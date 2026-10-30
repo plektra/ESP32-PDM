@@ -61,6 +61,23 @@ Boards: `pdm-4ch`, `pdm-hc2`.
 | `deep` reviews (before layout or an order) | Opus |
 | `stock-check` | Haiku |
 
+## Unattended runs (pilot)
+
+Policy, finding format, queue and inbox: `docs/AUTONOMY.md` (decision 20). Agents make small decisions and send
+bigger design changes to you.
+
+```
+python3 tools/orchestrate.py status            # queue, spend, inbox
+python3 tools/orchestrate.py run --dry-run     # show the agent commands
+python3 tools/orchestrate.py run               # ≤ 4 tasks, ≤ 60 USD; stops on CRITICAL or 2 failures
+/inbox                                         # answer the questions, then: orchestrate.py inbox
+```
+
+Each task is a fresh headless session (`claude -p --agent <role>`) in `.claude/worktrees/auto` on branch
+`auto/pilot`. The script, not the agent, checks the result: nothing but the new report may change, the report must
+carry a valid finding block. Merge `auto/pilot` into `main` when you have read the reports. Pilot: reviewers only;
+`board-fix` tasks wait as `parked` for `/board` sessions.
+
 ## Parallel sessions
 
 Shared files conflict easily: `lib/`, `docs/decisions.md`, the shared sheets. Run parallel sessions in separate

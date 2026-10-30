@@ -30,3 +30,7 @@ Report `docs/reviews/<YYYY-MM-DD>-cost-<scope>.md`: **Figures** (per board and q
 since the last report), **Levers** (largest saving first: saving, what changes, trade-off, must-stay check, effort,
 evidence), **Rule findings**, **Questions for the owner**, **Not checked**. Return the path, the totals and the five
 largest levers.
+
+End the report with the finding block from `docs/AUTONOMY.md` (every finding, lever and owner question, each
+classed `small` or `big` under its policy; `[]` if none). When the caller says the run is unattended, ask nothing:
+put questions in the block as `kind: "question"`.

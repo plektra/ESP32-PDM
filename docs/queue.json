@@ -1,0 +1,43 @@
+{
+  "next": {
+    "T": 5,
+    "Q": 1
+  },
+  "tasks": [
+    {
+      "id": "T-0001",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-10-30",
+      "depends_on": []
+    },
+    {
+      "id": "T-0002",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-10-30",
+      "depends_on": [],
+      "deep": true
+    },
+    {
+      "id": "T-0003",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-10-30",
+      "depends_on": [],
+      "deep": true
+    },
+    {
+      "id": "T-0004",
+      "role": "validator",
+      "scope": "pdm-hc2",
+      "state": "ready",
+      "created": "2026-10-30",
+      "depends_on": [],
+      "deep": true
+    }
+  ]
+}

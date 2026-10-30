@@ -16,6 +16,8 @@ Firmware: not started.
 1. **`/system panel-cable`** – decide decision 17 (fused switch supply, constant-current LED sinks, TVS on every
    line, no 3.3 V on the cable) and decision 18 (battery voltage, NTC, pin map). Changes the shared `analog_sw` sheet
    on both boards.
+   Steps 2–4 are queued for the unattended pilot (`docs/queue.json`, `python3 tools/orchestrate.py run`) and can
+   run before step 1; their findings land in `docs/OWNER-INBOX.md`.
 2. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.
 3. **`/cost system deep`** – price both BOMs (parts, JLCPCB extended-part fees, 2 oz copper, through-hole terminals)

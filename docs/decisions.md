@@ -1,7 +1,8 @@
 # Decisions
 
 Every design decision, numbered. Numbers are never reused. **Confirmed** = decided by the owner; **[proposed]** =
-recommended, not decided. Background and calculations: [design-notes.md](design-notes.md). New decisions take the next
+recommended, not decided; **auto** = a small decision made by an agent under decision 20, which the owner may
+overturn. Background and calculations: [design-notes.md](design-notes.md). New decisions take the next
 free number (`/handoff` adds them).
 
 | # | Date | Area | Decision | Status |
@@ -25,3 +26,4 @@ free number (`/handoff` adds them).
 | 17 | 2026-10-30 | system | Panel cable: fused switch-supply output on the panel connector, LEDs on constant-current sinks (BC817 + emitter resistor, ~5 mA, PWM-dimmable), TVS on every line, no 3.3 V on the cable. | [proposed] |
 | 18 | 2026-10-30 | system | Battery-voltage measurement and an NTC near the switches; needs ADC pins (move panel LED drive off IO10–IO13). | [proposed] |
 | 19 | 2026-10-30 | pdm-hc2 | For loads ~21 A (searchlight), fit lower-RDS(on) MOSFETs (candidate onsemi NTMFS5C612NL); for halogen inrush, disable the fast short-circuit trip only after an SOA check. | [proposed] |
+| 20 | 2026-10-30 | system | Unattended agent runs (`docs/AUTONOMY.md`): agents make small decisions themselves (recorded as **auto**); bigger design changes go to the owner through `docs/OWNER-INBOX.md`. Pilot: only the reviewers run unattended. | confirmed |

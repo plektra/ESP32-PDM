@@ -3,7 +3,7 @@
 Read first, then:
 
 1. `docs/CONTINUE-FROM-HERE.md` – which board is where, order of work
-2. `docs/decisions.md` – every decision and its status
+2. `docs/decisions.md` – every decision and its status; `docs/AUTONOMY.md` for unattended runs
 3. `docs/ARCHITECTURE.md` – shared sheets, pin map, invariants, budgets (changed only in `/system` sessions)
 4. For board work: `hardware/<board>/STATUS.md`; for background `docs/design-notes.md`
 
@@ -22,7 +22,8 @@ assembled by JLCPCB. First user: the tug Vega (24 V).
 ## How to work
 
 1. **Confirmed vs proposed.** `docs/decisions.md` says what the owner decided. **[proposed]** is not settled. Ask before
-   changing a confirmed decision.
+   changing a confirmed decision. Unattended runs follow `docs/AUTONOMY.md` (decision 20): small decisions are made
+   and recorded as **auto**, big ones go to `docs/OWNER-INBOX.md`.
 2. **Low cost first (decision 2).** JLCPCB basic or preferred parts wherever one fits; E24/E12 values; count unique
    extended parts (each costs a loading fee per order).
 3. **Check part facts.** Never invent pinouts, footprints or limits. Read the datasheet (download with curl, extract
@@ -42,12 +43,13 @@ assembled by JLCPCB. First user: the tug Vega (24 V).
 
 ```
 CLAUDE.md, README.md, LICENSE
-.claude/commands/   /board /system /handoff /progress /validate /cost /emc
+.claude/commands/   /board /system /handoff /progress /validate /cost /emc /inbox
 .claude/agents/     architect, validator, cost-controller, emc-reviewer, part-facts, stock-check
-docs/               CONTINUE-FROM-HERE.md, ARCHITECTURE.md, decisions.md, design-notes.md, WORKING-WITH-CLAUDE.md
+docs/               CONTINUE-FROM-HERE.md, ARCHITECTURE.md, decisions.md, design-notes.md, WORKING-WITH-CLAUDE.md,
+                    AUTONOMY.md, queue.json, OWNER-INBOX.md
   reviews/          validator, cost and EMC reports
 hardware/pdm-4ch/   KiCad project + STATUS.md
 hardware/pdm-hc2/   KiCad project + STATUS.md
 lib/                shared symbols (ESP32-PDM.kicad_sym) and footprints (ESP32-PDM.pretty)
-tools/              heat_budget.py, ksch.py (schematic editing), kicad_netlist.py
+tools/              heat_budget.py, ksch.py (schematic editing), kicad_netlist.py, orchestrate.py
 ```

@@ -31,3 +31,7 @@ Never edit design files. Work in `$CLAUDE_JOB_DIR/tmp` or a `mktemp -d` folder.
 Report `docs/reviews/<YYYY-MM-DD>-validate-<scope>.md`: **Findings** (CRITICAL / MAJOR / MINOR, location, what is
 wrong, evidence, what would fix it; `UNVERIFIED` where no primary source), **Checked and OK** (one line each with
 source), **Not checked**. Return the path, counts per severity and the CRITICAL and MAJOR findings in one line each.
+
+End the report with the finding block from `docs/AUTONOMY.md` (every finding, lever and owner question, each
+classed `small` or `big` under its policy; `[]` if none). When the caller says the run is unattended, ask nothing:
+put questions in the block as `kind: "question"`.
