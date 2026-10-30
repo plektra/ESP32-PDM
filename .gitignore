@@ -1,0 +1,14 @@
+# KiCad
+*-backups/
+*.lck
+~*.lck
+fp-info-cache
+#auto_saved_files#
+*.kicad_prl
+_autosave-*
+# Python
+__pycache__/
+# OS
+.DS_Store
+# Agent worktrees
+.claude/
