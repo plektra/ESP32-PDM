@@ -1,7 +1,7 @@
 {
   "next": {
-    "T": 21,
-    "Q": 14
+    "T": 41,
+    "Q": 33
   },
   "tasks": [
     {
@@ -23,10 +23,17 @@
       "id": "T-0002",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-10-30",
       "depends_on": [],
-      "deep": true
+      "deep": true,
+      "started": "2026-10-30T22:09:07",
+      "model": "opus",
+      "cost_usd": 4.1296,
+      "attempts": 1,
+      "finished": "2026-10-30",
+      "note": null,
+      "report": "docs/reviews/2026-10-30-cost-system.md"
     },
     {
       "id": "T-0003",
@@ -538,6 +545,645 @@
         "reviewer classed it big: New extended part on a shared sheet.",
         "affects both boards",
         "touches shared-sheet, new-extended-part"
+      ]
+    },
+    {
+      "id": "T-0021",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "C1",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "system",
+        "location": "root, power-usb, can, analog_sw: C2,C4-C13,D12-D15,FB1,FB2,R1,R2,R5,R6,R11,R12,R15-R17,R21,R24,R27,J5,J10,J11",
+        "summary": "22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn",
+        "fix": "Add the basic/preferred codes listed in rule finding C1 (C14663, C15849, C19666, C28233, C45783, C307331, C52923, C22466350, C25879, C25905, C25744); J5/J10/J11 in /system mechanical",
+        "class": "big",
+        "reason": "Missing LCSC field is a small change in kind, but it touches shared sheets and board=system",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "C1"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0014",
+      "why_big": [
+        "reviewer classed it big: Missing LCSC field is a small change in kind, but it touches shared sheets and board=system",
+        "affects both boards",
+        "touches shared-sheet"
+      ]
+    },
+    {
+      "id": "T-0022",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "C4",
+        "kind": "finding",
+        "severity": "INFO",
+        "board": "system",
+        "location": "U3/L1 (power-usb), U11/U12 (pdm-hc2 hc_channel), BTT6050",
+        "summary": "Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458",
+        "fix": "Re-check stock before ordering; note L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074 after a datasheet check",
+        "class": "big",
+        "reason": "board=system, affects shared sheet power-usb",
+        "touches": [
+          "shared-sheet"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "C4"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0015",
+      "why_big": [
+        "reviewer classed it big: board=system, affects shared sheet power-usb",
+        "affects both boards",
+        "touches shared-sheet"
+      ]
+    },
+    {
+      "id": "T-0023",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "C5",
+        "kind": "finding",
+        "severity": "INFO",
+        "board": "system",
+        "location": "BOM, package variants of 100 nF / 1 uF",
+        "summary": "52/59 unique parts cost 1.53 $ each only under Standard PCBA; merging package variants would save ~9 $ per order then",
+        "fix": "Only if Q1 forces Standard PCBA: merge 100 nF and 1 uF package variants",
+        "class": "big",
+        "reason": "board=system, shared sheets",
+        "touches": [
+          "shared-sheet"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "C5"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0016",
+      "why_big": [
+        "reviewer classed it big: board=system, shared sheets",
+        "affects both boards",
+        "touches shared-sheet"
+      ]
+    },
+    {
+      "id": "T-0024",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L1",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "ordering",
+        "summary": "Order 30 instead of 10 per run: -6.05 $/board (4-ch), -7.00 $/board (HC2); 10 instead of 5 saves -9.0/-9.8 $",
+        "fix": "Owner sets the order quantity per board from Vega's needs",
+        "class": "big",
+        "reason": "Cost lever needing an owner decision on quantity and cash; board=system",
+        "touches": [],
+        "cost_delta_usd": -6.05
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L1"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0017",
+      "why_big": [
+        "reviewer classed it big: Cost lever needing an owner decision on quantity and cash; board=system",
+        "affects both boards",
+        "cost change -6.05 USD per board"
+      ]
+    },
+    {
+      "id": "T-0025",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L2",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "PCB/PCBA ordering, panel",
+        "summary": "One panel holding pdm-4ch + pdm-hc2 saves one setup, stencil, THT fee and 15 shared extended fees: -59.79 $/order (-2.99 $/board at 10+10)",
+        "fix": "Panelise both designs as one PCBA design at the PCB phase, after checking the JLCPCB multi-design surcharge",
+        "class": "big",
+        "reason": "Trades flexibility (fixed 1:1 ratio), mechanical/panel choice, board=system",
+        "touches": [
+          "mechanical"
+        ],
+        "cost_delta_usd": -2.99
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L2"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0018",
+      "why_big": [
+        "reviewer classed it big: Trades flexibility (fixed 1:1 ratio), mechanical/panel choice, board=system",
+        "affects both boards",
+        "touches mechanical",
+        "cost change -2.99 USD per board"
+      ]
+    },
+    {
+      "id": "T-0026",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L3",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "power-usb FB1, F2, D4-D6; can FB2, U6",
+        "summary": "Four basic/preferred swaps remove 4 extended fees: FB->GZ2012D601TF C1017, F2->1812L050/60GR, PESD0402V05->H5VL10B C7420372, TPS7B91->L78M05ABDT C58069",
+        "fix": "Adopt after part-facts checks (USB FS capacitance of H5VL10B, L78M05 at 29 V clamp, DPAK area)",
+        "class": "big",
+        "reason": "Touches shared sheets and changes footprints; protection parts swapped",
+        "touches": [
+          "shared-sheet",
+          "protection"
+        ],
+        "cost_delta_usd": -1.2
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L3"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0019",
+      "why_big": [
+        "reviewer classed it big: Touches shared sheets and changes footprints; protection parts swapped",
+        "affects both boards",
+        "touches shared-sheet, protection",
+        "cost change -1.20 USD per board"
+      ]
+    },
+    {
+      "id": "T-0027",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L4",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "power-usb J3, D4-D6, F2, FB1, D3, R11, R12, C4, C5",
+        "summary": "USB-C as DNP or pogo pads removes 3 extended fees and ~0.27 $ parts: -1.30 $/board at 10 (overlaps L3)",
+        "fix": "Owner decides whether a fitted USB-C service port is needed",
+        "class": "big",
+        "reason": "Connector change on a shared sheet; trades a convenience feature",
+        "touches": [
+          "shared-sheet",
+          "connector"
+        ],
+        "cost_delta_usd": -1.3
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L4"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0020",
+      "why_big": [
+        "reviewer classed it big: Connector change on a shared sheet; trades a convenience feature",
+        "affects both boards",
+        "touches shared-sheet, connector",
+        "cost change -1.30 USD per board"
+      ]
+    },
+    {
+      "id": "T-0028",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L5",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "J4, J5 (and J10/J11 when chosen)",
+        "summary": "Fixed screw terminals instead of pluggable header + plug: about -1.0 $/board (the plug halves alone cost 1.20 $)",
+        "fix": "Decide in /system mechanical",
+        "class": "big",
+        "reason": "Connector and mechanical choice",
+        "touches": [
+          "connector",
+          "mechanical"
+        ],
+        "cost_delta_usd": -1.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L5"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0021",
+      "why_big": [
+        "reviewer classed it big: Connector and mechanical choice",
+        "affects both boards",
+        "touches connector, mechanical",
+        "cost change -1.00 USD per board"
+      ]
+    },
+    {
+      "id": "T-0029",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L6",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "power-usb U3 LMR51610YDBVR, L1",
+        "summary": "LMR51610XDBVR (400 kHz, C20539658, 0.52 $) instead of the Y variant (1.35 $): -0.83 $/board; needs a re-designed L/C and conflicts with EMC lever L1",
+        "fix": "Evaluate with the datasheet and the EMC reviewer before adopting",
+        "class": "big",
+        "reason": "Shared sheet, changes the switching frequency (EMC)",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": -0.83
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L6"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0022",
+      "why_big": [
+        "reviewer classed it big: Shared sheet, changes the switching frequency (EMC)",
+        "affects both boards",
+        "touches shared-sheet",
+        "cost change -0.83 USD per board"
+      ]
+    },
+    {
+      "id": "T-0030",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L7",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "can U5 ISO1044BDR",
+        "summary": "CA-IS3050G (C528763, 5 kV RMS, 0.92 $ at 10+) instead of ISO1044 (1.62 $): -0.71 $/board, second source; different package/pinout",
+        "fix": "part-facts check of the CA-IS3050G datasheet (supplies, pinout, timing), then footprint change",
+        "class": "big",
+        "reason": "Shared sheet, NMEA 2000 isolation part replaced",
+        "touches": [
+          "shared-sheet",
+          "protection",
+          "new-extended-part"
+        ],
+        "cost_delta_usd": -0.71
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L7"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0023",
+      "why_big": [
+        "reviewer classed it big: Shared sheet, NMEA 2000 isolation part replaced",
+        "affects both boards",
+        "touches shared-sheet, protection, new-extended-part",
+        "cost change -0.71 USD per board"
+      ]
+    },
+    {
+      "id": "T-0031",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L8",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "root TH1 (NTC, IO9)",
+        "summary": "No basic NTC exists; an MMBT3904 diode sensor (preferred) would remove one extended fee: -0.32 $/board at 10, at the cost of accuracy and calibration",
+        "fix": "Owner decides whether NTC accuracy is worth 3.07 $ per order",
+        "class": "big",
+        "reason": "Changes confirmed decision 18 (named NTC part) and firmware",
+        "touches": [
+          "decision:18",
+          "shared-sheet",
+          "firmware"
+        ],
+        "cost_delta_usd": -0.32
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L8"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0024",
+      "why_big": [
+        "reviewer classed it big: Changes confirmed decision 18 (named NTC part) and firmware",
+        "affects both boards",
+        "touches decision:18, shared-sheet, firmware"
+      ]
+    },
+    {
+      "id": "T-0032",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L9",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "location": "U11-U14 population",
+        "summary": "Each BTT6010 channel adds 1.57 $ at 10 and a mixed build adds one 3.07 $ fee per order (2+2 mix: +3.71 $/board); fit BTT6010 only where > 4 A and order mixed builds together",
+        "fix": "Document the population and ordering rule in pdm-4ch STATUS / README",
+        "class": "small",
+        "reason": "Documentation only, follows confirmed decision 7, no design change",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L9"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0033",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L10",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "pdm-hc2",
+        "location": "root R1/R2 (IO8/IO11 pull-downs)",
+        "summary": "Removing R1/R2 on HC2 saves only ~0.01 $/board; recommendation is to keep the controller part identical",
+        "fix": "Keep as is",
+        "class": "big",
+        "reason": "Controller part of the root sheet is shared",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": -0.01
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "L10"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0025",
+      "why_big": [
+        "reviewer classed it big: Controller part of the root sheet is shared",
+        "touches shared-sheet"
+      ]
+    },
+    {
+      "id": "T-0034",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "Q1",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "location": "PCB fabrication / PCBA mode",
+        "summary": "Does JLCPCB accept 2 oz copper with Economic PCBA? If not, Standard PCBA adds +5.1 $ (4-ch) / +5.6 $ (HC2) per board at 10",
+        "fix": "Owner checks the JLCPCB quote page with 2 oz + Economic PCBA before layout",
+        "class": "big",
+        "reason": "Question; affects the budget",
+        "touches": [
+          "budget"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "Q1"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0026",
+      "why_big": [
+        "reviewer classed it big: Question; affects the budget",
+        "a question only the owner can answer",
+        "affects both boards",
+        "touches budget"
+      ]
+    },
+    {
+      "id": "T-0035",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "Q2",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "location": "ordering",
+        "summary": "How many pdm-4ch and pdm-hc2 boards per order (5, 10, 30)? This is the largest cost lever",
+        "fix": "Owner states the quantities for Vega and spares",
+        "class": "big",
+        "reason": "Question",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "Q2"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0027",
+      "why_big": [
+        "reviewer classed it big: Question",
+        "a question only the owner can answer",
+        "affects both boards"
+      ]
+    },
+    {
+      "id": "T-0036",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "Q3",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "location": "panel",
+        "summary": "Is a combined 1:1 panel of pdm-4ch + pdm-hc2 acceptable (L2)?",
+        "fix": "Owner decides",
+        "class": "big",
+        "reason": "Question",
+        "touches": [
+          "mechanical"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "Q3"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0028",
+      "why_big": [
+        "reviewer classed it big: Question",
+        "a question only the owner can answer",
+        "affects both boards",
+        "touches mechanical"
+      ]
+    },
+    {
+      "id": "T-0037",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "Q4",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "location": "power-usb J3",
+        "summary": "Is a fitted USB-C service connector required, or are pads/DNP plus OTA enough (L4)?",
+        "fix": "Owner decides",
+        "class": "big",
+        "reason": "Question",
+        "touches": [
+          "connector",
+          "shared-sheet"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "Q4"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0029",
+      "why_big": [
+        "reviewer classed it big: Question",
+        "a question only the owner can answer",
+        "affects both boards",
+        "touches connector, shared-sheet"
+      ]
+    },
+    {
+      "id": "T-0038",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "Q5",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "location": "J4, J5, J10, J11",
+        "summary": "Pluggable or fixed screw terminals (L5)?",
+        "fix": "Settle in /system mechanical",
+        "class": "big",
+        "reason": "Question",
+        "touches": [
+          "connector",
+          "mechanical"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "Q5"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0030",
+      "why_big": [
+        "reviewer classed it big: Question",
+        "a question only the owner can answer",
+        "affects both boards",
+        "touches connector, mechanical"
+      ]
+    },
+    {
+      "id": "T-0039",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "Q6",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "location": "can sheet, NET-S supply",
+        "summary": "Must the isolated CAN side stay powered from NET-S? If not, an isolated CAN part with integrated isolated supply could also remove the TPS7B91/FB2/D11 chain",
+        "fix": "Owner/architect confirms the NMEA 2000 powering requirement",
+        "class": "big",
+        "reason": "Question; touches NMEA isolation and a shared sheet",
+        "touches": [
+          "shared-sheet",
+          "protection"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "Q6"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0031",
+      "why_big": [
+        "reviewer classed it big: Question; touches NMEA isolation and a shared sheet",
+        "a question only the owner can answer",
+        "affects both boards",
+        "touches shared-sheet, protection"
+      ]
+    },
+    {
+      "id": "T-0040",
+      "role": "system",
+      "scope": "pdm-4ch",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "Q7",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "location": "U11-U14 population",
+        "summary": "Standard population for Vega's pdm-4ch: all BTT6050 (24.87 $) or a 2+2 mix with BTT6010 (28.58 $ at 10)?",
+        "fix": "Owner decides from the load list",
+        "class": "big",
+        "reason": "Question",
+        "touches": [
+          "decision:7"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-cost-system.md",
+        "finding": "Q7"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0032",
+      "why_big": [
+        "reviewer classed it big: Question",
+        "a question only the owner can answer",
+        "touches decision:7"
       ]
     }
   ]

@@ -5,7 +5,7 @@ question's Answer line – `yes` (do the proposed fix), `no` (drop it) or your o
 The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file is regenerated from
 `docs/queue.json`: only the Answer lines are read; other edits are lost.
 
-## Open (13)
+## Open (32)
 
 ## Q-0001 · MAJOR · pdm-hc2 · finding
 
@@ -145,6 +145,215 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Summary:** LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first.
 - **Proposed:** Swap only if the pre-compliance scan shows PFM noise; check price and stock.
 - **Why it needs you:** reviewer classed it big: New extended part on a shared sheet.; affects both boards; touches shared-sheet, new-extended-part
+
+**Answer:** 
+
+---
+
+## Q-0014 · MINOR · system · finding
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` C1 (root, power-usb, can, analog_sw: C2,C4-C13,D12-D15,FB1,FB2,R1,R2,R5,R6,R11,R12,R15-R17,R21,R24,R27,J5,J10,J11); task T-0021
+- **Summary:** 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn
+- **Proposed:** Add the basic/preferred codes listed in rule finding C1 (C14663, C15849, C19666, C28233, C45783, C307331, C52923, C22466350, C25879, C25905, C25744); J5/J10/J11 in /system mechanical
+- **Why it needs you:** reviewer classed it big: Missing LCSC field is a small change in kind, but it touches shared sheets and board=system; affects both boards; touches shared-sheet
+
+**Answer:** 
+
+---
+
+## Q-0015 · INFO · system · finding
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` C4 (U3/L1 (power-usb), U11/U12 (pdm-hc2 hc_channel), BTT6050); task T-0022
+- **Summary:** Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458
+- **Proposed:** Re-check stock before ordering; note L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074 after a datasheet check
+- **Why it needs you:** reviewer classed it big: board=system, affects shared sheet power-usb; affects both boards; touches shared-sheet
+
+**Answer:** 
+
+---
+
+## Q-0016 · INFO · system · finding
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` C5 (BOM, package variants of 100 nF / 1 uF); task T-0023
+- **Summary:** 52/59 unique parts cost 1.53 $ each only under Standard PCBA; merging package variants would save ~9 $ per order then
+- **Proposed:** Only if Q1 forces Standard PCBA: merge 100 nF and 1 uF package variants
+- **Why it needs you:** reviewer classed it big: board=system, shared sheets; affects both boards; touches shared-sheet
+
+**Answer:** 
+
+---
+
+## Q-0017 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L1 (ordering); task T-0024
+- **Summary:** Order 30 instead of 10 per run: -6.05 $/board (4-ch), -7.00 $/board (HC2); 10 instead of 5 saves -9.0/-9.8 $
+- **Proposed:** Owner sets the order quantity per board from Vega's needs
+- **Why it needs you:** reviewer classed it big: Cost lever needing an owner decision on quantity and cash; board=system; affects both boards; cost change -6.05 USD per board
+
+**Answer:** 
+
+---
+
+## Q-0018 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L2 (PCB/PCBA ordering, panel); task T-0025
+- **Summary:** One panel holding pdm-4ch + pdm-hc2 saves one setup, stencil, THT fee and 15 shared extended fees: -59.79 $/order (-2.99 $/board at 10+10)
+- **Proposed:** Panelise both designs as one PCBA design at the PCB phase, after checking the JLCPCB multi-design surcharge
+- **Why it needs you:** reviewer classed it big: Trades flexibility (fixed 1:1 ratio), mechanical/panel choice, board=system; affects both boards; touches mechanical; cost change -2.99 USD per board
+
+**Answer:** 
+
+---
+
+## Q-0019 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L3 (power-usb FB1, F2, D4-D6; can FB2, U6); task T-0026
+- **Summary:** Four basic/preferred swaps remove 4 extended fees: FB->GZ2012D601TF C1017, F2->1812L050/60GR, PESD0402V05->H5VL10B C7420372, TPS7B91->L78M05ABDT C58069
+- **Proposed:** Adopt after part-facts checks (USB FS capacitance of H5VL10B, L78M05 at 29 V clamp, DPAK area)
+- **Why it needs you:** reviewer classed it big: Touches shared sheets and changes footprints; protection parts swapped; affects both boards; touches shared-sheet, protection; cost change -1.20 USD per board
+
+**Answer:** 
+
+---
+
+## Q-0020 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L4 (power-usb J3, D4-D6, F2, FB1, D3, R11, R12, C4, C5); task T-0027
+- **Summary:** USB-C as DNP or pogo pads removes 3 extended fees and ~0.27 $ parts: -1.30 $/board at 10 (overlaps L3)
+- **Proposed:** Owner decides whether a fitted USB-C service port is needed
+- **Why it needs you:** reviewer classed it big: Connector change on a shared sheet; trades a convenience feature; affects both boards; touches shared-sheet, connector; cost change -1.30 USD per board
+
+**Answer:** 
+
+---
+
+## Q-0021 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L5 (J4, J5 (and J10/J11 when chosen)); task T-0028
+- **Summary:** Fixed screw terminals instead of pluggable header + plug: about -1.0 $/board (the plug halves alone cost 1.20 $)
+- **Proposed:** Decide in /system mechanical
+- **Why it needs you:** reviewer classed it big: Connector and mechanical choice; affects both boards; touches connector, mechanical; cost change -1.00 USD per board
+
+**Answer:** 
+
+---
+
+## Q-0022 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L6 (power-usb U3 LMR51610YDBVR, L1); task T-0029
+- **Summary:** LMR51610XDBVR (400 kHz, C20539658, 0.52 $) instead of the Y variant (1.35 $): -0.83 $/board; needs a re-designed L/C and conflicts with EMC lever L1
+- **Proposed:** Evaluate with the datasheet and the EMC reviewer before adopting
+- **Why it needs you:** reviewer classed it big: Shared sheet, changes the switching frequency (EMC); affects both boards; touches shared-sheet; cost change -0.83 USD per board
+
+**Answer:** 
+
+---
+
+## Q-0023 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L7 (can U5 ISO1044BDR); task T-0030
+- **Summary:** CA-IS3050G (C528763, 5 kV RMS, 0.92 $ at 10+) instead of ISO1044 (1.62 $): -0.71 $/board, second source; different package/pinout
+- **Proposed:** part-facts check of the CA-IS3050G datasheet (supplies, pinout, timing), then footprint change
+- **Why it needs you:** reviewer classed it big: Shared sheet, NMEA 2000 isolation part replaced; affects both boards; touches shared-sheet, protection, new-extended-part; cost change -0.71 USD per board
+
+**Answer:** 
+
+---
+
+## Q-0024 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L8 (root TH1 (NTC, IO9)); task T-0031
+- **Summary:** No basic NTC exists; an MMBT3904 diode sensor (preferred) would remove one extended fee: -0.32 $/board at 10, at the cost of accuracy and calibration
+- **Proposed:** Owner decides whether NTC accuracy is worth 3.07 $ per order
+- **Why it needs you:** reviewer classed it big: Changes confirmed decision 18 (named NTC part) and firmware; affects both boards; touches decision:18, shared-sheet, firmware
+
+**Answer:** 
+
+---
+
+## Q-0025 · INFO · pdm-hc2 · lever
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` L10 (root R1/R2 (IO8/IO11 pull-downs)); task T-0033
+- **Summary:** Removing R1/R2 on HC2 saves only ~0.01 $/board; recommendation is to keep the controller part identical
+- **Proposed:** Keep as is
+- **Why it needs you:** reviewer classed it big: Controller part of the root sheet is shared; touches shared-sheet
+
+**Answer:** 
+
+---
+
+## Q-0026 · INFO · system · question
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` Q1 (PCB fabrication / PCBA mode); task T-0034
+- **Summary:** Does JLCPCB accept 2 oz copper with Economic PCBA? If not, Standard PCBA adds +5.1 $ (4-ch) / +5.6 $ (HC2) per board at 10
+- **Proposed:** Owner checks the JLCPCB quote page with 2 oz + Economic PCBA before layout
+- **Why it needs you:** reviewer classed it big: Question; affects the budget; a question only the owner can answer; affects both boards; touches budget
+
+**Answer:** 
+
+---
+
+## Q-0027 · INFO · system · question
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` Q2 (ordering); task T-0035
+- **Summary:** How many pdm-4ch and pdm-hc2 boards per order (5, 10, 30)? This is the largest cost lever
+- **Proposed:** Owner states the quantities for Vega and spares
+- **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; affects both boards
+
+**Answer:** 
+
+---
+
+## Q-0028 · INFO · system · question
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` Q3 (panel); task T-0036
+- **Summary:** Is a combined 1:1 panel of pdm-4ch + pdm-hc2 acceptable (L2)?
+- **Proposed:** Owner decides
+- **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; affects both boards; touches mechanical
+
+**Answer:** 
+
+---
+
+## Q-0029 · INFO · system · question
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` Q4 (power-usb J3); task T-0037
+- **Summary:** Is a fitted USB-C service connector required, or are pads/DNP plus OTA enough (L4)?
+- **Proposed:** Owner decides
+- **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; affects both boards; touches connector, shared-sheet
+
+**Answer:** 
+
+---
+
+## Q-0030 · INFO · system · question
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` Q5 (J4, J5, J10, J11); task T-0038
+- **Summary:** Pluggable or fixed screw terminals (L5)?
+- **Proposed:** Settle in /system mechanical
+- **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; affects both boards; touches connector, mechanical
+
+**Answer:** 
+
+---
+
+## Q-0031 · INFO · system · question
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` Q6 (can sheet, NET-S supply); task T-0039
+- **Summary:** Must the isolated CAN side stay powered from NET-S? If not, an isolated CAN part with integrated isolated supply could also remove the TPS7B91/FB2/D11 chain
+- **Proposed:** Owner/architect confirms the NMEA 2000 powering requirement
+- **Why it needs you:** reviewer classed it big: Question; touches NMEA isolation and a shared sheet; a question only the owner can answer; affects both boards; touches shared-sheet, protection
+
+**Answer:** 
+
+---
+
+## Q-0032 · INFO · pdm-4ch · question
+
+- **From:** `docs/reviews/2026-10-30-cost-system.md` Q7 (U11-U14 population); task T-0040
+- **Summary:** Standard population for Vega's pdm-4ch: all BTT6050 (24.87 $) or a 2+2 mix with BTT6010 (28.58 $ at 10)?
+- **Proposed:** Owner decides from the load list
+- **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; touches decision:7
 
 **Answer:** 
 
