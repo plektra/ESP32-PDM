@@ -112,25 +112,43 @@ layers around the cooling tabs, stitched with vias; 2 oz copper; vents at bottom
 current rating printed on the label; firmware warns or sheds load from measured current (and an NTC,
 when an ADC pin is freed).
 
-## 4a. High-current board (planned)
+## 4a. High-current board `pdm-hc2` (2 channels)
 
-Controller: TI TPS48111LQDGXRQ1 (C17558994, ~2.97 $, 9 874 in stock): 3.5–80 V (100 V abs. max),
-drives back-to-back N-MOSFETs (reverse-polarity / reverse-current blocking), two-level overcurrent
-protection (IWRN with adjustable circuit-breaker timer TMR; fast ISCP 1.2 µs), IMON current monitor
-(±2 % at 30 mV), adjustable UVLO/OV cut-off, remote temperature sensing (DIODE pin), fault flags.
-Source: TI TPS4811-Q1 datasheet.
+Schematic: `hardware/pdm-hc2` (controller, power, CAN and input sheets shared with `pdm-4ch`; channel sheet
+`hc_channel.kicad_sch` ×2). Variant ID R42 = 4.7 kΩ (1.05 V). Inputs 1–2 drive channels 1–2 in hardware; inputs 3–4
+are sense-only (e.g. float-switch runs). IMON → IO2/IO3 (ADC1), FLT_I/FLT_T → IO34–IO37.
 
-- Thresholds: IWRN ≈ 8–31 mV across RSNS (resistor-set), ISCP ≈ 19–45 mV (resistor-set). With
-  RSNS = 0.5 mΩ: ISCP ≈ 80 A, IWRN e.g. 20 A with a timer of ~100–200 ms for motor starts.
-- MOSFETs: 60 V, 2–3 mΩ, PDFN 5×6 (e.g. HD506N032SG C52766425, 0.47 $; FH3406GS C5453909, 2.1 mΩ).
-  Estimated ≈ 4.5 $ per channel incl. shunt and passives.
-- Heat (estimate): 21 A through 2 × ~3.6 mΩ (hot) + 1 mΩ shunt ≈ 3.6 W per channel; 2 channels at
-  21 A simultaneously → Tj ≈ 105 °C (vented, 40 °C). At 12 A ≈ 1.2 W per channel.
-- **Halogen inrush** (500 W searchlight: ≈ 21 A, roughly 200–300 A for tens of ms when cold) is the hard
-  case: ISCP must be disabled or set very high and the timer must ride through the inrush; MOSFET pulse
-  SOA and short-circuit energy must be verified. An LED searchlight with a heated lens avoids this.
-- The same protected physical switch input drives the controller EN; the board reuses the controller,
-  power, CAN and input sheets of the 4-channel board.
+Per channel (source: TI TPS4811-Q1 datasheet SLUSEE5E):
+
+| Part | Value | Purpose |
+|---|---|---|
+| TPS48110AQDGXRQ1 (C17556513) | – | controller: OV/UVLO, two-level overcurrent, IMON, remote temperature (DIODE), auto-retry |
+| 2 × BSC030N08NS5 (C501507) | 80 V, 3 mΩ | back-to-back, common source: blocks back-feed (bilge float switch powering the pump while the channel is off) |
+| RSNS | 1 mΩ 2512 3 W (C2903470) | 25 mV at 25 A; Kelvin-connect CS+/CS− at layout |
+| RSET | 100 Ω | VS → CS+ |
+| RIWRN | 47 kΩ | overcurrent (circuit breaker) ≈ 25 A: 11.9 × RSET / (RSNS × IOC) |
+| RISCP + 1 nF | 4.7 kΩ | fast short-circuit ≈ 80 A: ISC × RSNS / 15.6 µA − 464 |
+| CTMR | 10 µF | overcurrent time 82 µA·t/1.2 → ≈ 146 ms; auto-retry 22.7·10⁶ × CTMR ≈ 3.8 min |
+| RIMON | 12 kΩ | gain 0.9 × RIMON / RSET = 108 → 25 A = 2.7 V; 10 kΩ + BAT54S clamp + 1 nF to the ADC |
+| UVLO/OV divider | 1 MΩ / 100 kΩ / 39 kΩ | UVLO ≈ 9.7 V, OV cut-off ≈ 34.5 V |
+| CBST | 1 µF / 50 V | > Qg(total) / 1 V = 152 nF |
+| RG | 10 Ω | PU → gate (turn-on slew); PD drives the gate directly |
+| MMBT3904 | – | temperature sensor between the MOSFETs (overtemperature → FLT_T, auto-retry 512 ms) |
+| SS510B | 100 V 5 A | freewheel diode for motor loads |
+
+Heat (`tools/heat_budget.py --part HC-2xBSC030 --rth-ja 20 --r-box 0.9`, estimate, 40 °C, vented):
+2 × 12.5 A → Tj ≈ 71 °C; 2 × 15 A → 87 °C; 2 × 20 A → 137 °C (too hot). **Continuous rating ≈ 15 A per
+channel.** The hardware breaker (25 A / 146 ms) allows motor starts; continuous protection comes from the
+temperature sensor and the firmware soft fuse.
+
+Notes and open points:
+- **Searchlight 21 A** needs lower-RDS(on) MOSFETs (e.g. onsemi NTMFS5C612NL C348543, ≈ 1.5–2 mΩ; check
+  that its SO-8FL land fits the TDSON-8-1 footprint) → estimated Tj ≈ 90–100 °C at 21 A.
+- **Halogen inrush** (≈ 10–15× for tens of ms): the 80 A fast trip would stop a cold 500 W lamp. Options: an
+  LED searchlight, or ISCP disabled (R_ISCP position fitted as 0 Ω to CS−) after verifying MOSFET pulse SOA and
+  short-circuit energy with the 146 ms timer.
+- Terminals for ≥ 25 A per output and ≈ 50 A battery input; 2 oz copper; footprint
+  `Texas_DGX0019A` drawn from TI's land-pattern example (verify against JLCPCB before ordering).
 
 ## 5. Physical switch inputs and long leads
 
@@ -203,6 +221,7 @@ most marine electronics, this device relies on that system-level protection.
 - [ ] Verify the PG-TDSO-14 footprint against the JLCPCB/EasyEDA footprint
 - [ ] Per-output fuse strategy (on board vs. in the installation)
 - [ ] Standard population (e.g. 2 × BTT6010 + 2 × BTT6050) vs. all-BTT6010 builds
+- [ ] High-current board: MOSFET option for 21 A, halogen inrush decision, terminals (§4a)
 - [ ] Bilge pumps (Vega: SEAFLO 01 Series 3500 GPH, 24 V model SFBP2-G3500-01: 8.0 A rated, 12.5 A max
       draw per the product page; current rises with pumping head; start-up and jammed-impeller current not
       given). BTT6010 at 8 A → Tj ≈ 86 °C, at 10 A ≈ 123 °C, at ≥ 11 A thermal shutdown: a pump working

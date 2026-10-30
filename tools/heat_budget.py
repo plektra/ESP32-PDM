@@ -14,6 +14,7 @@ Examples:
   python3 tools/heat_budget.py --channels 2 --r-box 0.9
   python3 tools/heat_budget.py --ambient 50 --rth-ja 50   # 1 oz copper, hot cabinet
   python3 tools/heat_budget.py --mix BTT6010-1ERA:8,BTT6030-1ERA:5,BTT6050-1ERA:3,BTT6050-1ERA:3
+  python3 tools/heat_budget.py --channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002 --currents 12.5,15,20,25
 """
 import argparse
 
@@ -23,6 +24,9 @@ PARTS = {
     'BTT6030-1ERA': (0.037, 0.065),
     'BTT6010-1ERA': (0.012, 0.022),
     'TPS27S100': (0.100, 0.166),
+    # High-current channel: 2 x BSC030N08NS5 (3.0 mR max at 25 C, ~1.7x at 150 C) + 1 mR shunt in series.
+    # Heat is shared by two MOSFET packages: use --rth-ja ~20 (half of one package on 2 oz copper).
+    'HC-2xBSC030': (0.0070, 0.0112),
 }
 
 
