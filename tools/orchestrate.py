@@ -35,6 +35,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 BRANCH = 'auto/pilot'
 WORKTREE = REPO / '.claude' / 'worktrees' / 'auto'
+LOGS = REPO / '.claude' / 'worktrees' / 'auto-logs'  # raw agent output per task, git-ignored
 QUEUE = Path('docs/queue.json')
 INBOX = Path('docs/OWNER-INBOX.md')
 REVIEWS = Path('docs/reviews')
@@ -306,12 +307,16 @@ def run_task(q, t, budget_left, dry_run):
         out = dict(is_error=True, result=f'exit {r.returncode}: ' + (r.stderr or r.stdout).strip()[-300:])
     finally:
         shutil.rmtree(scratch, ignore_errors=True)
+    LOGS.mkdir(parents=True, exist_ok=True)
+    log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
+    log.write_text(json.dumps(dict(cmd=cmd, output=out), indent=2, ensure_ascii=False))
     cost = float(out.get('total_cost_usd') or 0)
     t['cost_usd'] = round(t.get('cost_usd', 0) + cost, 4)
     t['attempts'] = t.get('attempts', 0) + 1
     notes = []
     if out.get('permission_denials'):
-        notes.append(f"{len(out['permission_denials'])} tool calls denied")
+        denied = sorted({d.get('tool_name', '?') for d in out['permission_denials']})
+        notes.append(f"{len(out['permission_denials'])} tool calls denied ({', '.join(denied)}); log {log.name}")
 
     # Gate 1: the agent must not have moved the branch.
     if git('rev-parse', 'HEAD') != head:
@@ -329,7 +334,8 @@ def run_task(q, t, budget_left, dry_run):
     # Gate 3: the report carries a valid finding block.
     result = None
     if got is None:
-        notes.append('no report written' + (f": {str(out.get('result', ''))[:200]}" if out.get('is_error') else ''))
+        notes.append(f"no report written ({out.get('terminal_reason') or out.get('subtype') or 'unknown'}): "
+                     f"{str(out.get('result', ''))[:200]}")
     else:
         try:
             items = parse_block((WORKTREE / got).read_text())
