@@ -258,8 +258,15 @@ def prompt_for(t, report):
 
 
 def changed_paths():
-    out = git('status', '--porcelain', '--untracked-files=all')
-    return [line[3:].split(' -> ')[-1].strip('"') for line in out.splitlines()]
+    out = subprocess.run(['git', 'status', '--porcelain', '-z', '--untracked-files=all'], cwd=WORKTREE,
+                         capture_output=True, text=True, check=True).stdout
+    paths, entries = [], iter(out.split('\0'))
+    for e in entries:
+        if e:
+            paths.append(e[3:])
+            if e[0] in 'RC':  # renames carry the old path as the next entry
+                next(entries, None)
+    return paths
 
 
 def revert(paths):
@@ -289,13 +296,14 @@ def run_task(q, t, budget_left, dry_run):
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}")
     t.update(state='running', started=datetime.datetime.now().isoformat(timespec='seconds'), model=model)
     save_queue(WORKTREE, q)
+    (WORKTREE / REVIEWS).mkdir(parents=True, exist_ok=True)  # empty folders are not in git
     try:
         r = subprocess.run(cmd, cwd=WORKTREE, env=env, capture_output=True, text=True, timeout=TASK_TIMEOUT)
-        out = json.loads(r.stdout or '{}')
+        out = json.loads(r.stdout)
     except subprocess.TimeoutExpired:
         out = dict(is_error=True, result=f'timeout after {TASK_TIMEOUT} s')
     except json.JSONDecodeError:
-        out = dict(is_error=True, result=(r.stderr or r.stdout)[-500:])
+        out = dict(is_error=True, result=f'exit {r.returncode}: ' + (r.stderr or r.stdout).strip()[-300:])
     finally:
         shutil.rmtree(scratch, ignore_errors=True)
     cost = float(out.get('total_cost_usd') or 0)
