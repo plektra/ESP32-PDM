@@ -1,6 +1,6 @@
 # Autonomous runs
 
-How agents work without the owner in the loop (decision 20). The orchestrator is `tools/orchestrate.py`; agents talk
+How agents work without the owner in the loop (decision 22). The orchestrator is `tools/orchestrate.py`; agents talk
 to each other only through files: reports in `docs/reviews/`, tasks in `docs/queue.json`, questions for the owner in
 `docs/OWNER-INBOX.md`.
 
@@ -27,7 +27,7 @@ the task waits. When in doubt, it is big.
 terminal changes, mechanics, firmware architecture, cost levers that trade a feature, every CRITICAL finding.
 
 A small decision an agent makes is recorded in `docs/decisions.md` with status **auto** (decided by an agent under
-decision 20). The owner may overturn it at any time; overturning makes it a normal decision.
+decision 22). The owner may overturn it at any time; overturning makes it a normal decision.
 
 ## Finding block (every reviewer report)
 

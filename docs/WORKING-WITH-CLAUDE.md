@@ -63,7 +63,7 @@ Boards: `pdm-4ch`, `pdm-hc2`.
 
 ## Unattended runs (pilot)
 
-Policy, finding format, queue and inbox: `docs/AUTONOMY.md` (decision 20). Agents make small decisions and send
+Policy, finding format, queue and inbox: `docs/AUTONOMY.md` (decision 22). Agents make small decisions and send
 bigger design changes to you.
 
 ```

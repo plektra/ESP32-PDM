@@ -22,7 +22,7 @@ assembled by JLCPCB. First user: the tug Vega (24 V).
 ## How to work
 
 1. **Confirmed vs proposed.** `docs/decisions.md` says what the owner decided. **[proposed]** is not settled. Ask before
-   changing a confirmed decision. Unattended runs follow `docs/AUTONOMY.md` (decision 20): small decisions are made
+   changing a confirmed decision. Unattended runs follow `docs/AUTONOMY.md` (decision 22): small decisions are made
    and recorded as **auto**, big ones go to `docs/OWNER-INBOX.md`.
 2. **Low cost first (decision 2).** JLCPCB basic or preferred parts wherever one fits; E24/E12 values; count unique
    extended parts (each costs a loading fee per order).

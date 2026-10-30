@@ -32,8 +32,8 @@ Values marked *estimate* are engineering estimates, not measurements.
 | Output channels | `channel` (×4) | BTT6050-1ERA per channel |
 | Battery input | root | J10, SMCJ30CA surge clamp |
 
-Pin use (ESP32-S3): IN drive IO6–IO9, current sense IO2–IO5 (ADC1), switch state IO14/IO15/IO16/IO21,
-panel LEDs IO10–IO13, DEN IO33, variant ID IO1 (ADC1), CAN IO17/IO18, USB IO19/IO20.
+Pin use (ESP32-S3, 4-channel): IN drive IO6–IO8 and IO11, current sense IO2–IO5 (ADC1), switch state IO14/IO15/IO16/IO21,
+panel LED sinks IO38–IO41, VBAT_SENSE IO10 (ADC1), NTC IO9 (ADC1), DEN IO33, variant ID IO1 (ADC1), CAN IO17/IO18, USB IO19/IO20.
 
 Variant ID (`MOD_ID`, IO1): 10 kΩ pull-up R29, variant resistor R42 to GND. 4-channel = 10 kΩ (1.65 V).
 Proposed table: 1-channel 2.2 kΩ (0.59 V), 2-channel 4.7 kΩ (1.05 V), 4-channel 10 kΩ (1.65 V);
@@ -162,11 +162,34 @@ Keeping long leads from acting as antennas:
 - Filter every external line at the connector (TVS capacitance + series R + RC); no unfiltered line
   enters the board.
 - Keep loops small: the switch supply and the switch return in the same cable (twisted pair or
-  multicore). **Open item:** provide a fused switch-supply output on the panel connector so the whole
-  loop runs inside one cable.
-- **Open item:** the panel connector still carries 3.3 V and the LED lines. Proposed: LEDs between the
-  switch supply and constant-current sinks (BC817 + emitter resistor, ~5 mA, PWM-dimmable), each line
-  with a TVS, no 3.3 V on the cable.
+  multicore). The panel connector J5 provides a fused switch supply SW_SUPPLY so the whole loop runs
+  inside one cable (decision 17).
+
+Panel connector J5 (decision 17), 10 poles:
+
+| Pin | Signal | At the connector |
+|---|---|---|
+| 1–4 | SWIN1–4: switch from SW_SUPPLY | SMAJ30CA, 4.7 k load, 10 k + divider (above) |
+| 5 | SW_SUPPLY = VS via PTC F4 (1812L050/60GR, same part as F1) | SMAJ30CA + 100 nF/100 V |
+| 6–9 | LED_K1–4: panel LED cathode (anode to SW_SUPPLY) | SMAJ30CA, 100 Ω, 1 nF at the collector |
+| 10 | GND (cable drain / spare) | – |
+
+- LED sinks: GPIO (IO38–IO41) → 1 k → base, 10 k base pull-down, MMBT5551 (V_CEO 160 V, above the
+  SMAJ30CA clamp of ≈ 48 V; BC817's 45 V was not), 470 Ω emitter. V_B ≈ 3.3 × 10/11 = 3.0 V,
+  V_E ≈ 2.33 V → I_LED ≈ 5.0 mA independent of the supply (10.5–30 V), the LED colour and the cable length
+  (≥ 10 m is fine; the panel has no LED resistor). Dissipation at 30 V ≈ (30 − 2 − 2.3) × 5 mA ≈ 0.13 W;
+  R_θJA 416 K/W (JCET datasheet) → T_j ≈ 50 °C enclosure air + 54 K ≈ 104 °C (< 150 °C). LEDs are off
+  when the 3.3 V rail is down. PWM: low frequency (100–200 Hz); the 1 nF collector capacitor slows edges.
+- Switch-supply budget ≈ 50 mA (4 × 6.4 mA switch load at 30 V + 4 × 5 mA LEDs); F4 holds 500 mA.
+- **Failure mode (safety):** a short in the panel cable (or at a panel switch) trips F4; all panel
+  switches of that board then do nothing until the short is cleared, while NMEA 2000 control keeps
+  working, but the panel LEDs go dark too. As drawn the firmware **cannot** tell a tripped F4 from "all
+  switches off"; a sense line (SW_SUPPLY → 100 k/10 k divider → spare GPIO IO12, two basic resistors) would
+  let it alert (decision 21, proposed). Outputs that must
+  keep working from the panel (bilge forced run, navigation lights) need a competent person's review; an
+  installer can also feed the switches from a separate fused supply (the inputs accept any 10.5–30 V).
+- Panel LED behaviour (decision 20, open): LED on = output on, blinking = fault; alerts to Signal K where
+  they can be acknowledged and muted. Details in `/system firmware`.
 - Outputs: run each load's return with its feed; if outputs are PWM-dimmed, use a low frequency
   (100–200 Hz).
 - Firmware: qualify inputs (e.g. 20 ms stable), average ADC readings.
@@ -182,7 +205,7 @@ Keeping long leads from acting as antennas:
 - Entered by a command over NMEA 2000 (or Signal K); local switches always work and can wake the node.
 - In deep sleep the ESP32 cannot receive CAN or Wi-Fi; the node wakes every few seconds and listens
   briefly, and the central controller repeats its wake command for ~10 s.
-- Output state is held through deep sleep with RTC GPIO hold (IO6–IO9 are RTC GPIOs). A full reset or
+- Output state is held through deep sleep with RTC GPIO hold (4-ch drives IO6–IO8 and IO11 are RTC GPIOs, IO0–IO21; the panel LED pins IO38–IO41 are not, so the LEDs are off in deep sleep). A full reset or
   OTA update drops outputs for ~0.3 s unless the physical switch is on.
 - DEN low puts the BTT6050s in standby (µA range) – this saves more than the ESP32 sleep itself.
 
@@ -214,9 +237,9 @@ most marine electronics, this device relies on that system-level protection.
 
 ## 9. Open items
 
-- [ ] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5)
-- [ ] Battery-voltage measurement (needs an ADC pin: move panel LEDs off IO10–IO13)
-- [ ] NTC near the switches (same ADC pin question)
+- [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
+- [x] Battery-voltage measurement (IO10) and NTC near the switches (IO9) (decision 18)
+- [ ] Failure modes and alert handling: LED blink codes, Signal K alerts with acknowledge/mute (decision 20)
 - [ ] Terminal blocks and enclosure layout for DIN / flat mounting (§7)
 - [ ] Verify the PG-TDSO-14 footprint against the JLCPCB/EasyEDA footprint
 - [ ] Per-output fuse strategy (on board vs. in the installation)
@@ -237,5 +260,6 @@ most marine electronics, this device relies on that system-level protection.
 - [ ] Auxiliary sense-only inputs (1-2, same protected input circuit, spare GPIO) for pump-running /
       float-switch state
 - [ ] Load list with nameplate currents (VHF, FM radio, wipers incl. park circuit, bilge pumps, work lights)
-- [ ] Update Symbols from Library in KiCad (BC817, LMR51610, USB-C symbols)
+- [ ] Update Symbols from Library in KiCad (LMR51610, USB-C symbols; Q3–Q6 use the BC817 symbol with value
+      MMBT5551 – same SOT-23 pinout 1 B / 2 E / 3 C – keep that when updating)
 - [ ] Remaining checks from the BOM audit: Kangnex CAN connector footprint, PESD2CAN pinout

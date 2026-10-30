@@ -1,7 +1,7 @@
 # Decisions
 
 Every design decision, numbered. Numbers are never reused. **Confirmed** = decided by the owner; **[proposed]** =
-recommended, not decided; **auto** = a small decision made by an agent under decision 20, which the owner may
+recommended, not decided; **auto** = a small decision made by an agent under decision 22, which the owner may
 overturn. Background and calculations: [design-notes.md](design-notes.md). New decisions take the next
 free number (`/handoff` adds them).
 
@@ -23,7 +23,9 @@ free number (`/handoff` adds them).
 | 14 | 2026-10-29 | system | Board variant ID: resistor divider on IO1 (`MOD_ID`, 10 kΩ pull-up). 4-ch = 10 kΩ, HC2 = 4.7 kΩ. | confirmed |
 | 15 | 2026-10-30 | system | Bilge pumps: the automatic float-switch circuits stay wired directly to the battery; the PDM is used only for manual forced run (in parallel with the float switch). | confirmed |
 | 16 | 2026-10-30 | system | Searchlight heating: an edge heater ring is not enough for de-icing; a film-type heater is preferred, but cost must be reviewed before deciding. | open |
-| 17 | 2026-10-30 | system | Panel cable: fused switch-supply output on the panel connector, LEDs on constant-current sinks (BC817 + emitter resistor, ~5 mA, PWM-dimmable), TVS on every line, no 3.3 V on the cable. | [proposed] |
-| 18 | 2026-10-30 | system | Battery-voltage measurement and an NTC near the switches; needs ADC pins (move panel LED drive off IO10–IO13). | [proposed] |
+| 17 | 2026-10-30 | system | Panel cable (J5, 10 poles): 1–4 switch inputs, 5 fused switch supply SW_SUPPLY (VS via PTC F4 1812L050/60GR, SMAJ30CA, 100 nF), 6–9 LED cathodes to constant-current sinks (MMBT5551 + 470 Ω emitter, 1 k/10 k base from the GPIO, ≈ 5 mA, PWM-dimmable, 1 nF on the collector), 10 GND/drain. Panel LEDs: anode to SW_SUPPLY, no resistor at the panel; works up to ≥ 10 m of cable at 12 V and 24 V. SMAJ30CA on every line; no 3.3 V on the cable. A short in the panel cable trips F4 and disables that board's panel switches (bus control keeps working). | confirmed |
+| 18 | 2026-10-30 | system | Pin map: VBAT_SENSE on IO10 (220 k/22 k + 100 nF, 33 V full scale), NTC on IO9 (10 k B3380 NTC APV ANTC1608-103F3380FB + 10 k pull-up, placed next to the output switches); both ADC1. Panel LED drives move to IO38–IO41; channel-4 drive (4-ch) moves IO9 → IO11; IO12/IO13 spare. | confirmed |
 | 19 | 2026-10-30 | pdm-hc2 | For loads ~21 A (searchlight), fit lower-RDS(on) MOSFETs (candidate onsemi NTMFS5C612NL); for halogen inrush, disable the fast short-circuit trip only after an SOA check. | [proposed] |
-| 20 | 2026-10-30 | system | Unattended agent runs (`docs/AUTONOMY.md`): agents make small decisions themselves (recorded as **auto**); bigger design changes go to the owner through `docs/OWNER-INBOX.md`. Pilot: only the reviewers run unattended. | confirmed |
+| 20 | 2026-10-30 | system | Panel LED behaviour and fault handling: LED on = output on, blinking = fault (firmware). Alerts and failures are published to Signal K so they can be acknowledged and muted there; the failure modes per output (what blinks, what alerts, what is latched, what clears) are still to be designed in `/system firmware`. | open |
+| 21 | 2026-10-30 | system | Sense the panel switch supply: SW_SUPPLY → 100 k/10 k divider (+ 100 nF) → spare GPIO IO12, so the firmware can alert when F4 has tripped (otherwise indistinguishable from "all switches off"). Two basic resistors per board. | [proposed] |
+| 22 | 2026-10-30 | system | Unattended agent runs (`docs/AUTONOMY.md`): agents make small decisions themselves (recorded as **auto**); bigger design changes go to the owner through `docs/OWNER-INBOX.md`. Pilot: only the reviewers run unattended. | confirmed |

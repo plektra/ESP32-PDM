@@ -13,25 +13,25 @@ Firmware: not started.
 
 ## Order of work
 
-1. **`/system panel-cable`** – decide decision 17 (fused switch supply, constant-current LED sinks, TVS on every
-   line, no 3.3 V on the cable) and decision 18 (battery voltage, NTC, pin map). Changes the shared `analog_sw` sheet
-   on both boards.
-   Steps 2–4 are queued for the unattended pilot (`docs/queue.json`, `python3 tools/orchestrate.py run`) and can
-   run before step 1; their findings land in `docs/OWNER-INBOX.md`.
-2. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
+Steps 1–3 are queued for the unattended pilot (decision 22: `docs/queue.json`, `python3 tools/orchestrate.py run`);
+their findings land in `docs/OWNER-INBOX.md`.
+
+1. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.
-3. **`/cost system deep`** – price both BOMs (parts, JLCPCB extended-part fees, 2 oz copper, through-hole terminals)
+2. **`/cost system deep`** – price both BOMs (parts, JLCPCB extended-part fees, 2 oz copper, through-hole terminals)
    and propose levers.
-4. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
+3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
-5. **`/system mechanical`** – terminal blocks and pole count, DIN (1 module width) and flat-mount enclosure, vents.
-6. **`/board pdm-4ch pcb`**, then **`/board pdm-hc2 pcb`**.
-7. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
-   heater thermostat, variant ID.
+4. **`/system mechanical`** – terminal blocks and pole count (panel connector J5 = 10 poles), DIN (1 module width) and flat-mount enclosure, vents.
+5. **`/board pdm-4ch pcb`**, then **`/board pdm-hc2 pcb`**.
+6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
+   heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
+   blinking = fault; alerts and failures go to Signal K where they can be acknowledged and muted – design the
+   failure modes per output (what blinks, alerts, latches, clears).
 
 ## Waiting on the owner
 
-- Decisions 17, 18, 19 **[proposed]**.
+- Decisions 19 and 21 **[proposed]**; decision 20 (fault/alert handling) open until `/system firmware`.
 - Decision 16 (searchlight heating) open: revisit with cost in mind; halogen vs LED.
 - Measurements on Vega: searchlight glass diameter and thickness; bilge pump locations and feeds.
 

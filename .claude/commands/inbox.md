@@ -3,7 +3,7 @@ description: Go through the owner inbox from unattended runs and record the owne
 argument-hint: [question id, e.g. Q-0003]
 ---
 
-Owner inbox session (decision 20, `docs/AUTONOMY.md`). Scope: $ARGUMENTS (empty = all open questions).
+Owner inbox session (decision 22, `docs/AUTONOMY.md`). Scope: $ARGUMENTS (empty = all open questions).
 
 1. Use the orchestrator's copy: `../ESP32-PDM-auto/docs/OWNER-INBOX.md` (the `auto/pilot` worktree) if it exists, else `docs/OWNER-INBOX.md`.
    Run `python3 tools/orchestrate.py status` for the overview.
