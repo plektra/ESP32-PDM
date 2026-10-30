@@ -1,16 +1,23 @@
 {
   "next": {
-    "T": 5,
-    "Q": 1
+    "T": 21,
+    "Q": 14
   },
   "tasks": [
     {
       "id": "T-0001",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-10-30",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-10-30T21:58:08",
+      "model": "sonnet",
+      "cost_usd": 1.4502,
+      "attempts": 1,
+      "finished": "2026-10-30",
+      "note": null,
+      "report": "docs/reviews/2026-10-30-emc-system.md"
     },
     {
       "id": "T-0002",
@@ -38,6 +45,500 @@
       "created": "2026-10-30",
       "depends_on": [],
       "deep": true
+    },
+    {
+      "id": "T-0005",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E1",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-hc2",
+        "location": "hc_channel: U11/U12 pin 20 (VS), C102/C202",
+        "summary": "TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP.",
+        "fix": "Add RVS 100 ohm and CVS 1 uF/100 V in the VS supply of each controller after checking IVS.",
+        "class": "small",
+        "reason": "Passive decoupling on one board, no function or topology change, below CRITICAL.",
+        "touches": [],
+        "cost_delta_usd": 0.03
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E1"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0006",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E2",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-hc2",
+        "location": "hc_channel: R104/R204 (RG 10 ohm), GATE/PU/PD",
+        "summary": "MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us.",
+        "fix": "RG_PU about 100-220 ohm plus an RGATE_PD footprint, tune on the bench, then recheck switching loss, SOA and the fast short-circuit response.",
+        "class": "big",
+        "reason": "Changes switching and protection timing of a safety-relevant output (bilge pump) and the heat budget.",
+        "touches": [
+          "safety"
+        ],
+        "cost_delta_usd": 0.02
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E2"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0001",
+      "why_big": [
+        "reviewer classed it big: Changes switching and protection timing of a safety-relevant output (bilge pump) and the heat budget.",
+        "touches safety"
+      ]
+    },
+    {
+      "id": "T-0007",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E3",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "system",
+        "location": "root sheet: J10 battery input, D30, net VS",
+        "summary": "Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails.",
+        "fix": "Add about 100 uF/50 V bulk plus 1-2.2 uF/100 V ceramic at J10 (more on HC2), 1 uF/100 V at each BTT6050 VS tab, and a ferrite/CMC footprint.",
+        "class": "big",
+        "reason": "Shared root sheet, new part type, cost about 0.2-0.3 USD per board.",
+        "touches": [
+          "shared-sheet",
+          "budget"
+        ],
+        "cost_delta_usd": 0.3
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E3"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0002",
+      "why_big": [
+        "reviewer classed it big: Shared root sheet, new part type, cost about 0.2-0.3 USD per board.",
+        "affects both boards",
+        "touches shared-sheet, budget"
+      ]
+    },
+    {
+      "id": "T-0008",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E4",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-hc2",
+        "location": "hc_channel: CS+/CS- (R102/R101), EN/UVLO (R105/R106), OVSET (R107), DIODE (Q13), IWRN (R113)",
+        "summary": "Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output.",
+        "fix": "Footprints per TI Table 9-3: about 1 nF X cap and 100 pF Y caps on CS+/CS-, 10 nF on EN/UVLO and OVSET, 1 nF on DIODE, 100 pF on IWRN; tune in test.",
+        "class": "small",
+        "reason": "Passive filter footprints on one board, function unchanged, no new unique part.",
+        "touches": [],
+        "cost_delta_usd": 0.05
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E4"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0009",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E5",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-hc2",
+        "location": "hc_channel: OUT1/OUT2 at J11, D102/D202",
+        "summary": "HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them.",
+        "fix": "Add SMAJ30CA (already on the BOM) from each OUT to GND at J11 with a short return to J10.2; check float-switch case at 28.8 V.",
+        "class": "big",
+        "reason": "New protection element on output lines (protection topology) of safety-relevant outputs.",
+        "touches": [
+          "protection",
+          "invariant",
+          "safety"
+        ],
+        "cost_delta_usd": 0.08
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E5"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0003",
+      "why_big": [
+        "reviewer classed it big: New protection element on output lines (protection topology) of safety-relevant outputs.",
+        "touches protection, invariant, safety"
+      ]
+    },
+    {
+      "id": "T-0010",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E6",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "system",
+        "location": "can: GND_CAN island, U5 ISO1044, D9, D10, J4",
+        "summary": "No high-frequency return across the isolation barrier (CIO about 1 pF) and no CMC option, so the N2K cable can radiate logic-ground noise and ESD lifts the whole island; not measured.",
+        "fix": "Add a footprint for a 1-2.2 nF/1 kV Y-class capacitor GND_CAN-GND and a CMC footprint in series with CANH/CANL; confirm with a pre-compliance scan.",
+        "class": "big",
+        "reason": "Shared can sheet, protection and grounding topology change.",
+        "touches": [
+          "shared-sheet",
+          "protection"
+        ],
+        "cost_delta_usd": 0.05
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E6"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0004",
+      "why_big": [
+        "reviewer classed it big: Shared can sheet, protection and grounding topology change.",
+        "affects both boards",
+        "touches shared-sheet, protection"
+      ]
+    },
+    {
+      "id": "T-0011",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E7",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "system",
+        "location": "power-usb: U3 LMR51610YDBVR, C1, C2, L1",
+        "summary": "Buck is the 1.1 MHz PFM variant; PFM drops into the 150-350 kHz band at light load, the datasheet's separate 0.1 uF at VIN is missing, C1 is only 50 V, and SW ringing can land in the tightly limited 156-165 MHz band.",
+        "fix": "Add 100 nF/100 V at VIN, footprints for an SW RC snubber and a boot resistor, and consider the LMR51610YF (FPWM) if the scan shows PFM noise.",
+        "class": "big",
+        "reason": "Shared power-usb sheet; the FPWM option would be a different extended part.",
+        "touches": [
+          "shared-sheet",
+          "new-extended-part"
+        ],
+        "cost_delta_usd": 0.05
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E7"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0005",
+      "why_big": [
+        "reviewer classed it big: Shared power-usb sheet; the FPWM option would be a different extended part.",
+        "affects both boards",
+        "touches shared-sheet, new-extended-part"
+      ]
+    },
+    {
+      "id": "T-0012",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E8",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "system",
+        "location": "analog_sw: R34-R37, C14-C17, R3-R8",
+        "summary": "Hardware switch path has tau 0.32 ms (no real debounce), turns the output off below about 8 V at the switch (12 V cranking), and a lamp across the switch contacts above about 1.4 mA turns it on.",
+        "fix": "Raise C14-C17 to 470 nF-1 uF; document dry contacts and the cranking behaviour in the README.",
+        "class": "big",
+        "reason": "Shared analog_sw sheet and the invariant 1 signal path.",
+        "touches": [
+          "shared-sheet",
+          "invariant"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E8"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0006",
+      "why_big": [
+        "reviewer classed it big: Shared analog_sw sheet and the invariant 1 signal path.",
+        "affects both boards",
+        "touches shared-sheet, invariant"
+      ]
+    },
+    {
+      "id": "T-0013",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E9",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-4ch",
+        "location": "channel: OUT1-OUT4 at J11, C102/C202/C302/C402",
+        "summary": "4-ch outputs rely on the PROFET (body diode to VS, clamp, 4 kV HBM) and D30 at J10; this meets the intent of invariant 4 but not its wording, and D30 is far from J11.",
+        "fix": "Document the output rule in invariant 4 and leave a DNP SMAJ30CA footprint per output; keep the VS copper to D30 wide.",
+        "class": "big",
+        "reason": "Touches an invariant and the protection scheme.",
+        "touches": [
+          "invariant",
+          "protection"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E9"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0007",
+      "why_big": [
+        "reviewer classed it big: Touches an invariant and the protection scheme.",
+        "touches invariant, protection"
+      ]
+    },
+    {
+      "id": "T-0014",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E10",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "system",
+        "location": "power-usb: J3 shield, D4-D6 PESD0402V05",
+        "summary": "USB shield is tied to battery negative (shore PE loop via a laptop) and the ESD diode is listed with a 40 V clamp against 3.6 V ESP32 pins (unverified).",
+        "fix": "README: service only, battery-powered laptop or USB isolator; check the TLP data of the DOWO part before ordering; consider an RC shield-to-GND.",
+        "class": "big",
+        "reason": "Shared power-usb sheet; a shield change is a design decision.",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E10"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0008",
+      "why_big": [
+        "reviewer classed it big: Shared power-usb sheet; a shield change is a design decision.",
+        "affects both boards",
+        "touches shared-sheet"
+      ]
+    },
+    {
+      "id": "T-0015",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E11",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "system",
+        "location": "analog_sw: C50-C53 (C1523); power-usb: C1",
+        "summary": "1 nF collector capacitors and the 2.2 uF buck input capacitor are probably 50 V parts against a 48.4 V TVS clamp; TI advises twice VIN for CIN.",
+        "fix": "Use 100 V (or 63 V) parts for C50-C53 and C1 if available as basic parts.",
+        "class": "big",
+        "reason": "Shared sheets (analog_sw, power-usb); part change needs the stock check.",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": 0.02
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E11"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0009",
+      "why_big": [
+        "reviewer classed it big: Shared sheets (analog_sw, power-usb); part change needs the stock check.",
+        "affects both boards",
+        "touches shared-sheet"
+      ]
+    },
+    {
+      "id": "T-0016",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E12",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "system",
+        "location": "root sheet: J10.2 (GND), D102/D202 return path on HC2",
+        "summary": "Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined.",
+        "fix": "Size the GND pole (or use two poles) in /system mechanical to match the VS input; wide GND copper to J10.2.",
+        "class": "big",
+        "reason": "Terminal and pole count decision.",
+        "touches": [
+          "connector",
+          "mechanical"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E12"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0010",
+      "why_big": [
+        "reviewer classed it big: Terminal and pole count decision.",
+        "affects both boards",
+        "touches connector, mechanical"
+      ]
+    },
+    {
+      "id": "T-0017",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E13",
+        "kind": "finding",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "location": "root sheet: D30 SMCJ30CA vs U11-U14 VS",
+        "summary": "SMCJ30CA clamps at 48.4 V at 31 A, the BTT6050 absolute maximum is 48 V, but VS(LD) is 65 V (ISO 7637-1), so short clamp excursions are covered; recorded only.",
+        "fix": "None.",
+        "class": "small",
+        "reason": "Documentation only.",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E13"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0018",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E14",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "location": "F1, F3, F4 (1812L050/60GR)",
+        "summary": "Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet.",
+        "fix": "Validator to check Imax and minimum resistance against 30 V / (cable + PTC resistance).",
+        "class": "big",
+        "reason": "Question for the owner or validator, not a design change.",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E14"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0011",
+      "why_big": [
+        "reviewer classed it big: Question for the owner or validator, not a design change.",
+        "a question only the owner can answer",
+        "affects both boards"
+      ]
+    },
+    {
+      "id": "T-0019",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "E15",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "location": "can: J4 (4 poles, no shield pin), project goal",
+        "summary": "Is IEC 60945 (marine) compliance a goal or only good practice, is a pre-compliance scan planned, and may the N2K shield stay unconnected at the node (4-pole J4)? This sets how far E3-E7 must go.",
+        "fix": "Owner ruling on the compliance target and the shield strategy.",
+        "class": "big",
+        "reason": "Only the owner can answer; shared sheet and connector.",
+        "touches": [
+          "shared-sheet",
+          "connector"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "E15"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0012",
+      "why_big": [
+        "reviewer classed it big: Only the owner can answer; shared sheet and connector.",
+        "a question only the owner can answer",
+        "affects both boards",
+        "touches shared-sheet, connector"
+      ]
+    },
+    {
+      "id": "T-0020",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-10-30",
+      "finding": {
+        "id": "L1",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "power-usb: U3",
+        "summary": "LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first.",
+        "fix": "Swap only if the pre-compliance scan shows PFM noise; check price and stock.",
+        "class": "big",
+        "reason": "New extended part on a shared sheet.",
+        "touches": [
+          "shared-sheet",
+          "new-extended-part"
+        ],
+        "cost_delta_usd": 0.1
+      },
+      "source": {
+        "report": "docs/reviews/2026-10-30-emc-system.md",
+        "finding": "L1"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0013",
+      "why_big": [
+        "reviewer classed it big: New extended part on a shared sheet.",
+        "affects both boards",
+        "touches shared-sheet, new-extended-part"
+      ]
     }
   ]
 }
