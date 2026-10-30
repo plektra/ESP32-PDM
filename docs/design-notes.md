@@ -181,8 +181,12 @@ most marine electronics, this device relies on that system-level protection.
 - [ ] Verify the PG-TDSO-14 footprint against the JLCPCB/EasyEDA footprint
 - [ ] Per-output fuse strategy (on board vs. in the installation)
 - [ ] Standard population (e.g. 2 × BTT6010 + 2 × BTT6050) vs. all-BTT6010 builds
-- [ ] Bilge pumps: keep the automatic float-switch circuit wired directly (always on); the PDM adds
-      manual forced run (works without the ESP32 via the physical switch) and run monitoring
+- [ ] Bilge pumps (Vega: 12 A per pump when running, owner 2026-10-30): too much for one channel
+      (BTT6010 @ 12 A → Tj ≈ 186 °C). Plan: automatic float-switch circuit wired directly (always on);
+      manual forced run through a motor-rated relay driven by a channel (works without the ESP32 via the
+      physical switch); run monitoring via an auxiliary sense input on the pump feed
+- [ ] Auxiliary sense-only inputs (1-2, same protected input circuit, spare GPIO) for pump-running /
+      float-switch state
 - [ ] Load list with nameplate currents (VHF, FM radio, wipers incl. park circuit, bilge pumps, work lights)
 - [ ] Update Symbols from Library in KiCad (BC817, LMR51610, USB-C symbols)
 - [ ] Remaining checks from the BOM audit: Kangnex CAN connector footprint, PESD2CAN pinout
