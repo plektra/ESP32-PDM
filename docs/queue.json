@@ -55,10 +55,16 @@
       "id": "T-0004",
       "role": "validator",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "failed",
       "created": "2026-10-30",
       "depends_on": [],
-      "deep": true
+      "deep": true,
+      "started": "2026-10-30T22:29:49",
+      "model": "opus",
+      "cost_usd": 0.2737,
+      "attempts": 1,
+      "finished": "2026-10-30",
+      "note": "no report written (api_error): You've hit your 5-hour limit · resets 12:30am (Europe/Helsinki)"
     },
     {
       "id": "T-0005",
