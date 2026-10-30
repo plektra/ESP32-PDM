@@ -203,7 +203,15 @@ most marine electronics, this device relies on that system-level protection.
 - [ ] Verify the PG-TDSO-14 footprint against the JLCPCB/EasyEDA footprint
 - [ ] Per-output fuse strategy (on board vs. in the installation)
 - [ ] Standard population (e.g. 2 × BTT6010 + 2 × BTT6050) vs. all-BTT6010 builds
-- [ ] Bilge pumps (Vega: 12 A per pump when running, owner 2026-10-30): too much for one channel
+- [ ] Bilge pumps (Vega: SEAFLO 01 Series 3500 GPH, 24 V model SFBP2-G3500-01: 8.0 A rated, 12.5 A max
+      draw per the product page; current rises with pumping head; start-up and jammed-impeller current not
+      given). BTT6010 at 8 A → Tj ≈ 86 °C, at 10 A ≈ 123 °C, at ≥ 11 A thermal shutdown: a pump working
+      hard must not be cut off, so it goes on a high-current channel. Wiring per manual: float switch and
+      manual switch in parallel to the pump; the PDM channel replaces the manual switch. Back-to-back
+      MOSFETs block back-feed when the float switch runs the pump; an OUT voltage divider lets the PDM see
+      float-driven runs. Timed overcurrent reports a jammed impeller instead of blowing a fuse.
+      Previous note: owner reported 12 A per pump (2026-10-30), consistent with the 12.5 A max draw.
+      Original analysis: too much for one PROFET channel
       (BTT6010 @ 12 A → Tj ≈ 186 °C) → high-current board. Automatic float-switch circuit wired directly
       (always on); manual forced run on a high-current channel (works without the ESP32 via the physical
       switch); run monitoring via an auxiliary sense input on the pump feed
