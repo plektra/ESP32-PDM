@@ -13,7 +13,9 @@ Values marked *estimate* are engineering estimates, not measurements.
 - Low cost is the guiding principle: JLCPCB PCBA, basic/preferred parts where possible,
   few unique extended parts.
 - ESP32-S3 (NMEA 2000 / SensESP / Signal K ecosystem, Wi-Fi, OTA updates).
-- One board per variant: 1, 2 and 4 channels, built from shared schematic sheets.
+- One product: a 4-channel board. Current per channel is chosen at assembly by fitting a
+  pin-compatible switch (BTT6050 ≈ 4 A or BTT6010 ≈ 8 A); loads above that use a relay/contactor
+  driven by a channel (e.g. the 500 W halogen searchlight: ≈ 21 A at 24 V, inrush roughly 10–15×).
 - Installed in an enclosed location, in a vented 3D-printed enclosure. Two mounting styles:
   DIN rail (PCB perpendicular to the rail, 1–2 module widths) and flat (wall/ceiling).
 - Engine-room ambient up to 40 °C.
@@ -36,7 +38,20 @@ Variant ID (`MOD_ID`, IO1): 10 kΩ pull-up R29, variant resistor R42 to GND. 4-c
 Proposed table: 1-channel 2.2 kΩ (0.59 V), 2-channel 4.7 kΩ (1.05 V), 4-channel 10 kΩ (1.65 V);
 0 V and 3.3 V are treated as faults.
 
-## 3. Output channel: BTT6050-1ERA (PROFET+24V)
+## 3. Output channel: BTT6050-1ERA / BTT6010-1ERA (PROFET+24V)
+
+The BTT6050-1ERA, BTT6030-1ERA and BTT6010-1ERA are pin-compatible (same pin table, PG-TDSO-14, cooling
+tab = VS; JLCPCB uses the same footprint for all three). Each channel is populated per build:
+
+| Option | Part | RDS(on) | Datasheet IL(NOM) | Rating in our enclosure* | kILIS | Min. current limit | Price |
+|---|---|---|---|---|---|---|---|
+| Standard | BTT6050-1ERA (C534868) | 50 mΩ | 4.5 A | ≈ 4 A | 1500 | 38 A | 1.28 $ |
+| High current | BTT6010-1ERA (C534858) | 10 mΩ | 9 A | ≈ 8 A | 3900 | 90 A | 3.19 $ |
+| (not used) | BTT6030-1ERA (C534863) | 31 mΩ | 6 A | ≈ 5 A | 2200 | 60 A | 2.72 $ |
+
+\* heat budget, 40 °C, vented, 2 oz; BTT6030 is dominated by BTT6010 (+0.47 $ for ~60 % more current).
+RIS 680 Ω suits all parts (≈ 2.0 V at 4.5 A for BTT6050, ≈ 1.4 V at 8 A for BTT6010); the firmware
+stores kILIS per channel. Values below are for the BTT6050 unless noted.
 
 Source: Infineon BTT6050-1ERA datasheet Rev 1.00 (2019-03-09).
 
@@ -77,14 +92,18 @@ rising linearly to 150 °C.
 | 4-ch | BTT6050-1ERA | 40 °C | 1 oz | 3.5 A (4 A → 120 °C) |
 | 4-ch | BTT6050-1ERA | 50 °C | 2 oz | 3.5–4 A (4 A → 113 °C) |
 | 2-ch | BTT6050-1ERA | 40 °C | 2 oz | **4 A** (Tj ≈ 99 °C) |
-| 1-ch | BTT6010-1ERA | 40 °C | 2 oz, large copper | **≈ 10 A** (12 A → 132 °C) |
+| 4-ch mixed | 2 × BTT6010 @ 8 A + 2 × BTT6050 @ 4 A | 40 °C | 2 oz | OK (Tj 89–101 °C) |
+| 4-ch | 4 × BTT6010 @ 9 A | 40 °C | 2 oz | marginal (Tj 107–117 °C, 12 W total) |
+| 4-ch | BTT6030 @ 6 A | 40 °C | 2 oz | too hot (Tj 135 °C) → ≈ 5 A |
 
 Findings that drove the design:
 - Spreading the heat over separate packages matters more than the lowest RDS(on): four single
   BTT6050s beat two dual BTT6030-2ERAs.
 - A sealed printed box limits a 4-channel board to ~2.5–3 A per channel. Vents are required.
 - A metal base plate was rejected: risk of bridging DC negative to a steel hull, and cost.
-- Above ~10 A per channel a different output stage is needed (controller + external MOSFETs).
+- Above ~8 A per channel: relay or contactor driven by a channel (searchlight, hydraulic backup pump).
+- At high total current the shared supply path dominates: 36 A through 4 mΩ is 5 W. Keep the battery
+  terminal + VS copper ≤ 2 mΩ and rate the input terminal for ≈ 40 A; output terminals ≥ 10 A.
 
 Layout rules from the budget: switches spread out and away from the ESP32; large VS copper on both
 layers around the cooling tabs, stitched with vias; 2 oz copper; vents at bottom and top; continuous
@@ -129,10 +148,12 @@ Keeping long leads from acting as antennas:
 
 ## 7. Mechanics and connectors
 
-- DIN: PCB perpendicular to the rail, ~85 × 55 mm, 1 module width (2-ch) or 2 module widths (4-ch).
+- DIN: PCB perpendicular to the rail, ~85 × 55 mm, target **1 module width** (17.5 mm). Terminal rows
+  run front-to-back along the top and bottom edges, so the pole count is set by depth, not width.
+  Provisional rating 3.5 A per BTT6050 channel in 1 module width until a prototype is measured.
 - Pluggable terminal blocks on the top and bottom edges. A 4-channel board needs ~20 poles
-  (power 2, outputs 4, panel 9, CAN 4–5); double-deck blocks or a front-face panel connector are
-  needed at 2 module widths. Exact parts are chosen at the PCB stage.
+  (power 2, outputs 4, panel 9, CAN 4–5): ≈ 10–13 poles per edge at 3.81 mm pitch. Exact parts are
+  chosen at the PCB stage.
 - Flat mounting: same PCB and housing with a flat-mount foot instead of the DIN clip.
 - Enclosure material: ASA (PETG softens at ~80 °C).
 
@@ -159,6 +180,9 @@ most marine electronics, this device relies on that system-level protection.
 - [ ] Terminal blocks and enclosure layout for DIN / flat mounting (§7)
 - [ ] Verify the PG-TDSO-14 footprint against the JLCPCB/EasyEDA footprint
 - [ ] Per-output fuse strategy (on board vs. in the installation)
-- [ ] 2-channel and 1-channel boards; output stage above ~10 A
+- [ ] Standard population (e.g. 2 × BTT6010 + 2 × BTT6050) vs. all-BTT6010 builds
+- [ ] Bilge pumps: keep the automatic float-switch circuit wired directly (always on); the PDM adds
+      manual forced run (works without the ESP32 via the physical switch) and run monitoring
+- [ ] Load list with nameplate currents (VHF, FM radio, wipers incl. park circuit, bilge pumps, work lights)
 - [ ] Update Symbols from Library in KiCad (BC817, LMR51610, USB-C symbols)
 - [ ] Remaining checks from the BOM audit: Kangnex CAN connector footprint, PESD2CAN pinout

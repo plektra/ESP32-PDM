@@ -7,13 +7,16 @@ Infineon PROFET+24V high-side switches, for 12 V and 24 V systems, assembled by 
 **Status:** schematic phase. The 4-channel board (`hardware/pdm-4ch`) is complete at schematic level
 and passes ERC (apart from library-version notices); no PCB layout yet. Not tested in hardware.
 
-## Variants
+## Channels
 
-| Variant | Channels | Switch | Continuous current per channel (estimate, 40 °C) |
-|---|---|---|---|
-| `pdm-4ch` | 4 | BTT6050-1ERA | 4 A (2 oz copper, vented enclosure) |
-| `pdm-2ch` (planned) | 2 | BTT6050-1ERA | 4 A |
-| `pdm-1ch` (planned) | 1 | BTT6010-1ERA | ≈ 10 A |
+One 4-channel board. Each channel is fitted with a pin-compatible Infineon PROFET+24V switch:
+
+| Option | Switch | Continuous current per channel (estimate, 40 °C, vented) |
+|---|---|---|
+| Standard | BTT6050-1ERA | ≈ 4 A |
+| High current | BTT6010-1ERA | ≈ 8 A |
+
+Larger loads (e.g. a 500 W halogen searchlight) are switched through a relay or contactor driven by a channel.
 
 ## Features
 
