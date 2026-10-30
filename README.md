@@ -16,7 +16,7 @@ One 4-channel board. Each channel is fitted with a pin-compatible Infineon PROFE
 | Standard | BTT6050-1ERA | ≈ 4 A |
 | High current | BTT6010-1ERA | ≈ 8 A |
 
-Larger loads (e.g. a 500 W halogen searchlight) are switched through a relay or contactor driven by a channel.
+A high-current board (planned) uses a smart high-side controller with external MOSFETs for ≈ 8–20 A loads.
 
 ## Features
 

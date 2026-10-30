@@ -13,9 +13,10 @@ Values marked *estimate* are engineering estimates, not measurements.
 - Low cost is the guiding principle: JLCPCB PCBA, basic/preferred parts where possible,
   few unique extended parts.
 - ESP32-S3 (NMEA 2000 / SensESP / Signal K ecosystem, Wi-Fi, OTA updates).
-- One product: a 4-channel board. Current per channel is chosen at assembly by fitting a
-  pin-compatible switch (BTT6050 ≈ 4 A or BTT6010 ≈ 8 A); loads above that use a relay/contactor
-  driven by a channel (e.g. the 500 W halogen searchlight: ≈ 21 A at 24 V, inrush roughly 10–15×).
+- Two boards, no relays (the point of the product is to replace them):
+  - **4-channel** board, PROFET+24V per channel, fitted per build: BTT6050 (≈ 4 A) or BTT6010 (≈ 8 A).
+  - **High-current** board (planned): smart high-side controller TPS48111-Q1 + external MOSFETs,
+    ≈ 8–20 A per channel (bilge pumps 12 A, work lights, wipers; searchlight see §4).
 - Installed in an enclosed location, in a vented 3D-printed enclosure. Two mounting styles:
   DIN rail (PCB perpendicular to the rail, 1–2 module widths) and flat (wall/ceiling).
 - Engine-room ambient up to 40 °C.
@@ -101,7 +102,8 @@ Findings that drove the design:
   BTT6050s beat two dual BTT6030-2ERAs.
 - A sealed printed box limits a 4-channel board to ~2.5–3 A per channel. Vents are required.
 - A metal base plate was rejected: risk of bridging DC negative to a steel hull, and cost.
-- Above ~8 A per channel: relay or contactor driven by a channel (searchlight, hydraulic backup pump).
+- Above ~8 A per channel: the high-current board (§4a). Very large loads (hydraulic backup pump, ~100 A)
+  stay on their own contactor/breaker outside the PDM.
 - At high total current the shared supply path dominates: 36 A through 4 mΩ is 5 W. Keep the battery
   terminal + VS copper ≤ 2 mΩ and rate the input terminal for ≈ 40 A; output terminals ≥ 10 A.
 
@@ -109,6 +111,26 @@ Layout rules from the budget: switches spread out and away from the ESP32; large
 layers around the cooling tabs, stitched with vias; 2 oz copper; vents at bottom and top; continuous
 current rating printed on the label; firmware warns or sheds load from measured current (and an NTC,
 when an ADC pin is freed).
+
+## 4a. High-current board (planned)
+
+Controller: TI TPS48111LQDGXRQ1 (C17558994, ~2.97 $, 9 874 in stock): 3.5–80 V (100 V abs. max),
+drives back-to-back N-MOSFETs (reverse-polarity / reverse-current blocking), two-level overcurrent
+protection (IWRN with adjustable circuit-breaker timer TMR; fast ISCP 1.2 µs), IMON current monitor
+(±2 % at 30 mV), adjustable UVLO/OV cut-off, remote temperature sensing (DIODE pin), fault flags.
+Source: TI TPS4811-Q1 datasheet.
+
+- Thresholds: IWRN ≈ 8–31 mV across RSNS (resistor-set), ISCP ≈ 19–45 mV (resistor-set). With
+  RSNS = 0.5 mΩ: ISCP ≈ 80 A, IWRN e.g. 20 A with a timer of ~100–200 ms for motor starts.
+- MOSFETs: 60 V, 2–3 mΩ, PDFN 5×6 (e.g. HD506N032SG C52766425, 0.47 $; FH3406GS C5453909, 2.1 mΩ).
+  Estimated ≈ 4.5 $ per channel incl. shunt and passives.
+- Heat (estimate): 21 A through 2 × ~3.6 mΩ (hot) + 1 mΩ shunt ≈ 3.6 W per channel; 2 channels at
+  21 A simultaneously → Tj ≈ 105 °C (vented, 40 °C). At 12 A ≈ 1.2 W per channel.
+- **Halogen inrush** (500 W searchlight: ≈ 21 A, roughly 200–300 A for tens of ms when cold) is the hard
+  case: ISCP must be disabled or set very high and the timer must ride through the inrush; MOSFET pulse
+  SOA and short-circuit energy must be verified. An LED searchlight with a heated lens avoids this.
+- The same protected physical switch input drives the controller EN; the board reuses the controller,
+  power, CAN and input sheets of the 4-channel board.
 
 ## 5. Physical switch inputs and long leads
 
@@ -182,9 +204,9 @@ most marine electronics, this device relies on that system-level protection.
 - [ ] Per-output fuse strategy (on board vs. in the installation)
 - [ ] Standard population (e.g. 2 × BTT6010 + 2 × BTT6050) vs. all-BTT6010 builds
 - [ ] Bilge pumps (Vega: 12 A per pump when running, owner 2026-10-30): too much for one channel
-      (BTT6010 @ 12 A → Tj ≈ 186 °C). Plan: automatic float-switch circuit wired directly (always on);
-      manual forced run through a motor-rated relay driven by a channel (works without the ESP32 via the
-      physical switch); run monitoring via an auxiliary sense input on the pump feed
+      (BTT6010 @ 12 A → Tj ≈ 186 °C) → high-current board. Automatic float-switch circuit wired directly
+      (always on); manual forced run on a high-current channel (works without the ESP32 via the physical
+      switch); run monitoring via an auxiliary sense input on the pump feed
 - [ ] Auxiliary sense-only inputs (1-2, same protected input circuit, spare GPIO) for pump-running /
       float-switch state
 - [ ] Load list with nameplate currents (VHF, FM radio, wipers incl. park circuit, bilge pumps, work lights)
