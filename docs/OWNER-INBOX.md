@@ -5,7 +5,7 @@ question's Answer line – `yes` (do the proposed fix), `no` (drop it) or your o
 The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file is regenerated from
 `docs/queue.json`: only the Answer lines are read; other edits are lost.
 
-## Open (32)
+## Open (41)
 
 ## Q-0001 · MAJOR · pdm-hc2 · finding
 
@@ -354,6 +354,105 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Summary:** Standard population for Vega's pdm-4ch: all BTT6050 (24.87 $) or a 2+2 mix with BTT6010 (28.58 $ at 10)?
 - **Proposed:** Owner decides from the load list
 - **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; touches decision:7
+
+**Answer:** 
+
+---
+
+## Q-0033 · MAJOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V1 (channel x4: R103/R203/R303/R403 (RIS 680 ohm 0603), DEN on IO33); task T-0041
+- **Summary:** IS fault current (6/15/40 mA, P_7.5.7) into 680 ohm dissipates 0.15 W typ / ~1.1 W max in a 0.1 W 0603 whenever DEN is high and a channel is faulted, including an unconnected output floating up in OFF (open-load-in-OFF).
+- **Proposed:** Firmware enables DEN only for sampling or drops it on a full-scale IS; fit RIS as 1206 >= 0.25 W; optionally an OUT pull-down so open outputs do not flag a fault.
+- **Why it needs you:** reviewer classed it big: The complete fix needs a firmware DEN policy (firmware architecture is big); the resistor package change alone would be small.; touches firmware
+
+**Answer:** 
+
+---
+
+## Q-0034 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V2 (analog_sw SW1-4 node -> D12-D15 -> R101/R201/R301/R401 -> IN; design-notes section 3); task T-0042
+- **Summary:** At SWIN 10.5 V with the 3.3 V rail down, IN minus device GND is about 1.8-2.0 V once ON, against VIN(H) min 2.0 V; the claimed 0.4 V margin does not hold (UNVERIFIED zener knee).
+- **Proposed:** Correct the margin claim and measure on the prototype; if short, consider RIN 4.7 k or a divider change on the shared sheet.
+- **Why it needs you:** reviewer classed it big: Any circuit fix touches the shared analog_sw sheet and invariant 1 (hardware switch path).; touches shared-sheet, invariant
+
+**Answer:** 
+
+---
+
+## Q-0035 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V3 (root: R60/R61 VBAT_SENSE; decision 18 text); task T-0043
+- **Summary:** ESP32-S3 ADC calibrated range is 0-2900 mV (datasheet v2.2 Table 5-6), so VBAT full scale is 31.9 V, not 33 V; 30 V still reads.
+- **Proposed:** Correct the figure in decision 18 and design-notes to about 32 V full scale.
+- **Why it needs you:** reviewer classed it big: Documentation only, but the text is part of confirmed decision 18.; touches decision:18
+
+**Answer:** 
+
+---
+
+## Q-0036 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V4 (lib/ESP32-PDM.pretty/Infineon_PG-TDSO-14_ThermalVias: paste windows vs thermal vias); task T-0044
+- **Summary:** Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab).
+- **Proposed:** Move the paste windows between the vias, or order plugged/capped vias.
+- **Why it needs you:** reviewer classed it big: Footprint correction, but it is in lib/, which the small policy excludes.
+
+**Answer:** 
+
+---
+
+## Q-0037 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V5 (lib/ESP32-PDM.pretty/LMR51610 (U3)); task T-0045
+- **Summary:** Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct.
+- **Proposed:** Use Package_TO_SOT_SMD:SOT-23-6 or redraw to the TI land pattern; compare with the JLCPCB footprint.
+- **Why it needs you:** reviewer classed it big: Footprint correction proven by the datasheet, but in lib/ (excluded from small).
+
+**Answer:** 
+
+---
+
+## Q-0038 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V6 (analog_sw: R3/R4/R7/R8 4.7 k 1206 switch loads); task T-0046
+- **Summary:** 0.19 W continuous at 30 V in a 0.25 W part (77 %), 0.49 W during a 48 V clamp.
+- **Proposed:** Two 1206 resistors in series (2.2 k + 2.4 k) or a 2010 part, same value.
+- **Why it needs you:** reviewer classed it big: Passive-only change, but on the shared analog_sw sheet.; touches shared-sheet
+
+**Answer:** 
+
+---
+
+## Q-0039 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V8 (can: U5 TXD (IO17)); task T-0048
+- **Summary:** No external pull-up on ISO1044 TXD; TI says not to rely on the internal one, and GPIO17 has a 60 us low glitch at power-up, which can put a dominant pulse on the N2K bus.
+- **Proposed:** 10 k pull-up from TXD to +3V3 on the shared can sheet (both boards).
+- **Why it needs you:** reviewer classed it big: A missing pull-up is small in kind, but the can sheet is shared.; touches shared-sheet
+
+**Answer:** 
+
+---
+
+## Q-0040 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V9 (analog_sw: SW_SUPPLY/F4, LED_K1-4, Q3-Q6); task T-0049
+- **Summary:** With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V.
+- **Proposed:** Document in the README, or add a series diode in the SW_SUPPLY feed (owner).
+- **Why it needs you:** reviewer classed it big: A hardware fix changes protection on the shared sheet.; touches shared-sheet, protection
+
+**Answer:** 
+
+---
+
+## Q-0041 · INFO · pdm-4ch · question
+
+- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V12 (DEN (IO33), design-notes section 6); task T-0052
+- **Summary:** Should DEN be held high in Active mode, or pulsed only while sampling IS? V1 (RIS overload on fault or open output) depends on it.
+- **Proposed:** Owner decides the DEN policy in /system firmware.
+- **Why it needs you:** reviewer classed it big: Firmware architecture question for the owner.; a question only the owner can answer; touches firmware
 
 **Answer:** 
 
