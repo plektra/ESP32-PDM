@@ -6,7 +6,7 @@ Updated: 2026-10-30
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15 apply.
 
 **Waiting for the owner:** decision 19 **[proposed]** (21 A MOSFET option, halogen inrush). Depends on the
-searchlight choice (decision 16, open: halogen or LED + heated glass).
+searchlight choice (halogen or LED).
 
 ## Next
 

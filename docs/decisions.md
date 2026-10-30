@@ -21,7 +21,7 @@ free number (`/handoff` adds them).
 | 13 | 2026-10-30 | system | Low-power modes are entered by a bus command (NMEA 2000 or Signal K); local switches always work and can wake the node. Panel LEDs dimmable. | confirmed |
 | 14 | 2026-10-29 | system | Board variant ID: resistor divider on IO1 (`MOD_ID`, 10 kΩ pull-up). 4-ch = 10 kΩ, HC2 = 4.7 kΩ. | confirmed |
 | 15 | 2026-10-30 | system | Bilge pumps: the automatic float-switch circuits stay wired directly to the battery; the PDM is used only for manual forced run (in parallel with the float switch). | confirmed |
-| 16 | 2026-10-30 | system | Searchlight heating: an edge heater ring is not enough for de-icing; a film-type heater is preferred, but cost must be reviewed before deciding. | open |
+| 16 | 2026-10-30 | system | Moved to vega-systems (not part of ESP32-PDM). | moved |
 | 17 | 2026-10-30 | system | Panel cable: fused switch-supply output on the panel connector, LEDs on constant-current sinks (BC817 + emitter resistor, ~5 mA, PWM-dimmable), TVS on every line, no 3.3 V on the cable. | [proposed] |
 | 18 | 2026-10-30 | system | Battery-voltage measurement and an NTC near the switches; needs ADC pins (move panel LED drive off IO10–IO13). | [proposed] |
 | 19 | 2026-10-30 | pdm-hc2 | For loads ~21 A (searchlight), fit lower-RDS(on) MOSFETs (candidate onsemi NTMFS5C612NL); for halogen inrush, disable the fast short-circuit trip only after an SOA check. | [proposed] |

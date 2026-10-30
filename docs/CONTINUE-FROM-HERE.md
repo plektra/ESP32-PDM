@@ -25,13 +25,13 @@ Firmware: not started.
 5. **`/system mechanical`** – terminal blocks and pole count, DIN (1 module width) and flat-mount enclosure, vents.
 6. **`/board pdm-4ch pcb`**, then **`/board pdm-hc2 pcb`**.
 7. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
-   heater thermostat, variant ID.
+   variant ID.
 
 ## Waiting on the owner
 
 - Decisions 17, 18, 19 **[proposed]**.
-- Decision 16 (searchlight heating) open: revisit with cost in mind; halogen vs LED.
-- Measurements on Vega: searchlight glass diameter and thickness; bilge pump locations and feeds.
+- Searchlight: halogen vs LED (drives decision 19).
+- Measurements on Vega: bilge pump locations and feeds.
 
 ## Housekeeping
 
