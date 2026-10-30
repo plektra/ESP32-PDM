@@ -34,7 +34,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 BRANCH = 'auto/pilot'
-WORKTREE = REPO / '.claude' / 'worktrees' / 'auto'
+# Outside the repo and outside any .claude/ folder: Claude Code refuses agent writes under .claude/ as sensitive.
+WORKTREE = REPO.parent / f'{REPO.name}-auto'
 LOGS = REPO / '.claude' / 'worktrees' / 'auto-logs'  # raw agent output per task, git-ignored
 QUEUE = Path('docs/queue.json')
 INBOX = Path('docs/OWNER-INBOX.md')

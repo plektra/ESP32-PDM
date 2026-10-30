@@ -73,7 +73,7 @@ python3 tools/orchestrate.py run               # ≤ 4 tasks, ≤ 60 USD; stops 
 /inbox                                         # answer the questions, then: orchestrate.py inbox
 ```
 
-Each task is a fresh headless session (`claude -p --agent <role>`) in `.claude/worktrees/auto` on branch
+Each task is a fresh headless session (`claude -p --agent <role>`) in the sibling worktree `../ESP32-PDM-auto` (outside `.claude/`, where agent writes are refused) on branch
 `auto/pilot`. The script, not the agent, checks the result: nothing but the new report may change, the report must
 carry a valid finding block. Merge `auto/pilot` into `main` when you have read the reports. Pilot: reviewers only;
 `board-fix` tasks wait as `parked` for `/board` sessions.
