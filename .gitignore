@@ -10,5 +10,6 @@ _autosave-*
 __pycache__/
 # OS
 .DS_Store
-# Agent worktrees
-.claude/
+# Agent worktrees and local settings
+.claude/worktrees/
+.claude/settings.local.json

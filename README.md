@@ -40,8 +40,9 @@ Both boards share the controller, power, NMEA 2000 and switch-input design.
 hardware/pdm-4ch/   KiCad project, 4-channel board (PROFET)
 hardware/pdm-hc2/   KiCad project, 2-channel high-current board
 lib/                shared KiCad symbols and footprints
-docs/               design notes (decisions, calculations, open items)
-tools/              heat budget model, schematic netlist checker
+docs/               CONTINUE-FROM-HERE (next steps), decisions, ARCHITECTURE, design notes, reviews
+tools/              heat budget model, schematic editing helpers, netlist checker
+.claude/            Claude Code roles: commands and review agents (see docs/WORKING-WITH-CLAUDE.md)
 ```
 
 See [docs/design-notes.md](docs/design-notes.md) for the design rationale, heat budget and open items.
