@@ -8,7 +8,7 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (11) – two-way doors
+## Decided by agents (10) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
@@ -20,9 +20,17 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 - T-0050 · MINOR · pdm-4ch · 'Switches survive with the ground network' holds only for VS(REV) 28 V, t < 2 min, RL >= 12 ohm (P_4.1.2); at 4 A the body diode dissipates about 2.4 W > PTOT 1.6 W. → Qualify the claim in design-notes/README with the datasheet conditions.
 - T-0047 · MINOR · pdm-4ch · p_other 0.6 W omits about 1.5 W of panel-interface dissipation at 30 V (switch loads, dividers, LED sinks); Tj rises from 100 to 101 C at 4 A, so the rating stands. → Raise the default or document about 2.1 W for the 4-ch board at 30 V with all panel lines on.
 - T-0032 · INFO · pdm-4ch · Each BTT6010 channel adds 1.57 $ at 10 and a mixed build adds one 3.07 $ fee per order (2+2 mix: +3.71 $/board); fit BTT6010 only where > 4 A and order mixed builds together → Document the population and ordering rule in pdm-4ch STATUS / README
-- T-0017 · INFO · pdm-4ch · SMCJ30CA clamps at 48.4 V at 31 A, the BTT6050 absolute maximum is 48 V, but VS(LD) is 65 V (ISO 7637-1), so short clamp excursions are covered; recorded only. → None.
 - T-0008 · MAJOR · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → Footprints per TI Table 9-3: about 1 nF X cap and 100 pF Y caps on CS+/CS-, 10 nF on EN/UVLO and OVSET, 1 nF on DIODE, 100 pF on IWRN; tune in test.
 - T-0005 · MAJOR · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → Add RVS 100 ohm and CVS 1 uF/100 V in the VS supply of each controller after checking IVS.
+
+## Applied by agents (4)
+
+Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
+
+- T-0017 · pdm-4ch · SMCJ30CA clamps at 48.4 V at 31 A, the BTT6050 absolute maximum is 48 V, but VS(LD) is 65 V (ISO 7637-1), so short clamp excursions are covered; recorded only. → T-0064 (`dbc672cd`)
+- T-0013 · pdm-4ch · 4-ch outputs rely on the PROFET (body diode to VS, clamp, 4 kV HBM) and D30 at J10; this meets the intent of invariant 4 but not its wording, and D30 is far from J11. → T-0064 (`dbc672cd`)
+- T-0009 · pdm-hc2 · HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them. → T-0064 (`dbc672cd`)
+- T-0007 · system · Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → T-0064 (`dbc672cd`)
 
 ## Deferred (14)
 
@@ -44,12 +52,12 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 ## Answered (46)
 
 - Q-0001 (pdm-hc2): MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → **yes - RG_PU 100 ohm, PD kept direct, RGATE_PD as a 0 ohm footprint; recheck switching loss, SOA, heat budget and short-circuit response; no PWM on HC2 outputs until measured on the bench** (parked)
-- Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (parked)
-- Q-0003 (pdm-hc2): HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them. → **yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA** (parked)
+- Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (done)
+- Q-0003 (pdm-hc2): HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them. → **yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA** (done)
 - Q-0004 (system): No high-frequency return across the isolation barrier (CIO about 1 pF) and no CMC option, so the N2K cable can radiate logic-ground noise and ESD lifts the whole island; not measured. → **yes - as footprints only: Y-capacitor GND_CAN-GND DNP, CMC footprint fitted with 0 ohm bridges; decide at pre-compliance scan** (parked)
 - Q-0005 (system): Buck is the 1.1 MHz PFM variant; PFM drops into the 150-350 kHz band at light load, the datasheet's separate 0.1 uF at VIN is missing, C1 is only 50 V, and SW ringing can land in the tightly limited 156-165 MHz band. → **yes - add 100 nF/100 V at VIN, footprints for an SW RC snubber (DNP) and a boot resistor (0 ohm); keep LMR51610YDBVR, switch to the YF (FPWM) variant only if the pre-compliance scan shows PFM noise** (parked)
 - Q-0006 (system): Hardware switch path has tau 0.32 ms (no real debounce), turns the output off below about 8 V at the switch (12 V cranking), and a lamp across the switch contacts above about 1.4 mA turns it on. → **yes - C14-C17 to 470 nF; README note: dry (unlit) switch contacts, and the output-off behaviour below about 8 V during 12 V cranking** (parked)
-- Q-0007 (pdm-4ch): 4-ch outputs rely on the PROFET (body diode to VS, clamp, 4 kV HBM) and D30 at J10; this meets the intent of invariant 4 but not its wording, and D30 is far from J11. → **yes - reword invariant 4 to cover the PROFET output case, DNP SMAJ30CA footprint per output, keep VS copper to D30 wide** (parked)
+- Q-0007 (pdm-4ch): 4-ch outputs rely on the PROFET (body diode to VS, clamp, 4 kV HBM) and D30 at J10; this meets the intent of invariant 4 but not its wording, and D30 is far from J11. → **yes - reword invariant 4 to cover the PROFET output case, DNP SMAJ30CA footprint per output, keep VS copper to D30 wide** (done)
 - Q-0008 (system): USB shield is tied to battery negative (shore PE loop via a laptop) and the ESD diode is listed with a 40 V clamp against 3.6 V ESP32 pins (unverified). → **yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option** (parked)
 - Q-0009 (system): 1 nF collector capacitors and the 2.2 uF buck input capacitor are probably 50 V parts against a 48.4 V TVS clamp; TI advises twice VIN for CIN. → **yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides** (parked)
 - Q-0010 (system): Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined. → **yes - GND pole(s) rated like the VS input, decided in /system mechanical; wide GND copper to J10.2** (deferred)

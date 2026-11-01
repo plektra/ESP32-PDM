@@ -151,7 +151,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E3"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0002",
       "why_big": [
         "reviewer classed it big: Shared root sheet, new part type, cost about 0.2-0.3 USD per board.",
@@ -160,7 +160,9 @@
       ],
       "ruling": "yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint",
       "answered": "2026-11-01",
-      "package": "T-0064"
+      "package": "T-0064",
+      "fixed_by": "T-0064",
+      "merged": "dbc672cd2a2c13a443a2350b5d6107fb28b5b539"
     },
     {
       "id": "T-0008",
@@ -213,7 +215,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E5"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0003",
       "why_big": [
         "reviewer classed it big: New protection element on output lines (protection topology) of safety-relevant outputs.",
@@ -221,7 +223,9 @@
       ],
       "ruling": "yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA",
       "answered": "2026-11-01",
-      "package": "T-0064"
+      "package": "T-0064",
+      "fixed_by": "T-0064",
+      "merged": "dbc672cd2a2c13a443a2350b5d6107fb28b5b539"
     },
     {
       "id": "T-0010",
@@ -356,7 +360,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E9"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0007",
       "why_big": [
         "reviewer classed it big: Touches an invariant and the protection scheme.",
@@ -364,7 +368,9 @@
       ],
       "ruling": "yes - reword invariant 4 to cover the PROFET output case, DNP SMAJ30CA footprint per output, keep VS copper to D30 wide",
       "answered": "2026-11-01",
-      "package": "T-0064"
+      "package": "T-0064",
+      "fixed_by": "T-0064",
+      "merged": "dbc672cd2a2c13a443a2350b5d6107fb28b5b539"
     },
     {
       "id": "T-0014",
@@ -495,8 +501,10 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E13"
       },
-      "state": "parked",
-      "package": "T-0064"
+      "state": "done",
+      "package": "T-0064",
+      "fixed_by": "T-0064",
+      "merged": "dbc672cd2a2c13a443a2350b5d6107fb28b5b539"
     },
     {
       "id": "T-0018",
@@ -2060,7 +2068,7 @@
       "id": "T-0064",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-01",
       "title": "Battery input bulk/HF caps and output surge protection (invariant 4)",
       "brief": "Order: (1) T-0007 battery input at J10 (root sheet, both boards). Owner ruling Q-0002 verbatim: 'yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint'. Search JLCPCB for a >=63 V electrolytic or polymer of ~100 uF, basic or preferred first, extended only if none exists (record the fee as an auto decision). Check its ripple current and ESR against the datasheet. Add a 1-2.2 uF/100 V ceramic next to J10. Add a ferrite/CMC series footprint as DNP with a bypass so VS stays connected: either a 0 ohm/jumper fitted in parallel, or state how the DNP part is bridged, so that the netlist stays continuous. On pdm-4ch add 1 uF/100 V at each BTT6050 VS tab (channel sheet x4). E3 asks for more bulk on HC2: choose the HC2 amount (e.g. a second bulk capacitor) and record it as auto. Keep the controller part of the root sheet identical on both boards; put any HC2-only extra in an HC2-only place. (2) T-0009 HC2 output TVS. Ruling Q-0003 verbatim: 'yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA'. Part check first: SMAJ33CA LCSC library type, price, VBR/VC from the datasheet. Its clamp (~53 V) must stay below the 80 V BSC030N08NS5 VDS and must not exceed any OUT-side part rating. Then add one TVS per OUT (hc_channel) and write the return-path rule into STATUS for the PCB phase. (3) T-0013 4-ch outputs. Ruling Q-0007 verbatim: 'yes - reword invariant 4 to cover the PROFET output case, DNP SMAJ30CA footprint per output, keep VS copper to D30 wide'. Add a DNP SMAJ30CA from each OUT to GND at J11 (channel sheet x4). Reword ARCHITECTURE invariant 4 only to state that a PROFET output is protected through its body diode to VS and D30 (plus the DNP TVS footprint); every other external line keeps the full wording. Add the wide VS copper rule to pdm-4ch STATUS (PCB). (4) T-0017: no change; record the SMCJ30CA 48.4 V vs BTT6050 VS 48 V / VS(LD) 65 V reasoning in design-notes section 8 next to the new input capacitors. Checks: ERC and netlist on both boards before and after each step; LCSC code on every fitted part; the shared sheets are not touched; heat budget is unaffected (no output part change). Failure-mode note for the HC2 output TVS (bilge forced-run output): a shorted TVS blows the output wire fuse, and the float-switch circuit is unaffected (invariant 8). Stop and ask (one-way) if: the invariant 4 wording would relax protection for any line other than PROFET outputs; no TVS keeps the 28.8 V float case below its stand-off without a clamp above a part rating; no >=63 V bulk capacitor fits without exceeding ~0.5 USD/board.",
@@ -2072,10 +2080,16 @@
       ],
       "plan": "T-0063",
       "depends_on": [],
-      "started": "2026-11-01T22:52:59",
+      "started": "2026-11-01T23:05:17",
       "model": "opus",
-      "session": "05c66d34-a24c-4734-a17a-f75f4e6055cf",
-      "note": null
+      "session": "d7b31a18-b268-4804-b6fe-53f0f2ec5004",
+      "note": "1 tool calls denied (Bash); log T-0064-20261101-230522.json",
+      "cost_usd": 4.1151,
+      "attempts": 1,
+      "finished": "2026-11-01",
+      "summary": "4 fixed, 0 blocked, merged dbc672cd",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-01-fix-shared-T-0064.md"
     },
     {
       "id": "T-0065",
