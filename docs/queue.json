@@ -2060,7 +2060,7 @@
       "id": "T-0064",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "failed",
       "created": "2026-11-01",
       "title": "Battery input bulk/HF caps and output surge protection (invariant 4)",
       "brief": "Order: (1) T-0007 battery input at J10 (root sheet, both boards). Owner ruling Q-0002 verbatim: 'yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint'. Search JLCPCB for a >=63 V electrolytic or polymer of ~100 uF, basic or preferred first, extended only if none exists (record the fee as an auto decision). Check its ripple current and ESR against the datasheet. Add a 1-2.2 uF/100 V ceramic next to J10. Add a ferrite/CMC series footprint as DNP with a bypass so VS stays connected: either a 0 ohm/jumper fitted in parallel, or state how the DNP part is bridged, so that the netlist stays continuous. On pdm-4ch add 1 uF/100 V at each BTT6050 VS tab (channel sheet x4). E3 asks for more bulk on HC2: choose the HC2 amount (e.g. a second bulk capacitor) and record it as auto. Keep the controller part of the root sheet identical on both boards; put any HC2-only extra in an HC2-only place. (2) T-0009 HC2 output TVS. Ruling Q-0003 verbatim: 'yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA'. Part check first: SMAJ33CA LCSC library type, price, VBR/VC from the datasheet. Its clamp (~53 V) must stay below the 80 V BSC030N08NS5 VDS and must not exceed any OUT-side part rating. Then add one TVS per OUT (hc_channel) and write the return-path rule into STATUS for the PCB phase. (3) T-0013 4-ch outputs. Ruling Q-0007 verbatim: 'yes - reword invariant 4 to cover the PROFET output case, DNP SMAJ30CA footprint per output, keep VS copper to D30 wide'. Add a DNP SMAJ30CA from each OUT to GND at J11 (channel sheet x4). Reword ARCHITECTURE invariant 4 only to state that a PROFET output is protected through its body diode to VS and D30 (plus the DNP TVS footprint); every other external line keeps the full wording. Add the wide VS copper rule to pdm-4ch STATUS (PCB). (4) T-0017: no change; record the SMCJ30CA 48.4 V vs BTT6050 VS 48 V / VS(LD) 65 V reasoning in design-notes section 8 next to the new input capacitors. Checks: ERC and netlist on both boards before and after each step; LCSC code on every fitted part; the shared sheets are not touched; heat budget is unaffected (no output part change). Failure-mode note for the HC2 output TVS (bilge forced-run output): a shorted TVS blows the output wire fuse, and the float-switch circuit is unaffected (invariant 8). Stop and ask (one-way) if: the invariant 4 wording would relax protection for any line other than PROFET outputs; no TVS keeps the 28.8 V float case below its stand-off without a clamp above a part rating; no >=63 V bulk capacitor fits without exceeding ~0.5 USD/board.",
@@ -2071,13 +2071,17 @@
         "T-0017"
       ],
       "plan": "T-0063",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-01T22:52:59",
+      "model": "opus",
+      "session": "05c66d34-a24c-4734-a17a-f75f4e6055cf",
+      "note": "orchestrator error: AttributeError(\"'str' object has no attribute 'get'\")"
     },
     {
       "id": "T-0065",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "failed",
       "created": "2026-11-01",
       "title": "Shared supply, USB and fuse parts (buck caps, USB shield/ESD, L3 swaps, PTC check)",
       "brief": "All edits go on the shared sheets (power-usb, analog_sw, can), identically on both boards. Order: (1) T-0018, check before the F2 swap. Ruling Q-0011 verbatim: 'yes - validator/part-facts checks the 1812L050/60GR Imax and minimum resistance against the prospective short current (30 V / cable + PTC resistance)'. Read the 1812L050/60GR datasheet: Imax at 60 V and Rmin. Compare with 30 V / (Rmin + about 10 mOhm of cable) for F1, F3 and F4 (F4 is fed from VS on J5.5). If Imax is too low, do not change anything here: it is a protection problem, so report it one-way with a proposal. (2) T-0026 four L3 swaps. Ruling Q-0019 verbatim: 'yes - adopt each of the four swaps only if its part-facts check passes (H5VL10B USB FS capacitance and clamp, L78M05 at the 29 V clamp and Iq, DPAK area)'. FB1/FB2 -> GZ2012D601TF C1017 (0805; FB1 carries VBUS: check rated current >=500 mA, impedance at 100 MHz). F2 -> 1812L050/60GR, only if step 1 passes. D4-D6 PESD0402V05 -> H5VL10B C7420372: check capacitance (USB FS needs low pF, e.g. <=15-20 pF per line), VRWM 5 V, clamp at 8 kV/TLP. U6 TPS7B91 -> L78M05ABDT C58069 (can sheet): check VIN abs max against the SMAJ18CA clamp 29.2 V with margin, Iq from NET-S (N2K LEN), dropout, stability capacitors, DPAK area (note it for /system mechanical). Each swap is independent; a failed check leaves that part as it is. (3) T-0014 USB. Ruling Q-0008 verbatim: 'yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option'. The TLP check applies to whichever ESD part step 2 leaves. Add 1 M || 4.7 nF footprints from J3 shield to GND plus a 0 ohm option, and decide which is fitted (auto; default: RC fitted, 0 ohm DNP). The 4.7 nF needs a voltage rating suitable for a shield. Add the README service rule. (4) T-0011 buck. Ruling Q-0005 verbatim: 'yes - add 100 nF/100 V at VIN, footprints for an SW RC snubber (DNP) and a boot resistor (0 ohm); keep LMR51610YDBVR, switch to the YF (FPWM) variant only if the pre-compliance scan shows PFM noise'. Add 100 nF/100 V at U3 VIN-GND, an SW-to-GND RC snubber (R+C, DNP), and a 0 ohm in series with the boot capacitor C2. (5) T-0015 capacitor ratings. Ruling Q-0009 verbatim: 'yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides'. Applies to C1 (2.2 uF buck input, power-usb) and C50-C53 (1 nF LED collector, analog_sw); keep the values. (6) T-0022. Ruling Q-0015 verbatim: 'yes - recheck stock before ordering; datasheet-check the L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074'. Compare inductance, Isat, Irms, DCR and footprint with SWPA6045S8R2MT and record the approved alternates in STATUS of both boards. Put the stock recheck on the pre-order checklist in STATUS. Checks: ERC and netlist on both boards after each step; the shared sheets must be byte-identical apart from the project name; LCSC on every fitted part; DNP on the snubber. Keep J3 USB-C fitted (Q-0029). Do not touch the TH1 NTC (Q-0024). Stop and ask if: a PTC Imax check fails; a swap would weaken ESD or surge protection; the L78M05 swap would change the NET-S load class (LEN).",
@@ -2090,7 +2094,15 @@
         "T-0026"
       ],
       "plan": "T-0063",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-01T22:53:30",
+      "model": "opus",
+      "session": "d46a34af-8e4a-44f4-a7ae-cd8e2ceb8b15",
+      "cost_usd": 2.0406,
+      "attempts": 1,
+      "finished": "2026-11-01",
+      "note": "no report written (aborted_streaming): ",
+      "summary": "failed"
     },
     {
       "id": "T-0066",
