@@ -14,7 +14,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** RG_PU about 100-220 ohm plus an RGATE_PD footprint, tune on the bench, then recheck switching loss, SOA and the fast short-circuit response.
 - **Why it needs you:** reviewer classed it big: Changes switching and protection timing of a safety-relevant output (bilge pump) and the heat budget.; touches safety
 
-**Answer:** 
+**Answer:** yes - RG_PU 100 ohm, PD kept direct, RGATE_PD as a 0 ohm footprint; recheck switching loss, SOA, heat budget and short-circuit response; no PWM on HC2 outputs until measured on the bench
 
 ---
 
@@ -25,7 +25,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Add about 100 uF/50 V bulk plus 1-2.2 uF/100 V ceramic at J10 (more on HC2), 1 uF/100 V at each BTT6050 VS tab, and a ferrite/CMC footprint.
 - **Why it needs you:** reviewer classed it big: Shared root sheet, new part type, cost about 0.2-0.3 USD per board.; affects both boards; touches shared-sheet, budget
 
-**Answer:** 
+**Answer:** yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint
 
 ---
 
@@ -36,7 +36,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Add SMAJ30CA (already on the BOM) from each OUT to GND at J11 with a short return to J10.2; check float-switch case at 28.8 V.
 - **Why it needs you:** reviewer classed it big: New protection element on output lines (protection topology) of safety-relevant outputs.; touches protection, invariant, safety
 
-**Answer:** 
+**Answer:** yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA
 
 ---
 
@@ -47,7 +47,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Add a footprint for a 1-2.2 nF/1 kV Y-class capacitor GND_CAN-GND and a CMC footprint in series with CANH/CANL; confirm with a pre-compliance scan.
 - **Why it needs you:** reviewer classed it big: Shared can sheet, protection and grounding topology change.; affects both boards; touches shared-sheet, protection
 
-**Answer:** 
+**Answer:** yes - as footprints only: Y-capacitor GND_CAN-GND DNP, CMC footprint fitted with 0 ohm bridges; decide at pre-compliance scan
 
 ---
 
@@ -58,7 +58,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Add 100 nF/100 V at VIN, footprints for an SW RC snubber and a boot resistor, and consider the LMR51610YF (FPWM) if the scan shows PFM noise.
 - **Why it needs you:** reviewer classed it big: Shared power-usb sheet; the FPWM option would be a different extended part.; affects both boards; touches shared-sheet, new-extended-part
 
-**Answer:** 
+**Answer:** yes - add 100 nF/100 V at VIN, footprints for an SW RC snubber (DNP) and a boot resistor (0 ohm); keep LMR51610YDBVR, switch to the YF (FPWM) variant only if the pre-compliance scan shows PFM noise
 
 ---
 
@@ -69,7 +69,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Raise C14-C17 to 470 nF-1 uF; document dry contacts and the cranking behaviour in the README.
 - **Why it needs you:** reviewer classed it big: Shared analog_sw sheet and the invariant 1 signal path.; affects both boards; touches shared-sheet, invariant
 
-**Answer:** 
+**Answer:** yes - C14-C17 to 470 nF; README note: dry (unlit) switch contacts, and the output-off behaviour below about 8 V during 12 V cranking
 
 ---
 
@@ -80,7 +80,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Document the output rule in invariant 4 and leave a DNP SMAJ30CA footprint per output; keep the VS copper to D30 wide.
 - **Why it needs you:** reviewer classed it big: Touches an invariant and the protection scheme.; touches invariant, protection
 
-**Answer:** 
+**Answer:** yes - reword invariant 4 to cover the PROFET output case, DNP SMAJ30CA footprint per output, keep VS copper to D30 wide
 
 ---
 
@@ -91,7 +91,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** README: service only, battery-powered laptop or USB isolator; check the TLP data of the DOWO part before ordering; consider an RC shield-to-GND.
 - **Why it needs you:** reviewer classed it big: Shared power-usb sheet; a shield change is a design decision.; affects both boards; touches shared-sheet
 
-**Answer:** 
+**Answer:** yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option
 
 ---
 
@@ -102,7 +102,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Use 100 V (or 63 V) parts for C50-C53 and C1 if available as basic parts.
 - **Why it needs you:** reviewer classed it big: Shared sheets (analog_sw, power-usb); part change needs the stock check.; affects both boards; touches shared-sheet
 
-**Answer:** 
+**Answer:** yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides
 
 ---
 
@@ -113,7 +113,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Size the GND pole (or use two poles) in /system mechanical to match the VS input; wide GND copper to J10.2.
 - **Why it needs you:** reviewer classed it big: Terminal and pole count decision.; affects both boards; touches connector, mechanical
 
-**Answer:** 
+**Answer:** yes - GND pole(s) rated like the VS input, decided in /system mechanical; wide GND copper to J10.2
 
 ---
 
@@ -124,7 +124,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Validator to check Imax and minimum resistance against 30 V / (cable + PTC resistance).
 - **Why it needs you:** reviewer classed it big: Question for the owner or validator, not a design change.; a question only the owner can answer; affects both boards
 
-**Answer:** 
+**Answer:** yes - validator/part-facts checks the 1812L050/60GR Imax and minimum resistance against the prospective short current (30 V / cable + PTC resistance)
 
 ---
 
@@ -135,7 +135,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner ruling on the compliance target and the shield strategy.
 - **Why it needs you:** reviewer classed it big: Only the owner can answer; shared sheet and connector.; a question only the owner can answer; affects both boards; touches shared-sheet, connector
 
-**Answer:** 
+**Answer:** IEC 60945 as a design target, no certification; one pre-compliance scan on the first prototypes decides the DNP footprints; the N2K shield stays unconnected at the node (4-pole J4)
 
 ---
 
@@ -146,7 +146,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Swap only if the pre-compliance scan shows PFM noise; check price and stock.
 - **Why it needs you:** reviewer classed it big: New extended part on a shared sheet.; affects both boards; touches shared-sheet, new-extended-part
 
-**Answer:** 
+**Answer:** swap to LMR51610YF only if the pre-compliance scan shows PFM noise (see Q-0005); check price and stock then
 
 ---
 
@@ -157,7 +157,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Add the basic/preferred codes listed in rule finding C1 (C14663, C15849, C19666, C28233, C45783, C307331, C52923, C22466350, C25879, C25905, C25744); J5/J10/J11 in /system mechanical
 - **Why it needs you:** reviewer classed it big: Missing LCSC field is a small change in kind, but it touches shared sheets and board=system; affects both boards; touches shared-sheet
 
-**Answer:** 
+**Answer:** yes - add the listed basic/preferred LCSC codes after checking each against value and footprint; J5/J10/J11 in /system mechanical
 
 ---
 
@@ -168,7 +168,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Re-check stock before ordering; note L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074 after a datasheet check
 - **Why it needs you:** reviewer classed it big: board=system, affects shared sheet power-usb; affects both boards; touches shared-sheet
 
-**Answer:** 
+**Answer:** yes - recheck stock before ordering; datasheet-check the L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074
 
 ---
 
@@ -179,7 +179,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Only if Q1 forces Standard PCBA: merge 100 nF and 1 uF package variants
 - **Why it needs you:** reviewer classed it big: board=system, shared sheets; affects both boards; touches shared-sheet
 
-**Answer:** 
+**Answer:** only if Standard PCBA is forced (see Q-0026): then merge the 100 nF and 1 uF package variants
 
 ---
 
@@ -190,7 +190,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner sets the order quantity per board from Vega's needs
 - **Why it needs you:** reviewer classed it big: Cost lever needing an owner decision on quantity and cash; board=system; affects both boards; cost change -6.05 USD per board
 
-**Answer:** 
+**Answer:** 5 + 5 for the first order (see Q-0027); revisit the quantity for later runs
 
 ---
 
@@ -201,7 +201,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Panelise both designs as one PCBA design at the PCB phase, after checking the JLCPCB multi-design surcharge
 - **Why it needs you:** reviewer classed it big: Trades flexibility (fixed 1:1 ratio), mechanical/panel choice, board=system; affects both boards; touches mechanical; cost change -2.99 USD per board
 
-**Answer:** 
+**Answer:** yes - panelise both designs at the PCB phase if the multi-design surcharge does not cancel the saving (see Q-0028)
 
 ---
 
@@ -212,7 +212,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Adopt after part-facts checks (USB FS capacitance of H5VL10B, L78M05 at 29 V clamp, DPAK area)
 - **Why it needs you:** reviewer classed it big: Touches shared sheets and changes footprints; protection parts swapped; affects both boards; touches shared-sheet, protection; cost change -1.20 USD per board
 
-**Answer:** 
+**Answer:** yes - adopt each of the four swaps only if its part-facts check passes (H5VL10B USB FS capacitance and clamp, L78M05 at the 29 V clamp and Iq, DPAK area)
 
 ---
 
@@ -223,7 +223,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner decides whether a fitted USB-C service port is needed
 - **Why it needs you:** reviewer classed it big: Connector change on a shared sheet; trades a convenience feature; affects both boards; touches shared-sheet, connector; cost change -1.30 USD per board
 
-**Answer:** 
+**Answer:** no for now - USB-C stays fitted on prototypes (see Q-0029); revisit for later runs
 
 ---
 
@@ -234,7 +234,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Decide in /system mechanical
 - **Why it needs you:** reviewer classed it big: Connector and mechanical choice; affects both boards; touches connector, mechanical; cost change -1.00 USD per board
 
-**Answer:** 
+**Answer:** decide in /system mechanical (see Q-0030)
 
 ---
 
@@ -245,7 +245,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Evaluate with the datasheet and the EMC reviewer before adopting
 - **Why it needs you:** reviewer classed it big: Shared sheet, changes the switching frequency (EMC); affects both boards; touches shared-sheet; cost change -0.83 USD per board
 
-**Answer:** 
+**Answer:** no for now - keep LMR51610Y; revisit after the pre-compliance scan
 
 ---
 
@@ -256,7 +256,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** part-facts check of the CA-IS3050G datasheet (supplies, pinout, timing), then footprint change
 - **Why it needs you:** reviewer classed it big: Shared sheet, NMEA 2000 isolation part replaced; affects both boards; touches shared-sheet, protection, new-extended-part; cost change -0.71 USD per board
 
-**Answer:** 
+**Answer:** yes - part-facts check of CA-IS3050G (supplies, pinout, timing), swap only if it passes; Q-0004 footprints and Q-0039 pull-up then apply to it
 
 ---
 
@@ -267,7 +267,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner decides whether NTC accuracy is worth 3.07 $ per order
 - **Why it needs you:** reviewer classed it big: Changes confirmed decision 18 (named NTC part) and firmware; affects both boards; touches decision:18, shared-sheet, firmware
 
-**Answer:** 
+**Answer:** keep the NTC (accuracy without calibration is worth 3.07 USD per order)
 
 ---
 
@@ -278,7 +278,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Keep as is
 - **Why it needs you:** reviewer classed it big: Controller part of the root sheet is shared; touches shared-sheet
 
-**Answer:** 
+**Answer:** no - keep R1/R2 so the controller part stays identical on both boards
 
 ---
 
@@ -289,7 +289,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner checks the JLCPCB quote page with 2 oz + Economic PCBA before layout
 - **Why it needs you:** reviewer classed it big: Question; affects the budget; a question only the owner can answer; affects both boards; touches budget
 
-**Answer:** 
+**Answer:** owner checks the JLCPCB quote page (2 oz + Economic PCBA) before layout; Q-0016 merge only if Standard PCBA is forced
 
 ---
 
@@ -300,7 +300,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner states the quantities for Vega and spares
 - **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; affects both boards
 
-**Answer:** 
+**Answer:** 5 + 5 (5 pdm-4ch and 5 pdm-hc2) for the first order
 
 ---
 
@@ -311,7 +311,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner decides
 - **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; affects both boards; touches mechanical
 
-**Answer:** 
+**Answer:** yes - combined 1:1 panel of pdm-4ch + pdm-hc2, decided at the PCB phase after checking the JLCPCB multi-design surcharge
 
 ---
 
@@ -322,7 +322,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner decides
 - **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; affects both boards; touches connector, shared-sheet
 
-**Answer:** 
+**Answer:** USB-C fitted on the prototype run; reconsider DNP/pogo pads plus OTA for later runs
 
 ---
 
@@ -333,7 +333,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Settle in /system mechanical
 - **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; affects both boards; touches connector, mechanical
 
-**Answer:** 
+**Answer:** decide in /system mechanical together with the J10 pole sizing (Q-0010); leaning pluggable for low-current J4/J5, fixed for J10/J11
 
 ---
 
@@ -344,7 +344,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner/architect confirms the NMEA 2000 powering requirement
 - **Why it needs you:** reviewer classed it big: Question; touches NMEA isolation and a shared sheet; a question only the owner can answer; affects both boards; touches shared-sheet, protection
 
-**Answer:** 
+**Answer:** keep the isolated CAN side powered from NET-S (NMEA 2000 practice, LEN)
 
 ---
 
@@ -355,7 +355,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner decides from the load list
 - **Why it needs you:** reviewer classed it big: Question; a question only the owner can answer; touches decision:7
 
-**Answer:** 
+**Answer:** all four BTT6050 as the standard pdm-4ch population; heavy loads go on HC2
 
 ---
 
@@ -366,7 +366,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Firmware enables DEN only for sampling or drops it on a full-scale IS; fit RIS as 1206 >= 0.25 W; optionally an OUT pull-down so open outputs do not flag a fault.
 - **Why it needs you:** reviewer classed it big: The complete fix needs a firmware DEN policy (firmware architecture is big); the resistor package change alone would be small.; touches firmware
 
-**Answer:** 
+**Answer:** yes, all three - RIS as 1206 >=0.25 W; record firmware rule: DEN pulsed only while sampling (and dropped on full-scale IS); OUT pull-down as a DNP footprint
 
 ---
 
@@ -377,7 +377,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Correct the margin claim and measure on the prototype; if short, consider RIN 4.7 k or a divider change on the shared sheet.
 - **Why it needs you:** reviewer classed it big: Any circuit fix touches the shared analog_sw sheet and invariant 1 (hardware switch path).; touches shared-sheet, invariant
 
-**Answer:** 
+**Answer:** correct the margin claim in design-notes and measure on the prototype; RIN 4.7 k goes on the prototype test list as the planned fix if the margin is short; no circuit change now
 
 ---
 
@@ -388,7 +388,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Correct the figure in decision 18 and design-notes to about 32 V full scale.
 - **Why it needs you:** reviewer classed it big: Documentation only, but the text is part of confirmed decision 18.; touches decision:18
 
-**Answer:** 
+**Answer:** yes - correct VBAT full scale to about 32 V in decision 18 and design-notes
 
 ---
 
@@ -399,7 +399,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Move the paste windows between the vias, or order plugged/capped vias.
 - **Why it needs you:** reviewer classed it big: Footprint correction, but it is in lib/, which the small policy excludes.
 
-**Answer:** 
+**Answer:** move the paste windows between the thermal vias (no plugged-via surcharge); recheck the footprint against the package drawing
 
 ---
 
@@ -410,7 +410,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Use Package_TO_SOT_SMD:SOT-23-6 or redraw to the TI land pattern; compare with the JLCPCB footprint.
 - **Why it needs you:** reviewer classed it big: Footprint correction proven by the datasheet, but in lib/ (excluded from small).
 
-**Answer:** 
+**Answer:** use the standard KiCad Package_TO_SOT_SMD:SOT-23-6 after checking it against TI DBV0006A and the JLCPCB footprint
 
 ---
 
@@ -421,7 +421,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Two 1206 resistors in series (2.2 k + 2.4 k) or a 2010 part, same value.
 - **Why it needs you:** reviewer classed it big: Passive-only change, but on the shared analog_sw sheet.; touches shared-sheet
 
-**Answer:** 
+**Answer:** yes - two 1206 resistors in series (2.2 k + 2.4 k, basic parts) for R3/R4/R7/R8
 
 ---
 
@@ -432,7 +432,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** 10 k pull-up from TXD to +3V3 on the shared can sheet (both boards).
 - **Why it needs you:** reviewer classed it big: A missing pull-up is small in kind, but the can sheet is shared.; touches shared-sheet
 
-**Answer:** 
+**Answer:** yes - 10 k pull-up from ISO1044 TXD to +3V3 on the shared can sheet
 
 ---
 
@@ -443,7 +443,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Document in the README, or add a series diode in the SW_SUPPLY feed (owner).
 - **Why it needs you:** reviewer classed it big: A hardware fix changes protection on the shared sheet.; touches shared-sheet, protection
 
-**Answer:** 
+**Answer:** add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop
 
 ---
 
@@ -454,7 +454,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner decides the DEN policy in /system firmware.
 - **Why it needs you:** reviewer classed it big: Firmware architecture question for the owner.; a question only the owner can answer; touches firmware
 
-**Answer:** 
+**Answer:** DEN pulsed only while sampling IS (and dropped on full-scale IS), not held high in Active mode (see Q-0033)
 
 ---
 
@@ -465,7 +465,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Lower IOC towards the rating (RIWRN 68k -> about 17.5 A, check bilge pump start current) and/or require a documented external breaker <= 15-18 A per output plus a firmware soft fuse.
 - **Why it needs you:** reviewer classed it big: Changes channel protection and the ARCHITECTURE HC2 budget; affects safety-relevant outputs (bilge forced run).; touches protection, budget, decision:8, safety
 
-**Answer:** 
+**Answer:** option (c) - RIWRN 68k (IOC about 17.5 A) plus README/label requirement for an external breaker <=15-18 A per output plus a firmware soft fuse; update the ARCHITECTURE HC2 budget; measure the bilge pump start current before ordering
 
 ---
 
@@ -476,7 +476,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at the gate, PD direct; e.g. 100k/3.9nF for about 20 A into 1000 uF), check MOSFET SOA; or state a maximum load capacitance. Combine with EMC E2.
 - **Why it needs you:** reviewer classed it big: Changes gate drive and protection behaviour of the channel; new circuit function.; touches protection
 
-**Answer:** 
+**Answer:** yes - gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at gate, PD direct; start about 100k/3.9 nF for ~20 A into 1000 uF); this supersedes the plain RG_PU 100 ohm of Q-0001 (covers EMC E2 too); check MOSFET SOA, heat budget and fast short-circuit response
 
 ---
 
@@ -487,7 +487,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner choice: reverse-polarity protection at J10 (ideal-diode + MOSFET), or a crowbar diode that blows the battery fuse (e.g. unidirectional D30 if its forward surge suffices), at minimum a keyed J10 plus README warning and corrected design-notes section 8.
 - **Why it needs you:** reviewer classed it big: Protection topology change on the shared root sheet (battery input) or a new part.; touches protection, shared-sheet, connector
 
-**Answer:** 
+**Answer:** keyed/polarised J10 plus README and label warning, and correct design-notes section 8 (reversal survival does not apply to HC2); full reverse-polarity protection deferred to a later HC2 revision (keep it on the list)
 
 ---
 
@@ -498,7 +498,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner lists the intended HC2 loads and their input capacitance or inrush.
 - **Why it needs you:** reviewer classed it big: Only the owner knows the loads.; a question only the owner can answer; touches protection
 
-**Answer:** 
+**Answer:** loads not known yet - size the HC2 gate slew control for about 20 A into 1000 uF and measure the real loads on the prototype
 
 ---
 
@@ -509,6 +509,6 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Proposed:** Owner rules on breaker level and float-run sensing.
 - **Why it needs you:** reviewer classed it big: Channel rating, safety-relevant output and possible pin-map change.; a question only the owner can answer; touches protection, safety, pin-map, decision:8
 
-**Answer:** 
+**Answer:** breaker level as ruled in Q-0042 (RIWRN 68k, about 17.5 A, plus external breaker and firmware soft fuse); add an OUT voltage divider on spare IO4/IO5 for float-run detection - pin-map change via /system
 
 ---
