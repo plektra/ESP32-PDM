@@ -338,12 +338,28 @@ def report_path(t):
 
 NARRATE = ("The owner watches your progress live: before each step write one short line saying what you do and why, "
            "and when you find a problem write one line `FINDING (SEVERITY): what is wrong`.\n")
+TOOLS_HINT = ("For datasheets use `$PDM_PDF_PYTHON -I` (a ready Python with pypdf, pypdfium2 and Pillow; do not build "
+              "your own venv). Keep scripts in `$CLAUDE_JOB_DIR/scripts/` with names that do not shadow Python modules "
+              "(never inspect.py, json.py, …); `rm -rf` is not available to you.\n")
+PDF_VENV = Path.home() / '.cache' / 'esp32-pdm' / 'pdf-venv'
+PDF_PY = ''  # set by cmd_run
+
+
+def pdf_python():
+    """A shared venv with the PDF tools agents need, built once; '' if it cannot be built."""
+    py = PDF_VENV / 'bin' / 'python3'
+    if not py.exists():
+        subprocess.run([sys.executable, '-m', 'venv', str(PDF_VENV)], capture_output=True)
+        subprocess.run([str(py), '-m', 'pip', 'install', '-q', 'pypdf', 'pypdfium2', 'pillow'], capture_output=True)
+    ok = py.exists() and subprocess.run([str(py), '-I', '-c', 'import pypdf, pypdfium2, PIL'],
+                                        capture_output=True).returncode == 0
+    return str(py) if ok else ''
 
 
 def prompt_for(t, report, inputs=None):
     kind = ROLES[t['role']]['kind']
     common = (f"Unattended run, task {t['id']}. Today is {today()}. Follow your instructions, CLAUDE.md and "
-              f"docs/AUTONOMY.md (decision 23). Nobody will answer questions.\n{NARRATE}")
+              f"docs/AUTONOMY.md (decision 23). Nobody will answer questions.\n{NARRATE}{TOOLS_HINT}")
     if kind == 'plan':
         return (common + f"The approved items to plan are in `{inputs}` (JSON). Write your report to exactly "
                 f"`{report}` and end it with the plan block. Change no other file in the repository. Your final "
@@ -361,7 +377,7 @@ def prompt_for(t, report, inputs=None):
             f"Follow your instructions, CLAUDE.md and docs/AUTONOMY.md. Nobody will answer questions: put them in the "
             f"finding block as kind \"question\" and carry on.\n"
             f"The owner watches your progress live: before each new check write one short line saying what you check "
-            f"and why, and when you find a problem write one line `FINDING (SEVERITY): what is wrong`.\n"
+            f"and why, and when you find a problem write one line `FINDING (SEVERITY): what is wrong`.\n{TOOLS_HINT}"
             f"Write your report to exactly `{report}` and end it with the finding block. Change no other file in "
             f"the repository; scratch work goes in $CLAUDE_JOB_DIR. Your final message: the report path and counts "
             f"per severity.")
@@ -746,7 +762,9 @@ def run_task(q, t, budget_left, dry_run=False):
     gate_dir = Path(tempfile.mkdtemp(prefix=f"pdm-gate-{t['id']}-"))
     base = {b: kicad_check(wt, b, gate_dir) for b in BOARDS} if spec.get('edits') else None
     log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
-    env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}")
+    env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}",
+               PDM_PDF_PYTHON=PDF_PY or 'python3')
+    (scratch / 'scripts').mkdir(exist_ok=True)
     pane = tmux_pane(t, log.with_suffix('.log'))
 
     def on_init(session):  # recorded at once so `attach` works while the agent runs
@@ -1240,6 +1258,9 @@ def cmd_run(args):
         return
     fh = lock()
     ensure_worktree(args.base)
+    global PDF_PY
+    PDF_PY = pdf_python()
+    print(f"PDF tools for agents: {PDF_PY or 'not available (agents use python3)'}", flush=True)
     q = load_queue(WORKTREE)
     for t in q['tasks']:
         if t['state'] == 'running':  # left over from an interrupted run; the lock says nobody runs it
