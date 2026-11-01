@@ -1,9 +1,11 @@
 #!/bin/bash
-# tmux session for unattended agent runs (decision 22): the orchestrator, a refreshing status and the live agent
-# trace side by side; a second window for answering the owner inbox. Detach with prefix-d; the run keeps going.
+# tmux session for unattended agent runs (decision 22): the orchestrator, a refreshing status and the combined live
+# trace side by side; the orchestrator adds a window `workers` with one pane per running agent; a window `inbox` for
+# answering the owner inbox. Detach with prefix-d; the run keeps going.
 #
 #   tools/agents-tmux.sh                  open (or reattach to) the session; start a run by hand in the left pane
-#   tools/agents-tmux.sh --budget 85      open it and start `orchestrate.py run --budget 85` right away
+#   tools/agents-tmux.sh --budget 85      open it and start `orchestrate.py run --budget 85` (3 agents at once)
+#   tools/agents-tmux.sh --parallel 2 --budget 40
 #   tools/agents-tmux.sh --kill           close the session (stops a running agent)
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/.." && pwd)
