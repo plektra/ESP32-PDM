@@ -76,6 +76,8 @@ DENIED_TOOLS = ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(git reset:*)', '
                 'Bash(git revert:*)', 'Bash(rm -rf:*)', 'Bash(sudo:*)', 'Agent']
 SEVERITIES = ('CRITICAL', 'MAJOR', 'MINOR', 'INFO')
 # Agent output that means the API was not available (usage limit, rate limit, overload), not that the task failed.
+INTERRUPTED = ('aborted_streaming', 'aborted', 'interrupted')  # terminal reasons of an agent cut off mid-run
+MAX_ATTEMPTS = 3
 UNAVAILABLE = re.compile(r'hit your .*limit|usage limit|rate limit|overloaded|\b529\b', re.I)
 KINDS = ('finding', 'lever', 'question')
 STATE = threading.Lock()  # guards the queue, the inbox and git while agents run in parallel
@@ -414,15 +416,16 @@ def tmux_close(pane, linger=120):
 def describe(event):
     """Readable lines for one stream-json event: tool calls, agent text, tool errors, start and end."""
     kind = event.get('type')
-    content = (event.get('message') or {}).get('content')
-    content = content if isinstance(content, list) else []
+    message = event.get('message')  # a dict for assistant/user events; some system events carry a plain string
+    content = message.get('content') if isinstance(message, dict) else None
+    content = [c for c in content if isinstance(c, dict)] if isinstance(content, list) else []
     if kind == 'system' and event.get('subtype') == 'init':
         return [f"● started on {event.get('model')}"]
     if kind == 'assistant':
         lines = []
         for c in content:
             if c.get('type') == 'tool_use':
-                i = c.get('input') or {}
+                i = c.get('input') if isinstance(c.get('input'), dict) else {}
                 fp = i.get('file_path') or i.get('path')
                 arg = (i.get('description') or (Path(fp).name if fp else None) or i.get('pattern') or i.get('url')
                        or i.get('query') or i.get('command') or json.dumps(i, ensure_ascii=False))
@@ -445,27 +448,39 @@ def run_streaming(cmd, env, tag, task_log, cwd, on_init=None):
     proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     timed_out = threading.Event()
     timer = threading.Timer(TASK_TIMEOUT, lambda: (timed_out.set(), proc.kill()))
+    timer.daemon = True  # a leftover timer must never keep the orchestrator from exiting
     timer.start()
     out, other = None, []
-    with open(task_log, 'a') as tl, open(LOGS / 'live.log', 'a') as live:
-        for line in proc.stdout:
-            try:
-                event = json.loads(line)
-            except json.JSONDecodeError:
-                other.append(line.strip())
-                continue
-            if event.get('type') == 'result':
-                out = event
-            if on_init and event.get('type') == 'system' and event.get('subtype') == 'init':
-                on_init(event.get('session_id'))
-            for text in describe(event):
-                stamped = f'{datetime.datetime.now():%H:%M:%S} {tag} {text}\n'
-                tl.write(stamped)
-                live.write(stamped)
-            tl.flush()
-            live.flush()
-    proc.wait()
-    timer.cancel()
+    try:
+        with open(task_log, 'a') as tl, open(LOGS / 'live.log', 'a') as live:
+            for line in proc.stdout:
+                try:
+                    event = json.loads(line)
+                except json.JSONDecodeError:
+                    other.append(line.strip())
+                    continue
+                if not isinstance(event, dict):
+                    continue
+                if event.get('type') == 'result':
+                    out = event
+                if on_init and event.get('type') == 'system' and event.get('subtype') == 'init':
+                    on_init(event.get('session_id'))
+                try:
+                    lines = describe(event)
+                except Exception as e:  # the trace is for people; it must never stop a run
+                    lines = [f'(unreadable event {event.get("type")}: {e!r})']
+                for text in lines:
+                    stamped = f'{datetime.datetime.now():%H:%M:%S} {tag} {text}\n'
+                    tl.write(stamped)
+                    live.write(stamped)
+                tl.flush()
+                live.flush()
+    except BaseException:
+        proc.kill()  # never leave an agent running that nobody will check or merge
+        raise
+    finally:
+        proc.wait()
+        timer.cancel()
     if out is None:
         out = dict(is_error=True, result=f'timeout after {TASK_TIMEOUT} s' if timed_out.is_set() else
                    f"exit {proc.returncode}: {' '.join(other)[-300:]}")
@@ -802,11 +817,14 @@ def run_task(q, t, budget_left, dry_run=False):
                 notes.append(f'report {got}: {e}')
                 result = None
         # A usage limit or API outage is not the task's fault: leave it ready and let the caller stop the run.
+        # An interrupted agent (killed, stream cut) is queued again, up to MAX_ATTEMPTS.
         paused = result is None and not keep and (out.get('terminal_reason') == 'api_error'
                                                   or bool(UNAVAILABLE.search(str(out.get('result', '')))))
-        summary = summarize(spec['kind'], result, paused)
-        t.update(state='done' if result else 'ready' if paused else 'failed', finished=today(),
-                 note='; '.join(notes) or None, summary=summary)
+        interrupted = (result is None and not keep and not paused and out.get('terminal_reason') in INTERRUPTED
+                       and t['attempts'] < MAX_ATTEMPTS)
+        summary = 'interrupted, queued again' if interrupted else summarize(spec['kind'], result, paused)
+        t.update(state='done' if result else 'ready' if paused or interrupted else 'failed', finished=today(),
+                 note='; '.join(notes) or None, summary=summary, interrupted=interrupted or None)
         if result:
             t['report'] = result['report']
         write_inbox(WORKTREE, q)
@@ -1280,6 +1298,8 @@ def cmd_run(args):
                         save_queue(WORKTREE, q)
                     cost, result = 0.0, None
                 spent += cost
+                if not result and t['state'] == 'ready' and t.get('interrupted'):
+                    continue  # queued again; not a failure
                 if not result and t['state'] == 'ready':
                     stop = stop or f"API unavailable ({t['note'][-100:]}); {t['id']} stays ready"
                     continue
