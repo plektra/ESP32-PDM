@@ -34,6 +34,8 @@ import sys
 import shlex
 import tempfile
 import threading
+import time
+from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
 
@@ -94,7 +96,9 @@ def load_queue(root):
 
 
 def save_queue(root, q):
-    (root / QUEUE).write_text(json.dumps(q, indent=2, ensure_ascii=False) + '\n')
+    tmp = root / f'{QUEUE}.tmp'  # atomic, so `watch` never reads half a file
+    tmp.write_text(json.dumps(q, indent=2, ensure_ascii=False) + '\n')
+    os.replace(tmp, root / QUEUE)
 
 
 def new_id(q, prefix):
@@ -263,6 +267,8 @@ def prompt_for(t, report):
     return (f"Unattended run, task {t['id']}. Scope: {t['scope']}.{focus}{ruling} Today is {today()}.\n"
             f"Follow your instructions, CLAUDE.md and docs/AUTONOMY.md. Nobody will answer questions: put them in the "
             f"finding block as kind \"question\" and carry on.\n"
+            f"The owner watches your progress live: before each new check write one short line saying what you check "
+            f"and why, and when you find a problem write one line `FINDING (SEVERITY): what is wrong`.\n"
             f"Write your report to exactly `{report}` and end it with the finding block. Change no other file in "
             f"the repository; scratch work goes in $CLAUDE_JOB_DIR. Your final message: the report path and counts "
             f"per severity.")
@@ -294,7 +300,7 @@ def tmux_pane(t, log):
     if not os.environ.get('TMUX'):
         return None
     log.touch()
-    tail = f'tail -n +1 -F {shlex.quote(str(log))}'
+    tail = f"{shlex.quote(sys.executable)} {shlex.quote(str(Path(__file__).resolve()))} follow {t['id']}"
     with STATE:
         r = tmux('split-window', '-d', '-t', 'workers', '-P', '-F', '#{pane_id}', tail)
         if r.returncode:
@@ -326,9 +332,11 @@ def describe(event):
         for c in content:
             if c.get('type') == 'tool_use':
                 i = c.get('input') or {}
-                arg = (i.get('command') or i.get('file_path') or i.get('pattern') or i.get('url') or i.get('query')
-                       or json.dumps(i, ensure_ascii=False))
-                lines.append(f"▸ {c['name']}: {' '.join(str(arg).split())[:160]}")
+                fp = i.get('file_path') or i.get('path')
+                arg = (i.get('description') or (Path(fp).name if fp else None) or i.get('pattern') or i.get('url')
+                       or i.get('query') or i.get('command') or json.dumps(i, ensure_ascii=False))
+                name = c['name'].split('__')[-1]  # mcp__pcbparts__jlc_get_part -> jlc_get_part
+                lines.append(f"▸ {name}: {' '.join(str(arg).split())[:160]}")
             elif c.get('type') == 'text' and c['text'].strip():
                 lines.append('“ ' + ' '.join(c['text'].split())[:240])
         return lines
@@ -340,9 +348,9 @@ def describe(event):
     return []
 
 
-def run_streaming(cmd, env, tag, task_log, cwd):
+def run_streaming(cmd, env, tag, task_log, cwd, on_init=None):
     """Run one agent, writing a readable trace to its log and to live.log (tail it in tmux); return the result
-    event, or an error dict shaped like one."""
+    event, or an error dict shaped like one. on_init gets the session id as soon as the agent starts."""
     proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
     timed_out = threading.Event()
     timer = threading.Timer(TASK_TIMEOUT, lambda: (timed_out.set(), proc.kill()))
@@ -357,6 +365,8 @@ def run_streaming(cmd, env, tag, task_log, cwd):
                 continue
             if event.get('type') == 'result':
                 out = event
+            if on_init and event.get('type') == 'system' and event.get('subtype') == 'init':
+                on_init(event.get('session_id'))
             for text in describe(event):
                 stamped = f'{datetime.datetime.now():%H:%M:%S} {tag} {text}\n'
                 tl.write(stamped)
@@ -387,7 +397,6 @@ def run_task(q, t, budget_left, dry_run=False):
     scratch = Path(tempfile.mkdtemp(prefix=f"pdm-{t['id']}-"))
     cmd = [CLAUDE_BIN, '-p', prompt_for(t, report), '--agent', t['role'], '--model', model,
            '--max-budget-usd', f'{budget:.2f}', '--output-format', 'stream-json', '--verbose',
-           '--no-session-persistence',
            '--add-dir', str(scratch), '--allowedTools', *agent_tools(t['role']), 'Write',
            '--disallowedTools', *DENIED_TOOLS]
     print(f"→ {t['id']} {t['role']} {t['scope']}{' deep' if deep else ''} ({model}, ≤ {budget:.2f} USD) → {report}")
@@ -407,8 +416,13 @@ def run_task(q, t, budget_left, dry_run=False):
     log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}")
     pane = tmux_pane(t, log.with_suffix('.log'))
+
+    def on_init(session):  # recorded at once so `attach` works while the agent runs
+        with STATE:
+            t['session'] = session
+            save_queue(WORKTREE, q)
     try:
-        out = run_streaming(cmd, env, t['id'], log.with_suffix('.log'), wt)
+        out = run_streaming(cmd, env, t['id'], log.with_suffix('.log'), wt, on_init)
     finally:
         shutil.rmtree(scratch, ignore_errors=True)
         tmux_close(pane)
@@ -512,6 +526,217 @@ def notify(text):
                        capture_output=True)
 
 
+# ---------------------------------------------------------------- views: watch, follow, attach
+
+RUN_INFO = 'run.json'
+STYLE = dict(reset='\033[0m', bold='\033[1m', dim='\033[2m', red='\033[31m', green='\033[32m', yellow='\033[33m',
+             cyan='\033[36m', magenta='\033[35m')
+SEV_STYLE = dict(CRITICAL=('red', 'bold'), MAJOR=('yellow', 'bold'), MINOR=('cyan',), INFO=('dim',))
+TRACE = re.compile(r'(\d\d:\d\d:\d\d) (T-\d+) +(\S)\s?(.*)')
+FINDING = re.compile(r'FINDING\s*\((CRITICAL|MAJOR|MINOR|INFO)\)', re.I)
+
+
+def paint(text, *styles):
+    return ''.join(STYLE[s] for s in styles) + str(text) + STYLE['reset']
+
+
+def fit(text, width):
+    """Cut a line with colour codes to `width` visible characters."""
+    out, n = [], 0
+    for part in re.split(r'(\033\[[0-9;]*m)', text):
+        if part.startswith('\033['):
+            out.append(part)
+        else:
+            out.append(part[:max(width - n, 0)])
+            n += len(part)
+    return ''.join(out) + STYLE['reset']
+
+
+def said(text):
+    """Agent narration, coloured by severity when it is a finding."""
+    m = FINDING.search(text)
+    return paint(text, *SEV_STYLE[m.group(1).upper()]) if m else paint(text, 'bold')
+
+
+def write_run(info):
+    LOGS.mkdir(parents=True, exist_ok=True)
+    tmp = LOGS / f'{RUN_INFO}.tmp'
+    tmp.write_text(json.dumps(info))
+    os.replace(tmp, LOGS / RUN_INFO)
+
+
+def task_log(tid):
+    logs = sorted(LOGS.glob(f'{tid}-*.log'))
+    return logs[-1] if logs else None
+
+
+def read_trace(tid):
+    """Tool count, last narration, last tool and findings from a task's latest trace."""
+    info = dict(tools=0, said=None, tool=None, findings=[])
+    path = task_log(tid)
+    for line in (path.read_text(errors='replace').splitlines() if path else []):
+        m = TRACE.match(line)
+        if not m:
+            continue
+        mark, rest = m.group(3), m.group(4)
+        if mark == '▸':
+            info['tools'] += 1
+            info['tool'] = rest
+        elif mark == '“' and FINDING.search(rest):
+            info['findings'].append(rest)
+        elif mark == '“':
+            info['said'] = rest
+    return info
+
+
+def ago(iso):
+    try:
+        s = int((datetime.datetime.now() - datetime.datetime.fromisoformat(iso)).total_seconds())
+    except (TypeError, ValueError):
+        return '?'
+    return f'{s // 3600}h{s % 3600 // 60:02d}m' if s >= 3600 else f'{s // 60}m{s % 60:02d}s'
+
+
+def bar(done, total, width=28):
+    full = min(width, round(width * done / total)) if total else 0
+    return paint('█' * full, 'green') + paint('░' * (width - full), 'dim')
+
+
+def dashboard(width, recent):
+    root = state_root()
+    q = load_queue(root)
+    reviews = [t for t in q['tasks'] if t['role'] in ROLES]
+    st = Counter(t['state'] for t in reviews)
+    run = json.loads((LOGS / RUN_INFO).read_text()) if (LOGS / RUN_INFO).exists() else {}
+    out = [paint(' ESP32-PDM agents ', 'bold', 'magenta') + paint(f'  {datetime.datetime.now():%H:%M:%S}', 'dim'), '']
+    out.append(f" Reviews  {bar(st['done'], len(reviews))}  {paint(st['done'], 'bold')}/{len(reviews)} done   "
+               f"{paint(str(st['running']) + ' running', 'cyan')}   {st['ready']} queued   "
+               + (paint(f"{st['failed']} failed", 'red') if st['failed'] else '0 failed'))
+    if run:
+        state = (paint('stopped: ' + run['stop'], 'red') if run.get('stop') else
+                 paint('finished', 'green') if run.get('finished') else paint('running', 'cyan'))
+        out.append(f" Run      {bar(run['spent'], run['budget'])}  {run['spent']:.2f} of {run['budget']:.0f} USD"
+                   f" · {run['parallel']} at once · since {run['started'][11:16]} · {state}")
+    out.append(paint(f" All runs {sum(t.get('cost_usd', 0) for t in q['tasks']):.2f} USD", 'dim'))
+
+    running = [t for t in reviews if t['state'] == 'running']
+    out += ['', paint(f' RUNNING ({len(running)})', 'bold')]
+    for t in running:
+        tr = read_trace(t['id'])
+        out.append(f"  {paint(t['id'], 'cyan', 'bold')} {t['role']} {paint(t['scope'], 'bold')}"
+                   f"{' deep' if t.get('deep') else ''}" + paint(
+                       f"   {t.get('model', '')} · {ago(t.get('started'))} · {tr['tools']} tool calls · "
+                       f"{len(tr['findings'])} findings", 'dim'))
+        out.append('    ' + (said(tr['said']) if tr['said'] else paint('starting…', 'dim')))
+        if tr['tool']:
+            out.append('    ' + paint('▸ ' + tr['tool'], 'dim'))
+        out += ['    ' + said(f) for f in tr['findings'][-3:]]
+    if not running:
+        out.append(paint('  none', 'dim'))
+
+    finished = sorted((t for t in reviews if t['state'] in ('done', 'failed')),
+                      key=lambda t: t.get('started') or '', reverse=True)
+    out += ['', paint(' FINISHED', 'bold')]
+    for t in finished[:recent]:
+        name = f"{t['id']} {t['role']} {t['scope']}{' deep' if t.get('deep') else ''}"
+        if t['state'] == 'done':
+            mine = [x for x in q['tasks'] if (x.get('source') or {}).get('report') == t.get('report')]
+            big = sum(1 for x in mine if x.get('question'))
+            out.append(f"  {paint('✓', 'green')} {name}" + paint(
+                f"   {t.get('cost_usd', 0):.2f} USD · {len(mine) - big} small · {big} for you · "
+                f"{Path(t.get('report', '')).name}", 'dim'))
+        else:
+            out.append(f"  {paint('✗', 'red')} {name}   " + paint((t.get('note') or '')[:160], 'red'))
+    if not finished:
+        out.append(paint('  none yet', 'dim'))
+
+    open_q = [t for t in q['tasks'] if t['state'] == 'blocked-owner']
+    sev = Counter(t['finding']['severity'] for t in open_q)
+    answers = read_answers(root)
+    waiting = sum(1 for t in open_q if t.get('question') in answers)
+    out += ['', paint(' OWNER INBOX', 'bold')]
+    out.append((f'  {len(open_q)} open: ' + ' · '.join(paint(f'{sev[s]} {s}', *SEV_STYLE[s]) for s in SEVERITIES
+                                                      if sev[s]) if open_q else '  no open questions')
+               + f"   {sum(1 for t in q['tasks'] if t['state'] == 'parked')} small fixes parked"
+               + (paint(f'   {waiting} answered, applied at the next run', 'green') if waiting else ''))
+    out += ['', paint(' talk to an agent: orchestrate.py attach <task> · answer: /inbox', 'dim')]
+    return [fit(line, width) for line in out]
+
+
+def cmd_watch(args):
+    sys.stdout.write('\033[2J')
+    while True:
+        size = shutil.get_terminal_size()
+        try:
+            frame = dashboard(size.columns, args.recent)
+        except (OSError, ValueError, KeyError) as e:  # queue mid-write or not there yet
+            frame = [f'waiting for the queue: {e!r}']
+        sys.stdout.write('\033[H' + ''.join(line + '\033[K\n' for line in frame[:size.lines - 1]) + '\033[J')
+        sys.stdout.flush()
+        if args.once:
+            return
+        time.sleep(args.interval)
+
+
+def cmd_follow(args):
+    """Readable trace: one task (tool calls folded into one counting line) or all tasks (narration only)."""
+    while True:
+        path = task_log(args.task) if args.task else LOGS / 'live.log'
+        if path and path.exists():
+            break
+        time.sleep(1)
+    tools, folded = Counter(), False
+    with open(path, errors='replace') as f:
+        while True:
+            line = f.readline()
+            if not line:
+                time.sleep(0.5)
+                continue
+            m = TRACE.match(line.rstrip('\n'))
+            if not m:
+                continue
+            ts, tid, mark, rest = m.groups()
+            stamp = paint(ts + ' ', 'dim') + ('' if args.task else paint(tid + ' ', 'cyan'))
+            if mark == '▸':
+                tools[rest.split(':')[0]] += 1
+                if args.task or args.tools:
+                    top = ', '.join(f'{k} ×{n}' for k, n in tools.most_common(3))
+                    n = sum(tools.values())
+                    text = stamp + paint(f"… {n} tool call{'s' if n > 1 else ''} ({top}) – {rest}", 'dim')
+                    width = shutil.get_terminal_size().columns
+                    sys.stdout.write(('\r\033[K' + fit(text, width - 1)) if args.task else text + '\n')
+                    sys.stdout.flush()
+                    folded = bool(args.task)
+                continue
+            if folded:
+                sys.stdout.write('\n')
+                folded = False
+            tools.clear()
+            styled = {'“': said(rest), '●': paint('● ' + rest, 'green'), '■': paint('■ ' + rest, 'bold'),
+                      '✗': paint('✗ ' + rest, 'red')}.get(mark, rest)
+            print(stamp + styled, flush=True)
+
+
+def cmd_attach(args):
+    root = state_root()
+    t = find_task(load_queue(root), args.task)
+    if not t.get('session'):
+        raise SystemExit(f"{t['id']} has no saved session (it ran before sessions were saved, or has not started)")
+    wt = task_worktree(t)
+    cwd = wt if wt.exists() else root
+    cmd = [CLAUDE_BIN, '--resume', t['session']] + (['--model', t['model']] if t.get('model') else [])
+    if t['state'] == 'running':
+        cmd.append('--fork-session')  # a copy: the running agent is not disturbed
+    print(f"{t['id']}: {'a copy of the running session' if t['state'] == 'running' else 'its session'} in {cwd}"
+          + ('' if wt.exists() else '\nThe agent is done: ask questions, but edits here would block the next run.'),
+          flush=True)
+    if os.environ.get('TMUX'):
+        tmux('new-window', '-n', f"talk-{t['id']}", '-c', str(cwd), shlex.join(cmd))
+    else:
+        os.chdir(cwd)
+        os.execvp(cmd[0], cmd)
+
+
 # ---------------------------------------------------------------- commands
 
 def cmd_status(args):
@@ -605,8 +830,13 @@ def cmd_run(args):
     limit = 1 if args.task else args.max_tasks
     spent, ran, fails, new_q, stop = 0.0, 0, 0, 0, None
     running = {}  # future -> (task, cap)
+    run_info = dict(started=datetime.datetime.now().isoformat(timespec='seconds'), budget=args.budget,
+                    parallel=args.parallel, spent=0.0, stop=None, finished=None)
+    write_run(run_info)
     with ThreadPoolExecutor(max_workers=args.parallel) as pool:
         while True:
+            run_info.update(spent=round(spent, 2), stop=stop)
+            write_run(run_info)
             while not stop and len(running) < args.parallel and ran < limit:
                 with STATE:
                     todo = [find_task(q, args.task)] if args.task else runnable(q)
@@ -646,6 +876,8 @@ def cmd_run(args):
                     stop = stop or 'two tasks failed in a row'
             if stop and running:
                 print(f'stopping after the {len(running)} running agent(s) finish: {stop}', flush=True)
+    run_info.update(spent=round(spent, 2), stop=stop, finished=datetime.datetime.now().isoformat(timespec='seconds'))
+    write_run(run_info)
     if stop:
         notify(f'Run stopped: {stop}')
     if args.push:
@@ -670,6 +902,18 @@ def main():
     s.add_argument('--deep', action='store_true', help='run on Opus with the larger budget')
     s.add_argument('--after', nargs='*', help='task ids that must be done first')
     s.set_defaults(fn=cmd_add)
+    s = sub.add_parser('watch', help='live dashboard: progress, running agents, findings, inbox')
+    s.add_argument('--interval', type=float, default=2.0)
+    s.add_argument('--recent', type=int, default=6, help='finished tasks shown')
+    s.add_argument('--once', action='store_true')
+    s.set_defaults(fn=cmd_watch)
+    s = sub.add_parser('follow', help="readable live trace of one task, or of all (narration only)")
+    s.add_argument('task', nargs='?')
+    s.add_argument('--tools', action='store_true', help='with all tasks: show tool calls too')
+    s.set_defaults(fn=cmd_follow)
+    s = sub.add_parser('attach', help="talk to an agent: resume its session (a copy while it runs)")
+    s.add_argument('task')
+    s.set_defaults(fn=cmd_attach)
     s = sub.add_parser('retry', help='set a failed task ready again')
     s.add_argument('task')
     s.set_defaults(fn=cmd_retry)

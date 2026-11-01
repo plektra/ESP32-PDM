@@ -80,9 +80,16 @@ and lets running agents finish. N agents use the 5-hour usage limit N times fast
 leaves the tasks ready.
 
 **In tmux:** `tools/agents-tmux.sh --budget 85` opens the session `pdm-agents` and starts the run: orchestrator
-(top left), status every 20 s (bottom left), combined live trace of all agents (right: tool calls, agent text,
-tool errors, cost). Window `workers` gets one titled pane per running agent with its own trace (closed 2 minutes
-after it finishes). Window `inbox` is for `claude` → `/inbox`. Detach with prefix-d; the run continues; run the script again to
+(top left), what all agents say – narration and `FINDING` lines, no tool noise (bottom left, `orchestrate.py
+follow`), and the dashboard (right, `orchestrate.py watch`: progress, run budget, each running agent's current step
+and findings, finished results, inbox). Window `workers` gets one titled pane per running agent
+(`orchestrate.py follow <task>`: narration, findings, tool calls folded into one counting line), closed 2 minutes
+after it finishes. Window `inbox` is for `claude` → `/inbox`.
+
+**Talk to an agent:** `python3 tools/orchestrate.py attach T-0004` opens an interactive Claude session on that
+agent's conversation (in tmux: a new window). While it runs you get a copy (`--fork-session`), so the agent is not
+disturbed; after it finishes you continue its own session – ask why it judged something the way it did, or have it
+explain a finding. The headless agents themselves take no input. Detach with prefix-d; the run continues; run the script again to
 reattach; `--kill` closes it. Per-task traces and raw results: `.claude/worktrees/auto-logs/`. A usage limit
 pauses the run and leaves the task ready.
 

@@ -27,9 +27,9 @@ if ! tmux has-session -t "$S" 2>/dev/null; then
     start="echo 'Start a run:  caffeinate -i $ORCH run [--budget 85]'"
   fi
   orch=$(tmux new-session -d -s "$S" -n agents -c "$REPO" -P -F '#{pane_id}')
-  tmux split-window -h -l 55% -t "$orch" -c "$REPO" "tail -n 200 -F '$LOGS/live.log'"
-  tmux split-window -v -l 50% -t "$orch" -c "$REPO" \
-    "while true; do clear; $ORCH status --limit 6; sleep 20; done"
+  # right: the dashboard; bottom left: what all agents say (narration and findings, no tool noise)
+  tmux split-window -h -l 60% -t "$orch" -c "$REPO" "$ORCH watch"
+  tmux split-window -v -l 70% -t "$orch" -c "$REPO" "$ORCH follow"
   tmux send-keys -t "$orch" "$start" C-m
   tmux select-pane -t "$orch"
   inbox=$(tmux new-window -d -t "$S" -n inbox -c "$REPO" -P -F '#{pane_id}')
