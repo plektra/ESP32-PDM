@@ -59,6 +59,8 @@ DENIED_TOOLS = ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(git reset:*)', '
                 'Bash(git merge:*)', 'Bash(git rebase:*)', 'Bash(git stash:*)', 'Bash(git worktree:*)',
                 'Bash(rm -rf:*)', 'Bash(sudo:*)', 'Agent', 'Edit']
 SEVERITIES = ('CRITICAL', 'MAJOR', 'MINOR', 'INFO')
+# Agent output that means the API was not available (usage limit, rate limit, overload), not that the task failed.
+UNAVAILABLE = re.compile(r'hit your .*limit|usage limit|rate limit|overloaded|\b529\b', re.I)
 KINDS = ('finding', 'lever', 'question')
 
 
@@ -346,7 +348,11 @@ def run_task(q, t, budget_left, dry_run):
             notes.append(f'report {got}: {e}')
             revert([got])
             got = None
-    t.update(state='done' if result else 'failed', finished=today(), note='; '.join(notes) or None)
+    # A usage limit or API outage is not the task's fault: leave it ready and let the caller stop the run.
+    paused = result is None and (out.get('terminal_reason') == 'api_error'
+                                 or bool(UNAVAILABLE.search(str(out.get('result', '')))))
+    t.update(state='done' if result else 'ready' if paused else 'failed', finished=today(),
+             note='; '.join(notes) or None)
     if result:
         t['report'] = got
     write_inbox(WORKTREE, q)
@@ -354,7 +360,7 @@ def run_task(q, t, budget_left, dry_run):
     paths = [str(QUEUE), str(INBOX)] + ([got] if got else [])
     git('add', '--', *paths)
     summary = (f"{result['small']} small, {result['big']} for the owner, {result['duplicates']} duplicates"
-               if result else 'failed')
+               if result else 'paused, API unavailable' if paused else 'failed')
     git('commit', '-m', f"Auto: {t['role']} {t['scope']} ({t['id']}): {summary}\n\n"
         f"Unattended run by tools/orchestrate.py, model {model}, {cost:.2f} USD.\n\n"
         f"Co-Authored-By: Claude <noreply@anthropic.com>")
@@ -494,6 +500,9 @@ def cmd_run(args):
         cost, result = run_task(q, todo[0], args.budget - spent, dry_run=False)
         spent += cost
         ran += 1
+        if not result and todo[0]['state'] == 'ready':
+            notify(f"API unavailable, run paused; {todo[0]['id']} stays ready. {todo[0]['note'][-120:]}")
+            break
         fails = 0 if result else fails + 1
         new_q += result['big'] if result else 0
         if result and result['critical']:
