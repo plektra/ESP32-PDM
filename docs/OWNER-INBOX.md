@@ -1,11 +1,29 @@
 # Owner inbox
 
-Questions the agents may not decide themselves (decision 23, `docs/AUTONOMY.md`). Write your ruling on each
+One-way doors the agents may not decide themselves (decision 23, `docs/AUTONOMY.md`). Write your ruling on each
 question's Answer line – `yes` (do the proposed fix), `no` (drop it) or your own ruling in words – or use `/inbox`.
-The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file is regenerated from
-`docs/queue.json`: only the Answer lines are read; other edits are lost.
+The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the questions: what the agents decided
+(two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
+lines are read; other edits are lost.
 
 No open questions.
+
+## Decided by agents (12) – two-way doors
+
+Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
+
+- T-0060 · INFO · pdm-hc2 · IO3 strapping pin is held low by the IMON2 network; harmless while EFUSE_STRAP_JTAG_SEL is not burnt (same as V11 on pdm-4ch). → No hardware change; production must not burn that eFuse.
+- T-0059 · INFO · pdm-hc2 · First switch-on after power-up waits about 76-100 ms for the bootstrap (Eq. 1), also on the hardware switch path; overcurrent/short retry is about 3.8 min, reset by toggling INP. → Record both times in design-notes section 4a and user documentation.
+- T-0058 · MINOR · pdm-hc2 · Section 1 still names TPS48111-Q1 and 8-20 A; section 9 says an OUT voltage divider lets the PDM see float-driven runs, but no such divider exists and IMON cannot see that current. → Correct both sections to the as-drawn design (TPS48110A-Q1, about 15 A; float runs only visible via SW3/SW4 if wired); OUT divider decision goes to Q2.
+- T-0057 · MINOR · pdm-hc2 · RDS(on) at 150 C is 11.2 mOhm in the tool; BSC030N08NS5 Diagram 9 max (5.35 mOhm) gives 2 x 5.35 + 1 = 11.7 mOhm; 15 A rises from 87 to 88 C, 20 A from 137 to 143 C; rating stands. → Set (0.0070, 0.0117) with the datasheet reference in a comment.
+- T-0056 · MINOR · pdm-hc2 · No 1 nF bypass across the MMBT3904 remote sensor; TPS4811-Q1 section 9.6.1 says it must be placed (EMC E4 lists it only as a tune-in-test footprint). → Add 1 nF 0402 (C1523, already on the BOM) from DIODE to GND at each MMBT3904; Kelvin emitter return to controller GND.
+- T-0051 · INFO · pdm-4ch · IO3 (JTAG source strap) is tied low through 10.7 k; harmless unless EFUSE_STRAP_JTAG_SEL is burnt. → Note in the firmware/production docs: never burn EFUSE_STRAP_JTAG_SEL.
+- T-0050 · MINOR · pdm-4ch · 'Switches survive with the ground network' holds only for VS(REV) 28 V, t < 2 min, RL >= 12 ohm (P_4.1.2); at 4 A the body diode dissipates about 2.4 W > PTOT 1.6 W. → Qualify the claim in design-notes/README with the datasheet conditions.
+- T-0047 · MINOR · pdm-4ch · p_other 0.6 W omits about 1.5 W of panel-interface dissipation at 30 V (switch loads, dividers, LED sinks); Tj rises from 100 to 101 C at 4 A, so the rating stands. → Raise the default or document about 2.1 W for the 4-ch board at 30 V with all panel lines on.
+- T-0032 · INFO · pdm-4ch · Each BTT6010 channel adds 1.57 $ at 10 and a mixed build adds one 3.07 $ fee per order (2+2 mix: +3.71 $/board); fit BTT6010 only where > 4 A and order mixed builds together → Document the population and ordering rule in pdm-4ch STATUS / README
+- T-0017 · INFO · pdm-4ch · SMCJ30CA clamps at 48.4 V at 31 A, the BTT6050 absolute maximum is 48 V, but VS(LD) is 65 V (ISO 7637-1), so short clamp excursions are covered; recorded only. → None.
+- T-0008 · MAJOR · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → Footprints per TI Table 9-3: about 1 nF X cap and 100 pF Y caps on CS+/CS-, 10 nF on EN/UVLO and OVSET, 1 nF on DIODE, 100 pF on IWRN; tune in test.
+- T-0005 · MAJOR · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → Add RVS 100 ohm and CVS 1 uF/100 V in the VS supply of each controller after checking IVS.
 
 ## Answered (46)
 
