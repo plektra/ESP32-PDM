@@ -30,6 +30,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -281,6 +282,63 @@ def revert(paths):
             (WORKTREE / p).unlink(missing_ok=True)
 
 
+def describe(event):
+    """Readable lines for one stream-json event: tool calls, agent text, tool errors, start and end."""
+    kind = event.get('type')
+    content = (event.get('message') or {}).get('content')
+    content = content if isinstance(content, list) else []
+    if kind == 'system' and event.get('subtype') == 'init':
+        return [f"● started on {event.get('model')}"]
+    if kind == 'assistant':
+        lines = []
+        for c in content:
+            if c.get('type') == 'tool_use':
+                i = c.get('input') or {}
+                arg = (i.get('command') or i.get('file_path') or i.get('pattern') or i.get('url') or i.get('query')
+                       or json.dumps(i, ensure_ascii=False))
+                lines.append(f"▸ {c['name']}: {' '.join(str(arg).split())[:160]}")
+            elif c.get('type') == 'text' and c['text'].strip():
+                lines.append('“ ' + ' '.join(c['text'].split())[:240])
+        return lines
+    if kind == 'user':
+        return ['  ✗ ' + ' '.join(str(c.get('content')).split())[:160] for c in content if c.get('is_error')]
+    if kind == 'result':
+        return [f"■ {event.get('terminal_reason') or event.get('subtype')}, "
+                f"{float(event.get('total_cost_usd') or 0):.2f} USD"]
+    return []
+
+
+def run_streaming(cmd, env, tag, task_log):
+    """Run one agent, writing a readable trace to its log and to live.log (tail it in tmux); return the result
+    event, or an error dict shaped like one."""
+    proc = subprocess.Popen(cmd, cwd=WORKTREE, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    timed_out = threading.Event()
+    timer = threading.Timer(TASK_TIMEOUT, lambda: (timed_out.set(), proc.kill()))
+    timer.start()
+    out, other = None, []
+    with open(task_log, 'a') as tl, open(LOGS / 'live.log', 'a') as live:
+        for line in proc.stdout:
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                other.append(line.strip())
+                continue
+            if event.get('type') == 'result':
+                out = event
+            for text in describe(event):
+                stamped = f'{datetime.datetime.now():%H:%M:%S} {tag} {text}\n'
+                tl.write(stamped)
+                live.write(stamped)
+            tl.flush()
+            live.flush()
+    proc.wait()
+    timer.cancel()
+    if out is None:
+        out = dict(is_error=True, result=f'timeout after {TASK_TIMEOUT} s' if timed_out.is_set() else
+                   f"exit {proc.returncode}: {' '.join(other)[-300:]}")
+    return out
+
+
 def run_task(q, t, budget_left, dry_run):
     deep = bool(t.get('deep'))
     spec = ROLES[t['role']]
@@ -289,7 +347,8 @@ def run_task(q, t, budget_left, dry_run):
     report = report_path(t)
     scratch = Path(tempfile.mkdtemp(prefix=f"pdm-{t['id']}-"))
     cmd = [CLAUDE_BIN, '-p', prompt_for(t, report), '--agent', t['role'], '--model', model,
-           '--max-budget-usd', f'{budget:.2f}', '--output-format', 'json', '--no-session-persistence',
+           '--max-budget-usd', f'{budget:.2f}', '--output-format', 'stream-json', '--verbose',
+           '--no-session-persistence',
            '--add-dir', str(scratch), '--allowedTools', *agent_tools(t['role']), 'Write',
            '--disallowedTools', *DENIED_TOOLS]
     print(f"→ {t['id']} {t['role']} {t['scope']}{' deep' if deep else ''} ({model}, ≤ {budget:.2f} USD) → {report}")
@@ -301,17 +360,12 @@ def run_task(q, t, budget_left, dry_run):
     t.update(state='running', started=datetime.datetime.now().isoformat(timespec='seconds'), model=model)
     save_queue(WORKTREE, q)
     (WORKTREE / REVIEWS).mkdir(parents=True, exist_ok=True)  # empty folders are not in git
-    try:
-        r = subprocess.run(cmd, cwd=WORKTREE, env=env, capture_output=True, text=True, timeout=TASK_TIMEOUT)
-        out = json.loads(r.stdout)
-    except subprocess.TimeoutExpired:
-        out = dict(is_error=True, result=f'timeout after {TASK_TIMEOUT} s')
-    except json.JSONDecodeError:
-        out = dict(is_error=True, result=f'exit {r.returncode}: ' + (r.stderr or r.stdout).strip()[-300:])
-    finally:
-        shutil.rmtree(scratch, ignore_errors=True)
     LOGS.mkdir(parents=True, exist_ok=True)
     log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
+    try:
+        out = run_streaming(cmd, env, t['id'], log.with_suffix('.log'))
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
     log.write_text(json.dumps(dict(cmd=cmd, output=out), indent=2, ensure_ascii=False))
     cost = float(out.get('total_cost_usd') or 0)
     t['cost_usd'] = round(t.get('cost_usd', 0) + cost, 4)
