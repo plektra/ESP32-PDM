@@ -1,7 +1,7 @@
 {
   "next": {
-    "T": 53,
-    "Q": 42
+    "T": 63,
+    "Q": 47
   },
   "tasks": [
     {
@@ -55,16 +55,17 @@
       "id": "T-0004",
       "role": "validator",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "done",
       "created": "2026-10-30",
       "depends_on": [],
       "deep": true,
-      "started": "2026-10-30T22:29:49",
+      "started": "2026-11-01T20:35:31",
       "model": "opus",
-      "cost_usd": 0.2737,
-      "attempts": 1,
-      "finished": "2026-10-30",
-      "note": null
+      "cost_usd": 4.1039,
+      "attempts": 2,
+      "finished": "2026-11-01",
+      "note": null,
+      "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md"
     },
     {
       "id": "T-0005",
@@ -1536,6 +1537,282 @@
         "reviewer classed it big: Firmware architecture question for the owner.",
         "a question only the owner can answer",
         "touches firmware"
+      ]
+    },
+    {
+      "id": "T-0053",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "H1",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-hc2",
+        "location": "hc_channel x2: R113/R213 RIWRN 47k, C105/C205 CTMR, Q13/Q23 OT sensor; ARCHITECTURE HC2 budget",
+        "summary": "Hardware breaker at about 24-26 A (146 ms) and OT trip at 140-160 C at the sensor leave about 18-24 A unprotected in hardware; heat budget gives Tj 137-143 C at 20 A and 169 C at 22 A against MOSFET Tj max 150 C, so only firmware protects when the ESP32 runs.",
+        "fix": "Lower IOC towards the rating (RIWRN 68k -> about 17.5 A, check bilge pump start current) and/or require a documented external breaker <= 15-18 A per output plus a firmware soft fuse.",
+        "class": "big",
+        "reason": "Changes channel protection and the ARCHITECTURE HC2 budget; affects safety-relevant outputs (bilge forced run).",
+        "touches": [
+          "protection",
+          "budget",
+          "decision:8",
+          "safety"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "H1"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0042",
+      "why_big": [
+        "reviewer classed it big: Changes channel protection and the ARCHITECTURE HC2 budget; affects safety-relevant outputs (bilge forced run).",
+        "touches protection, budget, decision:8, safety"
+      ]
+    },
+    {
+      "id": "T-0054",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "H2",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-hc2",
+        "location": "hc_channel x2: R104/R204 (PU 10 ohm), PD direct, R103/R203 RISCP 4.7k",
+        "summary": "MOSFETs switch fully on in under 1 us, so a load with more than about 50-100 uF input capacitance probably exceeds the 71-91 A short-circuit threshold for longer than 4-5 us; the channel then stays off for 3.8 min (estimate, UNVERIFIED).",
+        "fix": "Gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at the gate, PD direct; e.g. 100k/3.9nF for about 20 A into 1000 uF), check MOSFET SOA; or state a maximum load capacitance. Combine with EMC E2.",
+        "class": "big",
+        "reason": "Changes gate drive and protection behaviour of the channel; new circuit function.",
+        "touches": [
+          "protection"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "H2"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0043",
+      "why_big": [
+        "reviewer classed it big: Changes gate drive and protection behaviour of the channel; new circuit function.",
+        "touches protection"
+      ]
+    },
+    {
+      "id": "T-0055",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "H3",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-hc2",
+        "location": "root J10/D30 and hc_channel U11/U12 pins 20 (VS), 17/18 (CS-/CS+), 19 (ISCP)",
+        "summary": "Reversed battery puts about -12...-30 V on TPS48110 VS/CS+/CS-/ISCP (abs max -1 V to GND); D30 SMCJ30CA is bidirectional and HC2 has no reverse protection; design-notes section 8 survival claim does not apply to HC2.",
+        "fix": "Owner choice: reverse-polarity protection at J10 (ideal-diode + MOSFET), or a crowbar diode that blows the battery fuse (e.g. unidirectional D30 if its forward surge suffices), at minimum a keyed J10 plus README warning and corrected design-notes section 8.",
+        "class": "big",
+        "reason": "Protection topology change on the shared root sheet (battery input) or a new part.",
+        "touches": [
+          "protection",
+          "shared-sheet",
+          "connector"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "H3"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0044",
+      "why_big": [
+        "reviewer classed it big: Protection topology change on the shared root sheet (battery input) or a new part.",
+        "touches protection, shared-sheet, connector"
+      ]
+    },
+    {
+      "id": "T-0056",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "H4",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-hc2",
+        "location": "hc_channel x2: net DIODE (Q13/Q23, U11/U12 pin 10)",
+        "summary": "No 1 nF bypass across the MMBT3904 remote sensor; TPS4811-Q1 section 9.6.1 says it must be placed (EMC E4 lists it only as a tune-in-test footprint).",
+        "fix": "Add 1 nF 0402 (C1523, already on the BOM) from DIODE to GND at each MMBT3904; Kelvin emitter return to controller GND.",
+        "class": "small",
+        "reason": "Missing decoupling required by the datasheet on a board-only sheet; no new part, cost < 0.01 USD.",
+        "touches": [],
+        "cost_delta_usd": 0.01
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "H4"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0057",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "H5",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-hc2",
+        "location": "tools/heat_budget.py PARTS['HC-2xBSC030']",
+        "summary": "RDS(on) at 150 C is 11.2 mOhm in the tool; BSC030N08NS5 Diagram 9 max (5.35 mOhm) gives 2 x 5.35 + 1 = 11.7 mOhm; 15 A rises from 87 to 88 C, 20 A from 137 to 143 C; rating stands.",
+        "fix": "Set (0.0070, 0.0117) with the datasheet reference in a comment.",
+        "class": "small",
+        "reason": "Tool input correction proven by the datasheet; no rating or decision change.",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "H5"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0058",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "H6",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-hc2",
+        "location": "docs/design-notes.md sections 1 and 9",
+        "summary": "Section 1 still names TPS48111-Q1 and 8-20 A; section 9 says an OUT voltage divider lets the PDM see float-driven runs, but no such divider exists and IMON cannot see that current.",
+        "fix": "Correct both sections to the as-drawn design (TPS48110A-Q1, about 15 A; float runs only visible via SW3/SW4 if wired); OUT divider decision goes to Q2.",
+        "class": "small",
+        "reason": "Documentation only.",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "H6"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0059",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "H7",
+        "kind": "finding",
+        "severity": "INFO",
+        "board": "pdm-hc2",
+        "location": "hc_channel x2: C103/C203 CBST, C105/C205 CTMR",
+        "summary": "First switch-on after power-up waits about 76-100 ms for the bootstrap (Eq. 1), also on the hardware switch path; overcurrent/short retry is about 3.8 min, reset by toggling INP.",
+        "fix": "Record both times in design-notes section 4a and user documentation.",
+        "class": "small",
+        "reason": "Documentation only.",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "H7"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0060",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "H8",
+        "kind": "finding",
+        "severity": "INFO",
+        "board": "pdm-hc2",
+        "location": "root: IO3 (IMON2 via R212/R211)",
+        "summary": "IO3 strapping pin is held low by the IMON2 network; harmless while EFUSE_STRAP_JTAG_SEL is not burnt (same as V11 on pdm-4ch).",
+        "fix": "No hardware change; production must not burn that eFuse.",
+        "class": "small",
+        "reason": "Documentation only.",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "H8"
+      },
+      "state": "parked"
+    },
+    {
+      "id": "T-0061",
+      "role": "system",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "Q1",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "pdm-hc2",
+        "location": "hc_channel x2 (H2)",
+        "summary": "Which HC2 loads have more than about 50 uF input capacitance (LED searchlight/work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.",
+        "fix": "Owner lists the intended HC2 loads and their input capacitance or inrush.",
+        "class": "big",
+        "reason": "Only the owner knows the loads.",
+        "touches": [
+          "protection"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "Q1"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0045",
+      "why_big": [
+        "reviewer classed it big: Only the owner knows the loads.",
+        "a question only the owner can answer",
+        "touches protection"
+      ]
+    },
+    {
+      "id": "T-0062",
+      "role": "system",
+      "scope": "pdm-hc2",
+      "created": "2026-11-01",
+      "finding": {
+        "id": "Q2",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "pdm-hc2",
+        "location": "hc_channel x2 (H1, H6)",
+        "summary": "Should the HC2 hardware breaker sit near the continuous rating (about 17.5 A) or stay at 25 A with a documented external breaker requirement? Is an OUT voltage divider (spare IO4/IO5) wanted for float-run detection, or are SW3/SW4 enough?",
+        "fix": "Owner rules on breaker level and float-run sensing.",
+        "class": "big",
+        "reason": "Channel rating, safety-relevant output and possible pin-map change.",
+        "touches": [
+          "protection",
+          "safety",
+          "pin-map",
+          "decision:8"
+        ]
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
+        "finding": "Q2"
+      },
+      "state": "blocked-owner",
+      "question": "Q-0046",
+      "why_big": [
+        "reviewer classed it big: Channel rating, safety-relevant output and possible pin-map change.",
+        "a question only the owner can answer",
+        "touches protection, safety, pin-map, decision:8"
       ]
     }
   ]

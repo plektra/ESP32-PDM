@@ -5,7 +5,7 @@ question's Answer line – `yes` (do the proposed fix), `no` (drop it) or your o
 The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file is regenerated from
 `docs/queue.json`: only the Answer lines are read; other edits are lost.
 
-## Open (41)
+## Open (46)
 
 ## Q-0001 · MAJOR · pdm-hc2 · finding
 
@@ -453,6 +453,61 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file 
 - **Summary:** Should DEN be held high in Active mode, or pulsed only while sampling IS? V1 (RIS overload on fault or open output) depends on it.
 - **Proposed:** Owner decides the DEN policy in /system firmware.
 - **Why it needs you:** reviewer classed it big: Firmware architecture question for the owner.; a question only the owner can answer; touches firmware
+
+**Answer:** 
+
+---
+
+## Q-0042 · MAJOR · pdm-hc2 · finding
+
+- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` H1 (hc_channel x2: R113/R213 RIWRN 47k, C105/C205 CTMR, Q13/Q23 OT sensor; ARCHITECTURE HC2 budget); task T-0053
+- **Summary:** Hardware breaker at about 24-26 A (146 ms) and OT trip at 140-160 C at the sensor leave about 18-24 A unprotected in hardware; heat budget gives Tj 137-143 C at 20 A and 169 C at 22 A against MOSFET Tj max 150 C, so only firmware protects when the ESP32 runs.
+- **Proposed:** Lower IOC towards the rating (RIWRN 68k -> about 17.5 A, check bilge pump start current) and/or require a documented external breaker <= 15-18 A per output plus a firmware soft fuse.
+- **Why it needs you:** reviewer classed it big: Changes channel protection and the ARCHITECTURE HC2 budget; affects safety-relevant outputs (bilge forced run).; touches protection, budget, decision:8, safety
+
+**Answer:** 
+
+---
+
+## Q-0043 · MAJOR · pdm-hc2 · finding
+
+- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` H2 (hc_channel x2: R104/R204 (PU 10 ohm), PD direct, R103/R203 RISCP 4.7k); task T-0054
+- **Summary:** MOSFETs switch fully on in under 1 us, so a load with more than about 50-100 uF input capacitance probably exceeds the 71-91 A short-circuit threshold for longer than 4-5 us; the channel then stays off for 3.8 min (estimate, UNVERIFIED).
+- **Proposed:** Gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at the gate, PD direct; e.g. 100k/3.9nF for about 20 A into 1000 uF), check MOSFET SOA; or state a maximum load capacitance. Combine with EMC E2.
+- **Why it needs you:** reviewer classed it big: Changes gate drive and protection behaviour of the channel; new circuit function.; touches protection
+
+**Answer:** 
+
+---
+
+## Q-0044 · MAJOR · pdm-hc2 · finding
+
+- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` H3 (root J10/D30 and hc_channel U11/U12 pins 20 (VS), 17/18 (CS-/CS+), 19 (ISCP)); task T-0055
+- **Summary:** Reversed battery puts about -12...-30 V on TPS48110 VS/CS+/CS-/ISCP (abs max -1 V to GND); D30 SMCJ30CA is bidirectional and HC2 has no reverse protection; design-notes section 8 survival claim does not apply to HC2.
+- **Proposed:** Owner choice: reverse-polarity protection at J10 (ideal-diode + MOSFET), or a crowbar diode that blows the battery fuse (e.g. unidirectional D30 if its forward surge suffices), at minimum a keyed J10 plus README warning and corrected design-notes section 8.
+- **Why it needs you:** reviewer classed it big: Protection topology change on the shared root sheet (battery input) or a new part.; touches protection, shared-sheet, connector
+
+**Answer:** 
+
+---
+
+## Q-0045 · INFO · pdm-hc2 · question
+
+- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` Q1 (hc_channel x2 (H2)); task T-0061
+- **Summary:** Which HC2 loads have more than about 50 uF input capacitance (LED searchlight/work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.
+- **Proposed:** Owner lists the intended HC2 loads and their input capacitance or inrush.
+- **Why it needs you:** reviewer classed it big: Only the owner knows the loads.; a question only the owner can answer; touches protection
+
+**Answer:** 
+
+---
+
+## Q-0046 · INFO · pdm-hc2 · question
+
+- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` Q2 (hc_channel x2 (H1, H6)); task T-0062
+- **Summary:** Should the HC2 hardware breaker sit near the continuous rating (about 17.5 A) or stay at 25 A with a documented external breaker requirement? Is an OUT voltage divider (spare IO4/IO5) wanted for float-run detection, or are SW3/SW4 enough?
+- **Proposed:** Owner rules on breaker level and float-run sensing.
+- **Why it needs you:** reviewer classed it big: Channel rating, safety-relevant output and possible pin-map change.; a question only the owner can answer; touches protection, safety, pin-map, decision:8
 
 **Answer:** 
 
