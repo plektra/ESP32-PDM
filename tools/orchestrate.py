@@ -414,15 +414,16 @@ def tmux_close(pane, linger=120):
 def describe(event):
     """Readable lines for one stream-json event: tool calls, agent text, tool errors, start and end."""
     kind = event.get('type')
-    content = (event.get('message') or {}).get('content')
-    content = content if isinstance(content, list) else []
+    message = event.get('message')  # a dict for assistant/user events; some system events carry a plain string
+    content = message.get('content') if isinstance(message, dict) else None
+    content = [c for c in content if isinstance(c, dict)] if isinstance(content, list) else []
     if kind == 'system' and event.get('subtype') == 'init':
         return [f"● started on {event.get('model')}"]
     if kind == 'assistant':
         lines = []
         for c in content:
             if c.get('type') == 'tool_use':
-                i = c.get('input') or {}
+                i = c.get('input') if isinstance(c.get('input'), dict) else {}
                 fp = i.get('file_path') or i.get('path')
                 arg = (i.get('description') or (Path(fp).name if fp else None) or i.get('pattern') or i.get('url')
                        or i.get('query') or i.get('command') or json.dumps(i, ensure_ascii=False))
@@ -447,25 +448,36 @@ def run_streaming(cmd, env, tag, task_log, cwd, on_init=None):
     timer = threading.Timer(TASK_TIMEOUT, lambda: (timed_out.set(), proc.kill()))
     timer.start()
     out, other = None, []
-    with open(task_log, 'a') as tl, open(LOGS / 'live.log', 'a') as live:
-        for line in proc.stdout:
-            try:
-                event = json.loads(line)
-            except json.JSONDecodeError:
-                other.append(line.strip())
-                continue
-            if event.get('type') == 'result':
-                out = event
-            if on_init and event.get('type') == 'system' and event.get('subtype') == 'init':
-                on_init(event.get('session_id'))
-            for text in describe(event):
-                stamped = f'{datetime.datetime.now():%H:%M:%S} {tag} {text}\n'
-                tl.write(stamped)
-                live.write(stamped)
-            tl.flush()
-            live.flush()
-    proc.wait()
-    timer.cancel()
+    try:
+        with open(task_log, 'a') as tl, open(LOGS / 'live.log', 'a') as live:
+            for line in proc.stdout:
+                try:
+                    event = json.loads(line)
+                except json.JSONDecodeError:
+                    other.append(line.strip())
+                    continue
+                if not isinstance(event, dict):
+                    continue
+                if event.get('type') == 'result':
+                    out = event
+                if on_init and event.get('type') == 'system' and event.get('subtype') == 'init':
+                    on_init(event.get('session_id'))
+                try:
+                    lines = describe(event)
+                except Exception as e:  # the trace is for people; it must never stop a run
+                    lines = [f'(unreadable event {event.get("type")}: {e!r})']
+                for text in lines:
+                    stamped = f'{datetime.datetime.now():%H:%M:%S} {tag} {text}\n'
+                    tl.write(stamped)
+                    live.write(stamped)
+                tl.flush()
+                live.flush()
+    except BaseException:
+        proc.kill()  # never leave an agent running that nobody will check or merge
+        raise
+    finally:
+        proc.wait()
+        timer.cancel()
     if out is None:
         out = dict(is_error=True, result=f'timeout after {TASK_TIMEOUT} s' if timed_out.is_set() else
                    f"exit {proc.returncode}: {' '.join(other)[-300:]}")
