@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 63,
+    "T": 76,
     "Q": 47
   },
   "tasks": [
@@ -89,7 +89,8 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E1"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0071"
     },
     {
       "id": "T-0006",
@@ -122,7 +123,8 @@
         "touches safety"
       ],
       "ruling": "yes - RG_PU 100 ohm, PD kept direct, RGATE_PD as a 0 ohm footprint; recheck switching loss, SOA, heat budget and short-circuit response; no PWM on HC2 outputs until measured on the bench",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0070"
     },
     {
       "id": "T-0007",
@@ -157,7 +159,8 @@
         "touches shared-sheet, budget"
       ],
       "ruling": "yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0064"
     },
     {
       "id": "T-0008",
@@ -181,7 +184,8 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E4"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0071"
     },
     {
       "id": "T-0009",
@@ -216,7 +220,8 @@
         "touches protection, invariant, safety"
       ],
       "ruling": "yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0064"
     },
     {
       "id": "T-0010",
@@ -251,7 +256,8 @@
         "touches shared-sheet, protection"
       ],
       "ruling": "yes - as footprints only: Y-capacitor GND_CAN-GND DNP, CMC footprint fitted with 0 ohm bridges; decide at pre-compliance scan",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0067"
     },
     {
       "id": "T-0011",
@@ -286,7 +292,8 @@
         "touches shared-sheet, new-extended-part"
       ],
       "ruling": "yes - add 100 nF/100 V at VIN, footprints for an SW RC snubber (DNP) and a boot resistor (0 ohm); keep LMR51610YDBVR, switch to the YF (FPWM) variant only if the pre-compliance scan shows PFM noise",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0065"
     },
     {
       "id": "T-0012",
@@ -321,7 +328,8 @@
         "touches shared-sheet, invariant"
       ],
       "ruling": "yes - C14-C17 to 470 nF; README note: dry (unlit) switch contacts, and the output-off behaviour below about 8 V during 12 V cranking",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0068"
     },
     {
       "id": "T-0013",
@@ -355,7 +363,8 @@
         "touches invariant, protection"
       ],
       "ruling": "yes - reword invariant 4 to cover the PROFET output case, DNP SMAJ30CA footprint per output, keep VS copper to D30 wide",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0064"
     },
     {
       "id": "T-0014",
@@ -389,7 +398,8 @@
         "touches shared-sheet"
       ],
       "ruling": "yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0065"
     },
     {
       "id": "T-0015",
@@ -423,7 +433,8 @@
         "touches shared-sheet"
       ],
       "ruling": "yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0065"
     },
     {
       "id": "T-0016",
@@ -450,7 +461,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E12"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0010",
       "why_big": [
         "reviewer classed it big: Terminal and pole count decision.",
@@ -458,7 +469,9 @@
         "touches connector, mechanical"
       ],
       "ruling": "yes - GND pole(s) rated like the VS input, decided in /system mechanical; wide GND copper to J10.2",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "system-mechanical",
+      "reason": "Q-0010: GND pole(s) at J10 rated like the VS input are chosen with the terminal blocks in /system mechanical; wide GND copper to J10.2 is a PCB-phase rule"
     },
     {
       "id": "T-0017",
@@ -482,7 +495,8 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E13"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0064"
     },
     {
       "id": "T-0018",
@@ -514,7 +528,8 @@
         "affects both boards"
       ],
       "ruling": "yes - validator/part-facts checks the 1812L050/60GR Imax and minimum resistance against the prospective short current (30 V / cable + PTC resistance)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0065"
     },
     {
       "id": "T-0019",
@@ -550,7 +565,8 @@
         "touches shared-sheet, connector"
       ],
       "ruling": "IEC 60945 as a design target, no certification; one pre-compliance scan on the first prototypes decides the DNP footprints; the N2K shield stays unconnected at the node (4-pole J4)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0067"
     },
     {
       "id": "T-0020",
@@ -577,7 +593,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "L1"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0013",
       "why_big": [
         "reviewer classed it big: New extended part on a shared sheet.",
@@ -585,7 +601,9 @@
         "touches shared-sheet, new-extended-part"
       ],
       "ruling": "swap to LMR51610YF only if the pre-compliance scan shows PFM noise (see Q-0005); check price and stock then",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "prototype",
+      "reason": "Q-0013: swap to LMR51610YF only if the pre-compliance scan of the first prototypes shows PFM noise; check price and stock then"
     },
     {
       "id": "T-0021",
@@ -619,7 +637,8 @@
         "touches shared-sheet"
       ],
       "ruling": "yes - add the listed basic/preferred LCSC codes after checking each against value and footprint; J5/J10/J11 in /system mechanical",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0073"
     },
     {
       "id": "T-0022",
@@ -652,7 +671,8 @@
         "touches shared-sheet"
       ],
       "ruling": "yes - recheck stock before ordering; datasheet-check the L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0065"
     },
     {
       "id": "T-0023",
@@ -677,7 +697,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "C5"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0016",
       "why_big": [
         "reviewer classed it big: board=system, shared sheets",
@@ -685,7 +705,9 @@
         "touches shared-sheet"
       ],
       "ruling": "only if Standard PCBA is forced (see Q-0026): then merge the 100 nF and 1 uF package variants",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "owner",
+      "reason": "Q-0016: merge 100 nF / 1 uF package variants only if the owner's check (T-0034) shows Standard PCBA is forced"
     },
     {
       "id": "T-0024",
@@ -709,7 +731,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "L1"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0017",
       "why_big": [
         "reviewer classed it big: Cost lever needing an owner decision on quantity and cash; board=system",
@@ -717,7 +739,9 @@
         "cost change -6.05 USD per board"
       ],
       "ruling": "5 + 5 for the first order (see Q-0027); revisit the quantity for later runs",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "order",
+      "reason": "Q-0017: 5 + 5 for the first order; revisit the quantity for later runs"
     },
     {
       "id": "T-0025",
@@ -743,7 +767,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "L2"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0018",
       "why_big": [
         "reviewer classed it big: Trades flexibility (fixed 1:1 ratio), mechanical/panel choice, board=system",
@@ -752,7 +776,9 @@
         "cost change -2.99 USD per board"
       ],
       "ruling": "yes - panelise both designs at the PCB phase if the multi-design surcharge does not cancel the saving (see Q-0028)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "pcb",
+      "reason": "Q-0018: panelise both designs at the PCB phase if the JLCPCB multi-design surcharge does not cancel the saving"
     },
     {
       "id": "T-0026",
@@ -788,7 +814,8 @@
         "cost change -1.20 USD per board"
       ],
       "ruling": "yes - adopt each of the four swaps only if its part-facts check passes (H5VL10B USB FS capacitance and clamp, L78M05 at the 29 V clamp and Iq, DPAK area)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0065"
     },
     {
       "id": "T-0027",
@@ -815,7 +842,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "L4"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0020",
       "why_big": [
         "reviewer classed it big: Connector change on a shared sheet; trades a convenience feature",
@@ -824,7 +851,9 @@
         "cost change -1.30 USD per board"
       ],
       "ruling": "no for now - USB-C stays fitted on prototypes (see Q-0029); revisit for later runs",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "order",
+      "reason": "Q-0020: no change now, USB-C stays fitted on prototypes; revisit DNP/pogo pads for later runs"
     },
     {
       "id": "T-0028",
@@ -851,7 +880,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "L5"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0021",
       "why_big": [
         "reviewer classed it big: Connector and mechanical choice",
@@ -860,7 +889,9 @@
         "cost change -1.00 USD per board"
       ],
       "ruling": "decide in /system mechanical (see Q-0030)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "system-mechanical",
+      "reason": "Q-0021: pluggable vs fixed terminals for J4/J5 is decided in /system mechanical"
     },
     {
       "id": "T-0029",
@@ -886,7 +917,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "L6"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0022",
       "why_big": [
         "reviewer classed it big: Shared sheet, changes the switching frequency (EMC)",
@@ -895,7 +926,9 @@
         "cost change -0.83 USD per board"
       ],
       "ruling": "no for now - keep LMR51610Y; revisit after the pre-compliance scan",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "prototype",
+      "reason": "Q-0022: no for now, keep LMR51610Y; revisit the 400 kHz X variant after the pre-compliance scan"
     },
     {
       "id": "T-0030",
@@ -932,7 +965,8 @@
         "cost change -0.71 USD per board"
       ],
       "ruling": "yes - part-facts check of CA-IS3050G (supplies, pinout, timing), swap only if it passes; Q-0004 footprints and Q-0039 pull-up then apply to it",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0067"
     },
     {
       "id": "T-0031",
@@ -968,7 +1002,8 @@
         "touches decision:18, shared-sheet, firmware"
       ],
       "ruling": "keep the NTC (accuracy without calibration is worth 3.07 USD per order)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0073"
     },
     {
       "id": "T-0032",
@@ -992,7 +1027,8 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "L9"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0069"
     },
     {
       "id": "T-0033",
@@ -1025,7 +1061,8 @@
         "touches shared-sheet"
       ],
       "ruling": "no - keep R1/R2 so the controller part stays identical on both boards",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0073"
     },
     {
       "id": "T-0034",
@@ -1050,7 +1087,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "Q1"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0026",
       "why_big": [
         "reviewer classed it big: Question; affects the budget",
@@ -1059,7 +1096,9 @@
         "touches budget"
       ],
       "ruling": "owner checks the JLCPCB quote page (2 oz + Economic PCBA) before layout; Q-0016 merge only if Standard PCBA is forced",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "owner",
+      "reason": "Q-0026: the owner checks the JLCPCB quote page (2 oz + Economic PCBA) before layout"
     },
     {
       "id": "T-0035",
@@ -1082,7 +1121,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "Q2"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0027",
       "why_big": [
         "reviewer classed it big: Question",
@@ -1090,7 +1129,9 @@
         "affects both boards"
       ],
       "ruling": "5 + 5 (5 pdm-4ch and 5 pdm-hc2) for the first order",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "order",
+      "reason": "Q-0027: 5 pdm-4ch + 5 pdm-hc2 for the first order; applies when ordering"
     },
     {
       "id": "T-0036",
@@ -1115,7 +1156,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "Q3"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0028",
       "why_big": [
         "reviewer classed it big: Question",
@@ -1124,7 +1165,9 @@
         "touches mechanical"
       ],
       "ruling": "yes - combined 1:1 panel of pdm-4ch + pdm-hc2, decided at the PCB phase after checking the JLCPCB multi-design surcharge",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "pcb",
+      "reason": "Q-0028: combined 1:1 panel, decided at the PCB phase after checking the multi-design surcharge"
     },
     {
       "id": "T-0037",
@@ -1150,7 +1193,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "Q4"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0029",
       "why_big": [
         "reviewer classed it big: Question",
@@ -1159,7 +1202,9 @@
         "touches connector, shared-sheet"
       ],
       "ruling": "USB-C fitted on the prototype run; reconsider DNP/pogo pads plus OTA for later runs",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "order",
+      "reason": "Q-0029: USB-C fitted on the prototype run; reconsider DNP/pogo pads plus OTA for later runs"
     },
     {
       "id": "T-0038",
@@ -1185,7 +1230,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "Q5"
       },
-      "state": "parked",
+      "state": "deferred",
       "question": "Q-0030",
       "why_big": [
         "reviewer classed it big: Question",
@@ -1194,7 +1239,9 @@
         "touches connector, mechanical"
       ],
       "ruling": "decide in /system mechanical together with the J10 pole sizing (Q-0010); leaning pluggable for low-current J4/J5, fixed for J10/J11",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "until": "system-mechanical",
+      "reason": "Q-0030: terminal type for J4/J5/J10/J11 decided in /system mechanical with the J10 pole sizing (leaning pluggable J4/J5, fixed J10/J11)"
     },
     {
       "id": "T-0039",
@@ -1229,7 +1276,8 @@
         "touches shared-sheet, protection"
       ],
       "ruling": "keep the isolated CAN side powered from NET-S (NMEA 2000 practice, LEN)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0067"
     },
     {
       "id": "T-0040",
@@ -1262,7 +1310,8 @@
         "touches decision:7"
       ],
       "ruling": "all four BTT6050 as the standard pdm-4ch population; heavy loads go on HC2",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0069"
     },
     {
       "id": "T-0041",
@@ -1295,7 +1344,8 @@
         "touches firmware"
       ],
       "ruling": "yes, all three - RIS as 1206 >=0.25 W; record firmware rule: DEN pulsed only while sampling (and dropped on full-scale IS); OUT pull-down as a DNP footprint",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0069"
     },
     {
       "id": "T-0042",
@@ -1328,7 +1378,8 @@
         "touches shared-sheet, invariant"
       ],
       "ruling": "correct the margin claim in design-notes and measure on the prototype; RIN 4.7 k goes on the prototype test list as the planned fix if the margin is short; no circuit change now",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0068"
     },
     {
       "id": "T-0043",
@@ -1360,7 +1411,8 @@
         "touches decision:18"
       ],
       "ruling": "yes - correct VBAT full scale to about 32 V in decision 18 and design-notes",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0073"
     },
     {
       "id": "T-0044",
@@ -1389,7 +1441,8 @@
         "reviewer classed it big: Footprint correction, but it is in lib/, which the small policy excludes."
       ],
       "ruling": "move the paste windows between the thermal vias (no plugged-via surcharge); recheck the footprint against the package drawing",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0066"
     },
     {
       "id": "T-0045",
@@ -1418,7 +1471,8 @@
         "reviewer classed it big: Footprint correction proven by the datasheet, but in lib/ (excluded from small)."
       ],
       "ruling": "use the standard KiCad Package_TO_SOT_SMD:SOT-23-6 after checking it against TI DBV0006A and the JLCPCB footprint",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0066"
     },
     {
       "id": "T-0046",
@@ -1451,7 +1505,8 @@
         "touches shared-sheet"
       ],
       "ruling": "yes - two 1206 resistors in series (2.2 k + 2.4 k, basic parts) for R3/R4/R7/R8",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0068"
     },
     {
       "id": "T-0047",
@@ -1474,7 +1529,8 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V7"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0068"
     },
     {
       "id": "T-0048",
@@ -1507,7 +1563,8 @@
         "touches shared-sheet"
       ],
       "ruling": "yes - 10 k pull-up from ISO1044 TXD to +3V3 on the shared can sheet",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0067"
     },
     {
       "id": "T-0049",
@@ -1540,7 +1597,8 @@
         "touches shared-sheet, protection"
       ],
       "ruling": "add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0068"
     },
     {
       "id": "T-0050",
@@ -1563,7 +1621,8 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V10"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0068"
     },
     {
       "id": "T-0051",
@@ -1586,7 +1645,8 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V11"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0073"
     },
     {
       "id": "T-0052",
@@ -1619,7 +1679,8 @@
         "touches firmware"
       ],
       "ruling": "DEN pulsed only while sampling IS (and dropped on full-scale IS), not held high in Active mode (see Q-0033)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0069"
     },
     {
       "id": "T-0053",
@@ -1654,7 +1715,8 @@
         "touches protection, budget, decision:8, safety"
       ],
       "ruling": "option (c) - RIWRN 68k (IOC about 17.5 A) plus README/label requirement for an external breaker <=15-18 A per output plus a firmware soft fuse; update the ARCHITECTURE HC2 budget; measure the bilge pump start current before ordering",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0072"
     },
     {
       "id": "T-0054",
@@ -1686,7 +1748,8 @@
         "touches protection"
       ],
       "ruling": "yes - gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at gate, PD direct; start about 100k/3.9 nF for ~20 A into 1000 uF); this supersedes the plain RG_PU 100 ohm of Q-0001 (covers EMC E2 too); check MOSFET SOA, heat budget and fast short-circuit response",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0070"
     },
     {
       "id": "T-0055",
@@ -1720,7 +1783,8 @@
         "touches protection, shared-sheet, connector"
       ],
       "ruling": "keyed/polarised J10 plus README and label warning, and correct design-notes section 8 (reversal survival does not apply to HC2); full reverse-polarity protection deferred to a later HC2 revision (keep it on the list)",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0072"
     },
     {
       "id": "T-0056",
@@ -1744,7 +1808,8 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H4"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0071"
     },
     {
       "id": "T-0057",
@@ -1767,7 +1832,9 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H5"
       },
-      "state": "parked"
+      "state": "deferred",
+      "until": "owner",
+      "reason": "fix is in tools/heat_budget.py (HC-2xBSC030 RDS(on) 0.0070/0.0117 with the datasheet reference), which no package gate allows a board-fixer to change; needs an owner or /system edit. Until then P7/P9 use a scratch copy with 11.7 mOhm"
     },
     {
       "id": "T-0058",
@@ -1790,7 +1857,8 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H6"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0072"
     },
     {
       "id": "T-0059",
@@ -1813,7 +1881,8 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H7"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0070"
     },
     {
       "id": "T-0060",
@@ -1836,7 +1905,8 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H8"
       },
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0073"
     },
     {
       "id": "T-0061",
@@ -1869,7 +1939,8 @@
         "touches protection"
       ],
       "ruling": "loads not known yet - size the HC2 gate slew control for about 20 A into 1000 uF and measure the real loads on the prototype",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0070"
     },
     {
       "id": "T-0062",
@@ -1905,7 +1976,317 @@
         "touches protection, safety, pin-map, decision:8"
       ],
       "ruling": "breaker level as ruled in Q-0042 (RIWRN 68k, about 17.5 A, plus external breaker and firmware soft fuse); add an OUT voltage divider on spare IO4/IO5 for float-run detection - pin-map change via /system",
-      "answered": "2026-11-01"
+      "answered": "2026-11-01",
+      "package": "T-0072"
+    },
+    {
+      "id": "T-0063",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-01",
+      "depends_on": [],
+      "items": [
+        "T-0005",
+        "T-0006",
+        "T-0007",
+        "T-0008",
+        "T-0009",
+        "T-0010",
+        "T-0011",
+        "T-0012",
+        "T-0013",
+        "T-0014",
+        "T-0015",
+        "T-0016",
+        "T-0017",
+        "T-0018",
+        "T-0019",
+        "T-0020",
+        "T-0021",
+        "T-0022",
+        "T-0023",
+        "T-0024",
+        "T-0025",
+        "T-0026",
+        "T-0027",
+        "T-0028",
+        "T-0029",
+        "T-0030",
+        "T-0031",
+        "T-0032",
+        "T-0033",
+        "T-0034",
+        "T-0035",
+        "T-0036",
+        "T-0037",
+        "T-0038",
+        "T-0039",
+        "T-0040",
+        "T-0041",
+        "T-0042",
+        "T-0043",
+        "T-0044",
+        "T-0045",
+        "T-0046",
+        "T-0047",
+        "T-0048",
+        "T-0049",
+        "T-0050",
+        "T-0051",
+        "T-0052",
+        "T-0053",
+        "T-0054",
+        "T-0055",
+        "T-0056",
+        "T-0057",
+        "T-0058",
+        "T-0059",
+        "T-0060",
+        "T-0061",
+        "T-0062"
+      ],
+      "started": "2026-11-01T22:46:26",
+      "model": "opus",
+      "session": "2ef41b37-6b18-4ee5-8efd-0bc6c2d4a8ca",
+      "cost_usd": 1.7603,
+      "attempts": 1,
+      "finished": "2026-11-01",
+      "note": null,
+      "summary": "10 packages, 14 deferred, 16 decisions",
+      "report": "docs/reviews/2026-11-01-plan-system-T-0063.md"
+    },
+    {
+      "id": "T-0064",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "Battery input bulk/HF caps and output surge protection (invariant 4)",
+      "brief": "Order: (1) T-0007 battery input at J10 (root sheet, both boards). Owner ruling Q-0002 verbatim: 'yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint'. Search JLCPCB for a >=63 V electrolytic or polymer of ~100 uF, basic or preferred first, extended only if none exists (record the fee as an auto decision). Check its ripple current and ESR against the datasheet. Add a 1-2.2 uF/100 V ceramic next to J10. Add a ferrite/CMC series footprint as DNP with a bypass so VS stays connected: either a 0 ohm/jumper fitted in parallel, or state how the DNP part is bridged, so that the netlist stays continuous. On pdm-4ch add 1 uF/100 V at each BTT6050 VS tab (channel sheet x4). E3 asks for more bulk on HC2: choose the HC2 amount (e.g. a second bulk capacitor) and record it as auto. Keep the controller part of the root sheet identical on both boards; put any HC2-only extra in an HC2-only place. (2) T-0009 HC2 output TVS. Ruling Q-0003 verbatim: 'yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA'. Part check first: SMAJ33CA LCSC library type, price, VBR/VC from the datasheet. Its clamp (~53 V) must stay below the 80 V BSC030N08NS5 VDS and must not exceed any OUT-side part rating. Then add one TVS per OUT (hc_channel) and write the return-path rule into STATUS for the PCB phase. (3) T-0013 4-ch outputs. Ruling Q-0007 verbatim: 'yes - reword invariant 4 to cover the PROFET output case, DNP SMAJ30CA footprint per output, keep VS copper to D30 wide'. Add a DNP SMAJ30CA from each OUT to GND at J11 (channel sheet x4). Reword ARCHITECTURE invariant 4 only to state that a PROFET output is protected through its body diode to VS and D30 (plus the DNP TVS footprint); every other external line keeps the full wording. Add the wide VS copper rule to pdm-4ch STATUS (PCB). (4) T-0017: no change; record the SMCJ30CA 48.4 V vs BTT6050 VS 48 V / VS(LD) 65 V reasoning in design-notes section 8 next to the new input capacitors. Checks: ERC and netlist on both boards before and after each step; LCSC code on every fitted part; the shared sheets are not touched; heat budget is unaffected (no output part change). Failure-mode note for the HC2 output TVS (bilge forced-run output): a shorted TVS blows the output wire fuse, and the float-switch circuit is unaffected (invariant 8). Stop and ask (one-way) if: the invariant 4 wording would relax protection for any line other than PROFET outputs; no TVS keeps the 28.8 V float case below its stand-off without a clamp above a part rating; no >=63 V bulk capacitor fits without exceeding ~0.5 USD/board.",
+      "items": [
+        "T-0007",
+        "T-0009",
+        "T-0013",
+        "T-0017"
+      ],
+      "plan": "T-0063",
+      "depends_on": []
+    },
+    {
+      "id": "T-0065",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "Shared supply, USB and fuse parts (buck caps, USB shield/ESD, L3 swaps, PTC check)",
+      "brief": "All edits go on the shared sheets (power-usb, analog_sw, can), identically on both boards. Order: (1) T-0018, check before the F2 swap. Ruling Q-0011 verbatim: 'yes - validator/part-facts checks the 1812L050/60GR Imax and minimum resistance against the prospective short current (30 V / cable + PTC resistance)'. Read the 1812L050/60GR datasheet: Imax at 60 V and Rmin. Compare with 30 V / (Rmin + about 10 mOhm of cable) for F1, F3 and F4 (F4 is fed from VS on J5.5). If Imax is too low, do not change anything here: it is a protection problem, so report it one-way with a proposal. (2) T-0026 four L3 swaps. Ruling Q-0019 verbatim: 'yes - adopt each of the four swaps only if its part-facts check passes (H5VL10B USB FS capacitance and clamp, L78M05 at the 29 V clamp and Iq, DPAK area)'. FB1/FB2 -> GZ2012D601TF C1017 (0805; FB1 carries VBUS: check rated current >=500 mA, impedance at 100 MHz). F2 -> 1812L050/60GR, only if step 1 passes. D4-D6 PESD0402V05 -> H5VL10B C7420372: check capacitance (USB FS needs low pF, e.g. <=15-20 pF per line), VRWM 5 V, clamp at 8 kV/TLP. U6 TPS7B91 -> L78M05ABDT C58069 (can sheet): check VIN abs max against the SMAJ18CA clamp 29.2 V with margin, Iq from NET-S (N2K LEN), dropout, stability capacitors, DPAK area (note it for /system mechanical). Each swap is independent; a failed check leaves that part as it is. (3) T-0014 USB. Ruling Q-0008 verbatim: 'yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option'. The TLP check applies to whichever ESD part step 2 leaves. Add 1 M || 4.7 nF footprints from J3 shield to GND plus a 0 ohm option, and decide which is fitted (auto; default: RC fitted, 0 ohm DNP). The 4.7 nF needs a voltage rating suitable for a shield. Add the README service rule. (4) T-0011 buck. Ruling Q-0005 verbatim: 'yes - add 100 nF/100 V at VIN, footprints for an SW RC snubber (DNP) and a boot resistor (0 ohm); keep LMR51610YDBVR, switch to the YF (FPWM) variant only if the pre-compliance scan shows PFM noise'. Add 100 nF/100 V at U3 VIN-GND, an SW-to-GND RC snubber (R+C, DNP), and a 0 ohm in series with the boot capacitor C2. (5) T-0015 capacitor ratings. Ruling Q-0009 verbatim: 'yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides'. Applies to C1 (2.2 uF buck input, power-usb) and C50-C53 (1 nF LED collector, analog_sw); keep the values. (6) T-0022. Ruling Q-0015 verbatim: 'yes - recheck stock before ordering; datasheet-check the L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074'. Compare inductance, Isat, Irms, DCR and footprint with SWPA6045S8R2MT and record the approved alternates in STATUS of both boards. Put the stock recheck on the pre-order checklist in STATUS. Checks: ERC and netlist on both boards after each step; the shared sheets must be byte-identical apart from the project name; LCSC on every fitted part; DNP on the snubber. Keep J3 USB-C fitted (Q-0029). Do not touch the TH1 NTC (Q-0024). Stop and ask if: a PTC Imax check fails; a swap would weaken ESD or surge protection; the L78M05 swap would change the NET-S load class (LEN).",
+      "items": [
+        "T-0011",
+        "T-0014",
+        "T-0015",
+        "T-0018",
+        "T-0022",
+        "T-0026"
+      ],
+      "plan": "T-0063",
+      "depends_on": []
+    },
+    {
+      "id": "T-0066",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "Custom footprints in lib/ (TDSO-14 paste, LMR51610 -> SOT-23-6)",
+      "brief": "(1) T-0044. Ruling Q-0036 verbatim: 'move the paste windows between the thermal vias (no plugged-via surcharge); recheck the footprint against the package drawing'. Edit lib/ESP32-PDM.pretty/Infineon_PG-TDSO-14_ThermalVias. Split or move the paste apertures so that none overlaps a via drill (vias at y = 0, +/-1.2, +/-2.4, 0.3 mm drill). Keep the total paste coverage of the exposed pad around 50-70 %. Recheck pads and outline against the Infineon PG-TDSO-14 package drawing and against the JLCPCB footprint of C534868. (2) T-0045. Ruling Q-0037 verbatim: 'use the standard KiCad Package_TO_SOT_SMD:SOT-23-6 after checking it against TI DBV0006A and the JLCPCB footprint'. Compare the KiCad SOT-23-6 pads and pin 1 with TI DBV0006A (1.1 x 0.6 mm at +/-1.3) and with the JLCPCB footprint of LMR51610YDBVR. If they match, set U3's footprint on the shared power-usb sheet of both boards, and remove the custom footprint from lib/ only if nothing else uses it. Checks: footprint geometry in a scratch script or KiCad footprint export; ERC and netlist on both boards (the footprint field changes on U3 only). Stop and ask if the pin numbering of the KiCad footprint differs from the TI pinout (1 CB, 2 GND, 3 FB, 4 EN, 5 VIN, 6 SW), or if the TDSO-14 drawing disagrees with the existing pads.",
+      "items": [
+        "T-0044",
+        "T-0045"
+      ],
+      "plan": "T-0063",
+      "depends_on": [
+        "T-0065"
+      ]
+    },
+    {
+      "id": "T-0067",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "CAN sheet: barrier Y-cap/CMC footprints, TXD pull-up, CA-IS3050G check",
+      "brief": "Shared can sheet, identical on both boards. Constraints first: ruling Q-0031 (T-0039) verbatim: 'keep the isolated CAN side powered from NET-S (NMEA 2000 practice, LEN)'. Ruling Q-0012 (T-0019) verbatim: 'IEC 60945 as a design target, no certification; one pre-compliance scan on the first prototypes decides the DNP footprints; the N2K shield stays unconnected at the node (4-pole J4)'. Record both in design-notes (EMC and CAN sections); J4 stays 4-pole. Order: (1) T-0030. Ruling Q-0023 verbatim: 'yes - part-facts check of CA-IS3050G (supplies, pinout, timing), swap only if it passes; Q-0004 footprints and Q-0039 pull-up then apply to it'. Read the Chipanalog CA-IS3050G datasheet: VCC1 at 3.3 V, VCC2 at 5 V from U6 (TPS7B91, or L78M05 if P2 swapped it), bus fault protection against the N2K bus, loop delay against ISO 11898 at 250 kbit/s, TXD dominant timeout, isolation rating, pinout and package (SOIC-8 vs SOIC-8-WB). Also check the JLCPCB part C528763 (stock, footprint). Swap only if every check passes; otherwise keep ISO1044 and record why. (2) T-0048. Ruling Q-0039 verbatim: 'yes - 10 k pull-up from ISO1044 TXD to +3V3 on the shared can sheet'. Apply it to the transceiver that step 1 leaves (basic 10 k 0402, C25744). (3) T-0010. Ruling Q-0004 verbatim: 'yes - as footprints only: Y-capacitor GND_CAN-GND DNP, CMC footprint fitted with 0 ohm bridges; decide at pre-compliance scan'. Add a 1206 Y-class (1-2.2 nF, >=1 kV) footprint from GND_CAN to GND, DNP. Add a CMC footprint in series with CANH/CANL: CMC DNP, with two fitted 0 ohm bridges (or a footprint that accepts both). Note layout rule 9 (barrier clearance, Y-cap the only crossing) in STATUS. Checks: ERC and netlist on both boards after each step, can.kicad_sch identical on both boards, LCSC on fitted parts, DNP on the Y-cap and CMC. Stop and ask if: the Y-capacitor path would create a DC path across the barrier (it must stay a capacitor only, invariant 6 spirit / NMEA isolation); the CA-IS3050G needs a supply arrangement other than NET-S (that would contradict Q-0031).",
+      "items": [
+        "T-0010",
+        "T-0019",
+        "T-0030",
+        "T-0039",
+        "T-0048"
+      ],
+      "plan": "T-0063",
+      "depends_on": [
+        "T-0065"
+      ]
+    },
+    {
+      "id": "T-0068",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "Panel interface (analog_sw): debounce, switch-load resistors, SW_SUPPLY diode, margins, reverse notes",
+      "brief": "Shared analog_sw sheet, identical on both boards. Order: (1) T-0012. Ruling Q-0006 verbatim: 'yes - C14-C17 to 470 nF; README note: dry (unlit) switch contacts, and the output-off behaviour below about 8 V during 12 V cranking'. Basic 470 nF part, rated for the node voltage (<= ~3.3 V by the zener) and placed after R34-R37. (2) T-0046. Ruling Q-0038 verbatim: 'yes - two 1206 resistors in series (2.2 k + 2.4 k, basic parts) for R3/R4/R7/R8'. Each switch load becomes 2.2 k + 2.4 k 1206 in series; check basic LCSC codes and recompute dissipation at 30 V and at the 48 V clamp. (3) T-0049. Ruling Q-0040 verbatim: 'add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop'. Choose a basic diode: Schottky preferred for low drop, reverse rating >=60 V (the 48 V clamp plus a reversed 30 V battery), >= F4 trip current. Place it so that D54 still clamps the J5.5 line at the connector. (4) T-0042. Ruling Q-0034 verbatim: 'correct the margin claim in design-notes and measure on the prototype; RIN 4.7 k goes on the prototype test list as the planned fix if the margin is short; no circuit change now'. Rewrite design-notes section 3 with the margin at SWIN 10.5 V (3V3 down and up), including the new diode drop from step 3. Put the measurement and the RIN 4.7 k fallback on the prototype test list in pdm-4ch STATUS. (5) T-0047 (two-way, no ruling). Document in design-notes section 4 that p_other is about 2.1 W for the 4-ch board at 30 V with all panel lines on, using the values after steps 2-3, and the resulting Tj (scratch run: tools/heat_budget.py --p-other 2.1). The tool default itself stays (tools/ is outside the gates; see report). (6) T-0050 (two-way, no ruling). Qualify design-notes section 8 and the README for pdm-4ch: the reverse-battery survival holds for VS(REV) 28 V, t < 2 min, RL >= 12 ohm (BTT6050 P_4.1.2); heavier loads need the battery fuse to clear (body diode ~2.4 W > PTOT 1.6 W). Also add the panel-LED protection from step 3. Do not write the HC2 part of section 8 here (that is P9). Checks: ERC and netlist on both boards after each edit, analog_sw.kicad_sch identical on both boards, LCSC on every fitted part, heat budget scratch run. Failure-mode note (navigation lights and bilge forced-run are panel-switched): what changes with the 470 nF and the diode drop at low battery. Stop and ask (one-way, invariant 1) if, with the diode drop, the hardware switch path no longer turns an output on at SWIN >= 10.5 V by the datasheet worst case even with the planned RIN 4.7 k fallback, or would need a divider change on the shared sheet.",
+      "items": [
+        "T-0012",
+        "T-0042",
+        "T-0046",
+        "T-0047",
+        "T-0049",
+        "T-0050"
+      ],
+      "plan": "T-0063",
+      "depends_on": [
+        "T-0065"
+      ]
+    },
+    {
+      "id": "T-0069",
+      "role": "board-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "Channel sense resistor, DEN rule, population rule",
+      "brief": "pdm-4ch channel sheet (x4) and docs. (1) T-0041. Ruling Q-0033 verbatim: 'yes, all three - RIS as 1206 >=0.25 W; record firmware rule: DEN pulsed only while sampling (and dropped on full-scale IS); OUT pull-down as a DNP footprint'. Change R103/R203/R303/R403 to 680 ohm 1206, >=0.25 W, basic LCSC; the value is unchanged so the sense scaling is unchanged. Add a DNP pull-down footprint from each OUT to GND; propose its value from BTT6050 section 7.3.3.2 (RPD for open-load detection) and record it as auto. Its dissipation at 30 V must stay within the package rating if it is ever fitted. (2) T-0052. Ruling Q-0041 verbatim: 'DEN pulsed only while sampling IS (and dropped on full-scale IS), not held high in Active mode (see Q-0033)'. Rewrite design-notes section 6 (power modes / DEN) and add it to the firmware requirements list for /system firmware. (3) T-0040. Ruling Q-0032 verbatim: 'all four BTT6050 as the standard pdm-4ch population; heavy loads go on HC2'. (4) T-0032 (two-way): document the population and ordering rule in pdm-4ch STATUS and README: BTT6010 only where > 4 A, and mixed builds are ordered together so the extended fee is paid once. Checks: ERC and netlist on pdm-4ch (the RIS footprint/LCSC change and the new DNP refs only); tools/heat_budget.py at 40 C with --p-other 2.1 (the population is unchanged, BTT6050 x4 at 4 A). Stop and ask if the RIS power check at the 40 mA maximum fault current (~1.1 W) is meant to be covered by hardware: the ruling relies on the firmware DEN rule for that case, so record it only, and do not fit a 2 W part on your own.",
+      "items": [
+        "T-0032",
+        "T-0040",
+        "T-0041",
+        "T-0052"
+      ],
+      "plan": "T-0063",
+      "depends_on": [
+        "T-0064"
+      ]
+    },
+    {
+      "id": "T-0070",
+      "role": "board-fixer",
+      "scope": "pdm-hc2",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "HC2 gate slew control (inrush, EMC edges)",
+      "brief": "hc_channel sheet x2. Ruling Q-0043 (T-0054) verbatim: 'yes - gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at gate, PD direct; start about 100k/3.9 nF for ~20 A into 1000 uF); this supersedes the plain RG_PU 100 ohm of Q-0001 (covers EMC E2 too); check MOSFET SOA, heat budget and fast short-circuit response'. Ruling Q-0001 (T-0006) verbatim, valid where Q-0043 does not replace it: 'yes - RG_PU 100 ohm, PD kept direct, RGATE_PD as a 0 ohm footprint; recheck switching loss, SOA, heat budget and short-circuit response; no PWM on HC2 outputs until measured on the bench'. Do not fit RG_PU 100 ohm; do keep a 0 ohm RGATE_PD footprint and the no-PWM rule. Ruling Q-0045 (T-0061) verbatim: 'loads not known yet - size the HC2 gate slew control for about 20 A into 1000 uF and measure the real loads on the prototype'. Order: (1) Read TPS4811-Q1 section 8.3.2.1, Eq. 3 and Eq. 4, and the BSC030N08NS5 datasheet (Qg, SOA Diagram 3). (2) Size R1/C1 for IINRUSH ~20 A into 1000 uF at 28-30 V (E24/E12 values, C1 >=25 V C0G/X7R, basic parts). Check: CBST C103/C203 > Qg(total) + 10*C1; MOSFET energy during the ramp against SOA (~0.4 J over 1-2 ms); the gate PD path stays direct (0 ohm RGATE_PD), so the 80 A short-circuit turn-off is not slowed; turn-on into a short (current ramps slowly, ISCP still trips within tSC). (3) Edit: R104/R204 role per TI topology (R1 in PU path), C1 + ~10 ohm at the gate, RGATE_PD 0 ohm footprint. (4) T-0059 (two-way): record in design-notes section 4a and the user notes the bootstrap delay at first switch-on (~76-100 ms, Eq. 1), the new turn-on ramp time, and the 3.8 min retry reset by toggling INP. (5) Add to HC2 STATUS: no PWM until bench-measured, and a prototype test of real load capacitance and inrush. Checks: ERC and netlist on pdm-hc2 (declare every changed ref), heat budget at 40 C on a scratch copy with RDS(on) 11.7 mOhm (T-0057 is deferred), and confirm 15 A still stands. Failure-mode note: bilge forced-run and searchlight outputs, slower turn-on, behaviour into a stalled pump. Stop and ask if no R1/C1 pair meets both the 1000 uF / ~20 A target and the MOSFET SOA (that would need a maximum load capacitance or a different MOSFET, i.e. decision 19), or if slew control would delay the short-circuit protection.",
+      "items": [
+        "T-0006",
+        "T-0054",
+        "T-0059",
+        "T-0061"
+      ],
+      "plan": "T-0063",
+      "depends_on": [
+        "T-0064"
+      ]
+    },
+    {
+      "id": "T-0071",
+      "role": "board-fixer",
+      "scope": "pdm-hc2",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "HC2 controller pin filtering (VS RC, CS/EN/OV/IWRN filters, DIODE 1 nF)",
+      "brief": "hc_channel sheet x2; all three items are two-way agent items (no owner ruling). Order: (1) T-0056: add 1 nF 0402 (C1523) from DIODE to GND at each MMBT3904 (Q13/Q23), fitted; TPS4811-Q1 section 9.6.1 makes it mandatory. Note the Kelvin emitter return in STATUS for the PCB. (2) T-0005: add RVS 100 ohm and CVS 1 uF/100 V in the VS feed of U11/U12 pin 20 (TPS4811-Q1 Table 9-3). First read IVS (operating and with the charge pump active) and check that the drop is < ~0.3 V and does not move the UVLO/OV thresholds or the CS+ reference (CS+ is fed from VS via RSET). Make C102/C202 the CVS or keep them, and record the choice as auto. (3) T-0008: footprints per TI Table 9-3: X cap ~1 nF across CS+/CS-, Y caps ~100 pF CS+/CS- to GND/SRC, 10 nF on EN/UVLO and on OVSET, 100 pF on IWRN; the DIODE capacitor is already done in step 1. For each one, check the time constant against the protection it filters: CS filter << tSC 4-5 us (80 A fast trip) and << tOC; EN/UVLO and OVSET filters should not hide a real OV/UV event longer than intended. Fit the values that pass with a clear margin (basic parts, auto decision) and mark the rest DNP. Final values are decided at the pre-compliance scan (Q-0012). Checks: ERC and netlist on pdm-hc2 after each step, LCSC or DNP on every new part, CS amplifier offset with the Y caps (matched values). Failure-mode note: the filters sit on the breaker and short-circuit sensing of safety-relevant outputs. Stop and ask if any filter would slow the 80 A short-circuit trip or the breaker beyond the datasheet response, or if RVS would put VS below V(VS_PORR) during the gate-drive load.",
+      "items": [
+        "T-0005",
+        "T-0008",
+        "T-0056"
+      ],
+      "plan": "T-0063",
+      "depends_on": [
+        "T-0070"
+      ]
+    },
+    {
+      "id": "T-0072",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "HC2 breaker level, float-run OUT divider, reverse-battery documentation",
+      "brief": "Shared scope only because docs/ARCHITECTURE.md (HC2 budget, pin map) changes; hardware edits are on pdm-hc2 (hc_channel, HC2 root). Do not touch the shared sheets. Order: (1) T-0053. Ruling Q-0042 verbatim: 'option (c) - RIWRN 68k (IOC about 17.5 A) plus README/label requirement for an external breaker <=15-18 A per output plus a firmware soft fuse; update the ARCHITECTURE HC2 budget; measure the bilge pump start current before ordering'. Set R113/R213 to 68 k (basic, E12). Recompute IOC with Eq. 6 and the spread, and keep the 146 ms timer. Update the ARCHITECTURE budget row ('breaker ~17.5 A / 146 ms; fast trip 80 A'). Write the README and label requirement and the firmware soft-fuse requirement (for /system firmware). Put 'measure bilge pump start current before ordering' on the HC2 pre-order checklist. Heat check on a scratch copy of heat_budget.py with 11.7 mOhm: Tj at 17.5-18 A. Ruling Q-0046 (T-0062) verbatim: 'breaker level as ruled in Q-0042 (RIWRN 68k, about 17.5 A, plus external breaker and firmware soft fuse); add an OUT voltage divider on spare IO4/IO5 for float-run detection - pin-map change via /system'. (2) T-0062: add a divider from OUT1 to IO4 and OUT2 to IO5 (ADC1, invariant 10). Suggested start: same as VBAT_SENSE, 220 k/22 k + 100 nF, 1 % basic parts, so the full scale is ~32 V. Place it in hc_channel or the HC2 root without changing the shared controller part, and remove the no-connect flags on IO4/IO5. Check: injection current into an unpowered ESP32 pin when a float switch drives OUT; the OUT line during freewheel (-0.5 V) and reverse. Update the ARCHITECTURE pin map row (HC2: IO4/IO5 OUT1/OUT2 sense). Failure-mode note: the divider must not make the float-switch circuit depend on the PDM (invariant 8); a shorted lower resistor still loads the pump feed by <0.2 mA only. (3) T-0058 (two-way): correct design-notes section 1 (TPS48110A-Q1, ~15 A) and section 9 (float runs now seen by the OUT divider on IO4/IO5, and by SW3/SW4 if wired). (4) T-0055. Ruling Q-0044 verbatim: 'keyed/polarised J10 plus README and label warning, and correct design-notes section 8 (reversal survival does not apply to HC2); full reverse-polarity protection deferred to a later HC2 revision (keep it on the list)'. Write the README and label warning that reverse connection destroys the HC2 controllers. Add the HC2 paragraph to design-notes section 8 (after the P5 edit). Put 'J10 keyed/polarised' into HC2 STATUS 'For /system' (mechanical; J10 not chosen yet), and 'full reverse-polarity protection' into the next-revision list. Do not change decision 19 ([proposed], ~21 A searchlight): a 17.5 A breaker excludes that load. Report it as an owner question (per-build RIWRN or drop the option) with door one-way. Checks: ERC and netlist on both boards (pdm-4ch must be unchanged), LCSC on fitted parts. Stop and ask if: the 68 k breaker would trip on a measured or datasheet bilge-pump start current (that is the owner's measurement, so leave the value as ruled and flag it); the OUT divider needs a pin other than IO4/IO5.",
+      "items": [
+        "T-0053",
+        "T-0055",
+        "T-0058",
+        "T-0062"
+      ],
+      "plan": "T-0063",
+      "depends_on": [
+        "T-0068",
+        "T-0071"
+      ]
+    },
+    {
+      "id": "T-0073",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-01",
+      "title": "BOM LCSC codes and controller notes (VBAT full scale, IO3 strap)",
+      "brief": "Run after the swaps, so the codes are final. (1) T-0021. Ruling Q-0014 verbatim: 'yes - add the listed basic/preferred LCSC codes after checking each against value and footprint; J5/J10/J11 in /system mechanical'. Codes from cost report C1: C2/C13 C14663, C4/C6 C15849, C5 C19666, C7/C9 C28233, C8 C45783, C10/C11 C307331, C12 C52923, D12-D15 (HC2 D12/D13) C22466350, R1/R2/R5/R6 C25879, R11/R12 C25905, R15-R17/R21/R24/R27 C25744; FB1/FB2 as P2 left them (C1017 or C19330). For each one use jlc_get_part to check value, package against the footprint, and voltage rating against the net (e.g. C12 25 V only on the 5 V CAN side; C2 is the boot capacitor). If P2 renamed or replaced a ref, skip that line. J5/J10/J11 stay without code (mechanical). (2) T-0033. Ruling Q-0025 verbatim: 'no - keep R1/R2 so the controller part stays identical on both boards' (they get C25879 in step 1). (3) T-0031. Ruling Q-0024 verbatim: 'keep the NTC (accuracy without calibration is worth 3.07 USD per order)'; check that TH1 keeps its LCSC code and make no change. (4) T-0043. Ruling Q-0035 verbatim: 'yes - correct VBAT full scale to about 32 V in decision 18 and design-notes'. Correct design-notes; the decision 18 text is amended through the decision row of this plan (do not edit decisions.md). (5) T-0051 / T-0060 (two-way): add to design-notes (controller/firmware section) and the production notes: never burn EFUSE_STRAP_JTAG_SEL, because IO3 is held low by IS2 (4-ch) and IMON2 (HC2). Checks: ERC and netlist on both boards (only LCSC fields change, so no net changes); shared sheets identical; the gate wants every part with LCSC or DNP. Stop and ask if a listed code does not match the value, footprint or voltage rating and no basic or preferred part fits (record it; do not pick an extended part for a passive without saying so).",
+      "items": [
+        "T-0021",
+        "T-0031",
+        "T-0033",
+        "T-0043",
+        "T-0051",
+        "T-0060"
+      ],
+      "plan": "T-0063",
+      "depends_on": [
+        "T-0064",
+        "T-0065",
+        "T-0066",
+        "T-0067",
+        "T-0068"
+      ]
+    },
+    {
+      "id": "T-0074",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-01",
+      "depends_on": [
+        "T-0064",
+        "T-0065",
+        "T-0066",
+        "T-0067",
+        "T-0068",
+        "T-0069",
+        "T-0072",
+        "T-0073"
+      ],
+      "verify": true
+    },
+    {
+      "id": "T-0075",
+      "role": "validator",
+      "scope": "pdm-hc2",
+      "state": "ready",
+      "created": "2026-11-01",
+      "depends_on": [
+        "T-0064",
+        "T-0065",
+        "T-0066",
+        "T-0067",
+        "T-0068",
+        "T-0070",
+        "T-0071",
+        "T-0072",
+        "T-0073"
+      ],
+      "verify": true
     }
   ]
 }
