@@ -47,7 +47,11 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 1. A physical switch turns its output on without the ESP32 and without the 3.3 V rail (decision 6).
 2. No relays; every output is a protected solid-state switch (decision 1).
 3. 12 V and 24 V systems; every part on the battery side rated for ≥ 30 V continuous and ≥ 48 V transients (decision 3).
-4. Every external line is filtered and surge-protected at the connector (long leads, VHF on board).
+4. Every external line is filtered and surge-protected at the connector (long leads, VHF on board). The only
+   exception is a PROFET output (pdm-4ch J11). It is protected through the switch itself: positive surges through
+   its body diode to VS and the input TVS D30 at J10 (with wide VS copper to D30), negative surges by its own clamp
+   (VS − VDS(AZ)). It keeps a DNP SMAJ30CA footprint to GND at the connector. Every other external line, including
+   the HC2 outputs, has its own TVS at the connector (decision 27).
 5. Parts: JLCPCB basic/preferred where one fits; pinouts, footprints and limits verified in the datasheet, never invented (decision 2).
 6. No conductive path from the circuit to the mounting surface or hull (decision 11).
 7. Load dump is a system-level responsibility; the README says so (decision 12).

@@ -235,6 +235,102 @@ most marine electronics, this device relies on that system-level protection.
   "current while commanded off" and raise an alarm, but cannot switch the load off.
 - Reverse battery: the switches survive with the ground network, but the loads see reverse voltage.
 
+### 8.1 Battery input J10: TVS, capacitors, ferrite position (decision 26, T-0064, 2026-11-01)
+
+Root sheet, the same on both boards (controller part):
+
+| Ref | Part | Net | Purpose |
+|---|---|---|---|
+| D30 | SMCJ30CA (C19077607, preferred) | VBAT_IN–GND | surge clamp at the terminal (unchanged part, now on the terminal side of FL30) |
+| C30 | 1 µF/100 V X7R 1206, Samsung CL31B105KCHNNNE (C13832, extended) | VBAT_IN–GND | HF return at the terminals |
+| FL30 | ferrite / CMC position, **DNP** | VBAT_IN–VS | decided at the pre-compliance scan (decision 28) |
+| JP30 | copper bridge (net tie, no part) | VBAT_IN–VS | keeps VS connected while FL30 is not fitted; cut only when FL30 is fitted |
+| C31 | 100 µF/63 V Al electrolytic, Ymin VKMD1001J101MV (C487384, extended) | VS–GND | bulk at J10 |
+
+HC2 only (`hc_channel`, ×2): C106/C206, the same 100 µF/63 V at each channel's VS, so HC2 has 3 × 100 µF.
+4-ch only (`channel`, ×4): C104–C404, the same 1 µF/100 V at each BTT6050 VS tab, next to C103 (100 nF).
+
+Part facts:
+- Ymin VKM series datasheet (catalogue pp. 178–180): −55…+105 °C, tan δ 0.14 at 63 V (120 Hz), life
+  10 000 h at 105 °C for ≥ φ8, AEC-Q200. 100 µF/63 V = 8 × 10 mm, ripple 902 mA rms (105 °C, 100 kHz);
+  frequency factor 0.50 at 120 Hz → 451 mA rms. ESR is not specified. From tan δ, ESR(120 Hz) ≤ 0.14/(2π·120·100 µF)
+  ≈ 1.9 Ω; it is lower at 100 kHz, but the datasheet gives no figure. Body dimensions (B = C = 8.3, A = 3.4, H = 0.9,
+  E = 3.1 mm) are the standard 8 × 10 size of KiCad `CP_Elec_8x10`. Check that footprint against the JLCPCB/EasyEDA
+  footprint before ordering.
+- Samsung CL31B105KCHNNNE: part-numbering code 31 = 1206, B = X7R, 105 = 1 µF, K = ±10 %, C = 100 V (Samsung MLCC
+  catalogue, "Part Numbering System"). The capacitance drops under DC bias at 24–29 V, but this was not checked
+  against a curve. JLCPCB has no soft-termination 1 µF/100 V part in stock.
+- No basic or preferred SMD electrolytic ≥ 63 V and no basic or preferred 1–2.2 µF/100 V MLCC exist at JLCPCB
+  (searched 2026-11-01). Both parts are extended: 2 new unique extended parts, each with a loading fee per order.
+
+Why 63 V: D30 clamps at 48.4 V (below); 63 V leaves 30 % margin. 100 V for the ceramics (decision 30).
+
+Energy at turn-off (estimate; cable 1 µH/m as in the Infineon VBAT(SC) set-up, 5 m loop → 5 µH):
+- HC2 fast trip 80 A: E = ½·L·I² = 16 mJ. With only C31 (ideal C): √(28.8² + 2E/C) = 33.9 V. With 3 × 100 µF (HC2): 30.6 V.
+- 4-ch, BTT6050 current limit up to 56 A: 7.8 mJ → 31.4 V with 100 µF.
+- The ESR of the electrolytics (unspecified, ≤ 1.9 Ω at 120 Hz) means the first microseconds of an 80 A step are
+  taken by C30, D30 and the VS-tab ceramics. The electrolytics take the slower part, so D30 conducts less often.
+  Three electrolytics in parallel on HC2 also divide the ESR by three. That is the reason for the extra bulk on HC2 (EMC finding E3).
+
+Ripple: no PWM on HC2 (decision 25). For 4-ch PWM at 100–200 Hz the battery cable (≈ 20 mΩ + j·6 mΩ)
+has far lower impedance than 100 µF (8 Ω at 200 Hz), so C31 carries a small share. The 451 mA rms rating at 120 Hz is
+not a limit.
+
+Life: Arrhenius doubling per 10 K. At 65 °C board temperature (40 °C engine room + enclosure + switches nearby,
+assumption) 10 000 h × 2⁴ ≈ 160 000 h (≈ 18 years continuous). The cheaper fallback, Semtech CS1J101M-CRG10
+(C116430, 0.13 USD, 2000 h at 105 °C, 10 × 10.5 mm), gives ≈ 3.7 years at the same temperature, so it was not chosen.
+
+Ferrite position: no 40–50 A ferrite or CMC footprint exists in the libraries (the KiCad Ferrite_THT bead has a
+0.8 mm hole). FL30 therefore has no footprint yet. If the scan asks for it, a snap-on ferrite on the battery cable is the
+first, board-free option. If a board part is needed, choose it and its footprint at the PCB phase. JP30 (net tie)
+is a copper link that must be as wide as the VS copper on both layers. It is listed DNP because nothing is placed, but it
+conducts. If FL30 is ever fitted, 4-ch output surges (OUT → PROFET body diode → VS) reach D30 only through FL30.
+In that case reconsider fitting the output TVS footprints D103–D403.
+
+Cost per board at 10 units (part prices at 1–49 pcs): 4-ch C31 0.22 + C30 0.065 + 4 × C104 0.26 = 0.54 USD;
+HC2 C31 0.22 + C30 0.065 + 2 × C106 0.44 + 2 × SMAJ33CA 0.057 = 0.78 USD. On top of that comes the extended-part
+loading fee (about 3 USD per unique part per order, check the quote) for C487384 and C13832, i.e. ≈ 0.6 USD per
+board at 10 units. The bulk capacitor alone is 0.22 + 0.30 ≈ 0.52 USD per board, at the ~0.5 USD limit of the
+work package.
+
+**D30 vs the BTT6050 (T-0017, recorded, no change).** SMCJ30CA (hongjiacheng datasheet): VRWM 30 V, VBR
+33.3–36.8 V at 1 mA, VC 48.4 V at IPP 31 A (10/1000 µs). BTT6050-1ERA: VS max 48 V (P_4.1.1), VS(LD) 65 V for load
+dump with RI = 2 Ω, set up per ISO 7637-1 (P_4.1.3). D30 reaches 48.4 V only at its full rated pulse current, for the
+duration of the pulse. That is 0.4 V over the static limit, but well inside VS(LD), so short clamp excursions are
+covered. The new VS-side parts are rated above the clamp: C31 63 V, C30/C104 100 V.
+
+### 8.2 Output surge protection (decision 27, T-0064)
+
+**HC2: D103/D203 SMAJ33CA (C19077549, preferred, 0.028 USD) from each OUT to GND at J11.** Hongjiacheng datasheet:
+VRWM 33 V, VBR 36.7–40.6 V at 1 mA, VC 53.3 V at IPP 7.5 A (10/1000 µs), 400 W, IR 1 µA at VRWM.
+- Float-switch case: the float switch puts the battery (up to 28.8 V while charging, ≈ 30 V maximum per decision 3)
+  on OUT while the channel is off. That is below VRWM 33 V (leakage ≤ 1 µA). SMAJ30CA (VRWM 30 V) would have no margin.
+- Ratings on OUT: Q12/Q22 drain (BSC030N08NS5, VDS 80 V) and D102/D202 (SS510B, 100 V). The clamp of 53.3 V is
+  below both. Negative surges are clamped first by the SS510B freewheel diode.
+- With the channel on, a VS surge also appears on OUT. D30 (VBR from 33.3 V) breaks down before D103 (VBR from 36.7 V).
+- PCB rule: TVS next to the J11 terminal, its GND return a short, wide path straight to J10.2 (not through the
+  logic ground), as in EMC layout rule 2.
+
+**Failure mode (bilge forced-run output).** A TVS fails short when it is overstressed (for example a load dump on the
+pump wire, decision 12). With D103 shorted:
+- PDM channel on: the TPS48110 breaker / fast trip turns the channel off and reports the fault; the output-wire fuse
+  may blow.
+- Float switch running the pump: the TVS sits **outside** the back-to-back MOSFETs, so the float circuit feeds back
+  through the PDM output wire into the short. The float circuit keeps working (invariant 8) **only if the PDM leg
+  has its own fuse, between J11 and the point where it joins the float circuit, that opens before the float-circuit
+  fuse** (fuse selectivity: PDM-leg fuse clearly smaller than the float fuse, or a slower float fuse). This must go
+  into the README installation rules next to the external breaker ≤ 15–18 A of decision 39.
+- Open TVS: no function change, only the output surge protection is lost.
+- A competent person must review this output and its fusing before installation.
+
+**4-ch: D103–D403 SMAJ30CA (C19077548, preferred), DNP footprint per output at J11.** The outputs are protected by the
+PROFET: a positive surge goes through the body diode to VS and D30. A negative surge is clamped at VS − VDS(AZ), with
+VDS(AZ) 66/70/75 V (BTT6050 P_5.5.5); HBM 4 kV on OUT. VS copper from the switches to D30 must be wide.
+Before fitting D103–D403: during inductive turn-off the PROFET drives OUT to VS − VDS(AZ), for example 24 − 66…75 =
+−42…−51 V. The bidirectional SMAJ30CA (VBR 33.3–36.8 V) would then conduct and take the demagnetisation energy instead of
+the PROFET clamp. For inductive loads, either check that energy against the TVS rating (400 W, 10/1000 µs) or fit a
+unidirectional SMAJ30A (cathode to OUT), which freewheels the load instead.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)

@@ -1689,6 +1689,180 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:D_TVS"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "D_TVS"
+				(at 0 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Bidirectional transient-voltage-suppression diode"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "diode TVS thyrector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "TO-???* *_Diode_* *SingleDiode* D_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "D_TVS_0_1"
+				(polyline
+					(pts
+						(xy -2.54 1.27)
+						(xy -2.54 -1.27)
+						(xy 2.54 1.27)
+						(xy 2.54 -1.27)
+						(xy -2.54 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0.508 1.27)
+						(xy 0 1.27)
+						(xy 0 -1.27)
+						(xy -0.508 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 0)
+						(xy -1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "D_TVS_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 	)
 	(symbol
 		(lib_id "ESP32-PDM:BTT6050-1ERA")
@@ -3711,5 +3885,444 @@
 			(justify left)
 		)
 		(uuid "b9dff0c3-9b6f-43e9-acab-92aea7c0ad50")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 152.4 78.74 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9a076216-63f2-4615-be62-3318d707a348")
+		(property "Reference" "C104"
+			(at 154.94 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "1uF/100V"
+			(at 154.94 80.01 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 152.4 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 152.4 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "1 uF 100 V X7R 1206"
+			(at 152.4 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C13832"
+			(at 152.4 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "Samsung CL31B105KCHNNNE"
+			(at 152.4 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "afd12b8f-0a6e-4eb8-8367-32d48f361dae")
+		)
+		(pin "2"
+			(uuid "354def54-5f29-45bb-9726-e42934199de8")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/2e0ad34b-f6f7-44ac-9e76-6c6d9cc6db65"
+					(reference "C104")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f6cb778e-73c9-480f-b169-c90c8edcfa97"
+					(reference "C204")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f822a40d-5913-4e41-b2b2-d761d1e1770c"
+					(reference "C304")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/b3da0f83-9966-4609-9b2e-699227ba2919"
+					(reference "C404")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:VS")
+		(at 152.4 74.93 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board no)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "280a21c9-85ba-4ba8-a2c2-1090a1cfcb5f")
+		(property "Reference" "#PWR0971"
+			(at 154.94 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "VS"
+			(at 154.94 76.2 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 152.4 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 152.4 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 152.4 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "39da29d5-9e01-4a36-bb90-22ecf8825d59")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/2e0ad34b-f6f7-44ac-9e76-6c6d9cc6db65"
+					(reference "#PWR0971")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f6cb778e-73c9-480f-b169-c90c8edcfa97"
+					(reference "#PWR0972")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f822a40d-5913-4e41-b2b2-d761d1e1770c"
+					(reference "#PWR0973")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/b3da0f83-9966-4609-9b2e-699227ba2919"
+					(reference "#PWR0974")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 152.4 82.55 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board no)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5639eb75-17e8-49a7-ad55-75ae1cf5045d")
+		(property "Reference" "#PWR0975"
+			(at 154.94 81.28 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 154.94 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 152.4 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 152.4 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 152.4 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d76945e8-ca51-4632-8329-a97935bfc999")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/2e0ad34b-f6f7-44ac-9e76-6c6d9cc6db65"
+					(reference "#PWR0975")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f6cb778e-73c9-480f-b169-c90c8edcfa97"
+					(reference "#PWR0976")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f822a40d-5913-4e41-b2b2-d761d1e1770c"
+					(reference "#PWR0977")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/b3da0f83-9966-4609-9b2e-699227ba2919"
+					(reference "#PWR0978")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:D_TVS")
+		(at 162.56 95.25 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp yes)
+		(fields_autoplaced yes)
+		(uuid "18cc0c45-7a87-4039-b3ce-04ac1dbbff9c")
+		(property "Reference" "D103"
+			(at 165.1 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SMAJ30CA"
+			(at 165.1 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Diode_SMD:D_SMA"
+			(at 162.56 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 162.56 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "DNP output TVS footprint (decision 27); see design-notes 8 before fitting (PROFET demagnetisation clamp)"
+			(at 162.56 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C19077548"
+			(at 162.56 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8401fac0-a7ea-4ce8-9f49-5e564f7a6c09")
+		)
+		(pin "2"
+			(uuid "e1e2e953-99c5-4e0d-94b0-dec1f39dc5d9")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/2e0ad34b-f6f7-44ac-9e76-6c6d9cc6db65"
+					(reference "D103")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f6cb778e-73c9-480f-b169-c90c8edcfa97"
+					(reference "D203")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f822a40d-5913-4e41-b2b2-d761d1e1770c"
+					(reference "D303")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/b3da0f83-9966-4609-9b2e-699227ba2919"
+					(reference "D403")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(hierarchical_label "OUT"
+		(shape bidirectional)
+		(at 162.56 91.44 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d96223e7-d069-461d-b60a-e1f06b68851c")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 162.56 99.06 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board no)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "21e70962-3be5-4a51-b30f-5ef86e294d9e")
+		(property "Reference" "#PWR0979"
+			(at 165.1 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 165.1 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 162.56 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 162.56 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 162.56 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4dc2687d-91d8-4a28-892f-9b9cbf821409")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/2e0ad34b-f6f7-44ac-9e76-6c6d9cc6db65"
+					(reference "#PWR0979")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f6cb778e-73c9-480f-b169-c90c8edcfa97"
+					(reference "#PWR0980")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/f822a40d-5913-4e41-b2b2-d761d1e1770c"
+					(reference "#PWR0981")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/b3da0f83-9966-4609-9b2e-699227ba2919"
+					(reference "#PWR0982")
+					(unit 1)
+				)
+			)
+		)
 	)
 )
