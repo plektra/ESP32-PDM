@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """Orchestrator for unattended agent runs (decision 22, docs/AUTONOMY.md).
 
-Runs queued tasks one at a time as headless Claude Code sessions (`claude -p --agent <role>`), each in a fresh
-context, in a dedicated worktree on the branch `auto/pilot`. After every task it checks the result itself instead of
-trusting the agent: only the expected report in docs/reviews/ may change, the report must end with a valid finding
-block. It then sorts the findings by the policy in docs/AUTONOMY.md: small ones become parked `board-fix` tasks, big
-ones become owner questions in docs/OWNER-INBOX.md. Each task is committed on `auto/pilot`; the owner merges.
+Runs queued tasks in parallel (--parallel, default 3) as headless Claude Code sessions (`claude -p --agent <role>`),
+each in a fresh context and its own throwaway worktree (`../<repo>-auto-<task>`) cut from the branch `auto/pilot`.
+After every task it checks the result itself instead of trusting the agent: only the expected report in
+docs/reviews/ may change, the report must end with a valid finding block. Under one lock it then copies the report
+to the `auto/pilot` worktree (`../<repo>-auto`) and sorts the findings by the policy in docs/AUTONOMY.md: small ones
+become parked `board-fix` tasks, big ones become owner questions in docs/OWNER-INBOX.md. Each task is committed on
+`auto/pilot`; the owner merges. Inside tmux every running agent gets a pane in the window `workers`.
 
 Pilot: only the reviewer roles run (validator, emc-reviewer, cost-controller).
 
 Examples:
   python3 tools/orchestrate.py status
   python3 tools/orchestrate.py run --dry-run
-  python3 tools/orchestrate.py run --max-tasks 4 --budget 60
+  python3 tools/orchestrate.py run --max-tasks 4 --budget 60 --parallel 3
   python3 tools/orchestrate.py run --task T-0003
   python3 tools/orchestrate.py add validator pdm-hc2 --focus hc_channel --deep
   python3 tools/orchestrate.py inbox          # apply the owner's answers only
@@ -29,7 +31,10 @@ import re
 import shutil
 import subprocess
 import sys
+import shlex
 import tempfile
+import threading
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -59,7 +64,11 @@ DENIED_TOOLS = ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(git reset:*)', '
                 'Bash(git merge:*)', 'Bash(git rebase:*)', 'Bash(git stash:*)', 'Bash(git worktree:*)',
                 'Bash(rm -rf:*)', 'Bash(sudo:*)', 'Agent', 'Edit']
 SEVERITIES = ('CRITICAL', 'MAJOR', 'MINOR', 'INFO')
+# Agent output that means the API was not available (usage limit, rate limit, overload), not that the task failed.
+UNAVAILABLE = re.compile(r'hit your .*limit|usage limit|rate limit|overloaded|\b529\b', re.I)
 KINDS = ('finding', 'lever', 'question')
+STATE = threading.Lock()  # guards the queue, the inbox and git while agents run in parallel
+RESERVED = set()  # report paths handed to running agents
 
 
 def today():
@@ -243,7 +252,7 @@ def agent_tools(role):
 def report_path(t):
     name = f"{today()}-{ROLES[t['role']]['kind']}-{t['scope']}" + (f"-{t['focus']}" if t.get('focus') else '')
     path, n = REVIEWS / f'{name}.md', 2
-    while (WORKTREE / path).exists():
+    while (WORKTREE / path).exists() or path in RESERVED:
         path, n = REVIEWS / f'{name}-{n}.md', n + 1
     return path
 
@@ -259,8 +268,8 @@ def prompt_for(t, report):
             f"per severity.")
 
 
-def changed_paths():
-    out = subprocess.run(['git', 'status', '--porcelain', '-z', '--untracked-files=all'], cwd=WORKTREE,
+def changed_paths(cwd=None):
+    out = subprocess.run(['git', 'status', '--porcelain', '-z', '--untracked-files=all'], cwd=cwd or WORKTREE,
                          capture_output=True, text=True, check=True).stdout
     paths, entries = [], iter(out.split('\0'))
     for e in entries:
@@ -271,94 +280,200 @@ def changed_paths():
     return paths
 
 
-def revert(paths):
-    for p in paths:
-        if git('ls-files', '--', p):
-            git('checkout', '--', p)
-        else:
-            (WORKTREE / p).unlink(missing_ok=True)
+def task_worktree(t):
+    """Each running agent gets its own throwaway worktree next to the repo (never under .claude/)."""
+    return REPO.parent / f"{REPO.name}-auto-{t['id']}"
 
 
-def run_task(q, t, budget_left, dry_run):
+def tmux(*args):
+    return subprocess.run(['tmux', *args], capture_output=True, text=True)
+
+
+def tmux_pane(t, log):
+    """Inside tmux: one pane per running agent in the window `workers`, tailing its trace. Best effort."""
+    if not os.environ.get('TMUX'):
+        return None
+    log.touch()
+    tail = f'tail -n +1 -F {shlex.quote(str(log))}'
+    with STATE:
+        r = tmux('split-window', '-d', '-t', 'workers', '-P', '-F', '#{pane_id}', tail)
+        if r.returncode:
+            r = tmux('new-window', '-d', '-n', 'workers', '-P', '-F', '#{pane_id}', tail)
+            tmux('set-option', '-w', '-t', 'workers', 'pane-border-status', 'top')
+        if r.returncode:
+            return None
+        pane = r.stdout.strip()
+        tmux('select-pane', '-t', pane, '-T', f"{t['id']} {t['role']} {t['scope']}{' deep' if t.get('deep') else ''}")
+        tmux('select-layout', '-t', 'workers', 'tiled')
+    return pane
+
+
+def tmux_close(pane, linger=120):
+    """Leave a finished agent's pane up for a while, then close it."""
+    if pane:
+        tmux('run-shell', '-b', f'sleep {linger}; tmux kill-pane -t {pane}; tmux select-layout -t workers tiled')
+
+
+def describe(event):
+    """Readable lines for one stream-json event: tool calls, agent text, tool errors, start and end."""
+    kind = event.get('type')
+    content = (event.get('message') or {}).get('content')
+    content = content if isinstance(content, list) else []
+    if kind == 'system' and event.get('subtype') == 'init':
+        return [f"● started on {event.get('model')}"]
+    if kind == 'assistant':
+        lines = []
+        for c in content:
+            if c.get('type') == 'tool_use':
+                i = c.get('input') or {}
+                arg = (i.get('command') or i.get('file_path') or i.get('pattern') or i.get('url') or i.get('query')
+                       or json.dumps(i, ensure_ascii=False))
+                lines.append(f"▸ {c['name']}: {' '.join(str(arg).split())[:160]}")
+            elif c.get('type') == 'text' and c['text'].strip():
+                lines.append('“ ' + ' '.join(c['text'].split())[:240])
+        return lines
+    if kind == 'user':
+        return ['  ✗ ' + ' '.join(str(c.get('content')).split())[:160] for c in content if c.get('is_error')]
+    if kind == 'result':
+        return [f"■ {event.get('terminal_reason') or event.get('subtype')}, "
+                f"{float(event.get('total_cost_usd') or 0):.2f} USD"]
+    return []
+
+
+def run_streaming(cmd, env, tag, task_log, cwd):
+    """Run one agent, writing a readable trace to its log and to live.log (tail it in tmux); return the result
+    event, or an error dict shaped like one."""
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    timed_out = threading.Event()
+    timer = threading.Timer(TASK_TIMEOUT, lambda: (timed_out.set(), proc.kill()))
+    timer.start()
+    out, other = None, []
+    with open(task_log, 'a') as tl, open(LOGS / 'live.log', 'a') as live:
+        for line in proc.stdout:
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                other.append(line.strip())
+                continue
+            if event.get('type') == 'result':
+                out = event
+            for text in describe(event):
+                stamped = f'{datetime.datetime.now():%H:%M:%S} {tag} {text}\n'
+                tl.write(stamped)
+                live.write(stamped)
+            tl.flush()
+            live.flush()
+    proc.wait()
+    timer.cancel()
+    if out is None:
+        out = dict(is_error=True, result=f'timeout after {TASK_TIMEOUT} s' if timed_out.is_set() else
+                   f"exit {proc.returncode}: {' '.join(other)[-300:]}")
+    return out
+
+
+def task_budget(t, budget_left):
+    return min(ROLES[t['role']]['budget'][bool(t.get('deep'))], budget_left)
+
+
+def run_task(q, t, budget_left, dry_run=False):
+    """Run one agent in its own worktree, then (under STATE) check it, triage and commit on auto/pilot.
+    Thread-safe: several run at once."""
     deep = bool(t.get('deep'))
-    spec = ROLES[t['role']]
-    model = t.get('model') or spec['model'][deep]
-    budget = min(spec['budget'][deep], budget_left)
-    report = report_path(t)
+    model = t.get('model') or ROLES[t['role']]['model'][deep]
+    budget = task_budget(t, budget_left)
+    with STATE:
+        report = report_path(t)
+        RESERVED.add(report)
     scratch = Path(tempfile.mkdtemp(prefix=f"pdm-{t['id']}-"))
     cmd = [CLAUDE_BIN, '-p', prompt_for(t, report), '--agent', t['role'], '--model', model,
-           '--max-budget-usd', f'{budget:.2f}', '--output-format', 'json', '--no-session-persistence',
+           '--max-budget-usd', f'{budget:.2f}', '--output-format', 'stream-json', '--verbose',
+           '--no-session-persistence',
            '--add-dir', str(scratch), '--allowedTools', *agent_tools(t['role']), 'Write',
            '--disallowedTools', *DENIED_TOOLS]
     print(f"→ {t['id']} {t['role']} {t['scope']}{' deep' if deep else ''} ({model}, ≤ {budget:.2f} USD) → {report}")
     if dry_run:
         print('  ' + ' '.join(c if ' ' not in c else repr(c[:60] + '…') for c in cmd))
         return 0.0, None
-    head = git('rev-parse', 'HEAD')
+    wt = task_worktree(t)
+    with STATE:
+        if wt.exists():
+            git('worktree', 'remove', '--force', str(wt), check=False)
+        git('worktree', 'add', '--detach', str(wt), 'HEAD')
+        head = git('rev-parse', 'HEAD', cwd=wt)
+        t.update(state='running', started=datetime.datetime.now().isoformat(timespec='seconds'), model=model)
+        save_queue(WORKTREE, q)
+        LOGS.mkdir(parents=True, exist_ok=True)
+    (wt / REVIEWS).mkdir(parents=True, exist_ok=True)  # empty folders are not in git
+    log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}")
-    t.update(state='running', started=datetime.datetime.now().isoformat(timespec='seconds'), model=model)
-    save_queue(WORKTREE, q)
-    (WORKTREE / REVIEWS).mkdir(parents=True, exist_ok=True)  # empty folders are not in git
+    pane = tmux_pane(t, log.with_suffix('.log'))
     try:
-        r = subprocess.run(cmd, cwd=WORKTREE, env=env, capture_output=True, text=True, timeout=TASK_TIMEOUT)
-        out = json.loads(r.stdout)
-    except subprocess.TimeoutExpired:
-        out = dict(is_error=True, result=f'timeout after {TASK_TIMEOUT} s')
-    except json.JSONDecodeError:
-        out = dict(is_error=True, result=f'exit {r.returncode}: ' + (r.stderr or r.stdout).strip()[-300:])
+        out = run_streaming(cmd, env, t['id'], log.with_suffix('.log'), wt)
     finally:
         shutil.rmtree(scratch, ignore_errors=True)
-    LOGS.mkdir(parents=True, exist_ok=True)
-    log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
+        tmux_close(pane)
     log.write_text(json.dumps(dict(cmd=cmd, output=out), indent=2, ensure_ascii=False))
     cost = float(out.get('total_cost_usd') or 0)
-    t['cost_usd'] = round(t.get('cost_usd', 0) + cost, 4)
-    t['attempts'] = t.get('attempts', 0) + 1
     notes = []
     if out.get('permission_denials'):
         denied = sorted({d.get('tool_name', '?') for d in out['permission_denials']})
         notes.append(f"{len(out['permission_denials'])} tool calls denied ({', '.join(denied)}); log {log.name}")
 
-    # Gate 1: the agent must not have moved the branch.
-    if git('rev-parse', 'HEAD') != head:
-        t.update(state='failed', note=f'agent changed HEAD (was {head[:8]}); stop and inspect {WORKTREE}')
-        save_queue(WORKTREE, q)
-        raise SystemExit(t['note'])
-    # Gate 2: only one new report in docs/reviews/; everything else is reverted.
-    changed = [p for p in changed_paths() if p not in (str(QUEUE), str(INBOX))]
-    reports = [p for p in changed if p.startswith(f'{REVIEWS}/') and p.endswith('.md') and not git('ls-files', '--', p)]
-    got = str(report) if str(report) in reports else (reports[0] if len(reports) == 1 else None)
-    stray = [p for p in changed if p != got]
-    if stray:
-        revert(stray)
-        notes.append('reverted ' + ', '.join(stray))
-    # Gate 3: the report carries a valid finding block.
-    result = None
-    if got is None:
-        notes.append(f"no report written ({out.get('terminal_reason') or out.get('subtype') or 'unknown'}): "
-                     f"{str(out.get('result', ''))[:200]}")
-    else:
-        try:
-            items = parse_block((WORKTREE / got).read_text())
-            small, big, dup, crit = triage(q, got, items)
-            result = dict(report=got, small=small, big=big, duplicates=dup, critical=crit)
-        except (ValueError, json.JSONDecodeError) as e:
-            notes.append(f'report {got}: {e}')
-            revert([got])
+    with STATE:
+        t['cost_usd'] = round(t.get('cost_usd', 0) + cost, 4)
+        t['attempts'] = t.get('attempts', 0) + 1
+        # Gate 1: the agent must not have moved its worktree's HEAD; keep the worktree for inspection if it did.
+        keep = git('rev-parse', 'HEAD', cwd=wt) != head
+        if keep:
+            notes.append(f'agent changed HEAD (was {head[:8]}); inspect {wt}')
+        # Gate 2: only one new report in docs/reviews/; everything else is dropped with the worktree.
+        changed = changed_paths(wt)
+        reports = [p for p in changed if p.startswith(f'{REVIEWS}/') and p.endswith('.md')
+                   and not git('ls-files', '--', p, cwd=wt)]
+        got = str(report) if str(report) in reports else (reports[0] if len(reports) == 1 else None)
+        if got and keep:
             got = None
-    t.update(state='done' if result else 'failed', finished=today(), note='; '.join(notes) or None)
-    if result:
-        t['report'] = got
-    write_inbox(WORKTREE, q)
-    save_queue(WORKTREE, q)
-    paths = [str(QUEUE), str(INBOX)] + ([got] if got else [])
-    git('add', '--', *paths)
-    summary = (f"{result['small']} small, {result['big']} for the owner, {result['duplicates']} duplicates"
-               if result else 'failed')
-    git('commit', '-m', f"Auto: {t['role']} {t['scope']} ({t['id']}): {summary}\n\n"
-        f"Unattended run by tools/orchestrate.py, model {model}, {cost:.2f} USD.\n\n"
-        f"Co-Authored-By: Claude <noreply@anthropic.com>")
-    print(f"  {t['state']}: {summary}; {cost:.2f} USD" + (f"; {t['note']}" if t.get('note') else ''))
+        stray = [p for p in changed if p != got]
+        if stray:
+            notes.append('dropped ' + ', '.join(stray))
+        # Gate 3: the report carries a valid finding block; then it moves to auto/pilot.
+        result = None
+        if got is None:
+            notes.append(f"no report written ({out.get('terminal_reason') or out.get('subtype') or 'unknown'}): "
+                         f"{str(out.get('result', ''))[:200]}")
+        else:
+            text = (wt / got).read_text()
+            try:
+                items = parse_block(text)
+                if (WORKTREE / got).exists():  # another agent took the name meanwhile
+                    got = str(Path(got).with_name(f"{Path(got).stem}-{t['id']}.md"))
+                (WORKTREE / got).parent.mkdir(parents=True, exist_ok=True)
+                (WORKTREE / got).write_text(text)
+                small, big, dup, crit = triage(q, got, items)
+                result = dict(report=got, small=small, big=big, duplicates=dup, critical=crit)
+            except (ValueError, json.JSONDecodeError) as e:
+                notes.append(f'report {got}: {e}')
+                got = None
+        # A usage limit or API outage is not the task's fault: leave it ready and let the caller stop the run.
+        paused = result is None and not keep and (out.get('terminal_reason') == 'api_error'
+                                                  or bool(UNAVAILABLE.search(str(out.get('result', '')))))
+        t.update(state='done' if result else 'ready' if paused else 'failed', finished=today(),
+                 note='; '.join(notes) or None)
+        if result:
+            t['report'] = got
+        write_inbox(WORKTREE, q)
+        save_queue(WORKTREE, q)
+        git('add', '--', *([str(QUEUE), str(INBOX)] + ([got] if got else [])))
+        summary = (f"{result['small']} small, {result['big']} for the owner, {result['duplicates']} duplicates"
+                   if result else 'paused, API unavailable' if paused else 'failed')
+        git('commit', '-m', f"Auto: {t['role']} {t['scope']} ({t['id']}): {summary}\n\n"
+            f"Unattended run by tools/orchestrate.py, model {model}, {cost:.2f} USD.\n\n"
+            f"Co-Authored-By: Claude <noreply@anthropic.com>")
+        if not keep:
+            git('worktree', 'remove', '--force', str(wt), check=False)
+        RESERVED.discard(report)
+        print(f"  {t['id']} {t['state']}: {summary}; {cost:.2f} USD" + (f"; {t['note']}" if t.get('note') else ''),
+              flush=True)
     return cost, result
 
 
@@ -482,28 +597,57 @@ def cmd_run(args):
     if git('status', '--porcelain'):
         git('add', '--', str(QUEUE), str(INBOX))
         git('commit', '-m', f'Auto: apply {answered} owner answers')
-    spent, ran, fails, new_q = 0.0, 0, 0, 0
-    while ran < args.max_tasks:
-        todo = [find_task(q, args.task)] if args.task else runnable(q)
-        todo = [t for t in todo if t['state'] == 'ready' and t['role'] in ROLES]
-        if not todo:
-            break
-        if args.budget - spent < 1.0:
-            notify(f'Run budget of {args.budget:.0f} USD used up')
-            break
-        cost, result = run_task(q, todo[0], args.budget - spent, dry_run=False)
-        spent += cost
-        ran += 1
-        fails = 0 if result else fails + 1
-        new_q += result['big'] if result else 0
-        if result and result['critical']:
-            notify(f"CRITICAL finding in {result['report']}: run stopped, see the owner inbox")
-            break
-        if fails >= 2:
-            notify('Two tasks failed in a row: run stopped')
-            break
-        if args.task:
-            break
+    for wt in REPO.parent.glob(f'{REPO.name}-auto-T-*'):  # agent worktrees left by an interrupted run
+        git('worktree', 'remove', '--force', str(wt), check=False)
+    git('worktree', 'prune', check=False)
+    # Up to --parallel agents at once. Each new agent's budget cap is what is left after the caps of the running
+    # ones. A stop condition starts nothing new; running agents finish and are committed.
+    limit = 1 if args.task else args.max_tasks
+    spent, ran, fails, new_q, stop = 0.0, 0, 0, 0, None
+    running = {}  # future -> (task, cap)
+    with ThreadPoolExecutor(max_workers=args.parallel) as pool:
+        while True:
+            while not stop and len(running) < args.parallel and ran < limit:
+                with STATE:
+                    todo = [find_task(q, args.task)] if args.task else runnable(q)
+                    todo = [t for t in todo if t['state'] == 'ready' and t['role'] in ROLES]
+                    if not todo:
+                        break
+                    left = args.budget - spent - sum(cap for _, cap in running.values())
+                    if left < 1.0:
+                        stop = f'run budget of {args.budget:.0f} USD reserved or used'
+                        break
+                    t = todo[0]
+                    t['state'] = 'running'  # claimed here so the next pick skips it; run_task saves it
+                cap = task_budget(t, left)
+                running[pool.submit(run_task, q, t, cap)] = (t, cap)
+                ran += 1
+            if not running:
+                break
+            done, _ = wait(running, return_when=FIRST_COMPLETED)
+            for fut in done:
+                t, _ = running.pop(fut)
+                try:
+                    cost, result = fut.result()
+                except Exception as e:  # a crash in one worker must not orphan the others
+                    with STATE:
+                        t.update(state='failed', note=f'orchestrator error: {e!r}')
+                        save_queue(WORKTREE, q)
+                    cost, result = 0.0, None
+                spent += cost
+                if not result and t['state'] == 'ready':
+                    stop = stop or f"API unavailable ({t['note'][-100:]}); {t['id']} stays ready"
+                    continue
+                fails = 0 if result else fails + 1
+                new_q += result['big'] if result else 0
+                if result and result['critical']:
+                    stop = stop or f"CRITICAL finding in {result['report']}, see the owner inbox"
+                if fails >= 2:
+                    stop = stop or 'two tasks failed in a row'
+            if stop and running:
+                print(f'stopping after the {len(running)} running agent(s) finish: {stop}', flush=True)
+    if stop:
+        notify(f'Run stopped: {stop}')
     if args.push:
         git('push', '-u', 'origin', BRANCH)
     if ran:
@@ -535,6 +679,7 @@ def main():
         s.set_defaults(fn=fn)
         if name == 'run':
             s.add_argument('--max-tasks', type=int, default=4)
+            s.add_argument('--parallel', type=int, default=3, help='agents running at once (default 3)')
             s.add_argument('--budget', type=float, default=60.0, help='USD for this run (default 60)')
             s.add_argument('--task', help='run only this task')
             s.add_argument('--dry-run', action='store_true', help='print the agent commands, run nothing')

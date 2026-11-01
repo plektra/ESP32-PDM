@@ -73,6 +73,19 @@ python3 tools/orchestrate.py run               # ≤ 4 tasks, ≤ 60 USD; stops 
 /inbox                                         # answer the questions, then: orchestrate.py inbox
 ```
 
+**Parallel:** `--parallel N` (default 3) runs N agents at once, each in its own throwaway worktree
+`../ESP32-PDM-auto-<task>`; the script checks each one and commits its report on `auto/pilot` under a lock. The run
+budget is shared (a new agent gets what is left after the running agents' caps). A stop condition starts nothing new
+and lets running agents finish. N agents use the 5-hour usage limit N times faster; a limit pauses the run and
+leaves the tasks ready.
+
+**In tmux:** `tools/agents-tmux.sh --budget 85` opens the session `pdm-agents` and starts the run: orchestrator
+(top left), status every 20 s (bottom left), combined live trace of all agents (right: tool calls, agent text,
+tool errors, cost). Window `workers` gets one titled pane per running agent with its own trace (closed 2 minutes
+after it finishes). Window `inbox` is for `claude` → `/inbox`. Detach with prefix-d; the run continues; run the script again to
+reattach; `--kill` closes it. Per-task traces and raw results: `.claude/worktrees/auto-logs/`. A usage limit
+pauses the run and leaves the task ready.
+
 Each task is a fresh headless session (`claude -p --agent <role>`) in the sibling worktree `../ESP32-PDM-auto` (outside `.claude/`, where agent writes are refused) on branch
 `auto/pilot`. The script, not the agent, checks the result: nothing but the new report may change, the report must
 carry a valid finding block. Merge `auto/pilot` into `main` when you have read the reports. Pilot: reviewers only;
