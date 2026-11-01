@@ -105,8 +105,30 @@ board is ordered).
   (the ruling is passed to the agent and becomes a confirmed decision in its handoff), `no` → `done`. Then the digest
   of agent decisions with undo commands, then answered questions.
 
-## Pilot (now)
+## Unattended fixes (stage 2, decision 24)
 
-Only the reviewers run unattended: `emc-reviewer`, `cost-controller`, `validator`. They change nothing but
-`docs/reviews/`. `board-fix` tasks are queued and `parked`; they run in `/board` sessions with the owner until the
-next stage lets agents apply two-way fixes. Results are committed to the `auto/pilot` branch; the owner merges.
+Approved items – the owner's rulings and the agents' two-way decisions (`parked` in the queue) – are applied by
+agents without the owner:
+
+1. **Planner** (`.claude/agents/planner.md`) runs when approved items wait and no review is pending. It groups them
+   into small work packages (scope `pdm-4ch`, `pdm-hc2` or `shared`), defers what cannot be done yet
+   (`system-mechanical`, `pcb`, `prototype`, `firmware`, `order`, `owner`) and drafts decision rows for the owner's
+   rulings; the orchestrator appends those to `docs/decisions.md` as **confirmed**.
+2. **Board-fixer** (`.claude/agents/board-fixer.md`) applies one package in its own worktree: part facts from
+   datasheets, scripted edits with `tools/ksch.py`, ERC and netlist, `STATUS.md`, design notes and failure-mode notes.
+   It stops at one-way doors (they come back as owner questions). Its own design choices become **auto** decisions.
+3. **Gates** – checked by the orchestrator, not the agent; any failure and nothing is merged (the report is kept
+   as `…-rejected.md`):
+   - only files in the package's scope changed (`hardware/<board>/`, both boards for `shared`, `lib/`,
+     `docs/design-notes.md`, `README.md`; `docs/ARCHITECTURE.md` only for `shared`); no PDFs;
+   - ERC on both boards: no more errors and no more warnings than before;
+   - netlist on both boards: every part or connection that changed is in the agent's declared `refs`;
+   - every new or changed part has an `LCSC` code or is DNP;
+   - the shared sheets are identical on both boards (apart from the project name).
+4. **Merge** into `auto/pilot`; the items are `done` and listed under "Applied by agents" in the inbox.
+   `orchestrate.py undo <item>` reverts the whole package and turns its items into questions.
+5. **Re-check:** after a board's packages, a validator reviews it again; its findings go through the door rules, and
+   the next planning round picks up what it approves (`run --rounds`, default 2 per run).
+
+One board-fixer per board at a time (a `shared` package holds both). `run --no-fixes` runs reviews only. The owner
+merges `auto/pilot` into `main`, and reviews it before any order – ordering is a one-way door.

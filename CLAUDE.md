@@ -10,7 +10,8 @@ Read first, then:
 Roles and the session loop: `docs/WORKING-WITH-CLAUDE.md` (`/board`, `/system`, `/handoff`, `/progress`,
 `/validate`, `/cost`, `/emc`). Work one board and one phase per session; update that board's `STATUS.md` before
 ending. Use sub-agents only for bounded jobs through the agents in `.claude/agents/`; design choices stay in the main
-conversation with the owner.
+conversation with the owner – except unattended runs (`tools/orchestrate.py`, decisions 23–24), where agents take
+two-way doors and apply approved items under the orchestrator's gates.
 
 ## Project
 
@@ -44,7 +45,7 @@ assembled by JLCPCB. First user: the tug Vega (24 V).
 ```
 CLAUDE.md, README.md, LICENSE
 .claude/commands/   /board /system /handoff /progress /validate /cost /emc /inbox
-.claude/agents/     architect, validator, cost-controller, emc-reviewer, part-facts, stock-check
+.claude/agents/     architect, validator, cost-controller, emc-reviewer, part-facts, stock-check, planner, board-fixer
 docs/               CONTINUE-FROM-HERE.md, ARCHITECTURE.md, decisions.md, design-notes.md, WORKING-WITH-CLAUDE.md,
                     AUTONOMY.md, queue.json, OWNER-INBOX.md
   reviews/          validator, cost and EMC reports

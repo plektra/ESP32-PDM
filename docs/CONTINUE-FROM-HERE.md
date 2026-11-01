@@ -13,8 +13,9 @@ Firmware: not started.
 
 ## Order of work
 
-Steps 1–3 are queued for the unattended pilot (decision 22: `docs/queue.json`, `python3 tools/orchestrate.py run`);
-their findings land in `docs/OWNER-INBOX.md`.
+Steps 1–3 ran unattended (reviews done, 46 rulings answered). Next: `python3 tools/orchestrate.py run` applies the
+approved changes unattended (decision 24, `docs/AUTONOMY.md`); then read `git log --stat main..auto/pilot` and the
+inbox, and merge.
 
 1. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.

@@ -36,6 +36,7 @@ import shlex
 import tempfile
 import threading
 import time
+import xml.etree.ElementTree as ET
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from pathlib import Path
@@ -53,18 +54,26 @@ KICAD_BIN_DIR = os.environ.get('KICAD_BIN_DIR', '/Applications/KiCad/KiCad.app/C
 
 BOARDS = ('pdm-4ch', 'pdm-hc2')
 SCOPES = BOARDS + ('system',)
-# Runnable roles: report name, model and per-task budget (USD) for normal and deep runs.
+FIX_SCOPES = BOARDS + ('shared',)  # a shared package changes both boards identically
+BOARD_SCH = {'pdm-4ch': 'hardware/pdm-4ch/ESP32-PDM-4CH.kicad_sch', 'pdm-hc2': 'hardware/pdm-hc2/ESP32-PDM-HC2.kicad_sch'}
+SHARED_SHEETS = ('analog_sw', 'can', 'power-usb')
+DECISIONS = Path('docs/decisions.md')
+# Runnable roles: report name, model and per-task budget (USD) for normal and deep runs; `edits`: may change the
+# design (gated by fix_gates and merged into auto/pilot), otherwise only its report is kept.
 ROLES = {
     'validator': dict(kind='validate', model=('sonnet', 'opus'), budget=(8.0, 25.0)),
     'emc-reviewer': dict(kind='emc', model=('sonnet', 'opus'), budget=(8.0, 25.0)),
     'cost-controller': dict(kind='cost', model=('sonnet', 'opus'), budget=(8.0, 25.0)),
+    'planner': dict(kind='plan', model=('opus', 'opus'), budget=(6.0, 6.0)),
+    'board-fixer': dict(kind='fix', model=('opus', 'opus'), budget=(20.0, 20.0), edits=True),
 }
-PARKED_ROLES = ('board-fix', 'system')  # queued, but run with the owner during the pilot
+REVIEWERS = ('validator', 'emc-reviewer', 'cost-controller')
+FIX_ROLES = ('planner', 'board-fixer')  # off with `run --no-fixes`
 TASK_TIMEOUT = 90 * 60  # seconds
-# Never allowed to an unattended agent, whatever its tool list says.
+# Never allowed to an unattended agent, whatever its tool list says. Roles without `edits` also lose Edit.
 DENIED_TOOLS = ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(git reset:*)', 'Bash(git checkout:*)',
                 'Bash(git merge:*)', 'Bash(git rebase:*)', 'Bash(git stash:*)', 'Bash(git worktree:*)',
-                'Bash(rm -rf:*)', 'Bash(sudo:*)', 'Agent', 'Edit']
+                'Bash(git revert:*)', 'Bash(rm -rf:*)', 'Bash(sudo:*)', 'Agent']
 SEVERITIES = ('CRITICAL', 'MAJOR', 'MINOR', 'INFO')
 # Agent output that means the API was not available (usage limit, rate limit, overload), not that the task failed.
 UNAVAILABLE = re.compile(r'hit your .*limit|usage limit|rate limit|overloaded|\b529\b', re.I)
@@ -115,11 +124,20 @@ def find_task(q, tid):
 
 
 def deps_done(q, t):
-    return all(find_task(q, d)['state'] == 'done' for d in t.get('depends_on', []))
+    """A verify validator also runs after a failed package (it re-checks whatever was merged)."""
+    finished = ('done', 'failed') if t.get('verify') else ('done',)
+    return all(find_task(q, d)['state'] in finished for d in t.get('depends_on', []))
 
 
 def runnable(q):
     return [t for t in q['tasks'] if t['state'] == 'ready' and t['role'] in ROLES and deps_done(q, t)]
+
+
+def task_locks(t):
+    """One board-fixer per board at a time (a shared package holds both); one planner at a time."""
+    if t['role'] == 'board-fixer':
+        return set(BOARDS) if t['scope'] == 'shared' else {t['scope']}
+    return {'plan'} if t['role'] == 'planner' else set()
 
 
 # ---------------------------------------------------------------- inbox
@@ -180,6 +198,17 @@ def write_inbox(root, q):
             out.append(f"- {t['id']} · {f['severity']} · {f['board']} · {f['summary']} → {what}\n")
         if len(decided) > DIGEST_MAX:
             out.append(f'- … {len(decided) - DIGEST_MAX} older ones in `docs/queue.json`\n')
+    fixed = [t for t in q['tasks'] if t.get('finding') and t.get('merged')][::-1]
+    if fixed:
+        out.append(f'\n## Applied by agents ({len(fixed)})\n\n'
+                   f'Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.\n\n')
+        out += [f"- {t['id']} · {t['finding']['board']} · {t['finding']['summary']} → {t['fixed_by']} "
+                f"(`{t['merged'][:8]}`)\n" for t in fixed[:DIGEST_MAX]]
+    later = [t for t in q['tasks'] if t.get('finding') and t['state'] == 'deferred']
+    if later:
+        out.append(f'\n## Deferred ({len(later)})\n\n')
+        out += [f"- {t['id']} · {t['finding']['board']} · {t['finding']['summary']} → until {t.get('until')}: "
+                f"{t.get('reason', '')}\n" for t in later]
     if done_q:
         out.append(f'\n## Answered ({len(done_q)})\n\n')
         out += [f"- {t['question']} ({t['finding']['board']}): {t['finding']['summary']} → **{t.get('ruling', '')}**"
@@ -297,14 +326,33 @@ def agent_tools(role):
 
 
 def report_path(t):
-    name = f"{today()}-{ROLES[t['role']]['kind']}-{t['scope']}" + (f"-{t['focus']}" if t.get('focus') else '')
+    name = (f"{today()}-{ROLES[t['role']]['kind']}-{t['scope']}" + (f"-{t['focus']}" if t.get('focus') else '')
+            + (f"-{t['id']}" if t['role'] in FIX_ROLES else ''))
     path, n = REVIEWS / f'{name}.md', 2
     while (WORKTREE / path).exists() or path in RESERVED:
         path, n = REVIEWS / f'{name}-{n}.md', n + 1
     return path
 
 
-def prompt_for(t, report):
+NARRATE = ("The owner watches your progress live: before each step write one short line saying what you do and why, "
+           "and when you find a problem write one line `FINDING (SEVERITY): what is wrong`.\n")
+
+
+def prompt_for(t, report, inputs=None):
+    kind = ROLES[t['role']]['kind']
+    common = (f"Unattended run, task {t['id']}. Today is {today()}. Follow your instructions, CLAUDE.md and "
+              f"docs/AUTONOMY.md (decision 23). Nobody will answer questions.\n{NARRATE}")
+    if kind == 'plan':
+        return (common + f"The approved items to plan are in `{inputs}` (JSON). Write your report to exactly "
+                f"`{report}` and end it with the plan block. Change no other file in the repository. Your final "
+                f"message: the report path and the number of packages, deferred items and decision rows.")
+    if kind == 'fix':
+        return (common + f"Work package {t['id']}: {t.get('title', '')} (scope {t['scope']}).\n"
+                f"Brief from the planner:\n{t.get('brief', '')}\n"
+                f"The items with their findings and the owner's rulings are in `{inputs}` (JSON).\n"
+                f"Write your report to exactly `{report}` and end it with the fix block; list every reference "
+                f"designator you touched in `refs`. Your final message: the report path and what was done or "
+                f"blocked.")
     focus = f" Focus: {t['focus']}." if t.get('focus') else ''
     ruling = f" The owner ruled on this task: {t['ruling']}." if t.get('ruling') else ''
     return (f"Unattended run, task {t['id']}. Scope: {t['scope']}.{focus}{ruling} Today is {today()}.\n"
@@ -428,23 +476,247 @@ def task_budget(t, budget_left):
     return min(ROLES[t['role']]['budget'][bool(t.get('deep'))], budget_left)
 
 
+# ---------------------------------------------------------------- design gates (board-fixer)
+
+def kicad_check(wt, board, scratch):
+    """ERC (errors, warnings) and the netlist of one board in a worktree; None when kicad-cli fails."""
+    sch, name = wt / BOARD_SCH[board], board
+    erc_out, nl_out = scratch / f'{name}-erc.json', scratch / f'{name}-net.xml'
+    env = dict(os.environ, PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}")
+    a = subprocess.run(['kicad-cli', 'sch', 'erc', '--format', 'json', '-o', str(erc_out), str(sch)],
+                       capture_output=True, text=True, env=env)
+    b = subprocess.run(['kicad-cli', 'sch', 'export', 'netlist', '--format', 'kicadxml', '-o', str(nl_out), str(sch)],
+                       capture_output=True, text=True, env=env)
+    if a.returncode not in (0, 5) or b.returncode or not erc_out.exists() or not nl_out.exists():
+        return None  # kicad-cli exits 5 when ERC finds violations
+    sev = Counter(v['severity'] for s in json.loads(erc_out.read_text())['sheets'] for v in s['violations'])
+    root = ET.parse(nl_out).getroot()
+    comps = {}
+    for c in root.iter('comp'):
+        fields = {f.get('name'): (f.text or '') for f in c.iter('field')}
+        dnp = any(p.get('name') == 'dnp' for p in c.iter('property')) or 'DNP' in (c.findtext('value') or '')
+        comps[c.get('ref')] = (c.findtext('value'), c.findtext('footprint'), fields.get('LCSC', ''), dnp)
+    nets = [(n.get('name'), [(x.get('ref'), x.get('pin')) for x in n.iter('node')]) for n in root.iter('net')]
+    return dict(errors=sev['error'], warnings=sev['warning'], comps=comps, nets=nets)
+
+
+def undeclared_changes(before, after, declared):
+    """Refs whose part or connections changed but which the agent did not declare. Named nets are compared by
+    name; auto-named nets by their members other than declared refs, so adding a declared part does not implicate
+    its neighbours."""
+    def keys(nl):
+        k = {}
+        for name, nodes in nl['nets']:
+            auto = 'Net-(' in name or 'unconnected-(' in name
+            key = frozenset(n for n in nodes if n[0] not in declared) if auto else name
+            for n in nodes:
+                k[n] = key
+        return k
+    bad = {r for r in set(before['comps']) | set(after['comps'])
+           if before['comps'].get(r) != after['comps'].get(r) and r not in declared}
+    kb, ka = keys(before), keys(after)
+    bad |= {n[0] for n in set(kb) | set(ka) if n[0] not in declared and kb.get(n) != ka.get(n)}
+    return bad
+
+
+def shared_sheets_equal(wt):
+    """Shared sheets must be the same on both boards apart from the project name in their instance blocks."""
+    def norm(board):
+        return [(wt / f'hardware/{board}/{s}.kicad_sch').read_text().replace(
+            f'"{Path(BOARD_SCH[board]).stem}"', '"PROJECT"') for s in SHARED_SHEETS]
+    return [s for s, a, b in zip(SHARED_SHEETS, norm('pdm-4ch'), norm('pdm-hc2')) if a != b]
+
+
+def fix_allowed(path, scope):
+    boards = BOARDS if scope == 'shared' else (scope,)
+    ok = ['docs/design-notes.md', 'README.md', 'lib/'] + [f'hardware/{b}/' for b in boards]
+    if scope == 'shared':
+        ok.append('docs/ARCHITECTURE.md')
+    return any(path == p or (p.endswith('/') and path.startswith(p)) for p in ok)
+
+
+def fix_gates(wt, t, base, after, block, changed, report):
+    """Everything a board-fixer change must pass before it is merged. Returns the list of failures."""
+    fails, declared = [], set(block.get('refs') or [])
+    for p in changed:
+        if p == report or p.endswith('.kicad_prl'):
+            continue
+        tracked = bool(git('ls-files', '--', p, cwd=wt))
+        if p.lower().endswith('.pdf'):
+            fails.append(f'adds a PDF ({p}); public repo')
+        elif tracked and not fix_allowed(p, t['scope']):
+            fails.append(f'changed {p}, outside the package scope {t["scope"]}')
+    for b in BOARDS:
+        if after[b] is None:
+            fails.append(f'{b}: kicad-cli could not read the schematic')
+            continue
+        if after[b]['errors'] > base[b]['errors'] or after[b]['warnings'] > base[b]['warnings']:
+            fails.append(f"{b}: ERC {after[b]['errors']} errors/{after[b]['warnings']} warnings "
+                         f"(was {base[b]['errors']}/{base[b]['warnings']})")
+        bad = undeclared_changes(base[b], after[b], declared)
+        if bad:
+            fails.append(f"{b}: undeclared netlist changes on {', '.join(sorted(bad)[:15])}")
+        new = [r for r, c in after[b]['comps'].items() if base[b]['comps'].get(r) != c]
+        missing = [r for r in new if not after[b]['comps'][r][2] and not after[b]['comps'][r][3]]
+        if missing:
+            fails.append(f"{b}: no LCSC code (and not DNP) on {', '.join(sorted(missing)[:15])}")
+    differ = shared_sheets_equal(wt)
+    if differ:
+        fails.append('shared sheets differ between the boards: ' + ', '.join(differ))
+    return fails
+
+
+def parse_tagged(text, tag):
+    m = re.search(rf'<!-- {tag}:begin -->\s*```(?:json)?\s*(.*?)```\s*<!-- {tag}:end -->', text, re.S)
+    if not m:
+        raise ValueError(f'no {tag} block')
+    return json.loads(m.group(1))
+
+
+def add_decisions(root, rows):
+    """Append decision rows after the last row of the table; returns their numbers."""
+    path = root / DECISIONS
+    lines = path.read_text().splitlines()
+    last = max(i for i, line in enumerate(lines) if re.match(r'\|\s*\d+\s*\|', line))
+    n = max(int(re.match(r'\|\s*(\d+)', line).group(1)) for line in lines if re.match(r'\|\s*\d+\s*\|', line))
+    new = []
+    for i, (area, text, status) in enumerate(rows, 1):
+        clean = ' '.join(str(text).split()).replace('|', '\\|')
+        new.append(f'| {n + i} | {today()} | {area} | {clean} | {status} |')
+    path.write_text('\n'.join(lines[:last + 1] + new + lines[last + 1:]) + '\n')
+    return list(range(n + 1, n + 1 + len(new)))
+
+
+# ---------------------------------------------------------------- planning and fixing
+
+def approved_items(q):
+    """Approved, not yet planned: owner-approved rulings and agents' two-way fixes waiting to be applied."""
+    return [t for t in q['tasks'] if t.get('finding') and t['state'] == 'parked' and not t.get('package')]
+
+
+def maybe_plan(q):
+    """Queue a planner when approved items wait, no planner is pending and no review is still to run."""
+    if any(t['role'] == 'planner' and t['state'] in ('ready', 'running') for t in q['tasks']):
+        return False
+    if any(t['role'] in REVIEWERS and (t['state'] == 'running' or (t['state'] == 'ready' and deps_done(q, t)))
+           for t in q['tasks']):
+        return False
+    if not approved_items(q):
+        return False
+    q['tasks'].append(dict(id=new_id(q, 'T'), role='planner', scope='system', state='ready', created=today(),
+                           depends_on=[]))
+    return True
+
+
+def item_view(t):
+    f = t['finding']
+    return dict(task=t['id'], board=f['board'], severity=f['severity'], kind=f['kind'], location=f.get('location'),
+                summary=f['summary'], fix=f.get('fix') or f.get('default'), report=t['source']['report'],
+                ruling=t.get('ruling'), question=t.get('question'), door=t.get('door', 'two-way'))
+
+
+def apply_plan(q, t, plan):
+    """Planner result: packages become board-fixer tasks, deferred items wait, owner rulings become decisions,
+    and each touched board gets a verify validator after its packages."""
+    items = {i: find_task(q, i) for i in t.get('items', [])}
+    seen, pkg_ids = set(), {}
+    for p in plan.get('packages', []):
+        if p.get('scope') not in FIX_SCOPES:
+            raise ValueError(f"package {p.get('id')}: bad scope {p.get('scope')}")
+        tasks = [i for i in p.get('tasks', []) if i in items and i not in seen]
+        if not tasks:
+            continue
+        seen |= set(tasks)
+        pkg = dict(id=new_id(q, 'T'), role='board-fixer', scope=p['scope'], state='ready', created=today(),
+                   title=p.get('title', ''), brief=p.get('brief', ''), items=tasks, plan=t['id'], depends_on=[])
+        pkg_ids[p.get('id')] = pkg
+        q['tasks'].append(pkg)
+        for i in tasks:
+            items[i]['package'] = pkg['id']
+    for p in plan.get('packages', []):
+        if p.get('id') in pkg_ids:
+            pkg_ids[p['id']]['depends_on'] = [pkg_ids[a]['id'] for a in p.get('after', []) if a in pkg_ids]
+    deferred = 0
+    for d in plan.get('deferred', []):
+        if d.get('task') in items and d['task'] not in seen:
+            seen.add(d['task'])
+            items[d['task']].update(state='deferred', until=d.get('until', 'later'), reason=d.get('reason', ''))
+            deferred += 1
+    rows = []
+    for d in plan.get('decisions', []):
+        text = (f"Amends decision {d['amends']}: " if d.get('amends') else '') + d.get('text', '')
+        rows.append((d.get('area', 'system'), f"{text} (owner: {', '.join(d.get('from') or [])})", 'confirmed'))
+    numbers = add_decisions(WORKTREE, rows) if rows else []
+    for board in BOARDS:  # re-check each board once its packages are merged
+        deps = [p['id'] for p in pkg_ids.values() if p['scope'] in (board, 'shared')]
+        if deps:
+            q['tasks'].append(dict(id=new_id(q, 'T'), role='validator', scope=board, state='ready', created=today(),
+                                   depends_on=deps, verify=True))
+    left = [i for i in items if i not in seen]
+    return dict(packages=len(pkg_ids), deferred=deferred, decisions=numbers, unplanned=left)
+
+
+def apply_fix(q, t, block, merged):
+    """Board-fixer result: done items are closed, one-way blocks become owner questions, two-way blocks wait,
+    items it did not touch go back to the planner; its design choices become auto decisions."""
+    mine = set(t.get('items', []))
+    done = [i for i in block.get('done', []) if i in mine]
+    for i in done:
+        find_task(q, i).update(state='done', fixed_by=t['id'], merged=merged)
+    blocked = 0
+    for b in block.get('blocked', []):
+        if b.get('task') not in mine:
+            continue
+        s = find_task(q, b['task'])
+        if b.get('door') == 'one-way':
+            s.update(state='blocked-owner', question=new_id(q, 'Q'), door='one-way',
+                     why_big=[f"found while fixing ({t['id']}): {b.get('reason', '')}"],
+                     finding=dict(s['finding'], fix=b.get('question') or s['finding'].get('fix'),
+                                  default=b.get('default')))
+        else:
+            s.update(state='deferred', until='later', reason=f"{t['id']}: {b.get('reason', '')}")
+        blocked += 1
+    for i in mine - set(done) - {b.get('task') for b in block.get('blocked', [])}:
+        find_task(q, i).pop('package', None)  # untouched: planned again
+    rows = [(d.get('area', t['scope']), f"{d.get('text', '')} ({t['id']})", 'auto') for d in block.get('decisions', [])]
+    numbers = add_decisions(WORKTREE, rows) if rows else []
+    return dict(done=len(done), blocked=blocked, decisions=numbers, merged=merged)
+
+
+# ---------------------------------------------------------------- running one task
+
 def run_task(q, t, budget_left, dry_run=False):
-    """Run one agent in its own worktree, then (under STATE) check it, triage and commit on auto/pilot.
+    """Run one agent in its own worktree, then (under STATE) check it and bring its result to auto/pilot:
+    reviewers' findings are triaged, a planner's plan becomes tasks, a board-fixer's change is gated and merged.
     Thread-safe: several run at once."""
+    spec = ROLES[t['role']]
     deep = bool(t.get('deep'))
-    model = t.get('model') or ROLES[t['role']]['model'][deep]
+    model = t.get('model') or spec['model'][deep]
     budget = task_budget(t, budget_left)
     with STATE:
         report = report_path(t)
         RESERVED.add(report)
+        if spec['kind'] == 'plan':
+            t['items'] = [i['id'] for i in approved_items(q)]
+            payload = [item_view(i) for i in approved_items(q)]
+        elif spec['kind'] == 'fix':
+            payload = [item_view(find_task(q, i)) for i in t.get('items', [])]
+        else:
+            payload = None
     scratch = Path(tempfile.mkdtemp(prefix=f"pdm-{t['id']}-"))
-    cmd = [CLAUDE_BIN, '-p', prompt_for(t, report), '--agent', t['role'], '--model', model,
+    inputs = None
+    if payload is not None:
+        inputs = scratch / 'items.json'
+        inputs.write_text(json.dumps(payload, indent=1, ensure_ascii=False))
+    denied = DENIED_TOOLS + ([] if spec.get('edits') else ['Edit'])
+    cmd = [CLAUDE_BIN, '-p', prompt_for(t, report, inputs), '--agent', t['role'], '--model', model,
            '--max-budget-usd', f'{budget:.2f}', '--output-format', 'stream-json', '--verbose',
            '--add-dir', str(scratch), '--allowedTools', *agent_tools(t['role']), 'Write',
-           '--disallowedTools', *DENIED_TOOLS]
+           '--disallowedTools', *denied]
     print(f"→ {t['id']} {t['role']} {t['scope']}{' deep' if deep else ''} ({model}, ≤ {budget:.2f} USD) → {report}")
     if dry_run:
         print('  ' + ' '.join(c if ' ' not in c else repr(c[:60] + '…') for c in cmd))
+        shutil.rmtree(scratch, ignore_errors=True)
         return 0.0, None
     wt = task_worktree(t)
     with STATE:
@@ -456,6 +728,8 @@ def run_task(q, t, budget_left, dry_run=False):
         save_queue(WORKTREE, q)
         LOGS.mkdir(parents=True, exist_ok=True)
     (wt / REVIEWS).mkdir(parents=True, exist_ok=True)  # empty folders are not in git
+    gate_dir = Path(tempfile.mkdtemp(prefix=f"pdm-gate-{t['id']}-"))
+    base = {b: kicad_check(wt, b, gate_dir) for b in BOARDS} if spec.get('edits') else None
     log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}")
     pane = tmux_pane(t, log.with_suffix('.log'))
@@ -473,57 +747,71 @@ def run_task(q, t, budget_left, dry_run=False):
     cost = float(out.get('total_cost_usd') or 0)
     notes = []
     if out.get('permission_denials'):
-        denied = sorted({d.get('tool_name', '?') for d in out['permission_denials']})
-        notes.append(f"{len(out['permission_denials'])} tool calls denied ({', '.join(denied)}); log {log.name}")
+        denied_calls = sorted({d.get('tool_name', '?') for d in out['permission_denials']})
+        notes.append(f"{len(out['permission_denials'])} tool calls denied ({', '.join(denied_calls)}); log {log.name}")
+    keep = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=wt, capture_output=True, text=True).stdout.strip() != head
+    changed = changed_paths(wt)
+    new_reports = [p for p in changed if p.startswith(f'{REVIEWS}/') and p.endswith('.md')]
+    got = str(report) if str(report) in changed else (new_reports[0] if len(new_reports) == 1 else None)
+    text = (wt / got).read_text() if got else None
+    # Board-fixer gates run outside the lock (kicad-cli takes a while); other agents keep working meanwhile.
+    gate_fails, block = [], None
+    if spec.get('edits') and got and not keep:
+        try:
+            block = parse_tagged(text, 'fix')
+            after = {b: kicad_check(wt, b, gate_dir) for b in BOARDS}
+            if any(base[b] is None for b in BOARDS):
+                gate_fails.append('kicad-cli could not read the schematics before the change')
+            else:
+                gate_fails = fix_gates(wt, t, base, after, block, changed, got)
+        except (ValueError, json.JSONDecodeError) as e:
+            gate_fails.append(f'report {got}: {e}')
+    shutil.rmtree(gate_dir, ignore_errors=True)
 
     with STATE:
         t['cost_usd'] = round(t.get('cost_usd', 0) + cost, 4)
         t['attempts'] = t.get('attempts', 0) + 1
-        # Gate 1: the agent must not have moved its worktree's HEAD; keep the worktree for inspection if it did.
-        keep = git('rev-parse', 'HEAD', cwd=wt) != head
-        if keep:
+        if keep:  # the agent moved its worktree's HEAD: keep it for inspection
             notes.append(f'agent changed HEAD (was {head[:8]}); inspect {wt}')
-        # Gate 2: only one new report in docs/reviews/; everything else is dropped with the worktree.
-        changed = changed_paths(wt)
-        reports = [p for p in changed if p.startswith(f'{REVIEWS}/') and p.endswith('.md')
-                   and not git('ls-files', '--', p, cwd=wt)]
-        got = str(report) if str(report) in reports else (reports[0] if len(reports) == 1 else None)
-        if got and keep:
             got = None
-        stray = [p for p in changed if p != got]
-        if stray:
-            notes.append('dropped ' + ', '.join(stray))
-        # Gate 3: the report carries a valid finding block; then it moves to auto/pilot.
-        result = None
+        result, commit_paths = None, [str(QUEUE), str(INBOX)]
         if got is None:
             notes.append(f"no report written ({out.get('terminal_reason') or out.get('subtype') or 'unknown'}): "
                          f"{str(out.get('result', ''))[:200]}")
+        elif spec.get('edits'):
+            result, merge_note = finish_fix(q, t, wt, changed, got, block, gate_fails, model, cost)
+            notes += merge_note
+            commit_paths.append(str(DECISIONS))
         else:
-            text = (wt / got).read_text()
+            if any(p != got for p in changed):
+                notes.append('dropped ' + ', '.join(p for p in changed if p != got))
             try:
-                items = parse_block(text)
                 if (WORKTREE / got).exists():  # another agent took the name meanwhile
                     got = str(Path(got).with_name(f"{Path(got).stem}-{t['id']}.md"))
+                if spec['kind'] == 'plan':
+                    result = apply_plan(q, t, parse_tagged(text, 'plan'))
+                    commit_paths.append(str(DECISIONS))
+                else:
+                    agent, owner, dup, crit = triage(q, got, parse_block(text))
+                    result = dict(agent=agent, owner=owner, duplicates=dup, critical=crit)
                 (WORKTREE / got).parent.mkdir(parents=True, exist_ok=True)
                 (WORKTREE / got).write_text(text)
-                agent, owner, dup, crit = triage(q, got, items)
-                result = dict(report=got, agent=agent, owner=owner, duplicates=dup, critical=crit)
-            except (ValueError, json.JSONDecodeError) as e:
+                commit_paths.append(got)
+                result['report'] = got
+            except (ValueError, json.JSONDecodeError, KeyError, SystemExit) as e:
                 notes.append(f'report {got}: {e}')
-                got = None
+                result = None
         # A usage limit or API outage is not the task's fault: leave it ready and let the caller stop the run.
         paused = result is None and not keep and (out.get('terminal_reason') == 'api_error'
                                                   or bool(UNAVAILABLE.search(str(out.get('result', '')))))
+        summary = summarize(spec['kind'], result, paused)
         t.update(state='done' if result else 'ready' if paused else 'failed', finished=today(),
-                 note='; '.join(notes) or None)
+                 note='; '.join(notes) or None, summary=summary)
         if result:
-            t['report'] = got
+            t['report'] = result['report']
         write_inbox(WORKTREE, q)
         save_queue(WORKTREE, q)
-        git('add', '--', *([str(QUEUE), str(INBOX)] + ([got] if got else [])))
-        summary = (f"{result['agent']} decided by agents, {result['owner']} for the owner, "
-                   f"{result['duplicates']} duplicates" if result else
-                   'paused, API unavailable' if paused else 'failed')
+        git('add', '--', *commit_paths)
         git('commit', '-m', f"Auto: {t['role']} {t['scope']} ({t['id']}): {summary}\n\n"
             f"Unattended run by tools/orchestrate.py, model {model}, {cost:.2f} USD.\n\n"
             f"Co-Authored-By: Claude <noreply@anthropic.com>")
@@ -533,6 +821,43 @@ def run_task(q, t, budget_left, dry_run=False):
         print(f"  {t['id']} {t['state']}: {summary}; {cost:.2f} USD" + (f"; {t['note']}" if t.get('note') else ''),
               flush=True)
     return cost, result
+
+
+def summarize(kind, result, paused):
+    if not result:
+        return 'paused, API unavailable' if paused else 'failed'
+    if kind == 'plan':
+        return (f"{result['packages']} packages, {result['deferred']} deferred, {len(result['decisions'])} decisions"
+                + (f", {len(result['unplanned'])} unplanned" if result['unplanned'] else ''))
+    if kind == 'fix':
+        return f"{result['done']} fixed, {result['blocked']} blocked, merged {result['merged'][:8]}"
+    return f"{result['agent']} decided by agents, {result['owner']} for the owner, {result['duplicates']} duplicates"
+
+
+def finish_fix(q, t, wt, changed, got, block, gate_fails, model, cost):
+    """Under STATE: commit a gated board-fixer change in its worktree and merge it into auto/pilot.
+    Returns (result or None, notes). On failure nothing is merged; the report is kept for the owner."""
+    if gate_fails:
+        keep_report = REVIEWS / f"{Path(got).stem}-rejected.md"
+        (WORKTREE / keep_report).write_text((wt / got).read_text() + '\n\n## Rejected by the orchestrator\n\n'
+                                            + '\n'.join(f'- {f}' for f in gate_fails) + '\n')
+        git('add', '--', str(keep_report))
+        return None, ['gates failed: ' + '; '.join(gate_fails), f'report kept as {keep_report}']
+    paths = [p for p in changed if p == got or (fix_allowed(p, t['scope']) and not p.endswith('.kicad_prl')
+                                                and not p.lower().endswith('.pdf'))]
+    git('add', '--', *paths, cwd=wt)
+    git('commit', '-m', f"{t['scope']}: {t.get('title', 'work package')} ({t['id']})\n\n"
+        f"Unattended board-fixer, model {model}, {cost:.2f} USD; gates passed (ERC, netlist, LCSC, shared sheets).\n\n"
+        f"Co-Authored-By: Claude <noreply@anthropic.com>", cwd=wt)
+    sha = git('rev-parse', 'HEAD', cwd=wt)
+    r = subprocess.run(['git', 'merge', '--no-ff', '--no-edit', '-m', f"Auto: merge {t['id']} {t.get('title', '')}",
+                        sha], cwd=WORKTREE, capture_output=True, text=True)
+    if r.returncode:
+        git('merge', '--abort', check=False)
+        return None, [f'merge conflict with auto/pilot (retry rebuilds it on the new base): {r.stdout[-200:]}']
+    result = apply_fix(q, t, block, git('rev-parse', 'HEAD'))
+    result['report'] = got
+    return result, [f"not merged: {', '.join(p for p in changed if p not in paths)}"] if set(changed) - set(paths) else []
 
 
 # ---------------------------------------------------------------- worktree, lock, notify
@@ -683,7 +1008,10 @@ def dashboard(width, recent):
     out += ['', paint(' FINISHED', 'bold')]
     for t in finished[:recent]:
         name = f"{t['id']} {t['role']} {t['scope']}{' deep' if t.get('deep') else ''}"
-        if t['state'] == 'done':
+        if t['state'] == 'done' and t['role'] not in REVIEWERS:
+            out.append(f"  {paint('✓', 'green')} {name} {t.get('title', '')}"
+                       + paint(f"   {t.get('cost_usd', 0):.2f} USD · {t.get('summary', '')}", 'dim'))
+        elif t['state'] == 'done':
             mine = [x for x in q['tasks'] if (x.get('source') or {}).get('report') == t.get('report')]
             big = sum(1 for x in mine if x.get('question'))
             out.append(f"  {paint('✓', 'green')} {name}" + paint(
@@ -788,7 +1116,7 @@ def cmd_status(args):
     q = load_queue(root)
     answers = read_answers(root)
     waiting = [t for t in q['tasks'] if t['state'] == 'blocked-owner' and t['question'] in answers]
-    order = ('running', 'ready', 'blocked-owner', 'failed', 'parked', 'done')
+    order = ('running', 'ready', 'blocked-owner', 'failed', 'parked', 'deferred', 'done')
     print(f'State: {root / QUEUE}')
     for state in order:
         ts = [t for t in q['tasks'] if t['state'] == state]
@@ -839,6 +1167,27 @@ def cmd_undo(args):
     root = state_root()
     q = load_queue(root)
     t = find_task(q, args.task)
+    if t.get('merged'):  # an applied fix: revert the package's merge, all its items come back as questions
+        if root != WORKTREE:
+            raise SystemExit('applied fixes live on auto/pilot; run a pass first so its worktree exists')
+        if git('status', '--porcelain', '--', str(QUEUE), str(INBOX), str(DECISIONS)):
+            raise SystemExit(f'commit or apply the pending edits in {WORKTREE} first (orchestrate.py inbox)')
+        r = subprocess.run(['git', 'revert', '-m', '1', '--no-edit', t['merged']], cwd=WORKTREE,
+                           capture_output=True, text=True)
+        if r.returncode:
+            git('revert', '--abort', check=False)
+            raise SystemExit(f"cannot revert {t['merged'][:8]} cleanly (later changes build on it); undo it in a "
+                             f"/board session: {r.stderr.strip()[-200:]}")
+        sha = t['merged']
+        for s in [x for x in q['tasks'] if x.get('merged') == sha]:
+            s.update(state='blocked-owner', question=new_id(q, 'Q'), door='one-way', undone=today(),
+                     why_big=[f"you took back the applied fix ({s.get('fixed_by')}, reverted)"])
+            s.pop('merged', None)
+        write_inbox(root, q)
+        save_queue(root, q)
+        git('commit', '-m', f'Auto: owner undid {args.task} (reverted {sha[:8]})', '--', str(QUEUE), str(INBOX))
+        print(f'reverted {sha[:8]}; its items are open questions in {root / INBOX}')
+        return
     if not agent_decided(t):
         raise SystemExit(f"{t['id']} is not an agent decision waiting to be applied (state {t['state']})")
     t.update(state='blocked-owner', question=new_id(q, 'Q'), door='one-way', undone=today(),
@@ -888,6 +1237,7 @@ def cmd_run(args):
     # Up to --parallel agents at once. Each new agent's budget cap is what is left after the caps of the running
     # ones. A stop condition starts nothing new; running agents finish and are committed.
     limit = 1 if args.task else args.max_tasks
+    fixes, plans_left = not args.no_fixes, args.rounds
     spent, ran, fails, new_q, stop = 0.0, 0, 0, 0, None
     running = {}  # future -> (task, cap)
     run_info = dict(started=datetime.datetime.now().isoformat(timespec='seconds'), budget=args.budget,
@@ -899,8 +1249,13 @@ def cmd_run(args):
             write_run(run_info)
             while not stop and len(running) < args.parallel and ran < limit:
                 with STATE:
+                    if fixes and plans_left and not args.task and maybe_plan(q):
+                        plans_left -= 1
+                        save_queue(WORKTREE, q)
+                    held = set().union(*[task_locks(x) for x, _ in running.values()])
                     todo = [find_task(q, args.task)] if args.task else runnable(q)
-                    todo = [t for t in todo if t['state'] == 'ready' and t['role'] in ROLES]
+                    todo = [t for t in todo if t['state'] == 'ready' and t['role'] in ROLES
+                            and (fixes or t['role'] not in FIX_ROLES) and not task_locks(t) & held]
                     if not todo:
                         break
                     left = args.budget - spent - sum(cap for _, cap in running.values())
@@ -929,8 +1284,8 @@ def cmd_run(args):
                     stop = stop or f"API unavailable ({t['note'][-100:]}); {t['id']} stays ready"
                     continue
                 fails = 0 if result else fails + 1
-                new_q += result['owner'] if result else 0
-                if result and result['critical']:
+                new_q += result.get('owner', 0) if result else 0
+                if result and result.get('critical'):
                     stop = stop or f"CRITICAL finding in {result['report']}, see the owner inbox"
                 if fails >= 2:
                     stop = stop or 'two tasks failed in a row'
@@ -985,7 +1340,10 @@ def main():
         s.add_argument('--base', default='main', help='branch merged into auto/pilot first (default main)')
         s.set_defaults(fn=fn)
         if name == 'run':
-            s.add_argument('--max-tasks', type=int, default=4)
+            s.add_argument('--max-tasks', type=int, default=12)
+            s.add_argument('--no-fixes', action='store_true', help='reviews only: no planner, no board-fixers')
+            s.add_argument('--rounds', type=int, default=2,
+                           help='planning rounds per run (fix, re-validate, fix again; default 2)')
             s.add_argument('--parallel', type=int, default=3, help='agents running at once (default 3)')
             s.add_argument('--budget', type=float, default=60.0, help='USD for this run (default 60)')
             s.add_argument('--task', help='run only this task')

@@ -95,9 +95,12 @@ reattach; `--kill` closes it. Per-task traces and raw results: `.claude/worktree
 pauses the run and leaves the task ready.
 
 Each task is a fresh headless session (`claude -p --agent <role>`) in the sibling worktree `../ESP32-PDM-auto` (outside `.claude/`, where agent writes are refused) on branch
-`auto/pilot`. The script, not the agent, checks the result: nothing but the new report may change, the report must
-carry a valid finding block. Merge `auto/pilot` into `main` when you have read the reports. Pilot: reviewers only;
-`board-fix` tasks wait as `parked` for `/board` sessions.
+`auto/pilot`. The script, not the agent, checks the result: a reviewer may change nothing but its new report, which
+must carry a valid finding block. Since decision 24 approved items are also applied unattended: a planner groups
+them into work packages, board-fixer agents make the schematic changes, and the script gates every change (scope,
+ERC, netlist against declared refs, LCSC, shared sheets equal) before merging it; a validator then re-checks the
+board (`docs/AUTONOMY.md`, "Unattended fixes"). Merge `auto/pilot` into `main` when you have read the result –
+`git log --stat main..auto/pilot`. `run --no-fixes` runs reviews only.
 
 ## Parallel sessions
 
