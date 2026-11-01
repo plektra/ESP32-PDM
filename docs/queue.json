@@ -2109,14 +2109,15 @@
       ],
       "plan": "T-0063",
       "depends_on": [],
-      "started": "2026-11-01T22:53:30",
+      "started": "2026-11-01T23:18:04",
       "model": "opus",
-      "session": "d46a34af-8e4a-44f4-a7ae-cd8e2ceb8b15",
-      "cost_usd": 2.0406,
-      "attempts": 1,
+      "session": "e0f9f041-e9e2-4dda-87a0-a9519e284c34",
+      "cost_usd": 5.805,
+      "attempts": 2,
       "finished": "2026-11-01",
-      "note": null,
-      "summary": "failed"
+      "note": "no report written (api_error): You've hit your 5-hour limit · resets 3:20am (Europe/Helsinki)",
+      "summary": "paused, API unavailable",
+      "interrupted": null
     },
     {
       "id": "T-0066",
