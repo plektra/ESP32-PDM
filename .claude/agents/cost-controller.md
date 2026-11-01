@@ -32,5 +32,5 @@ evidence), **Rule findings**, **Questions for the owner**, **Not checked**. Retu
 largest levers.
 
 End the report with the finding block from `docs/AUTONOMY.md` (every finding, lever and owner question, each
-classed `small` or `big` under its policy; `[]` if none). When the caller says the run is unattended, ask nothing:
+marked `door: two-way` or `one-way` under its policy, questions with a `default` where one makes sense; `[]` if none). When the caller says the run is unattended, ask nothing:
 put questions in the block as `kind: "question"`.

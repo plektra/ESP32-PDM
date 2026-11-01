@@ -63,8 +63,9 @@ Boards: `pdm-4ch`, `pdm-hc2`.
 
 ## Unattended runs (pilot)
 
-Policy, finding format, queue and inbox: `docs/AUTONOMY.md` (decision 22). Agents make small decisions and send
-bigger design changes to you.
+Policy, finding format, queue and inbox: `docs/AUTONOMY.md` (decision 23). Agents decide two-way doors (cheap to
+undo: listed in the inbox digest, `orchestrate.py undo <task>` brings one back to you); one-way doors (money, your
+rulings, safety, facts only you have, CRITICAL findings) wait for you.
 
 ```
 python3 tools/orchestrate.py status            # queue, spend, inbox

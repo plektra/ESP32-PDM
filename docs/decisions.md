@@ -1,7 +1,7 @@
 # Decisions
 
 Every design decision, numbered. Numbers are never reused. **Confirmed** = decided by the owner; **[proposed]** =
-recommended, not decided; **auto** = a small decision made by an agent under decision 22, which the owner may
+recommended, not decided; **auto** = a two-way-door decision made by an agent under decision 23, which the owner may
 overturn. Background and calculations: [design-notes.md](design-notes.md). New decisions take the next
 free number (`/handoff` adds them).
 
@@ -28,4 +28,5 @@ free number (`/handoff` adds them).
 | 19 | 2026-10-30 | pdm-hc2 | For loads ~21 A (searchlight), fit lower-RDS(on) MOSFETs (candidate onsemi NTMFS5C612NL); for halogen inrush, disable the fast short-circuit trip only after an SOA check. | [proposed] |
 | 20 | 2026-10-30 | system | Panel LED behaviour and fault handling: LED on = output on, blinking = fault (firmware). Alerts and failures are published to Signal K so they can be acknowledged and muted there; the failure modes per output (what blinks, what alerts, what is latched, what clears) are still to be designed in `/system firmware`. | open |
 | 21 | 2026-10-30 | system | Sense the panel switch supply: SW_SUPPLY → 100 k/10 k divider (+ 100 nF) → spare GPIO IO12, so the firmware can alert when F4 has tripped (otherwise indistinguishable from "all switches off"). Two basic resistors per board. | [proposed] |
-| 22 | 2026-10-30 | system | Unattended agent runs (`docs/AUTONOMY.md`): agents make small decisions themselves (recorded as **auto**); bigger design changes go to the owner through `docs/OWNER-INBOX.md`. Pilot: only the reviewers run unattended. | confirmed |
+| 22 | 2026-10-30 | system | Unattended agent runs (`docs/AUTONOMY.md`): agents make small decisions themselves (recorded as **auto**); bigger design changes go to the owner through `docs/OWNER-INBOX.md`. Pilot: only the reviewers run unattended. | confirmed; policy replaced by 23 |
+| 23 | 2026-11-01 | system | Autonomy by reversibility (one-way/two-way doors, `docs/AUTONOMY.md`) replaces the small/big rule of decision 22. One-way doors go to the owner: money (orders, changes to ordered boards), the owner's confirmed, proposed or open decisions, weakening safety or invariants, facts only the owner has, CRITICAL findings. Everything else is a two-way door: agents decide (recorded as **auto**, listed in the inbox digest, undoable with `orchestrate.py undo`); questions with a sensible default are answered with it. | confirmed |

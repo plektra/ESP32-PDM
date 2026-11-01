@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Orchestrator for unattended agent runs (decision 22, docs/AUTONOMY.md).
+"""Orchestrator for unattended agent runs (decisions 22–23, docs/AUTONOMY.md).
 
 Runs queued tasks in parallel (--parallel, default 3) as headless Claude Code sessions (`claude -p --agent <role>`),
 each in a fresh context and its own throwaway worktree (`../<repo>-auto-<task>`) cut from the branch `auto/pilot`.
 After every task it checks the result itself instead of trusting the agent: only the expected report in
 docs/reviews/ may change, the report must end with a valid finding block. Under one lock it then copies the report
-to the `auto/pilot` worktree (`../<repo>-auto`) and sorts the findings by the policy in docs/AUTONOMY.md: small ones
-become parked `board-fix` tasks, big ones become owner questions in docs/OWNER-INBOX.md. Each task is committed on
-`auto/pilot`; the owner merges. Inside tmux every running agent gets a pane in the window `workers`.
+to the `auto/pilot` worktree (`../<repo>-auto`) and sorts the findings by the policy in docs/AUTONOMY.md (decision 23):
+two-way doors are decided by agents (approved `board-fix` tasks, questions answered with their default; listed in
+the inbox digest, `undo` takes one back), one-way doors become owner questions in docs/OWNER-INBOX.md. Each task is
+committed on `auto/pilot`; the owner merges. Inside tmux every running agent gets a pane in the window `workers`.
 
 Pilot: only the reviewer roles run (validator, emc-reviewer, cost-controller).
 
@@ -59,7 +60,6 @@ ROLES = {
     'cost-controller': dict(kind='cost', model=('sonnet', 'opus'), budget=(8.0, 25.0)),
 }
 PARKED_ROLES = ('board-fix', 'system')  # queued, but run with the owner during the pilot
-SMALL_COST_LIMIT = 0.50  # USD per board at 10 units (docs/AUTONOMY.md)
 TASK_TIMEOUT = 90 * 60  # seconds
 # Never allowed to an unattended agent, whatever its tool list says.
 DENIED_TOOLS = ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(git reset:*)', 'Bash(git checkout:*)',
@@ -126,11 +126,13 @@ def runnable(q):
 
 INBOX_HEAD = """# Owner inbox
 
-Questions the agents may not decide themselves (decision 22, `docs/AUTONOMY.md`). Write your ruling on each
+One-way doors the agents may not decide themselves (decision 23, `docs/AUTONOMY.md`). Write your ruling on each
 question's Answer line – `yes` (do the proposed fix), `no` (drop it) or your own ruling in words – or use `/inbox`.
-The next `tools/orchestrate.py run` (or `inbox`) applies the answers. This file is regenerated from
-`docs/queue.json`: only the Answer lines are read; other edits are lost.
+The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the questions: what the agents decided
+(two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
+lines are read; other edits are lost.
 """
+DIGEST_MAX = 60  # agent decisions listed in the inbox, newest first
 
 
 def read_answers(root):
@@ -147,7 +149,14 @@ def read_answers(root):
     return answers
 
 
+def agent_decided(t):
+    """Two-way doors the agents took: approved fixes waiting to be applied, and questions answered by default."""
+    return t.get('finding') and not t.get('question') and (
+        t['state'] == 'parked' or (t['state'] == 'done' and str(t.get('ruling', '')).startswith('assumed:')))
+
+
 def write_inbox(root, q):
+    answers = read_answers(root)  # typed but not yet applied: keep them
     open_q = [t for t in q['tasks'] if t.get('question') and t['state'] == 'blocked-owner']
     done_q = [t for t in q['tasks'] if t.get('question') and t['state'] != 'blocked-owner']
     out = [INBOX_HEAD, f'\n## Open ({len(open_q)})\n' if open_q else '\nNo open questions.\n']
@@ -156,9 +165,21 @@ def write_inbox(root, q):
         out.append(f"\n## {t['question']} · {f['severity']} · {f['board']} · {f['kind']}\n\n"
                    f"- **From:** `{t['source']['report']}` {f['id']} ({f.get('location', '')}); task {t['id']}\n"
                    f"- **Summary:** {f['summary']}\n"
-                   f"- **Proposed:** {f.get('fix') or '–'}\n"
+                   f"- **Proposed:** {f.get('fix') or f.get('default') or '–'}\n"
                    f"- **Why it needs you:** {'; '.join(t['why_big'])}\n\n"
-                   f"**Answer:** \n\n---\n")
+                   f"**Answer:** {answers.get(t['question'], '')}\n\n---\n")
+    decided = [t for t in q['tasks'] if agent_decided(t)][::-1]
+    if decided:
+        out.append(f'\n## Decided by agents ({len(decided)}) – two-way doors\n\n'
+                   f'Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a '
+                   f'question.\n\n')
+        for t in decided[:DIGEST_MAX]:
+            f = t['finding']
+            what = (f"assumed {t['ruling'][len('assumed:'):].strip()}" if f['kind'] == 'question'
+                    else f.get('fix') or '–')
+            out.append(f"- {t['id']} · {f['severity']} · {f['board']} · {f['summary']} → {what}\n")
+        if len(decided) > DIGEST_MAX:
+            out.append(f'- … {len(decided) - DIGEST_MAX} older ones in `docs/queue.json`\n')
     if done_q:
         out.append(f'\n## Answered ({len(done_q)})\n\n')
         out += [f"- {t['question']} ({t['finding']['board']}): {t['finding']['summary']} → **{t.get('ruling', '')}**"
@@ -194,56 +215,78 @@ def parse_block(text):
     if not isinstance(items, list):
         raise ValueError('finding block is not a list')
     for i, f in enumerate(items):
-        for key in ('id', 'kind', 'severity', 'board', 'summary', 'class'):
+        for key in ('id', 'kind', 'severity', 'board', 'summary'):
             if key not in f:
                 raise ValueError(f'entry {i}: missing {key}')
         if f['kind'] not in KINDS or f['severity'] not in SEVERITIES or f['board'] not in SCOPES:
             raise ValueError(f"entry {f['id']}: bad kind, severity or board")
+        if 'door' not in f:  # reports written before decision 23 say small/big
+            f['door'] = 'two-way' if f.get('class') == 'small' else 'one-way'
     return items
 
 
-def why_big(f):
-    """Policy reasons that make a finding big; empty means small (docs/AUTONOMY.md)."""
+def owner_decisions(root):
+    """Decision numbers only the owner may change: confirmed, [proposed] and open (not auto, not superseded)."""
+    held = set()
+    for line in (root / 'docs' / 'decisions.md').read_text().splitlines():
+        cells = [c.strip() for c in line.strip().strip('|').split('|')]
+        if len(cells) >= 5 and cells[0].isdigit():
+            status = cells[-1].lower()
+            if not status.startswith('auto') and 'replaced' not in status and 'superseded' not in status:
+                held.add(int(cells[0]))
+    return held
+
+
+ONE_WAY_TOUCHES = ('money', 'safety', 'invariant', 'owner-fact')
+
+
+def why_one_way(f, held, ordered):
+    """Policy reasons that make a finding a one-way door (the owner decides); empty: two-way (docs/AUTONOMY.md)."""
     why = []
-    if f['class'] != 'small':
-        why.append(f"reviewer classed it {f['class']}" + (f": {f['reason']}" if f.get('reason') else ''))
-    if f['kind'] == 'question':
-        why.append('a question only the owner can answer')
+    if f['door'] != 'two-way':
+        why.append('reviewer: one-way door' + (f" ({f['reason']})" if f.get('reason') else ''))
     if f['severity'] == 'CRITICAL':
         why.append('CRITICAL')
-    if f['board'] == 'system':
-        why.append('affects both boards')
-    if f.get('touches'):
-        why.append('touches ' + ', '.join(f['touches']))
-    if abs(f.get('cost_delta_usd') or 0) > SMALL_COST_LIMIT:
-        why.append(f"cost change {f['cost_delta_usd']:+.2f} USD per board")
+    if f['kind'] == 'question' and not f.get('default'):
+        why.append('a question without a sensible default')
+    touches = f.get('touches') or []
+    why += [f'touches {x}' for x in touches if x in ONE_WAY_TOUCHES]
+    why += [f'changes your decision {x.split(":")[1]}' for x in touches
+            if x.startswith('decision:') and x.split(':')[1].isdigit() and int(x.split(':')[1]) in held]
+    if f['board'] in ordered or (f['board'] == 'system' and ordered):
+        why.append(f"{f['board'] if f['board'] in ordered else 'a board'} is ordered")
     return why
 
 
-def triage(q, report, items):
-    """Turn findings into tasks and questions. Returns (small, big, duplicates, critical)."""
+def triage(q, report, items, root=None):
+    """Turn findings into tasks and questions. Returns (agent-decided, for the owner, duplicates, critical)."""
+    held = owner_decisions(root or WORKTREE)
+    ordered = set(q.get('ordered', []))
     seen = {(t['finding']['board'], t['finding'].get('location'), t['finding']['summary'])
             for t in q['tasks'] if t.get('finding') and t['state'] not in ('done', 'failed')}
-    small = big = dup = crit = 0
+    agent = owner = dup = crit = 0
     for f in items:
         key = (f['board'], f.get('location'), f['summary'])
         if key in seen:
             dup += 1
             continue
         seen.add(key)
-        why = why_big(f)
+        why = why_one_way(f, held, ordered)
         role = 'board-fix' if f['board'] in BOARDS and f['kind'] != 'question' else 'system'
         t = dict(id=new_id(q, 'T'), role=role, scope=f['board'], created=today(), finding=f,
-                 source=dict(report=str(report), finding=f['id']))
+                 source=dict(report=str(report), finding=f['id']), door='one-way' if why else 'two-way')
         if why:
             t.update(state='blocked-owner', question=new_id(q, 'Q'), why_big=why)
-            big += 1
+            owner += 1
+        elif f['kind'] == 'question':
+            t.update(state='done', ruling=f"assumed: {f['default']}")
+            agent += 1
         else:
             t.update(state='parked')
-            small += 1
+            agent += 1
         crit += f['severity'] == 'CRITICAL'
         q['tasks'].append(t)
-    return small, big, dup, crit
+    return agent, owner, dup, crit
 
 
 # ---------------------------------------------------------------- running one task
@@ -463,8 +506,8 @@ def run_task(q, t, budget_left, dry_run=False):
                     got = str(Path(got).with_name(f"{Path(got).stem}-{t['id']}.md"))
                 (WORKTREE / got).parent.mkdir(parents=True, exist_ok=True)
                 (WORKTREE / got).write_text(text)
-                small, big, dup, crit = triage(q, got, items)
-                result = dict(report=got, small=small, big=big, duplicates=dup, critical=crit)
+                agent, owner, dup, crit = triage(q, got, items)
+                result = dict(report=got, agent=agent, owner=owner, duplicates=dup, critical=crit)
             except (ValueError, json.JSONDecodeError) as e:
                 notes.append(f'report {got}: {e}')
                 got = None
@@ -478,8 +521,9 @@ def run_task(q, t, budget_left, dry_run=False):
         write_inbox(WORKTREE, q)
         save_queue(WORKTREE, q)
         git('add', '--', *([str(QUEUE), str(INBOX)] + ([got] if got else [])))
-        summary = (f"{result['small']} small, {result['big']} for the owner, {result['duplicates']} duplicates"
-                   if result else 'paused, API unavailable' if paused else 'failed')
+        summary = (f"{result['agent']} decided by agents, {result['owner']} for the owner, "
+                   f"{result['duplicates']} duplicates" if result else
+                   'paused, API unavailable' if paused else 'failed')
         git('commit', '-m', f"Auto: {t['role']} {t['scope']} ({t['id']}): {summary}\n\n"
             f"Unattended run by tools/orchestrate.py, model {model}, {cost:.2f} USD.\n\n"
             f"Co-Authored-By: Claude <noreply@anthropic.com>")
@@ -643,7 +687,7 @@ def dashboard(width, recent):
             mine = [x for x in q['tasks'] if (x.get('source') or {}).get('report') == t.get('report')]
             big = sum(1 for x in mine if x.get('question'))
             out.append(f"  {paint('✓', 'green')} {name}" + paint(
-                f"   {t.get('cost_usd', 0):.2f} USD · {len(mine) - big} small · {big} for you · "
+                f"   {t.get('cost_usd', 0):.2f} USD · {len(mine) - big} decided by agents · {big} for you · "
                 f"{Path(t.get('report', '')).name}", 'dim'))
         else:
             out.append(f"  {paint('✗', 'red')} {name}   " + paint((t.get('note') or '')[:160], 'red'))
@@ -657,7 +701,7 @@ def dashboard(width, recent):
     out += ['', paint(' OWNER INBOX', 'bold')]
     out.append((f'  {len(open_q)} open: ' + ' · '.join(paint(f'{sev[s]} {s}', *SEV_STYLE[s]) for s in SEVERITIES
                                                       if sev[s]) if open_q else '  no open questions')
-               + f"   {sum(1 for t in q['tasks'] if t['state'] == 'parked')} small fixes parked"
+               + f"   {sum(1 for t in q['tasks'] if agent_decided(t))} decided by agents (see the inbox digest)"
                + (paint(f'   {waiting} answered, applied at the next run', 'green') if waiting else ''))
     out += ['', paint(' talk to an agent: orchestrate.py attach <task> · answer: /inbox', 'dim')]
     return [fit(line, width) for line in out]
@@ -790,6 +834,22 @@ def cmd_retry(args):
     print(f'{t["id"]} is ready again')
 
 
+def cmd_undo(args):
+    """Take back an agent's two-way decision: it becomes a question in the owner inbox."""
+    root = state_root()
+    q = load_queue(root)
+    t = find_task(q, args.task)
+    if not agent_decided(t):
+        raise SystemExit(f"{t['id']} is not an agent decision waiting to be applied (state {t['state']})")
+    t.update(state='blocked-owner', question=new_id(q, 'Q'), door='one-way', undone=today(),
+             why_big=[f"you took it back from the agents (was: {t.get('ruling') or 'fix approved'})"])
+    t.pop('ruling', None)
+    write_inbox(root, q)
+    save_queue(root, q)
+    print(f"{t['id']} is question {t['question']} in {root / INBOX}"
+          + (' (committed by the next run)' if root == WORKTREE else ''))
+
+
 def cmd_inbox(args):
     fh = lock()
     ensure_worktree(args.base)
@@ -869,7 +929,7 @@ def cmd_run(args):
                     stop = stop or f"API unavailable ({t['note'][-100:]}); {t['id']} stays ready"
                     continue
                 fails = 0 if result else fails + 1
-                new_q += result['big'] if result else 0
+                new_q += result['owner'] if result else 0
                 if result and result['critical']:
                     stop = stop or f"CRITICAL finding in {result['report']}, see the owner inbox"
                 if fails >= 2:
@@ -914,6 +974,9 @@ def main():
     s = sub.add_parser('attach', help="talk to an agent: resume its session (a copy while it runs)")
     s.add_argument('task')
     s.set_defaults(fn=cmd_attach)
+    s = sub.add_parser('undo', help="take back an agent's two-way decision: it becomes an owner question")
+    s.add_argument('task')
+    s.set_defaults(fn=cmd_undo)
     s = sub.add_parser('retry', help='set a failed task ready again')
     s.add_argument('task')
     s.set_defaults(fn=cmd_retry)
