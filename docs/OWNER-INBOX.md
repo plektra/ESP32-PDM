@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** How should F1/F3/F4 be made safe against a hard short? (a) 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint, after datasheet check) plus a pulse-rated series resistor per PTC so that 30 V / R_total <= Imax (about 0.15-0.22 ohm); or (b) accept and document the residual risk (current limited only by battery, cable and terminals)?
 - **Why it needs you:** found while fixing (T-0065): Datasheet check failed: 1812L050/60GR Imax 40 A at 60 V (LUTE 1812L Rev. 2020 p. 3), Rmin 0.150 ohm; prospective short current behind F1/F3/F4 = 30 V / (0.150 + 0.010) ohm = 188 A (4.7 x Imax). Protection problem (F4 feeds the panel switches incl. bilge forced run / nav lights), so not changed; the dependent F2 swap of T-0026 was not done either.
 
-**Answer:** 
+**Answer:** (a) - 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint) after a datasheet check, plus a series resistor of about 0.15-0.22 ohm per PTC so that 30 V / R_total <= Imax; check the resistor's pulse energy against the PTC trip time, and if no basic/cheap part passes, return to the owner; then do the dependent F2 swap (T-0026); F4 is safety-relevant, so a competent person reviews it before installation
 
 ---
 
