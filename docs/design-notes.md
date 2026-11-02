@@ -74,8 +74,8 @@ switch path (≈3.2 V node − BAT54C) still clears VIN(H) with ~0.4 V margin.
 
 The footprint is drawn from the datasheet package outline (Figure 53): lead pads 1.6 × 0.6 mm at
 x = ±2.6 mm (0.47 mm clearance to the 2.65 × 6.4 mm exposed pad), 10 × 0.3 mm thermal vias,
-bottom-side copper pad, ~60 % paste coverage. **Check against the JLCPCB/EasyEDA footprint before
-ordering.**
+bottom-side copper pad, 51 % paste coverage in six windows between the via rows (no paste over a via, T-0066).
+Checked against the package drawing and the JLCPCB/EasyEDA footprint on 2026-11-02: see §8.4.
 
 ## 4. Heat budget
 
@@ -433,13 +433,57 @@ R43 0.001, C13 0.042, C50–C53 4 × 0.023, FB1/FB2 2 × 0.020, D4–D6 3 × 0.0
 That is roughly +0.3 USD per board in part price. Unique extended parts: −PESD0402V05, −TPS7B91 (and the ferrite, which had
 no LCSC code before) removed; +C170101, +C107198 added. That is about one loading fee fewer per order (check the quote).
 
+### 8.4 Custom footprints: TDSO-14 paste, LMR51610 on SOT-23-6 (T-0066, Q-0036/Q-0037, 2026-11-02)
+
+**PG-TDSO-14 (`ESP32-PDM:Infineon_PG-TDSO-14_ThermalVias`, BTT6050/BTT6010).** The six 1.0 × 1.6 mm paste windows sat
+on the ten open 0.3 mm thermal vias (x = ±0.6, y = 0/±1.2/±2.4), so paste would wick into the vias and leave voids under
+the VS tab (validator 2026-10-30). Owner ruling Q-0036: move the paste between the vias, no plugged vias.
+
+New paste: four windows 2.55 × 0.6 mm centred at y = ±0.6 and ±1.8 (between the via rows) and two 2.55 × 0.5 mm at
+y = ±2.95 (beyond the outer rows, ending at the pad edge), corner ratio 0.1. Area 4 × 1.53 + 2 × 1.275 = 8.67 mm² of
+the 2.65 × 6.4 = 16.96 mm² exposed pad = **51 %** (was 9.6 mm², 57 %, over the vias). Every window edge is ≥ 0.30 mm
+from a via centre: 0.15 mm from the drill and 0.05 mm from the 0.5 mm via pad. The webs between windows are 0.6 mm (the via
+rows). Checked by a scratch script (every window against every via) and a `kicad-cli fp export svg` plot. Across the 0.12 mm stencil,
+area ratio = 1.53 / (6.3 × 0.12) ≈ 2.0, well above 0.66. 51 % is at the low end of the 50–70 % range; the vias set the
+limit. If X-ray or first-article boards show a thin or voided tab joint, widen the windows to 2.65 mm (53 %) or
+order plugged vias (owner's call, money).
+
+Recheck against the Infineon package drawing (BTT6050-1ERA datasheet Rev 1.00, Fig. 53, PG-TDSO-14): body 3.9 × 8.65,
+pitch 1.27, lead width 0.4 ± 0.05, span 6.0 ± 0.2, foot 0.67 ± 0.25, exposed pad 2.65 × 6.4 ± 0.1, pin 1 next to the
+index mark, 1–7 on one side and 8–14 opposite. Lead pads 1.6 × 0.6 at x = ±2.6 cover x = 1.8…3.4; the foot lies within
+1.98…3.1 at all tolerances, so the pads cover it with ≥ 0.18 mm heel and ≥ 0.3 mm toe; side overhang 0.1 mm; gap between pads
+0.67 mm; clearance to the exposed pad 0.475 mm. The exposed pad copper is 1:1 with the package pad. **Drawing and pads
+agree.**
+
+JLCPCB/EasyEDA footprint of C534868 (`PG-TDSO-14_L8.6-W3.9-P1.27-LS6.0-BL-EP`, read from the EasyEDA API): lead pads
+1.8 × 0.6 oval at ±3.0 (x = 2.1…3.9), exposed pad 6.4 × 2.65 (same), pin 1 at the same corner after a 90° rotation
+(EasyEDA draws the package horizontally: expect a 90° rotation correction in the CPL at the first order). Their pads
+reach 0.5 mm further out and start 0.3 mm further in from the heel; ours give a larger heel fillet and more clearance to the
+exposed pad. Both cover the foot, so we keep ours.
+
+**LMR51610 U3 (`power-usb`, both boards).** The custom `ESP32-PDM:LMR51610` (1.81 × 0.61 pads at ±1.15) is replaced
+by the stock `Package_TO_SOT_SMD:SOT-23-6` (owner ruling Q-0037), checked first:
+
+| Source | Pad (along × across) | Pad centre x | Pad extent x | Pitch | Pin order |
+|---|---|---|---|---|---|
+| TI DBV0006A land pattern (LMR51610 DS SLUSEY1B p. 33) | 1.1 × 0.6 | ±1.30 | 0.75…1.85 | 0.95 | 1–3 left top→bottom, 4–6 right bottom→top |
+| KiCad `SOT-23-6` (KiCad 8 lib) | 1.325 × 0.6 | ±1.1375 | 0.475…1.80 | 0.95 | same |
+| JLCPCB/EasyEDA C22427220 `SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BL` | 1.072 × 0.532 | ±1.149 | 0.61…1.69 | 0.95 | same (drawn rotated 90°) |
+
+Package (DBV0006A p. 32): span 2.6–3.0, foot 0.3–0.6, so the foot lies within 0.7…1.5 from the centre. All three lands cover it.
+KiCad's pad ends 0.05 mm short of TI's toe and reaches 0.275 mm further under the body (IPC-7351 nominal; TI note 6
+allows IPC-7351 variants). The JLCPCB pad lies entirely inside it. Pin numbering is the same as TI's: 1 CB, 2 GND, 3 FB,
+4 EN, 5 VIN, 6 SW (Table 5-1). U3's footprint field (instance and cached symbol) and the library symbol default
+(was the non-existent `ESP32-PDM-BASE:LMR51610`) now point to `Package_TO_SOT_SMD:SOT-23-6`. Nothing else used
+`LMR51610.kicad_mod`, so it was removed from `lib/`. This also cleared U3's `lib_symbol_mismatch` warning on both boards.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
 - [x] Battery-voltage measurement (IO10) and NTC near the switches (IO9) (decision 18)
 - [ ] Failure modes and alert handling: LED blink codes, Signal K alerts with acknowledge/mute (decision 20)
 - [ ] Terminal blocks and enclosure layout for DIN / flat mounting (§7)
-- [ ] Verify the PG-TDSO-14 footprint against the JLCPCB/EasyEDA footprint
+- [x] Verify the PG-TDSO-14 footprint against the package drawing and the JLCPCB/EasyEDA footprint (§8.4, T-0066)
 - [ ] Per-output fuse strategy (on board vs. in the installation)
 - [ ] Standard population (e.g. 2 × BTT6010 + 2 × BTT6050) vs. all-BTT6010 builds
 - [ ] High-current board: MOSFET option for 21 A, halogen inrush decision, terminals (§4a)
@@ -458,6 +502,6 @@ no LCSC code before) removed; +C170101, +C107198 added. That is about one loadin
 - [ ] Auxiliary sense-only inputs (1-2, same protected input circuit, spare GPIO) for pump-running /
       float-switch state
 - [ ] Load list with nameplate currents (VHF, FM radio, wipers incl. park circuit, bilge pumps, work lights)
-- [ ] Update Symbols from Library in KiCad (LMR51610, USB-C symbols; Q3–Q6 use the BC817 symbol with value
+- [ ] Update Symbols from Library in KiCad (USB-C symbols; LMR51610 done in T-0066; Q3–Q6 use the BC817 symbol with value
       MMBT5551 – same SOT-23 pinout 1 B / 2 E / 3 C – keep that when updating)
 - [ ] Remaining checks from the BOM audit: Kangnex CAN connector footprint, PESD2CAN pinout
