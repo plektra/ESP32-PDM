@@ -39,6 +39,14 @@ per order, so order mixed builds together to pay it once.
 - **Not a circuit breaker.** Every output wire must be protected by a fuse or breaker sized to the
   wire. The switches protect themselves, not your wiring.
 - Install in an enclosed, ventilated location; observe the continuous current ratings.
+- **Panel switches: dry contacts only.** Use plain (unlit) switch contacts. A lamp or LED across the contacts leaks
+  current that can switch the output on in hardware. Use the J5 LED lines for panel indication instead.
+- **12 V systems, engine cranking:** the panel-switch path switches an output off when the switch voltage drops below
+  about 8 V (about 8.5 V at the battery). While the engine cranks, panel-switched outputs such as navigation lights can
+  therefore go off for a moment. 24 V systems are not affected.
+- **Reverse battery (`pdm-4ch`):** the output switches survive a reversed battery of at most 28 V for less than 2
+  minutes, with each load at least 12 Ω (BTT6050 datasheet). Heavier loads rely on the battery fuse to clear. The
+  loads see reverse voltage. A series diode in the switch supply protects the panel LEDs.
 - **USB-C is a service port only.** Connect only a battery-powered laptop, or use a USB isolator. The
   board's GND is the boat's battery negative. A laptop on a shore-powered charger can tie its protective
   earth to battery negative through the USB cable, which can cause ground-loop currents, galvanic
