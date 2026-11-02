@@ -8596,7 +8596,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1nF"
+		(property "Value" "1nF/2kV"
 			(at 157.48 30.48 0)
 			(effects
 				(font
@@ -8605,7 +8605,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 154.94 29.21 0)
 			(effects
 				(font
@@ -8632,7 +8632,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C1523"
+		(property "LCSC" "C9196"
 			(at 154.94 29.21 0)
 			(effects
 				(font
@@ -8916,7 +8916,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1nF"
+		(property "Value" "1nF/2kV"
 			(at 157.48 62.23 0)
 			(effects
 				(font
@@ -8925,7 +8925,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 154.94 60.96 0)
 			(effects
 				(font
@@ -8952,7 +8952,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C1523"
+		(property "LCSC" "C9196"
 			(at 154.94 60.96 0)
 			(effects
 				(font
@@ -9236,7 +9236,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1nF"
+		(property "Value" "1nF/2kV"
 			(at 157.48 93.98 0)
 			(effects
 				(font
@@ -9245,7 +9245,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 154.94 92.71 0)
 			(effects
 				(font
@@ -9272,7 +9272,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C1523"
+		(property "LCSC" "C9196"
 			(at 154.94 92.71 0)
 			(effects
 				(font
@@ -9556,7 +9556,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1nF"
+		(property "Value" "1nF/2kV"
 			(at 157.48 127 0)
 			(effects
 				(font
@@ -9565,7 +9565,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 154.94 125.73 0)
 			(effects
 				(font
@@ -9592,7 +9592,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C1523"
+		(property "LCSC" "C9196"
 			(at 154.94 125.73 0)
 			(effects
 				(font

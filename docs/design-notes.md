@@ -27,7 +27,7 @@ Values marked *estimate* are engineering estimates, not measurements.
 |---|---|---|
 | Controller | root | ESP32-S3-MINI-1-N8, native USB (no USB-UART bridge) |
 | Power | `power-usb` | LMR51610 buck (4–65 V in) → 3.3 V, diode-OR with USB VBUS, 60 V PTC, SMAJ30CA |
-| NMEA 2000 | `can` | ISO1044 isolated CAN, TPS7B91 5 V LDO from NET-S, SMAJ18CA, PESD2CAN |
+| NMEA 2000 | `can` | ISO1044 isolated CAN, L78M05 5 V linear regulator (DPAK) from NET-S (was TPS7B91, §8.3), SMAJ18CA, PESD2CAN |
 | Panel inputs | `analog_sw` | Protected direct switch inputs, LED drivers |
 | Output channels | `channel` (×4) | BTT6050-1ERA per channel |
 | Battery input | root | J10, SMCJ30CA surge clamp |
@@ -330,6 +330,108 @@ Before fitting D103–D403: during inductive turn-off the PROFET drives OUT to V
 −42…−51 V. The bidirectional SMAJ30CA (VBR 33.3–36.8 V) would then conduct and take the demagnetisation energy instead of
 the PROFET clamp. For inductive loads, either check that energy against the TVS rating (400 W, 10/1000 µs) or fit a
 unidirectional SMAJ30A (cathode to OUT), which freewheels the load instead.
+
+### 8.3 Shared supply, USB and fuse parts (T-0065, decisions 30–32, 2026-11-02)
+
+Shared sheets `power-usb`, `can` and `analog_sw`, the same on both boards.
+
+**PTC interrupt rating (T-0018, Q-0011): check FAILED, nothing changed.** LUTE 1812L series datasheet (Rev. 2020, p. 3),
+1812L050/60GR: I_hold 0.50 A, I_trip 1.00 A, V_max 60 V, **I_max 40 A** ("maximum fault current device can withstand
+without damage at rated voltage"), R_min 0.150 Ω, R1max 1.4 Ω, trip ≤ 0.15 s at 8 A. Note 3 of the datasheet says the
+part must not be used where I_max can be exceeded in a fault condition. Prospective current for a hard short directly
+behind the PTC, with the ruling's formula: I = 30 V / (R_min + ≈ 10 mΩ cable) = 30 / 0.160 ≈ **188 A**, 4.7 × I_max.
+
+| PTC | Fed from | Short location that reaches I_max | Comment |
+|---|---|---|---|
+| F1 | VS (battery) | D1/C1/U3 input on the board (cracked MLCC, failed TVS) | battery source, only the J10 cable in series |
+| F3 | NET-S (J4.2) | D10/FB2 side on the board, or J4 terminals | N2K supply is 9–16 V and fused at the power tee; drop-cable resistance (≈ 0.1–0.3 Ω) usually limits the current well below 188 A, but this is not guaranteed |
+| F4 | VS (battery) | J5.5 terminal or the first metres of the panel cable | **safety-relevant**: F4 feeds the panel switches (bilge forced run, navigation lights) |
+
+Even 30 V across the PTC plus 0.3 Ω of wiring gives 30 / 0.46 ≈ 65 A > 40 A. JLCPCB has 1812 60 V PTCs listed with
+I_max 100 A (TECHFUSE mSMD050-60V C70113, JDT ASMD1812-050-60V C427396: parametric listing only, datasheets not yet
+read). They are better, but still below 188 A for a short right at the board. This is a protection problem, so it goes to the
+owner (one-way). Options are listed in the T-0065 report: a 100 A-rated 1812 part plus a series resistance per PTC, or
+accept and document the residual risk. **F2 was therefore not swapped to 1812L050/60GR** (the Q-0019 swap depended on this check).
+
+Failure mode if I_max is exceeded: the PPTC can be damaged (cracking, arcing, charring) instead of tripping cleanly;
+the datasheet warns of arcing or fire beyond the maximum ratings. A competent person must review the F1/F3/F4 protection
+before installation.
+
+**L3 swaps (T-0026, Q-0019).**
+
+| Ref | Old | New | Check | Result |
+|---|---|---|---|---|
+| FB1, FB2 | BLM18AG601SN1D 0603 | Sunlord GZ2012D601TF 0805, C1017 (basic) | Sunlord GZ catalogue (rev. 2024-06-19) p. 3: 600 Ω ± 25 % at 100 MHz, DCR ≤ 0.30 Ω, I_r 500 mA. FB1 carries VBUS only when the board runs from USB: buck input ≈ 3.3 V × 0.47 A / (0.85 × 4.6 V) ≈ 0.40 A peak < 500 mA; drop ≤ 0.12 V. FB2 carries the CAN-side current (≤ 77 mA). | adopted |
+| F2 | SMD0805B050TF | 1812L050/60GR | depends on the PTC I_max check above | **not adopted** |
+| D4–D6 | DOWO PESD0402V05 (polymer, clamp 40 V at 8 kV contact, trigger 450 V, 0.05 pF; DOWO datasheet p. 2) | hongjiacheng H5VL10B, DFN1006-2L, C7420372 (preferred) | H5VL10B Rev 2.0: V_RWM 5 V, V_BR 5.6–8 V at 1 mA, V_C ≤ 8 V at 1 A and ≤ 10 V at 5 A (8/20 µs), C_J 15 pF typ / 18 pF max (0 V, 1 MHz), IEC 61000-4-2 ±25 kV contact/air, I_R ≤ 0.1 µA. 18 pF max is inside the ≤ 15–20 pF budget for a USB full-speed line. The clamp is far lower than the polymer part's 40 V and the ESD rating higher, so protection is stronger. D4 on VBUS: V_RWM 5.0 V against VBUS 5.25 V max (USB 2.0); V_BR min 5.6 V, so leakage stays small. | adopted, footprint `Diode_SMD:D_SOD-882` (1.0 × 0.6 mm, 0.65 mm pitch = DFN1006-2) |
+| U6 | TPS7B91050 SOT-23-5 | ST L78M05ABDT-TR, DPAK, C58069 (basic) | see below | adopted, footprint `Package_TO_SOT_SMD:TO-252-2` |
+
+L78M05ABDT (ST DS0425 Rev 24):
+- V_I abs max 35 V (V_O 5–18 V). The SMAJ18CA D10 clamps NET-S at 29.2 V; 35 / 29.2 = 1.20 (5.8 V margin), and there is
+  no operating voltage above 16 V on NMEA 2000.
+- Pinout (Fig. 2, DPAK): 1 = INPUT, tab = GND, 3 = OUTPUT. This matches the KiCad `Regulator_Linear:L7805` symbol
+  (1 IN, 2 GND, 3 OUT) and the `TO-252-2` footprint (pad 2 = tab). The symbol sits on the old U6 pin points: IN and GND
+  nets unchanged, OUT now pin 3.
+- I_d (quiescent) 6 mA max, ΔI_d ≤ 0.8 mA with line/load. **LEN:** ISO1044 I_CC2 (TI SLLSFB0A §6.9) 70 mA max bus dominant,
+  9 mA recessive, 38 mA max at 1 Mbit/s 50 % square wave. NET-S current = I_CC2 + regulator ground current. Normal
+  traffic: 38 → 44.8 mA, LEN 1 before and after. Continuous dominant (fault case): 70 → 76.8 mA, LEN 2 before and
+  after. **The load class does not change**, but the margin to 50 mA in the normal-traffic case is only 5 mA. A different
+  transceiver (T-0030 CA-IS3050G) must be rechecked against it.
+- Dropout 2 V: NET-S minimum 9 V − D11 (≈ 0.4 V) − F3/FB2 (< 0.05 V) ≈ 8.5 V > 7 V needed. V_O 4.8–5.2 V over
+  temperature (ISO1044 V_CC2 4.5–5.5 V).
+- Capacitors: the datasheet's test circuit uses C_I 0.33 µF and C_O 0.1 µF. C13 was raised from 0.1 µF to **1 µF/50 V
+  X7R 0805 (C28323, basic)**. C12 1 µF + C11 0.1 µF on the output are kept.
+- Heat: (16 − 0.4 − 5) V × 45 mA ≈ 0.48 W normal traffic (same as the TPS7B91 plus 0.07 W from I_d). R_θJA 100 K/W (DPAK,
+  Table 2) gives +48 K, so ≈ 98 °C at 50 °C enclosure air (T_J max 125 °C). Copper under the tab lowers that.
+- **DPAK area:** body ≈ 6.6 × 6.1 mm plus leads, footprint ≈ 10.4 × 6.7 mm, against ≈ 3 × 3 mm for SOT-23-5. This is for
+  `/system mechanical` (1-module DIN width).
+
+**USB service port (T-0014, Q-0008).**
+- README: USB-C is a service port only (battery-powered laptop or USB isolator).
+- J3 shield is no longer tied to GND directly: new net `USB_SHIELD` → R13 1 MΩ 1206 (C17927, basic) ‖ C18 4.7 nF/1 kV
+  X7R 1206 (Yageo CC1206KKX7RCBB472, C107198, extended; Yageo voltage code C = 1 kV) to GND, plus R14 0 Ω 0603 (C21189)
+  **DNP** as the hard-tie option. Choice (auto): RC fitted, 0 Ω DNP. 1 MΩ bleeds static charge; 4.7 nF gives an RF/ESD
+  return (Z ≈ 0.3 Ω at 100 MHz, ignoring ESL) but blocks the 50 Hz/DC loop to shore PE. No basic 4.7 nF part ≥ 250 V exists
+  (searched 2026-11-02), so this is one new extended part. 1206 sizes keep creepage for ESD on the shield.
+- TLP/clamp check of the ESD part left by step 2 (H5VL10B): **no TLP curve is published**. Clamp data are 8/20 µs only
+  (≤ 8 V at 1 A, ≤ 10 V at 5 A, Fig. 4). Extrapolating the 0.5 Ω dynamic resistance to the 8 kV contact first peak (≈ 30 A)
+  gives roughly 20–25 V for the first nanoseconds (estimate, not datasheet). That is far below the replaced part's 40 V.
+  The remaining margin comes from the ESP32-S3's own pin ESD structures. If TLP data are wanted before ordering, a part with
+  published TLP (e.g. a USBLC6-2 type) is the alternative.
+
+**Buck (T-0011, Q-0005).** TI SLUSEY1B §8.2.2.6: C_IN ≥ 2.2 µF rated about twice V_IN, plus 0.1 µF close to the pins.
+§7.3.5/8.2.2.7: C_BOOT 0.1 µF ≥ 16 V.
+- C19 100 nF/100 V X7R 0805 (C28233, basic, same part as C54) from VIN to GND, next to C1. Place it at the VIN/GND pins.
+- R43 0 Ω 0402 (C17168, basic) in series with C2 between CB and C2. Fitted as 0 Ω. If the scan shows SW-edge noise, a
+  few-ohm value slows the high-side turn-on (check that the boot capacitor still recharges).
+- R44 10 Ω 1206 (C17903) + C20 100 pF/100 V C0G 0603 (Samsung CL10C101JC8NNNC, C296717) from SW to GND, **both DNP**.
+  Snubber loss if fitted: C·V²·f = 100 pF × 24² × 1.1 MHz ≈ 63 mW (≈ 0.1 W at 30 V), within the 0.25 W 1206 rating. Values are
+  set at the pre-compliance scan from the measured ring frequency. LMR51610YDBVR is kept (decision 30).
+
+**Capacitor ratings (T-0015, Q-0009).**
+- C1 2.2 µF/50 V → **2.2 µF/100 V X7R 1206, Samsung CL31B225KCHSNNE (C170101, extended)**. No basic or preferred 2.2 µF
+  ≥ 63 V exists (searched 2026-11-02), so this is one new extended part. Two C13832 (1 µF/100 V, already in the BOM) would
+  give only 2 µF, below TI's 2.2 µF minimum. MLCC on a battery-derived net: keep it away from board edges and screws (a
+  cracked MLCC is a short behind F1, see the PTC finding).
+- C50–C53 1 nF 0402 50 V → **1 nF/2 kV X7R 1206, FH 1206B102K202NT (C9196, basic)**. A 100 V basic part does not exist in 1 nF;
+  this is the only basic part ≥ 63 V. Larger footprint (1206).
+
+**L1 second sources (T-0022, Q-0015).** All three have the same figures:
+
+| Part | LCSC | L | DCR typ/max | I_sat | I_rms | Size / land (a, b, c) | Source |
+|---|---|---|---|---|---|---|---|
+| Sunlord SWPA6045S8R2MT (fitted) | C96963 | 8.2 µH ± 20 % | 0.043 / 0.056 Ω | 3.90 A | 2.60 A | 6.0 × 6.0 × 4.5 max; 2.8/1.7/5.7 | SWPA catalogue rev. 2025-05-08 pp. 2, 13 |
+| Sunltech SLW6045S8R2MST | C47018494 | 8.2 µH ± 20 % | 0.043 ± 30 % (≤ 0.056) | 3.90 A | 2.60 A | 6.0 × 6.0 × 4.5 max; 2.8/1.7/5.7 | Sunltech SLW6045S Rev.02 pp. 1–2 |
+| cjiang FNR6045S8R2MT | C168074 | 8.2 µH ± 20 % | 0.043 / 0.056 Ω | 3.90 A (4.30 typ) | 2.60 A (2.80 typ) | 6.0 × 6.0 × 4.5 max; 2.8/1.7/5.7 | FNR catalogue pp. 2, 16 |
+
+Both alternates are approved, with the same footprint `Inductor_SMD:L_Sunlord_SWPA6045S`. SLW6045S8R2MST has no EasyEDA
+footprint at JLCPCB (`has_easyeda_footprint` false), so map it to the SWPA land at order time. Stock on 2026-11-02:
+SWPA 1231, SLW 1512, FNR 1677. Recheck before ordering.
+
+**Cost (estimate, 1–49 pcs prices):** fitted parts added or changed: C1 0.133, C18 0.018, C19 0.016, R13 0.004,
+R43 0.001, C13 0.042, C50–C53 4 × 0.023, FB1/FB2 2 × 0.020, D4–D6 3 × 0.0065 (was 3 × 0.0133), U6 0.207 (was 0.21).
+That is roughly +0.3 USD per board in part price. Unique extended parts: −PESD0402V05, −TPS7B91 (and the ferrite, which had
+no LCSC code before) removed; +C170101, +C107198 added. That is about one loading fee fewer per order (check the quote).
 
 ## 9. Open items
 
