@@ -535,13 +535,13 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E14"
       },
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0047",
       "why_big": [
         "found while fixing (T-0065): Datasheet check failed: 1812L050/60GR Imax 40 A at 60 V (LUTE 1812L Rev. 2020 p. 3), Rmin 0.150 ohm; prospective short current behind F1/F3/F4 = 30 V / (0.150 + 0.010) ohm = 188 A (4.7 x Imax). Protection problem (F4 feeds the panel switches incl. bilge forced run / nav lights), so not changed; the dependent F2 swap of T-0026 was not done either."
       ],
-      "ruling": "yes - validator/part-facts checks the 1812L050/60GR Imax and minimum resistance against the prospective short current (30 V / cable + PTC resistance)",
-      "answered": "2026-11-01",
+      "ruling": "(a) - 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint) after a datasheet check, plus a series resistor of about 0.15-0.22 ohm per PTC so that 30 V / R_total <= Imax; check the resistor's pulse energy against the PTC trip time, and if no basic/cheap part passes, return to the owner; then do the dependent F2 swap (T-0026); F4 is safety-relevant, so a competent person reviews it before installation",
+      "answered": "2026-11-02",
       "package": "T-0065",
       "door": "one-way"
     },
