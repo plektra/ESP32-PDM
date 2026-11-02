@@ -2179,7 +2179,16 @@
       "plan": "T-0063",
       "depends_on": [
         "T-0065"
-      ]
+      ],
+      "started": "2026-11-02T17:33:40",
+      "model": "opus",
+      "session": "6bdbd357-1f8b-4d50-bd5f-15a27772e421",
+      "cost_usd": 1.692,
+      "attempts": 1,
+      "finished": "2026-11-02",
+      "note": "no report written (aborted_streaming): ",
+      "summary": "interrupted, queued again",
+      "interrupted": true
     },
     {
       "id": "T-0068",
