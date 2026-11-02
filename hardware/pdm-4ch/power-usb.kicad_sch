@@ -1564,7 +1564,7 @@
 					)
 				)
 			)
-			(property "Footprint" "ESP32-PDM:LMR51610"
+			(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"
 				(at 0 0 0)
 				(effects
 					(font
@@ -7701,7 +7701,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ESP32-PDM:LMR51610"
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"
 			(at 163.83 68.58 0)
 			(effects
 				(font

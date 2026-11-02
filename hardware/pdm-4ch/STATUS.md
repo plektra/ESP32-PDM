@@ -2,7 +2,7 @@
 
 Updated: 2026-11-02
 
-**Where it stands:** schematic complete (scripted edits), ERC: 6 `lib_symbol_mismatch` notices only. Netlist checked
+**Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
@@ -20,6 +20,13 @@ D103 from OUT to GND (refs x04/x03 per channel). Invariant 4 now states the PROF
 1 MΩ ‖ C18 4.7 nF/1 kV to GND, R14 0 Ω hard-tie **DNP**. README USB service rule added. ERC unchanged
 (6 `lib_symbol_mismatch`), netlist checked. Details: design-notes §8.3.
 
+**2026-11-02 (T-0066, Q-0036/Q-0037, unattended, shared lib + `power-usb`, same on both boards):** PG-TDSO-14
+footprint paste moved between the thermal vias: 4 × 2.55 × 0.6 + 2 × 2.55 × 0.5 mm windows, 51 % of the exposed pad, all ≥ 0.15 mm
+from the via drills. Pads rechecked against Infineon Fig. 53 and the JLCPCB footprint of C534868; they agree. U3 LMR51610 now
+uses `Package_TO_SOT_SMD:SOT-23-6` (checked against TI DBV0006A and the JLCPCB footprint, pin numbering identical);
+custom `LMR51610.kicad_mod` removed. ERC 0 errors, warnings 6 → 5 (U3 mismatch cleared); netlist: only U3's
+footprint changed. Details: design-notes §8.4.
+
 **Blocked (owner, one-way):** the PTC check failed. 1812L050/60GR is rated I_max 40 A, but a hard short behind F1/F3/F4
 can draw ≈ 188 A (30 V / 0.16 Ω). F2 therefore stays SMD0805B050TF. Question in the T-0065 report.
 
@@ -28,10 +35,11 @@ can draw ≈ 188 A (30 V / 0.16 Ω). F2 therefore stays SMD0805B050TF. Question 
 ## Next
 
 1. Open in KiCad: tidy what the scripts placed (labels, part positions; the new parts in `analog_sw` and the
-   VBAT/NTC block at the bottom of the root sheet), run *Update Symbols from Library* (LMR51610, USB-C; keep Q3–Q6
+   VBAT/NTC block at the bottom of the root sheet), run *Update Symbols from Library* (USB-C; keep Q3–Q6
    on the BC817 symbol with value MMBT5551 – same pinout), then ERC.
 2. After `/emc pdm-4ch` and `/validate pdm-4ch deep`: fix findings.
-3. Verify the custom footprint `Infineon_PG-TDSO-14_ThermalVias` against the JLCPCB/EasyEDA footprint (C534868).
+3. ~~Verify `Infineon_PG-TDSO-14_ThermalVias` against the JLCPCB footprint~~ done (T-0066). At the first order, check the
+   CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°).
 4. Remaining part checks from the BOM audit: Kangnex WJ15EDGVC CAN connector on the Phoenix MCV footprint; PESD2CAN
    pin 3 = common; Molex 39301080 = 5569-08A2 (if still used).
 5. PCB layout after the terminal blocks and enclosure are decided (`/system mechanical`): 2 oz, VS copper on both
