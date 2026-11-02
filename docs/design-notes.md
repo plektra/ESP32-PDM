@@ -69,8 +69,31 @@ Source: Infineon BTT6050-1ERA datasheet Rev 1.00 (2019-03-09).
 
 External parts per channel follow the datasheet application BOM: RIN = RDEN = RSENSE = 10 kΩ,
 CSENSE 100 pF, COUT 10 nF, CVS 100 nF/100 V, ZGND = resistor + diode (22 Ω + DSK16 Schottky; the
-datasheet uses 27 Ω + BAS21). The Schottky keeps the device ground shift at ~0.5 V, so the physical
-switch path (≈3.2 V node − BAT54C) still clears VIN(H) with ~0.4 V margin.
+datasheet uses 27 Ω + BAS21). The Schottky keeps the device ground shift at ≈ 0.35–0.5 V once the channel is on
+(IGND 4.8 typ / 9 mA max, P_4.2.5).
+
+**Hardware switch path margin at low voltage (T-0042, Q-0034; corrected 2026-11-02).** The earlier "~0.4 V margin" did
+not hold at the bottom of the input range. Chain: SWIN → 10 k / 4.7 k divider (Thevenin 0.32 × SWIN behind 3.2 kΩ,
+zener D20–D23) → BAT54C (≈ 0.15–0.2 V) → RIN R101 (IIN(H) ≤ 25 µA, P_8.4.5 → ≤ 0.25 V) → IN; thresholds VIN(H) ≥ 2.0 V,
+VIN(L) ≤ 0.8 V to device GND (P_8.4.2). Worst-case figures (BAT54C 0.2 V, full IIN, ground shift 0.35–0.5 V):
+
+| Case | Node | IN − GND before turn-on | IN − device GND once on | With RIN 4.7 k (fallback) |
+|---|---|---|---|---|
+| SWIN 10.5 V, 3V3 down (R30 into the IO14 ESD diode ≈ 0.5 V) | ≈ 2.67 V | ≈ 2.2 V (≥ 2.0: turns on) | ≈ 1.7–1.9 V (below VIN(H) min) | ≈ 2.35 V / ≈ 1.85–2.0 V |
+| SWIN 10.5 V, 3V3 up (IO14 high-Z) | ≈ 3.2–3.35 V (zener knee, UNVERIFIED) | ≈ 2.8 V | ≥ ≈ 2.25 V (margin ≈ 0.25 V) | ≥ ≈ 2.4 V |
+| Battery 10.5 V via D55 (SWIN 9.8–10.1 V), 3V3 down | ≈ 2.5–2.57 V | ≈ 2.05–2.1 V (margin ≈ 0.05 V) | ≈ 1.55–1.75 V | ≈ 2.17–2.24 V / ≈ 1.7–1.9 V |
+| Battery 10.5 V via D55, 3V3 up | ≈ 3.13–3.23 V | ≈ 2.7 V | ≥ ≈ 2.18 V (margin ≈ 0.15 V) | ≥ ≈ 2.3 V |
+
+So with the 3.3 V rail down the datasheet guarantees turn-on at SWIN ≥ 10.5 V (and at a 10.5 V battery behind D55,
+thinly), but once the channel is on and its ground lifts, IN − device GND sits between VIN(L) max and VIN(H) min: the
+datasheet does not guarantee that the channel stays on there. It probably does (the real threshold lies between 0.8 and
+2 V, hysteresis ≈ 250 mV), but this is unproven. With the 3.3 V rail up the margin is ≈ 0.15–0.25 V. From 12 V upwards
+the margin is ample. D55 (§5) is upstream of SWIN, so at a given SWIN nothing changes; it costs 0.3–0.7 V of battery
+voltage (0.70 V is the 1 A maximum, the only VF limit in the DSK16 datasheet; ≈ 0.3–0.4 V typical at the ≈ 30–60 mA
+panel current; the low-current VF is UNVERIFIED). Owner ruling Q-0034: no circuit change now; **measure IN − GND on the
+prototype** at SWIN 10.5 V (3V3 removed and present, channel on, with and without D55's drop); if it is short, the
+planned fix is RIN R101–R401 → 4.7 kΩ (halves the IIN drop). The other option (the shared divider) is an owner decision.
+`UNVERIFIED`: the BZT52C3V3 knee below 1 mA.
 
 The footprint is drawn from the datasheet package outline (Figure 53): lead pads 1.6 × 0.6 mm at
 x = ±2.6 mm (0.47 mm clearance to the 2.65 × 6.4 mm exposed pad), 10 × 0.3 mm thermal vias,
@@ -86,6 +109,22 @@ Assumptions (*estimates* until a prototype is measured): vented enclosure with t
 (chimney airflow), R_box 0.6 K/W (4-ch) / 0.9 K/W (2-ch, 1 module width), RthJA 40 K/W per switch
 with 2 oz copper (50 K/W with 1 oz), 0.6 W for the ESP32/regulator/LEDs, RDS(on) at datasheet max
 rising linearly to 150 °C.
+
+**`--p-other` with the panel interface (T-0047, 2026-11-02).** The 0.6 W default covers the ESP32, regulators and status
+LEDs only. On the 4-ch board at VS 30 V with all four panel switches closed and all four panel LEDs lit, the panel
+interface (`analog_sw`, values after T-0068) adds ≈ 1.6 W:
+
+| Part | Per line | × 4 |
+|---|---|---|
+| Switch loads R3/R4/R7/R8 4.7 k at SWIN ≈ 29.6 V (behind D55) | 0.19 W | 0.75 W |
+| R34–R37 10 k + D20–D23 + R38–R41 (node ≈ 3.2 V, ≈ 2.6 mA) | 0.08 W | 0.31 W |
+| LED sinks Q3–Q6 + R50–R53 + R19… (5 mA, (29.6 − 2 − 2.33) V across Q) | 0.14 W | 0.55 W |
+| D55 (≈ 56 mA × ≈ 0.4 V) and F4 (≈ 56 mA² × 1.4 Ω) | – | 0.03 W |
+
+Total **p_other ≈ 2.2 W** (the validator's estimate was 2.1 W). `tools/heat_budget.py --p-other 2.1` and `--p-other 2.2`
+both give 4 × BTT6050 at 4 A → enclosure air 45.2–45.3 °C, **Tj ≈ 101 °C** (100 °C with 0.6 W): the 4 A rating stands.
+Use `--p-other 2.2` for 24 V installations with a busy panel. The tool's default is unchanged (tools/ is outside this
+package).
 
 | Variant | Switch | Ambient | Copper | Continuous per channel (Tj ≤ ~110 °C) |
 |---|---|---|---|---|
@@ -153,9 +192,9 @@ Notes and open points:
 ## 5. Physical switch inputs and long leads
 
 Per input (sheet `analog_sw`): SMAJ30CA at the connector → 4.7 kΩ 1206 load (contact wetting,
-2.5 mA at 12 V / 6.4 mA at 30 V) → 10 kΩ 1206 series → node with 4.7 kΩ, BZT52C3V3 and 100 nF →
+2.5 mA at 12 V / 6.4 mA at 30 V) → 10 kΩ 1206 series → node with 4.7 kΩ, BZT52C3V3 and 470 nF →
 BAT54C diode-OR into the channel IN. The node sits at ~3.2 V for any input 10.5–30 V; the EN threshold
-is ~7.5 V at the switch; τ ≈ 0.3 ms. The input works without the 3.3 V rail. 10 kΩ series resistors
+is ~7.5–8 V at the switch; τ ≈ 1.5 ms (3.2 kΩ × 470 nF; T-0012). The input works without the 3.3 V rail. 10 kΩ series resistors
 feed the node to the ESP32 (limits back-feed into an unpowered ESP32 to ~0.3 mA).
 
 Keeping long leads from acting as antennas:
@@ -170,7 +209,7 @@ Panel connector J5 (decision 17), 10 poles:
 | Pin | Signal | At the connector |
 |---|---|---|
 | 1–4 | SWIN1–4: switch from SW_SUPPLY | SMAJ30CA, 4.7 k load, 10 k + divider (above) |
-| 5 | SW_SUPPLY = VS via PTC F4 (1812L050/60GR, same part as F1) | SMAJ30CA + 100 nF/100 V |
+| 5 | SW_SUPPLY = VS via PTC F4 (1812L050/60GR, same part as F1) and Schottky D55 (DSK16) | SMAJ30CA + 100 nF/100 V |
 | 6–9 | LED_K1–4: panel LED cathode (anode to SW_SUPPLY) | SMAJ30CA, 100 Ω, 1 nF at the collector |
 | 10 | GND (cable drain / spare) | – |
 
@@ -181,6 +220,36 @@ Panel connector J5 (decision 17), 10 poles:
   R_θJA 416 K/W (JCET datasheet) → T_j ≈ 50 °C enclosure air + 54 K ≈ 104 °C (< 150 °C). LEDs are off
   when the 3.3 V rail is down. PWM: low frequency (100–200 Hz); the 1 nF collector capacitor slows edges.
 - Switch-supply budget ≈ 50 mA (4 × 6.4 mA switch load at 30 V + 4 × 5 mA LEDs); F4 holds 500 mA.
+- **Debounce (T-0012, Q-0006, 2026-11-02):** C14–C17 470 nF/10 V X5R 0402 (CL05A474KP5NNNC, C47339, preferred) on the
+  node after R34–R37 (the node is held ≤ ≈ 3.3 V by the zener, so 10 V is ample). τ ≈ 3.2 kΩ × 470 nF ≈ 1.5 ms
+  (corner ≈ 100 Hz), was 0.32 ms: contact bounce of a few ms no longer chatters the hardware path. The X5R
+  capacitance at ≈ 3 V bias is lower than nominal (no bias curve in the Samsung catalogue: UNVERIFIED), so the real τ
+  is somewhat below 1.5 ms. Turn-on and turn-off at the IN pin come ≈ 2–4 ms later than before; no effect on the
+  loads. Cranking dips (100s of ms) are far longer than τ: the filter does not ride through them.
+- **Switch supply diode D55 (T-0049, Q-0040, 2026-11-02):** DSK16 (C22466351, preferred, already on the BOM as D2/D3/D11,
+  and on the 4-ch board also as D101–D401) in series after F4: F4.2 → anode, cathode → SW_SUPPLY (J5.5, D54, C54), so D54 still
+  clamps the J5.5 line at the connector. Ratings (DSK16 datasheet, `docs/part-facts/C22466351.md`): VRRM 60 V,
+  IF(AV) 1 A ≥ F4's I_trip 1.0 A (I_hold 0.5 A), IFSM 25 A (8.3 ms). Reverse stress: a reversed battery puts ≈ 24–30 V on
+  it; a +48 V clamp on J5.5 with a normal battery ≤ 48 V. (A reversed battery *and* a simultaneous surge on the panel
+  cable would exceed 60 V: double fault, not covered.) With the battery reversed the panel LEDs now see only the
+  Schottky leakage (typ 10–20 µA, max 0.2 mA at 60 V, 25 °C) instead of ≈ 24–30 V reverse from a stiff source.
+  Cost: 0.3–0.7 V less on SW_SUPPLY (≈ 0.3–0.4 V typical at the panel current; 0.70 V is the datasheet maximum at 1 A).
+  The hardware ON threshold seen from the battery rises from ≈ 8 V to ≈ 8.3–8.7 V; the low-voltage margin is in §3.
+  Dissipation ≤ 0.03 W.
+- **Failure mode (safety), T-0012/T-0049:** navigation lights and the bilge forced-run can be panel-switched.
+  - With the 470 nF: the hardware path reacts ≈ 2–4 ms later; there is no new failure mode. A shorted C14–C17 holds that
+    input off, as a shorted 100 nF did before.
+  - With D55, at low battery: panel inputs drop out ≈ 0.3–0.7 V earlier. On a 12 V boat the panel-switched outputs
+    go off below ≈ 8.5 V at the battery during cranking (was ≈ 8 V); 24 V systems are not affected. At a 10.5 V battery the
+    turn-on is still guaranteed by the datasheet but thinly, and staying on with the 3.3 V rail down is not
+    guaranteed (§3: prototype measurement, RIN 4.7 k fallback).
+  - D55 open: all panel switches and LEDs of the board dead, the same symptom as a tripped F4. The proposed SW_SUPPLY
+    sense (decision 21) sits on the J5.5 side and would catch it too.
+  - D55 shorted: back to the old behaviour (the panel works; the LEDs are unprotected against reversal).
+  - A hard short in the panel cable drives the F4 fault current through D55 until F4 trips (≤ 0.15 s at 8 A). Whether
+    D55 survives the highest fault currents (IFSM 25 A for 8.3 ms) is UNVERIFIED. A diode that fails open gives the
+    "D55 open" case above.
+  - A competent person must review this before installation.
 - **Failure mode (safety):** a short in the panel cable (or at a panel switch) trips F4; all panel
   switches of that board then do nothing until the short is cleared, while NMEA 2000 control keeps
   working, but the panel LEDs go dark too. As drawn the firmware **cannot** tell a tripped F4 from "all
@@ -282,7 +351,13 @@ most marine electronics, this device relies on that system-level protection.
   (ABYC E-11 / ISO 10133). The firmware adds a programmable "soft fuse" from the current sense.
 - MOSFET switches usually fail short (output stuck on). Current sensing lets the firmware detect
   "current while commanded off" and raise an alarm, but cannot switch the load off.
-- Reverse battery: the switches survive with the ground network, but the loads see reverse voltage.
+- Reverse battery (`pdm-4ch`, T-0050, 2026-11-02): the BTT6050 with its ground network (22 Ω + DSK16) is rated for a
+  reverse supply only within VS(REV) ≤ 28 V, t < 2 min, RL ≥ 12 Ω (≤ ≈ 2.3 A at 28 V), TA 25 °C (datasheet P_4.1.2).
+  Within those limits the switches survive. Heavier loads are not covered: at the 4 A rating the reverse current
+  through the body diode dissipates ≈ 0.61 V × 4 A ≈ 2.4 W (VDS(REV), P_6.6.2), above PTOT 1.6 W (P_4.1.22), and the
+  ground diode does not change that. There the battery fuse has to clear. The loads see reverse voltage in every case.
+  The panel LEDs on J5 are protected by D55 in the SW_SUPPLY feed (§5, T-0049): with a reversed battery only the
+  Schottky leakage (≤ 0.2 mA) reaches them.
 
 ### 8.1 Battery input J10: TVS, capacitors, ferrite position (decision 26, T-0064, 2026-11-01)
 

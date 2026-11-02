@@ -7,6 +7,10 @@ TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` �
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
 
+**2026-11-02 (T-0068, shared `analog_sw` – same as `pdm-4ch`):** C14–C17 → 470 nF (C47339, debounce τ ≈ 1.5 ms); new D55
+DSK16 (C22466351, already on the BOM) after F4 in the SW_SUPPLY feed (panel-LED reverse protection, −0.3–0.7 V on the
+switch supply). ERC 0 errors, 5 warnings (unchanged). The HC2 reverse-battery note in design-notes §8 is still open (P9).
+
 **2026-11-01 (T-0064, decisions 26/27, unattended):** battery input J10 now has D30 + C30 (1 µF/100 V) on the
 terminal net `VBAT_IN`, a DNP ferrite position FL30 bridged by the copper net tie JP30 to `VS`, and C31 100 µF/63 V
 on VS (same controller part as 4-ch). HC2-only: C106/C206 100 µF/63 V on VS per channel (3 × 100 µF in total), and

@@ -7,6 +7,14 @@ after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
 
+**2026-11-02 (T-0068, Q-0006/Q-0040/Q-0034, unattended, shared `analog_sw` – same on both boards):** C14–C17 → 470 nF
+0402 (C47339, preferred; debounce τ ≈ 1.5 ms). New D55 DSK16 (C22466351, already on the BOM) in series after F4 in the
+SW_SUPPLY feed: protects the panel LEDs against reverse battery and costs 0.3–0.7 V of switch supply. D54/C54 stay on
+J5.5. Margin at SWIN 10.5 V corrected (design-notes §3), p_other ≈ 2.2 W documented (§4, Tj 101 °C at 4 A, the rating
+stands), reverse-battery limits qualified (§8, README). README: dry contacts and 12 V cranking note. ERC 0 errors,
+5 warnings (unchanged). +1 part, +1 unique part. **Blocked:** T-0046 (R3/R4/R7/R8 split): no basic 1206 2.2 k / 2.4 k
+exists; question for the owner in `docs/reviews/2026-11-02-fix-shared-T-0068.md`.
+
 **2026-11-02 (T-0069, Q-0032/Q-0033/Q-0041, unattended):** RIS R103/R203/R303/R403 now 680 Ω **1206** (C17975, extended – no
 basic exists; value unchanged). New DNP OUT pull-downs R106/R206/R306/R406 47 kΩ 0603 (C25819) per channel. DEN policy
 and firmware requirements: design-notes §6.1. ERC 0 errors, 5 warnings (unchanged). Heat budget unchanged.
@@ -70,6 +78,15 @@ can draw ≈ 188 A (30 V / 0.16 Ω). F2 therefore stays SMD0805B050TF. Question 
 7. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384
    and C13832; before fitting D103–D403 read the demagnetisation note in design-notes §8.2.
 
+## Prototype test list
+
+- **T-0042 / Q-0034 – switch-path margin:** measure IN − device GND (U11–U14 pin IN vs the channel's ground network) at
+  SWIN = 10.5 V with the channel on, once with the 3.3 V rail removed and once with it present. Repeat at a 10.5 V battery
+  with D55's drop (SWIN ≈ 9.8–10.1 V). Pass: ≥ 2.0 V (VIN(H) min). If short, the planned fix is **RIN R101/R201/R301/R401 →
+  4.7 kΩ**. The divider on the shared sheet stays an owner decision. Calculation in design-notes §3.
+- T-0012: check the hardware switch path with a bouncing contact (no output chatter, τ ≈ 1.5 ms). Measure the ON/OFF
+  switch voltage (≈ 8 V at the switch, ≈ 8.5 V at the battery).
+
 ## Pre-order checklist (T-0065)
 
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
@@ -83,6 +100,11 @@ can draw ≈ 188 A (30 V / 0.16 Ω). F2 therefore stays SMD0805B050TF. Question 
 - Resolve the F1/F3/F4 PTC I_max question before ordering.
 
 ## For /system
+
+- T-0068/T-0047: `tools/heat_budget.py --p-other` default is still 0.6 W. design-notes §4 documents ≈ 2.2 W for the 4-ch
+  board at 30 V with all panel lines on (Tj 101 °C vs 100 °C). Raise the default or its help text in a tools session.
+- T-0068/T-0046 blocked (owner): no basic 1206 2.2 k / 2.4 k. Options: 2 k + 2 k basic (C17944) or 2.2 k + 2.4 k
+  extended. R3/R4/R7/R8 stay 4.7 k for now (0.19 W at 30 V, 77 %).
 
 - T-0069: firmware requirements for DEN (design-notes §6.1) belong in the `/system firmware` list. T-0069 swapped one
   unique extended part (−/+): C23228 (basic) is replaced by C17975 (extended, 1206 680 Ω); C25819 (basic) is added.
