@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 76,
-    "Q": 47
+    "Q": 48
   },
   "tasks": [
     {
@@ -288,7 +288,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E7"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0005",
       "why_big": [
         "reviewer classed it big: Shared power-usb sheet; the FPWM option would be a different extended part.",
@@ -297,7 +297,9 @@
       ],
       "ruling": "yes - add 100 nF/100 V at VIN, footprints for an SW RC snubber (DNP) and a boot resistor (0 ohm); keep LMR51610YDBVR, switch to the YF (FPWM) variant only if the pre-compliance scan shows PFM noise",
       "answered": "2026-11-01",
-      "package": "T-0065"
+      "package": "T-0065",
+      "fixed_by": "T-0065",
+      "merged": "e5fedd9671f331238a5436bee7e07915f8642cea"
     },
     {
       "id": "T-0012",
@@ -396,7 +398,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E10"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0008",
       "why_big": [
         "reviewer classed it big: Shared power-usb sheet; a shield change is a design decision.",
@@ -405,7 +407,9 @@
       ],
       "ruling": "yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option",
       "answered": "2026-11-01",
-      "package": "T-0065"
+      "package": "T-0065",
+      "fixed_by": "T-0065",
+      "merged": "e5fedd9671f331238a5436bee7e07915f8642cea"
     },
     {
       "id": "T-0015",
@@ -431,7 +435,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E11"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0009",
       "why_big": [
         "reviewer classed it big: Shared sheets (analog_sw, power-usb); part change needs the stock check.",
@@ -440,7 +444,9 @@
       ],
       "ruling": "yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides",
       "answered": "2026-11-01",
-      "package": "T-0065"
+      "package": "T-0065",
+      "fixed_by": "T-0065",
+      "merged": "e5fedd9671f331238a5436bee7e07915f8642cea"
     },
     {
       "id": "T-0016",
@@ -518,26 +524,26 @@
         "board": "system",
         "location": "F1, F3, F4 (1812L050/60GR)",
         "summary": "Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet.",
-        "fix": "Validator to check Imax and minimum resistance against 30 V / (cable + PTC resistance).",
+        "fix": "How should F1/F3/F4 be made safe against a hard short? (a) 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint, after datasheet check) plus a pulse-rated series resistor per PTC so that 30 V / R_total <= Imax (about 0.15-0.22 ohm); or (b) accept and document the residual risk (current limited only by battery, cable and terminals)?",
         "class": "big",
         "reason": "Question for the owner or validator, not a design change.",
         "touches": [],
-        "cost_delta_usd": 0.0
+        "cost_delta_usd": 0.0,
+        "default": null
       },
       "source": {
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E14"
       },
-      "state": "parked",
-      "question": "Q-0011",
+      "state": "blocked-owner",
+      "question": "Q-0047",
       "why_big": [
-        "reviewer classed it big: Question for the owner or validator, not a design change.",
-        "a question only the owner can answer",
-        "affects both boards"
+        "found while fixing (T-0065): Datasheet check failed: 1812L050/60GR Imax 40 A at 60 V (LUTE 1812L Rev. 2020 p. 3), Rmin 0.150 ohm; prospective short current behind F1/F3/F4 = 30 V / (0.150 + 0.010) ohm = 188 A (4.7 x Imax). Protection problem (F4 feeds the panel switches incl. bilge forced run / nav lights), so not changed; the dependent F2 swap of T-0026 was not done either."
       ],
       "ruling": "yes - validator/part-facts checks the 1812L050/60GR Imax and minimum resistance against the prospective short current (30 V / cable + PTC resistance)",
       "answered": "2026-11-01",
-      "package": "T-0065"
+      "package": "T-0065",
+      "door": "one-way"
     },
     {
       "id": "T-0019",
@@ -671,7 +677,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "C4"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0015",
       "why_big": [
         "reviewer classed it big: board=system, affects shared sheet power-usb",
@@ -680,7 +686,9 @@
       ],
       "ruling": "yes - recheck stock before ordering; datasheet-check the L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074",
       "answered": "2026-11-01",
-      "package": "T-0065"
+      "package": "T-0065",
+      "fixed_by": "T-0065",
+      "merged": "e5fedd9671f331238a5436bee7e07915f8642cea"
     },
     {
       "id": "T-0023",
@@ -813,7 +821,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "L3"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0019",
       "why_big": [
         "reviewer classed it big: Touches shared sheets and changes footprints; protection parts swapped",
@@ -823,7 +831,9 @@
       ],
       "ruling": "yes - adopt each of the four swaps only if its part-facts check passes (H5VL10B USB FS capacitance and clamp, L78M05 at the 29 V clamp and Iq, DPAK area)",
       "answered": "2026-11-01",
-      "package": "T-0065"
+      "package": "T-0065",
+      "fixed_by": "T-0065",
+      "merged": "e5fedd9671f331238a5436bee7e07915f8642cea"
     },
     {
       "id": "T-0027",
@@ -2095,7 +2105,7 @@
       "id": "T-0065",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-01",
       "title": "Shared supply, USB and fuse parts (buck caps, USB shield/ESD, L3 swaps, PTC check)",
       "brief": "All edits go on the shared sheets (power-usb, analog_sw, can), identically on both boards. Order: (1) T-0018, check before the F2 swap. Ruling Q-0011 verbatim: 'yes - validator/part-facts checks the 1812L050/60GR Imax and minimum resistance against the prospective short current (30 V / cable + PTC resistance)'. Read the 1812L050/60GR datasheet: Imax at 60 V and Rmin. Compare with 30 V / (Rmin + about 10 mOhm of cable) for F1, F3 and F4 (F4 is fed from VS on J5.5). If Imax is too low, do not change anything here: it is a protection problem, so report it one-way with a proposal. (2) T-0026 four L3 swaps. Ruling Q-0019 verbatim: 'yes - adopt each of the four swaps only if its part-facts check passes (H5VL10B USB FS capacitance and clamp, L78M05 at the 29 V clamp and Iq, DPAK area)'. FB1/FB2 -> GZ2012D601TF C1017 (0805; FB1 carries VBUS: check rated current >=500 mA, impedance at 100 MHz). F2 -> 1812L050/60GR, only if step 1 passes. D4-D6 PESD0402V05 -> H5VL10B C7420372: check capacitance (USB FS needs low pF, e.g. <=15-20 pF per line), VRWM 5 V, clamp at 8 kV/TLP. U6 TPS7B91 -> L78M05ABDT C58069 (can sheet): check VIN abs max against the SMAJ18CA clamp 29.2 V with margin, Iq from NET-S (N2K LEN), dropout, stability capacitors, DPAK area (note it for /system mechanical). Each swap is independent; a failed check leaves that part as it is. (3) T-0014 USB. Ruling Q-0008 verbatim: 'yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option'. The TLP check applies to whichever ESD part step 2 leaves. Add 1 M || 4.7 nF footprints from J3 shield to GND plus a 0 ohm option, and decide which is fitted (auto; default: RC fitted, 0 ohm DNP). The 4.7 nF needs a voltage rating suitable for a shield. Add the README service rule. (4) T-0011 buck. Ruling Q-0005 verbatim: 'yes - add 100 nF/100 V at VIN, footprints for an SW RC snubber (DNP) and a boot resistor (0 ohm); keep LMR51610YDBVR, switch to the YF (FPWM) variant only if the pre-compliance scan shows PFM noise'. Add 100 nF/100 V at U3 VIN-GND, an SW-to-GND RC snubber (R+C, DNP), and a 0 ohm in series with the boot capacitor C2. (5) T-0015 capacitor ratings. Ruling Q-0009 verbatim: 'yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides'. Applies to C1 (2.2 uF buck input, power-usb) and C50-C53 (1 nF LED collector, analog_sw); keep the values. (6) T-0022. Ruling Q-0015 verbatim: 'yes - recheck stock before ordering; datasheet-check the L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074'. Compare inductance, Isat, Irms, DCR and footprint with SWPA6045S8R2MT and record the approved alternates in STATUS of both boards. Put the stock recheck on the pre-order checklist in STATUS. Checks: ERC and netlist on both boards after each step; the shared sheets must be byte-identical apart from the project name; LCSC on every fitted part; DNP on the snubber. Keep J3 USB-C fitted (Q-0029). Do not touch the TH1 NTC (Q-0024). Stop and ask if: a PTC Imax check fails; a swap would weaken ESD or surge protection; the L78M05 swap would change the NET-S load class (LEN).",
@@ -2109,15 +2119,16 @@
       ],
       "plan": "T-0063",
       "depends_on": [],
-      "started": "2026-11-01T23:18:04",
+      "started": "2026-11-02T17:11:21",
       "model": "opus",
-      "session": "e0f9f041-e9e2-4dda-87a0-a9519e284c34",
-      "cost_usd": 5.805,
-      "attempts": 2,
-      "finished": "2026-11-01",
-      "note": "no report written (api_error): You've hit your 5-hour limit · resets 3:20am (Europe/Helsinki)",
-      "summary": "paused, API unavailable",
-      "interrupted": null
+      "session": "031494b2-5b1d-46de-96ca-259aa91b8fbf",
+      "cost_usd": 12.1488,
+      "attempts": 3,
+      "finished": "2026-11-02",
+      "note": null,
+      "summary": "5 fixed, 1 blocked, merged e5fedd96",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-02-fix-shared-T-0065.md"
     },
     {
       "id": "T-0066",
