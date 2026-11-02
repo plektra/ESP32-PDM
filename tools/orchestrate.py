@@ -33,6 +33,7 @@ import shutil
 import subprocess
 import sys
 import shlex
+import signal
 import tempfile
 import threading
 import time
@@ -82,6 +83,7 @@ MAX_ATTEMPTS = 3
 UNAVAILABLE = re.compile(r'hit your .*limit|usage limit|rate limit|overloaded|\b529\b', re.I)
 KINDS = ('finding', 'lever', 'question')
 STATE = threading.Lock()  # guards the queue, the inbox and git while agents run in parallel
+STOPPING = threading.Event()  # set by Ctrl-C: agents cut off now are kept for resuming, not counted as attempts
 RESERVED = set()  # report paths handed to running agents
 
 
@@ -857,8 +859,11 @@ def run_task(q, t, budget_left, dry_run=False):
         # An interrupted agent (killed, stream cut) is queued again, up to MAX_ATTEMPTS.
         paused = result is None and not keep and (out.get('terminal_reason') == 'api_error'
                                                   or bool(UNAVAILABLE.search(str(out.get('result', '')))))
-        interrupted = (result is None and not keep and not paused and out.get('terminal_reason') in INTERRUPTED
-                       and t['attempts'] < MAX_ATTEMPTS)
+        if result is None and STOPPING.is_set():  # the owner's Ctrl-C is not the task's fault
+            t['attempts'] -= 1
+        interrupted = (result is None and not keep and not paused
+                       and (STOPPING.is_set() or (out.get('terminal_reason') in INTERRUPTED
+                                                  and t['attempts'] < MAX_ATTEMPTS)))
         summary = 'interrupted, queued again' if interrupted else summarize(spec['kind'], result, paused)
         # Keep what the agent has done so far: the next attempt resumes its session in the same worktree.
         hold = (paused or interrupted) and bool(t.get('session'))
@@ -960,6 +965,38 @@ def ensure_worktree(base):
     if r.returncode:
         git('merge', '--abort', check=False)
         raise SystemExit(f'merging {base} into {BRANCH} conflicts; merge by hand in {WORKTREE}')
+
+
+PAUSE_FLAG = LOGS / 'pause'  # `orchestrate.py pause`: start nothing new, let running agents finish
+
+
+def on_ctrl_c(signum, frame):
+    STOPPING.set()  # before the workers book their cut-off agents
+    raise KeyboardInterrupt
+
+
+def run_active():
+    common = Path(git('rev-parse', '--git-common-dir', cwd=REPO))
+    with open((REPO / common if not common.is_absolute() else common) / 'orchestrate.lock', 'w') as fh:
+        try:
+            fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return True
+        fcntl.flock(fh, fcntl.LOCK_UN)
+        return False
+
+
+def cmd_pause(args):
+    if args.cancel:
+        PAUSE_FLAG.unlink(missing_ok=True)
+        print('pause cancelled; the run carries on')
+    elif not run_active():
+        print('no run is active')
+    else:
+        LOGS.mkdir(parents=True, exist_ok=True)
+        PAUSE_FLAG.write_text(datetime.datetime.now().isoformat(timespec='seconds'))
+        print('pausing: no new agents start; running ones finish and are merged, then the run stops. '
+              'Start it again with the same run command.')
 
 
 def lock():
@@ -1344,6 +1381,8 @@ def cmd_run(args):
             run_task(q, t, args.budget, dry_run=True)
         return
     fh = lock()
+    PAUSE_FLAG.unlink(missing_ok=True)  # left from an earlier run
+    STOPPING.clear()
     ensure_worktree(args.base)
     global PDF_PY
     PDF_PY = pdf_python()
@@ -1372,64 +1411,76 @@ def cmd_run(args):
     run_info = dict(started=datetime.datetime.now().isoformat(timespec='seconds'), budget=args.budget,
                     parallel=args.parallel, spent=0.0, stop=None, finished=None)
     write_run(run_info)
-    with ThreadPoolExecutor(max_workers=args.parallel) as pool:
-        while True:
-            run_info.update(spent=round(spent, 2), stop=stop)
-            write_run(run_info)
-            while not stop and len(running) < args.parallel and ran < limit:
-                with STATE:
-                    if fixes and plans_left and not args.task and maybe_plan(q):
-                        plans_left -= 1
-                        save_queue(WORKTREE, q)
-                    held = set().union(*[task_locks(x) for x, _ in running.values()])
-                    todo = [find_task(q, args.task)] if args.task else runnable(q)
-                    todo = [t for t in todo if t['state'] == 'ready' and t['role'] in ROLES
-                            and (fixes or t['role'] not in FIX_ROLES) and not task_locks(t) & held]
-                    if not todo:
-                        break
-                    left = args.budget - spent - sum(cap for _, cap in running.values())
-                    if left < 1.0:
-                        stop = f'run budget of {args.budget:.0f} USD reserved or used'
-                        break
-                    t = todo[0]
-                    t['state'] = 'running'  # claimed here so the next pick skips it; run_task saves it
-                cap = task_budget(t, left)
-                running[pool.submit(run_task, q, t, cap)] = (t, cap)
-                ran += 1
-            if not running:
-                if limit_hit and args.wait_for_limit and waits < MAX_WAITS:
-                    waits += 1  # sleep until the usage limit resets, then carry on with the same run
-                    wait_for_reset(limit_hit, run_info)
-                    stop = limit_hit = None
-                    continue
-                break
-            done, _ = wait(running, return_when=FIRST_COMPLETED)
-            for fut in done:
-                t, _ = running.pop(fut)
-                try:
-                    cost, result = fut.result()
-                except Exception as e:  # a crash in one worker must not orphan the others
+    signal.signal(signal.SIGINT, on_ctrl_c)
+    try:
+        with ThreadPoolExecutor(max_workers=args.parallel) as pool:
+            while True:
+                if PAUSE_FLAG.exists() and not stop:
+                    stop = 'paused by you (orchestrate.py pause)'
+                    print(f'{stop}: ' + (f'{len(running)} running agent(s) finish first' if running
+                                          else 'stopping'), flush=True)
+                run_info.update(spent=round(spent, 2), stop=stop)
+                write_run(run_info)
+                while not stop and len(running) < args.parallel and ran < limit:
                     with STATE:
-                        t.update(state='failed', note=f'orchestrator error: {e!r}')
-                        save_queue(WORKTREE, q)
-                    cost, result = 0.0, None
-                spent += cost
-                if not result and t['state'] == 'ready':
-                    ran -= 1  # queued again (resumes later): does not use up --max-tasks
-                if not result and t['state'] == 'ready' and t.get('interrupted'):
-                    continue  # not a failure
-                if not result and t['state'] == 'ready':
-                    limit_hit = t['note'] or ''
-                    stop = stop or f"API unavailable ({t['note'][-100:]}); {t['id']} stays ready"
-                    continue
-                fails = 0 if result else fails + 1
-                new_q += result.get('owner', 0) if result else 0
-                if result and result.get('critical'):
-                    stop = stop or f"CRITICAL finding in {result['report']}, see the owner inbox"
-                if fails >= 2:
-                    stop = stop or 'two tasks failed in a row'
-            if stop and running:
-                print(f'stopping after the {len(running)} running agent(s) finish: {stop}', flush=True)
+                        if fixes and plans_left and not args.task and maybe_plan(q):
+                            plans_left -= 1
+                            save_queue(WORKTREE, q)
+                        held = set().union(*[task_locks(x) for x, _ in running.values()])
+                        todo = [find_task(q, args.task)] if args.task else runnable(q)
+                        todo = [t for t in todo if t['state'] == 'ready' and t['role'] in ROLES
+                                and (fixes or t['role'] not in FIX_ROLES) and not task_locks(t) & held]
+                        if not todo:
+                            break
+                        left = args.budget - spent - sum(cap for _, cap in running.values())
+                        if left < 1.0:
+                            stop = f'run budget of {args.budget:.0f} USD reserved or used'
+                            break
+                        t = todo[0]
+                        t['state'] = 'running'  # claimed here so the next pick skips it; run_task saves it
+                    cap = task_budget(t, left)
+                    running[pool.submit(run_task, q, t, cap)] = (t, cap)
+                    ran += 1
+                if not running:
+                    if limit_hit and args.wait_for_limit and waits < MAX_WAITS:
+                        waits += 1  # sleep until the usage limit resets, then carry on with the same run
+                        wait_for_reset(limit_hit, run_info)
+                        stop = limit_hit = None
+                        continue
+                    break
+                done, _ = wait(running, return_when=FIRST_COMPLETED)
+                for fut in done:
+                    t, _ = running.pop(fut)
+                    try:
+                        cost, result = fut.result()
+                    except Exception as e:  # a crash in one worker must not orphan the others
+                        with STATE:
+                            t.update(state='failed', note=f'orchestrator error: {e!r}')
+                            save_queue(WORKTREE, q)
+                        cost, result = 0.0, None
+                    spent += cost
+                    if not result and t['state'] == 'ready':
+                        ran -= 1  # queued again (resumes later): does not use up --max-tasks
+                    if not result and t['state'] == 'ready' and t.get('interrupted'):
+                        continue  # not a failure
+                    if not result and t['state'] == 'ready':
+                        limit_hit = t['note'] or ''
+                        stop = stop or f"API unavailable ({t['note'][-100:]}); {t['id']} stays ready"
+                        continue
+                    fails = 0 if result else fails + 1
+                    new_q += result.get('owner', 0) if result else 0
+                    if result and result.get('critical'):
+                        stop = stop or f"CRITICAL finding in {result['report']}, see the owner inbox"
+                    if fails >= 2:
+                        stop = stop or 'two tasks failed in a row'
+                if stop and running:
+                    print(f'stopping after the {len(running)} running agent(s) finish: {stop}', flush=True)
+    except KeyboardInterrupt:  # agents got the Ctrl-C too; their threads have recorded resumable state
+        stop = 'stopped by Ctrl-C (running agents resume at the next run)'
+        print(f'\n{stop}', flush=True)
+    finally:
+        signal.signal(signal.SIGINT, signal.default_int_handler)
+        PAUSE_FLAG.unlink(missing_ok=True)
     run_info.update(spent=round(spent, 2), stop=stop, finished=datetime.datetime.now().isoformat(timespec='seconds'))
     write_run(run_info)
     if stop:
@@ -1468,6 +1519,9 @@ def main():
     s = sub.add_parser('attach', help="talk to an agent: resume its session (a copy while it runs)")
     s.add_argument('task')
     s.set_defaults(fn=cmd_attach)
+    s = sub.add_parser('pause', help='let running agents finish, start no new ones, then stop the run')
+    s.add_argument('--cancel', action='store_true', help='take the pause back before the run stops')
+    s.set_defaults(fn=cmd_pause)
     s = sub.add_parser('undo', help="take back an agent's two-way decision: it becomes an owner question")
     s.add_argument('task')
     s.set_defaults(fn=cmd_undo)

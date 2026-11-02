@@ -79,6 +79,11 @@ python3 tools/orchestrate.py run               # ≤ 4 tasks, ≤ 60 USD; stops 
 budget is shared (a new agent gets what is left after the running agents' caps). A stop condition starts nothing new
 and lets running agents finish. N agents use the 5-hour usage limit N times faster.
 
+**Stopping and pausing:** `python3 tools/orchestrate.py pause` (from any terminal) lets the running agents finish
+and be merged, starts nothing new, then stops the run; `pause --cancel` takes it back. Ctrl-C in the orchestrator
+pane (press once, wait for the prompt) stops at once: running agents are cut off but keep their worktree and session
+and resume at the next run; a Ctrl-C does not count as a failed attempt. Restart with the same run command.
+
 **Usage limit:** an agent that hits it (or is cut off) keeps its worktree, scratch folder and session; its next
 attempt resumes the session where it stopped (`claude --resume`) instead of starting over, and the gates still
 compare against the commit it started from. Without options the run then stops: start it again after the reset time
