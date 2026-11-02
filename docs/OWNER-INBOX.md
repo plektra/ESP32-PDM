@@ -34,10 +34,12 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 - T-0008 · MAJOR · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → Footprints per TI Table 9-3: about 1 nF X cap and 100 pF Y caps on CS+/CS-, 10 nF on EN/UVLO and OVSET, 1 nF on DIODE, 100 pF on IWRN; tune in test.
 - T-0005 · MAJOR · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → Add RVS 100 ohm and CVS 1 uF/100 V in the VS supply of each controller after checking IVS.
 
-## Applied by agents (9)
+## Applied by agents (11)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0045 · pdm-4ch · Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct. → T-0066 (`14b42e65`)
+- T-0044 · pdm-4ch · Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab). → T-0066 (`14b42e65`)
 - T-0026 · system · Four basic/preferred swaps remove 4 extended fees: FB->GZ2012D601TF C1017, F2->1812L050/60GR, PESD0402V05->H5VL10B C7420372, TPS7B91->L78M05ABDT C58069 → T-0065 (`e5fedd96`)
 - T-0022 · system · Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458 → T-0065 (`e5fedd96`)
 - T-0017 · pdm-4ch · SMCJ30CA clamps at 48.4 V at 31 A, the BTT6050 absolute maximum is 48 V, but VS(LD) is 65 V (ISO 7637-1), so short clamp excursions are covered; recorded only. → T-0064 (`dbc672cd`)
@@ -101,8 +103,8 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0033 (pdm-4ch): IS fault current (6/15/40 mA, P_7.5.7) into 680 ohm dissipates 0.15 W typ / ~1.1 W max in a 0.1 W 0603 whenever DEN is high and a channel is faulted, including an unconnected output floating up in OFF (open-load-in-OFF). → **yes, all three - RIS as 1206 >=0.25 W; record firmware rule: DEN pulsed only while sampling (and dropped on full-scale IS); OUT pull-down as a DNP footprint** (parked)
 - Q-0034 (pdm-4ch): At SWIN 10.5 V with the 3.3 V rail down, IN minus device GND is about 1.8-2.0 V once ON, against VIN(H) min 2.0 V; the claimed 0.4 V margin does not hold (UNVERIFIED zener knee). → **correct the margin claim in design-notes and measure on the prototype; RIN 4.7 k goes on the prototype test list as the planned fix if the margin is short; no circuit change now** (parked)
 - Q-0035 (pdm-4ch): ESP32-S3 ADC calibrated range is 0-2900 mV (datasheet v2.2 Table 5-6), so VBAT full scale is 31.9 V, not 33 V; 30 V still reads. → **yes - correct VBAT full scale to about 32 V in decision 18 and design-notes** (parked)
-- Q-0036 (pdm-4ch): Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab). → **move the paste windows between the thermal vias (no plugged-via surcharge); recheck the footprint against the package drawing** (parked)
-- Q-0037 (pdm-4ch): Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct. → **use the standard KiCad Package_TO_SOT_SMD:SOT-23-6 after checking it against TI DBV0006A and the JLCPCB footprint** (parked)
+- Q-0036 (pdm-4ch): Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab). → **move the paste windows between the thermal vias (no plugged-via surcharge); recheck the footprint against the package drawing** (done)
+- Q-0037 (pdm-4ch): Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct. → **use the standard KiCad Package_TO_SOT_SMD:SOT-23-6 after checking it against TI DBV0006A and the JLCPCB footprint** (done)
 - Q-0038 (pdm-4ch): 0.19 W continuous at 30 V in a 0.25 W part (77 %), 0.49 W during a 48 V clamp. → **yes - two 1206 resistors in series (2.2 k + 2.4 k, basic parts) for R3/R4/R7/R8** (parked)
 - Q-0039 (pdm-4ch): No external pull-up on ISO1044 TXD; TI says not to rely on the internal one, and GPIO17 has a 60 us low glitch at power-up, which can put a dominant pulse on the N2K bus. → **yes - 10 k pull-up from ISO1044 TXD to +3V3 on the shared can sheet** (parked)
 - Q-0040 (pdm-4ch): With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V. → **add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop** (parked)
