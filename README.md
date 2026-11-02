@@ -16,6 +16,12 @@ level and pass ERC (apart from library-version notices); no PCB layout yet. Not 
 
 Both boards share the controller, power, NMEA 2000 and switch-input design.
 
+## Population and ordering rule (`pdm-4ch`)
+
+The standard `pdm-4ch` is built with four BTT6050-1ERA (≈ 4 A per channel). Heavy loads go on `pdm-hc2`. Fit a
+BTT6010-1ERA (≈ 8 A) only on a channel that carries more than 4 A. A mixed build adds one extended-part loading fee
+per order, so order mixed builds together to pay it once.
+
 ## Features
 
 - Physical switch inputs drive the outputs directly in hardware: they keep working if the ESP32 or
