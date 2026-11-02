@@ -6,6 +6,7 @@
 #   tools/agents-tmux.sh                  open (or reattach to) the session; start a run by hand in the left pane
 #   tools/agents-tmux.sh --budget 85      open it and start `orchestrate.py run --budget 85` (3 agents at once)
 #   tools/agents-tmux.sh --parallel 2 --budget 40
+#   tools/agents-tmux.sh --wait-for-limit --budget 150   overnight: waits out usage limits, paused agents resume
 #   tools/agents-tmux.sh --kill           close the session (stops a running agent)
 set -euo pipefail
 REPO=$(cd "$(dirname "$0")/.." && pwd)

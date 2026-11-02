@@ -77,8 +77,19 @@ python3 tools/orchestrate.py run               # ≤ 4 tasks, ≤ 60 USD; stops 
 **Parallel:** `--parallel N` (default 3) runs N agents at once, each in its own throwaway worktree
 `../ESP32-PDM-auto-<task>`; the script checks each one and commits its report on `auto/pilot` under a lock. The run
 budget is shared (a new agent gets what is left after the running agents' caps). A stop condition starts nothing new
-and lets running agents finish. N agents use the 5-hour usage limit N times faster; a limit pauses the run and
-leaves the tasks ready.
+and lets running agents finish. N agents use the 5-hour usage limit N times faster.
+
+**Stopping and pausing:** `python3 tools/orchestrate.py pause` (from any terminal) lets the running agents finish
+and be merged, starts nothing new, then stops the run; `pause --cancel` takes it back. Ctrl-C in the orchestrator
+pane (press once, wait for the prompt) stops at once: running agents are cut off but keep their worktree and session
+and resume at the next run; a Ctrl-C does not count as a failed attempt. Restart with the same run command.
+
+**Usage limit:** an agent that hits it (or is cut off) keeps its worktree, scratch folder and session; its next
+attempt resumes the session where it stopped (`claude --resume`) instead of starting over, and the gates still
+compare against the commit it started from. Without options the run then stops: start it again after the reset time
+shown in the notification and on the dashboard. With `run --wait-for-limit` it sleeps until the reset (read from the
+error message, plus 2 minutes; 30 minutes if no time is given; at most 6 waits per run) and carries on by itself –
+the way to leave it running overnight.
 
 **In tmux:** `tools/agents-tmux.sh --budget 85` opens the session `pdm-agents` and starts the run: orchestrator
 (top left), what all agents say – narration and `FINDING` lines, no tool noise (bottom left, `orchestrate.py
@@ -91,8 +102,7 @@ after it finishes. Window `inbox` is for `claude` → `/inbox`.
 agent's conversation (in tmux: a new window). While it runs you get a copy (`--fork-session`), so the agent is not
 disturbed; after it finishes you continue its own session – ask why it judged something the way it did, or have it
 explain a finding. The headless agents themselves take no input. Detach with prefix-d; the run continues; run the script again to
-reattach; `--kill` closes it. Per-task traces and raw results: `.claude/worktrees/auto-logs/`. A usage limit
-pauses the run and leaves the task ready.
+reattach; `--kill` closes it. Per-task traces and raw results: `.claude/worktrees/auto-logs/`.
 
 Each task is a fresh headless session (`claude -p --agent <role>`) in the sibling worktree `../ESP32-PDM-auto` (outside `.claude/`, where agent writes are refused) on branch
 `auto/pilot`. The script, not the agent, checks the result: a reviewer may change nothing but its new report, which

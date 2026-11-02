@@ -36,6 +36,26 @@ inbox, and merge.
 - Decision 16 (searchlight heating) open: revisit with cost in mind; halogen vs LED.
 - Measurements on Vega: searchlight glass diameter and thickness; bilge pump locations and feeds.
 
+## Backlog (not now)
+
+Ideas parked by the owner to keep focus on the two boards. Not decisions; pick up in a `/system` session later.
+
+- **PWM outputs and stepless blower control** (2026-11-02). Use case: heater/convector blowers, e.g. windshield
+  de-fogging, with stepless fan speed; also LED dimming of load outputs. Findings so far:
+  - pdm-4ch: MCU can PWM the PROFET channels (LEDC on IO6–IO8/IO11) at ≤ 200 Hz (EMC limit); a closed panel switch
+    forces the output fully on via the diode-OR; PROFET has no freewheel diode, so motor PWM puts the turn-off energy
+    into the PROFET clamp every cycle; PROFET PWM limits and current-sense timing not checked in the datasheet.
+  - pdm-hc2: no PWM until the gate slew is limited and measured on the bench (Q-0001, EMC E2).
+  - Stepless brushed-motor control needs ≈ 20–25 kHz, which conflicts with the EMC limits on long load cables near
+    VHF; a separate PWM board inside the PDM is not recommended.
+  - Options, cheapest first: (1) EC/brushless blowers with their own 0–10 V or PWM speed input – PDM switches power and
+    gives a protected signal output; (2) a speed module at the motor (short leads), commanded by a signal wire or
+    NMEA 2000; (3) blower speed taps on 2–3 ordinary outputs.
+  - Safety: heater element must never run without the blower (firmware interlock + fan-current check; keep the
+    heater's own overheat cutout); defogging is a visibility item and should work without the PDM/bus. Competent
+    review before installation.
+  - Needed from the owner: blower model, current, brushed or brushless.
+
 ## Housekeeping
 
 - The superseded repos `ESP32-PDM-base` and `ESP32-PDM-4x4` can be archived on GitHub.
