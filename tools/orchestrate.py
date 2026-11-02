@@ -301,11 +301,14 @@ def write_roadmap(root, q):
             out.append('')
 
     if done or failed:
-        out += ['## Done\n', '| Package | Scope | What | Items | Board growth | Merged |', '|---|---|---|---|---|---|']
+        out += ['## Done\n', '| Package | Scope | What | Items | Board growth | Model | Cost | Merged |',
+                '|---|---|---|---|---|---|---|---|']
         for p in done + failed:
             merged = f"`{(find_task(q, items(p)[0]['id']).get('merged') or '')[:8]}`" if p['state'] == 'done' and items(p) else ''
             out.append(f"| {p['id']} | {p['scope']} | {short(p.get('title'), 60)} | {len(items(p))} | "
-                       f"{growth_text(p['growth']) if p.get('growth') else ('failed: ' + short(p.get('note'), 60) if p['state'] == 'failed' else '–')} | {merged} |")
+                       f"{growth_text(p['growth']) if p.get('growth') else ('failed: ' + short(p.get('note'), 60) if p['state'] == 'failed' else '–')} | "
+                       f"{(p.get('ran_model') or p.get('model') or '').replace('claude-', '')} | "
+                       f"{p.get('cost_usd', 0):.2f} USD | {merged} |")
         out.append('\nUndo a package: `python3 tools/orchestrate.py undo <item>` (any of its items).\n')
 
     if questions:
@@ -440,9 +443,29 @@ def report_path(t):
 
 NARRATE = ("The owner watches your progress live: before each step write one short line saying what you do and why, "
            "and when you find a problem write one line `FINDING (SEVERITY): what is wrong`.\n")
-TOOLS_HINT = ("For datasheets use `$PDM_PDF_PYTHON -I` (a ready Python with pypdf, pypdfium2 and Pillow; do not build "
-              "your own venv). Keep scripts in `$CLAUDE_JOB_DIR/scripts/` with names that do not shadow Python modules "
-              "(never inspect.py, json.py, …); `rm -rf` is not available to you.\n")
+TOOLS_HINT = ("Part facts: `python3 tools/part_facts.py <LCSC code> \"<what you need>\"` – prints the cached facts file "
+              "from docs/part-facts/ or has a Sonnet agent read the datasheet and write it; do not read datasheets "
+              "into your own context (it makes every later step expensive). Schematics: `python3 tools/sch_query.py "
+              "<board> parts|ref|net|erc …` answers in one call. If you must read a PDF yourself use "
+              "`$PDM_PDF_PYTHON -I` (pypdf, pypdfium2, Pillow). Keep scripts in `$CLAUDE_JOB_DIR/scripts/` with names "
+              "that do not shadow Python modules (never inspect.py, json.py, …); `rm -rf` is not available to you. "
+              "Batch independent steps into one command where you can.\n")
+FIX_HINT = ("Before writing the report run `python3 tools/fix_check.py --scope $PDM_SCOPE --refs <refs you touched>`: "
+            "the orchestrator's own merge gates. Hand in only when it says OK.\n")
+FACTS_DIR = 'docs/part-facts'
+FACTS_MAX = 15  # part_facts.py lookups per agent attempt
+FIXER_MODEL = None  # run --fixer-model
+
+
+def keep_new_facts(wt, changed):
+    """Copy fact sheets an agent created into auto/pilot unless one exists already; returns their paths."""
+    kept = []
+    for p in changed:
+        if p.startswith(f'{FACTS_DIR}/') and p.endswith('.md') and not (WORKTREE / p).exists():
+            (WORKTREE / p).parent.mkdir(parents=True, exist_ok=True)
+            (WORKTREE / p).write_text((wt / p).read_text())
+            kept.append(p)
+    return kept
 PDF_VENV = Path.home() / '.cache' / 'esp32-pdm' / 'pdf-venv'
 PDF_PY = ''  # set by cmd_run
 
@@ -470,6 +493,7 @@ def prompt_for(t, report, inputs=None):
         return (common + f"Work package {t['id']}: {t.get('title', '')} (scope {t['scope']}).\n"
                 f"Brief from the planner:\n{t.get('brief', '')}\n"
                 f"The items with their findings and the owner's rulings are in `{inputs}` (JSON).\n"
+                f"{FIX_HINT}"
                 f"Write your report to exactly `{report}` and end it with the fix block; list every reference "
                 f"designator you touched in `refs`. Your final message: the report path and what was done or "
                 f"blocked.")
@@ -704,7 +728,7 @@ def shared_sheets_equal(wt):
 
 def fix_allowed(path, scope):
     boards = BOARDS if scope == 'shared' else (scope,)
-    ok = ['docs/design-notes.md', 'README.md', 'lib/'] + [f'hardware/{b}/' for b in boards]
+    ok = ['docs/design-notes.md', 'README.md', 'lib/', f'{FACTS_DIR}/'] + [f'hardware/{b}/' for b in boards]
     if scope == 'shared':
         ok.append('docs/ARCHITECTURE.md')
     return any(path == p or (p.endswith('/') and path.startswith(p)) for p in ok)
@@ -866,7 +890,8 @@ def run_task(q, t, budget_left, dry_run=False):
     Thread-safe: several run at once."""
     spec = ROLES[t['role']]
     deep = bool(t.get('deep'))
-    model = t.get('model') or spec['model'][deep]
+    model = (FIXER_MODEL if t['role'] == 'board-fixer' and FIXER_MODEL else None) or t.get('model') \
+        or spec['model'][deep]
     budget = task_budget(t, budget_left)
     # A task paused by a usage limit or cut off keeps its worktree, scratch folder and session: it resumes there.
     resume = t.get('resume')
@@ -915,7 +940,7 @@ def run_task(q, t, budget_left, dry_run=False):
                 git('worktree', 'remove', '--force', str(wt), check=False)
             git('worktree', 'add', '--detach', str(wt), 'HEAD')
             head = git('rev-parse', 'HEAD', cwd=wt)
-        t.update(state='running', started=datetime.datetime.now().isoformat(timespec='seconds'), model=model)
+        t.update(state='running', started=datetime.datetime.now().isoformat(timespec='seconds'), ran_model=model)
         save_queue(WORKTREE, q)
         LOGS.mkdir(parents=True, exist_ok=True)
     (wt / REVIEWS).mkdir(parents=True, exist_ok=True)  # empty folders are not in git
@@ -924,8 +949,10 @@ def run_task(q, t, budget_left, dry_run=False):
     base = ({b: kicad_check(base_tree(head, gate_dir), b, gate_dir) for b in BOARDS}
             if spec.get('edits') else None)
     log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
+    ledger = log.with_name(log.stem + '-facts.jsonl')  # tools/part_facts.py lookups of this attempt and their cost
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}",
-               PDM_PDF_PYTHON=PDF_PY or 'python3')
+               PDM_PDF_PYTHON=PDF_PY or 'python3', PDM_BASE=head, PDM_SCOPE=t['scope'],
+               PDM_COST_LEDGER=str(ledger), PDM_FACTS_MAX=str(FACTS_MAX))
     (scratch / 'scripts').mkdir(exist_ok=True)
     pane = tmux_pane(t, log.with_suffix('.log'))
 
@@ -941,8 +968,10 @@ def run_task(q, t, budget_left, dry_run=False):
     finally:
         tmux_close(pane)
     log.write_text(json.dumps(dict(cmd=cmd, output=out), indent=2, ensure_ascii=False))
-    cost = float(out.get('total_cost_usd') or 0)
-    notes = []
+    lookups = [json.loads(x) for x in ledger.read_text().splitlines() if x.strip()] if ledger.exists() else []
+    cost = float(out.get('total_cost_usd') or 0) + sum(float(x.get('cost_usd') or 0) for x in lookups)
+    notes = [f"{len(lookups)} part-facts lookups ({sum(float(x.get('cost_usd') or 0) for x in lookups):.2f} USD)"] \
+        if lookups else []
     if out.get('permission_denials'):
         denied_calls = sorted({d.get('tool_name', '?') for d in out['permission_denials']})
         notes.append(f"{len(out['permission_denials'])} tool calls denied ({', '.join(denied_calls)}); log {log.name}")
@@ -981,8 +1010,10 @@ def run_task(q, t, budget_left, dry_run=False):
             notes += merge_note
             commit_paths.append(str(DECISIONS))
         else:
-            if any(p != got for p in changed):
-                notes.append('dropped ' + ', '.join(p for p in changed if p != got))
+            facts = keep_new_facts(wt, changed)  # fact sheets a reviewer had written are worth keeping
+            commit_paths += facts
+            if any(p != got and p not in facts for p in changed):
+                notes.append('dropped ' + ', '.join(p for p in changed if p != got and p not in facts))
             try:
                 if (WORKTREE / got).exists():  # another agent took the name meanwhile
                     got = str(Path(got).with_name(f"{Path(got).stem}-{t['id']}.md"))
@@ -1079,6 +1110,8 @@ def finish_fix(q, t, wt, changed, got, block, gate_fails, model, cost, sizes=Non
         return None, ['gates failed: ' + '; '.join(gate_fails), f'report kept as {keep_report}']
     paths = [p for p in changed if p == got or (fix_allowed(p, t['scope']) and not p.endswith('.kicad_prl')
                                                 and not p.lower().endswith('.pdf'))]
+    # A fact sheet another agent merged meanwhile stays as it is (two versions of one file would not merge).
+    paths = [p for p in paths if not (p.startswith(f'{FACTS_DIR}/') and (WORKTREE / p).exists())]
     git('add', '--', *paths, cwd=wt)
     git('commit', '-m', f"{t['scope']}: {t.get('title', 'work package')} ({t['id']})\n\n"
         f"Unattended board-fixer, model {model}, {cost:.2f} USD; gates passed (ERC, netlist, LCSC, shared sheets).\n\n"
@@ -1321,7 +1354,7 @@ def dashboard(width, recent):
         tr = read_trace(t['id'])
         out.append(f"  {paint(t['id'], 'cyan', 'bold')} {t['role']} {paint(t['scope'], 'bold')}"
                    f"{' deep' if t.get('deep') else ''}" + paint(
-                       f"   {t.get('model', '')} · {ago(t.get('started'))} · {tr['tools']} tool calls · "
+                       f"   {t.get('ran_model') or t.get('model', '')} · {ago(t.get('started'))} · {tr['tools']} tool calls · "
                        f"{len(tr['findings'])} findings", 'dim'))
         out.append('    ' + (said(tr['said']) if tr['said'] else paint('starting…', 'dim')))
         if tr['tool']:
@@ -1540,7 +1573,8 @@ def cmd_inbox(args):
 
 
 def cmd_run(args):
-    global WORKTREE
+    global WORKTREE, PDF_PY, FIXER_MODEL
+    FIXER_MODEL = args.fixer_model
     if args.dry_run:  # touch nothing: read the queue where it is
         WORKTREE = state_root()
         q = load_queue(WORKTREE)
@@ -1551,7 +1585,6 @@ def cmd_run(args):
     PAUSE_FLAG.unlink(missing_ok=True)  # left from an earlier run
     STOPPING.clear()
     ensure_worktree(args.base)
-    global PDF_PY
     PDF_PY = pdf_python()
     print(f"PDF tools for agents: {PDF_PY or 'not available (agents use python3)'}", flush=True)
     q = load_queue(WORKTREE)
@@ -1712,6 +1745,8 @@ def main():
             s.add_argument('--task', help='run only this task')
             s.add_argument('--dry-run', action='store_true', help='print the agent commands, run nothing')
             s.add_argument('--push', action='store_true', help=f'push {BRANCH} to origin afterwards')
+            s.add_argument('--fixer-model', choices=('opus', 'sonnet'),
+                           help='model for board-fixers in this run (default opus); for trials, e.g. with --task')
             s.add_argument('--wait-for-limit', action='store_true',
                            help='on a usage limit, sleep until it resets and carry on (paused agents resume)')
     args = ap.parse_args()

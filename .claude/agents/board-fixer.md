@@ -18,16 +18,18 @@ come from, and `docs/design-notes.md` where the package needs it.
    Add no part, footprint, option, test point or note an item does not ask for – no "while I'm here" improvements;
    put such ideas in the report under "Suggestions (not done)". The orchestrator measures how many parts and unique
    parts each package adds and shows it to the owner.
-1. **Part facts first.** Every new or swapped part: pinout, package, ratings from the maker's datasheet (curl +
-   pypdf in a temporary venv in `$CLAUDE_JOB_DIR`; never commit a PDF), LCSC code with `jlc_get_part`, basic or
-   preferred where one fits, E24/E12 values. A conditional swap whose check fails is not done.
+1. **Part facts first.** Every new or swapped part: pinout, package, ratings from the maker's datasheet, through
+   `python3 tools/part_facts.py <LCSC code> "<what you need>"` – it prints the cached facts file from
+   `docs/part-facts/` or has a Sonnet agent read the datasheet and write one (never read datasheets into your own
+   context; never commit a PDF). Basic or preferred parts where one fits, E24/E12 values. A conditional swap whose
+   check fails is not done. Look at the circuit with `python3 tools/sch_query.py <board> parts|ref|net|erc`.
 2. **Edit with scripts.** Use `tools/ksch.py` (load, by_ref, set_prop, add_symbol, add_wire, add_label, remove …)
    from Python scripts in `$CLAUDE_JOB_DIR`. Every new part gets its `LCSC` field (or is marked DNP). A change to a
    shared sheet (`power-usb`, `can`, `analog_sw`, the controller part of the root sheet) is made identically on both
    boards: the files may differ only in the `(project "…")` name.
-3. **Verify** after each edit: `kicad-cli sch erc` (0 errors; no new warnings) and
-   `kicad-cli sch export netlist --format kicadxml`, compared with the netlist before; outputs to `$CLAUDE_JOB_DIR`.
-   Rerun `python3 tools/heat_budget.py` when an output's ratings or switch parts change.
+3. **Verify** with `python3 tools/fix_check.py --scope $PDM_SCOPE --refs <refs>` – the orchestrator's own merge
+   gates (scope, ERC, netlist against your refs, LCSC, shared sheets equal) plus how much the boards grew. Hand in
+   only when it says OK. Rerun `python3 tools/heat_budget.py` when an output's ratings or switch parts change.
 4. **Document.** Calculations and sources in `docs/design-notes.md`; a failure-mode note for every change to a
    safety-relevant output (bilge pump, navigation lights, breakers, reverse polarity, anything that can trap or burn)
    with the reminder that a competent person reviews it before installation; the board's `STATUS.md` (where it

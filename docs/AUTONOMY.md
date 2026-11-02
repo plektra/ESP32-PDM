@@ -140,5 +140,15 @@ agents without the owner:
 - A re-check after fixes reviews only what changed (`git diff` since the plan), not the whole board again, so
   rounds converge instead of finding new work each time.
 
+**Tools and cost.** Most of an agent's cost is re-reading its own growing conversation on every step, so agents keep
+it small and short:
+- `tools/part_facts.py <LCSC> "<what>"` – part facts from `docs/part-facts/` (each datasheet read once, text with
+  citations, no PDFs), else a Sonnet `part-facts` agent reads the datasheet in its own session (≤ 1.50 USD, at most
+  15 lookups per agent attempt; the cost counts toward the task and the run budget).
+- `tools/sch_query.py <board> parts|ref|net|erc` – a sheet's parts, a part's connections or a net in one call.
+- `tools/fix_check.py --scope … --refs …` – the merge gates, run by the board-fixer before it hands in.
+- `run --fixer-model sonnet` runs board-fixers on Sonnet (default Opus); the roadmap's "Done" table shows model and
+  cost per package for comparison.
+
 One board-fixer per board at a time (a `shared` package holds both). `run --no-fixes` runs reviews only. The owner
 merges `auto/pilot` into `main`, and reviews it before any order – ordering is a one-way door.
