@@ -6,7 +6,18 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (1)
+## Open (4)
+
+## Q-0050 · MAJOR · pdm-hc2 · finding
+
+- **From:** `docs/reviews/2026-10-30-emc-system.md` E2 (hc_channel: R104/R204 (RG 10 ohm), GATE/PU/PD); task T-0006
+- **Summary:** MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us.
+- **Proposed:** Covered by the T-0054 question.
+- **Why it needs you:** found while fixing (T-0070): Superseded by Q-0043 (do not fit RG_PU 100 ohm); waits on the T-0054 answer. The no-PWM rule is recorded in STATUS and design-notes 4a.
+
+**Answer:** 
+
+---
 
 ## Q-0048 · MINOR · pdm-4ch · finding
 
@@ -19,22 +30,44 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (7) – two-way doors
+## Q-0049 · MAJOR · pdm-hc2 · finding
+
+- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` H2 (hc_channel x2: R104/R204 (PU 10 ohm), PD direct, R103/R203 RISCP 4.7k); task T-0054
+- **Summary:** MOSFETs switch fully on in under 1 us, so a load with more than about 50-100 uF input capacitance probably exceeds the 71-91 A short-circuit threshold for longer than 4-5 us; the channel then stays off for 3.8 min (estimate, UNVERIFIED).
+- **Proposed:** HC2 gate slew control: (1) set a maximum load capacitance (about 50-100 uF at ~20 A with the BSC030N08NS5) and use only a short EMC slew, (2) fit a linear-mode-rated MOSFET on the input side (decision 19), or (3) move to TPS48111-Q1 with a pre-charge FET + resistor?
+- **Why it needs you:** found while fixing (T-0070): No R1/C1 pair meets 20 A into 1000 uF within the BSC030N08NS5 SOA: 600 W peak / 0.45 J over 1.5 ms vs SOA ~45 W at 1 ms (30 V); Zth gives dTj ~100 K above case (125 K with a 15 A load); slow turn-on into a short would also leave SOA before the 80 A trip. Fix needs a maximum load capacitance or a different MOSFET/pre-charge path (decision 19, proposed).
+
+**Answer:** 
+
+---
+
+## Q-0051 · INFO · pdm-hc2 · question
+
+- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` Q1 (hc_channel x2 (H2)); task T-0061
+- **Summary:** Which HC2 loads have more than about 50 uF input capacitance (LED searchlight/work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.
+- **Proposed:** Covered by the T-0054 question.
+- **Why it needs you:** found while fixing (T-0070): The ruled sizing target (20 A into 1000 uF) is outside the MOSFET SOA; the prototype load measurement is recorded in STATUS.
+
+**Answer:** 
+
+---
+
+## Decided by agents (6) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
 - T-0060 · INFO · pdm-hc2 · IO3 strapping pin is held low by the IMON2 network; harmless while EFUSE_STRAP_JTAG_SEL is not burnt (same as V11 on pdm-4ch). → No hardware change; production must not burn that eFuse.
-- T-0059 · INFO · pdm-hc2 · First switch-on after power-up waits about 76-100 ms for the bootstrap (Eq. 1), also on the hardware switch path; overcurrent/short retry is about 3.8 min, reset by toggling INP. → Record both times in design-notes section 4a and user documentation.
 - T-0058 · MINOR · pdm-hc2 · Section 1 still names TPS48111-Q1 and 8-20 A; section 9 says an OUT voltage divider lets the PDM see float-driven runs, but no such divider exists and IMON cannot see that current. → Correct both sections to the as-drawn design (TPS48110A-Q1, about 15 A; float runs only visible via SW3/SW4 if wired); OUT divider decision goes to Q2.
 - T-0056 · MINOR · pdm-hc2 · No 1 nF bypass across the MMBT3904 remote sensor; TPS4811-Q1 section 9.6.1 says it must be placed (EMC E4 lists it only as a tune-in-test footprint). → Add 1 nF 0402 (C1523, already on the BOM) from DIODE to GND at each MMBT3904; Kelvin emitter return to controller GND.
 - T-0051 · INFO · pdm-4ch · IO3 (JTAG source strap) is tied low through 10.7 k; harmless unless EFUSE_STRAP_JTAG_SEL is burnt. → Note in the firmware/production docs: never burn EFUSE_STRAP_JTAG_SEL.
 - T-0008 · MAJOR · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → Footprints per TI Table 9-3: about 1 nF X cap and 100 pF Y caps on CS+/CS-, 10 nF on EN/UVLO and OVSET, 1 nF on DIODE, 100 pF on IWRN; tune in test.
 - T-0005 · MAJOR · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → Add RVS 100 ohm and CVS 1 uF/100 V in the VS supply of each controller after checking IVS.
 
-## Applied by agents (20)
+## Applied by agents (21)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0059 · pdm-hc2 · First switch-on after power-up waits about 76-100 ms for the bootstrap (Eq. 1), also on the hardware switch path; overcurrent/short retry is about 3.8 min, reset by toggling INP. → T-0070 (`9d0b6d53`)
 - T-0052 · pdm-4ch · Should DEN be held high in Active mode, or pulsed only while sampling IS? V1 (RIS overload on fault or open output) depends on it. → T-0069 (`b9fcef31`)
 - T-0050 · pdm-4ch · 'Switches survive with the ground network' holds only for VS(REV) 28 V, t < 2 min, RL >= 12 ohm (P_4.1.2); at 4 A the body diode dissipates about 2.4 W > PTOT 1.6 W. → T-0068 (`86fbfe03`)
 - T-0049 · pdm-4ch · With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V. → T-0068 (`86fbfe03`)
@@ -73,9 +106,8 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0038 · system · Pluggable or fixed screw terminals (L5)? → until system-mechanical: Q-0030: terminal type for J4/J5/J10/J11 decided in /system mechanical with the J10 pole sizing (leaning pluggable J4/J5, fixed J10/J11)
 - T-0057 · pdm-hc2 · RDS(on) at 150 C is 11.2 mOhm in the tool; BSC030N08NS5 Diagram 9 max (5.35 mOhm) gives 2 x 5.35 + 1 = 11.7 mOhm; 15 A rises from 87 to 88 C, 20 A from 137 to 143 C; rating stands. → until owner: fix is in tools/heat_budget.py (HC-2xBSC030 RDS(on) 0.0070/0.0117 with the datasheet reference), which no package gate allows a board-fixer to change; needs an owner or /system edit. Until then P7/P9 use a scratch copy with 11.7 mOhm
 
-## Answered (45)
+## Answered (42)
 
-- Q-0001 (pdm-hc2): MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → **yes - RG_PU 100 ohm, PD kept direct, RGATE_PD as a 0 ohm footprint; recheck switching loss, SOA, heat budget and short-circuit response; no PWM on HC2 outputs until measured on the bench** (parked)
 - Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (done)
 - Q-0003 (pdm-hc2): HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them. → **yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA** (done)
 - Q-0004 (system): No high-frequency return across the isolation barrier (CIO about 1 pF) and no CMC option, so the N2K cable can radiate logic-ground noise and ESD lifts the whole island; not measured. → **yes - as footprints only: Y-capacitor GND_CAN-GND DNP, CMC footprint fitted with 0 ohm bridges; decide at pre-compliance scan** (parked)
@@ -116,7 +148,5 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0040 (pdm-4ch): With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V. → **add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop** (done)
 - Q-0041 (pdm-4ch): Should DEN be held high in Active mode, or pulsed only while sampling IS? V1 (RIS overload on fault or open output) depends on it. → **DEN pulsed only while sampling IS (and dropped on full-scale IS), not held high in Active mode (see Q-0033)** (done)
 - Q-0042 (pdm-hc2): Hardware breaker at about 24-26 A (146 ms) and OT trip at 140-160 C at the sensor leave about 18-24 A unprotected in hardware; heat budget gives Tj 137-143 C at 20 A and 169 C at 22 A against MOSFET Tj max 150 C, so only firmware protects when the ESP32 runs. → **option (c) - RIWRN 68k (IOC about 17.5 A) plus README/label requirement for an external breaker <=15-18 A per output plus a firmware soft fuse; update the ARCHITECTURE HC2 budget; measure the bilge pump start current before ordering** (parked)
-- Q-0043 (pdm-hc2): MOSFETs switch fully on in under 1 us, so a load with more than about 50-100 uF input capacitance probably exceeds the 71-91 A short-circuit threshold for longer than 4-5 us; the channel then stays off for 3.8 min (estimate, UNVERIFIED). → **yes - gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at gate, PD direct; start about 100k/3.9 nF for ~20 A into 1000 uF); this supersedes the plain RG_PU 100 ohm of Q-0001 (covers EMC E2 too); check MOSFET SOA, heat budget and fast short-circuit response** (parked)
 - Q-0044 (pdm-hc2): Reversed battery puts about -12...-30 V on TPS48110 VS/CS+/CS-/ISCP (abs max -1 V to GND); D30 SMCJ30CA is bidirectional and HC2 has no reverse protection; design-notes section 8 survival claim does not apply to HC2. → **keyed/polarised J10 plus README and label warning, and correct design-notes section 8 (reversal survival does not apply to HC2); full reverse-polarity protection deferred to a later HC2 revision (keep it on the list)** (parked)
-- Q-0045 (pdm-hc2): Which HC2 loads have more than about 50 uF input capacitance (LED searchlight/work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target. → **loads not known yet - size the HC2 gate slew control for about 20 A into 1000 uF and measure the real loads on the prototype** (parked)
 - Q-0046 (pdm-hc2): Should the HC2 hardware breaker sit near the continuous rating (about 17.5 A) or stay at 25 A with a documented external breaker requirement? Is an OUT voltage divider (spare IO4/IO5) wanted for float-run detection, or are SW3/SW4 enough? → **breaker level as ruled in Q-0042 (RIWRN 68k, about 17.5 A, plus external breaker and firmware soft fuse); add an OUT voltage divider on spare IO4/IO5 for float-run detection - pin-map change via /system** (parked)

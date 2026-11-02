@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 76,
-    "Q": 49
+    "Q": 52
   },
   "tasks": [
     {
@@ -104,27 +104,28 @@
         "board": "pdm-hc2",
         "location": "hc_channel: R104/R204 (RG 10 ohm), GATE/PU/PD",
         "summary": "MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us.",
-        "fix": "RG_PU about 100-220 ohm plus an RGATE_PD footprint, tune on the bench, then recheck switching loss, SOA and the fast short-circuit response.",
+        "fix": "Covered by the T-0054 question.",
         "class": "big",
         "reason": "Changes switching and protection timing of a safety-relevant output (bilge pump) and the heat budget.",
         "touches": [
           "safety"
         ],
-        "cost_delta_usd": 0.02
+        "cost_delta_usd": 0.02,
+        "default": null
       },
       "source": {
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E2"
       },
-      "state": "parked",
-      "question": "Q-0001",
+      "state": "blocked-owner",
+      "question": "Q-0050",
       "why_big": [
-        "reviewer classed it big: Changes switching and protection timing of a safety-relevant output (bilge pump) and the heat budget.",
-        "touches safety"
+        "found while fixing (T-0070): Superseded by Q-0043 (do not fit RG_PU 100 ohm); waits on the T-0054 answer. The no-PWM rule is recorded in STATUS and design-notes 4a."
       ],
       "ruling": "yes - RG_PU 100 ohm, PD kept direct, RGATE_PD as a 0 ohm footprint; recheck switching loss, SOA, heat budget and short-circuit response; no PWM on HC2 outputs until measured on the bench",
       "answered": "2026-11-01",
-      "package": "T-0070"
+      "package": "T-0070",
+      "door": "one-way"
     },
     {
       "id": "T-0007",
@@ -1771,26 +1772,27 @@
         "board": "pdm-hc2",
         "location": "hc_channel x2: R104/R204 (PU 10 ohm), PD direct, R103/R203 RISCP 4.7k",
         "summary": "MOSFETs switch fully on in under 1 us, so a load with more than about 50-100 uF input capacitance probably exceeds the 71-91 A short-circuit threshold for longer than 4-5 us; the channel then stays off for 3.8 min (estimate, UNVERIFIED).",
-        "fix": "Gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at the gate, PD direct; e.g. 100k/3.9nF for about 20 A into 1000 uF), check MOSFET SOA; or state a maximum load capacitance. Combine with EMC E2.",
+        "fix": "HC2 gate slew control: (1) set a maximum load capacitance (about 50-100 uF at ~20 A with the BSC030N08NS5) and use only a short EMC slew, (2) fit a linear-mode-rated MOSFET on the input side (decision 19), or (3) move to TPS48111-Q1 with a pre-charge FET + resistor?",
         "class": "big",
         "reason": "Changes gate drive and protection behaviour of the channel; new circuit function.",
         "touches": [
           "protection"
-        ]
+        ],
+        "default": null
       },
       "source": {
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H2"
       },
-      "state": "parked",
-      "question": "Q-0043",
+      "state": "blocked-owner",
+      "question": "Q-0049",
       "why_big": [
-        "reviewer classed it big: Changes gate drive and protection behaviour of the channel; new circuit function.",
-        "touches protection"
+        "found while fixing (T-0070): No R1/C1 pair meets 20 A into 1000 uF within the BSC030N08NS5 SOA: 600 W peak / 0.45 J over 1.5 ms vs SOA ~45 W at 1 ms (30 V); Zth gives dTj ~100 K above case (125 K with a 15 A load); slow turn-on into a short would also leave SOA before the 80 A trip. Fix needs a maximum load capacitance or a different MOSFET/pre-charge path (decision 19, proposed)."
       ],
       "ruling": "yes - gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at gate, PD direct; start about 100k/3.9 nF for ~20 A into 1000 uF); this supersedes the plain RG_PU 100 ohm of Q-0001 (covers EMC E2 too); check MOSFET SOA, heat budget and fast short-circuit response",
       "answered": "2026-11-01",
-      "package": "T-0070"
+      "package": "T-0070",
+      "door": "one-way"
     },
     {
       "id": "T-0055",
@@ -1922,8 +1924,10 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H7"
       },
-      "state": "parked",
-      "package": "T-0070"
+      "state": "done",
+      "package": "T-0070",
+      "fixed_by": "T-0070",
+      "merged": "9d0b6d53d0cd877aa57e424279e2097ac62a56d2"
     },
     {
       "id": "T-0060",
@@ -1961,27 +1965,27 @@
         "board": "pdm-hc2",
         "location": "hc_channel x2 (H2)",
         "summary": "Which HC2 loads have more than about 50 uF input capacitance (LED searchlight/work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.",
-        "fix": "Owner lists the intended HC2 loads and their input capacitance or inrush.",
+        "fix": "Covered by the T-0054 question.",
         "class": "big",
         "reason": "Only the owner knows the loads.",
         "touches": [
           "protection"
-        ]
+        ],
+        "default": null
       },
       "source": {
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "Q1"
       },
-      "state": "parked",
-      "question": "Q-0045",
+      "state": "blocked-owner",
+      "question": "Q-0051",
       "why_big": [
-        "reviewer classed it big: Only the owner knows the loads.",
-        "a question only the owner can answer",
-        "touches protection"
+        "found while fixing (T-0070): The ruled sizing target (20 A into 1000 uF) is outside the MOSFET SOA; the prototype load measurement is recorded in STATUS."
       ],
       "ruling": "loads not known yet - size the HC2 gate slew control for about 20 A into 1000 uF and measure the real loads on the prototype",
       "answered": "2026-11-01",
-      "package": "T-0070"
+      "package": "T-0070",
+      "door": "one-way"
     },
     {
       "id": "T-0062",
@@ -2298,7 +2302,7 @@
       "id": "T-0070",
       "role": "board-fixer",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-01",
       "title": "HC2 gate slew control (inrush, EMC edges)",
       "brief": "hc_channel sheet x2. Ruling Q-0043 (T-0054) verbatim: 'yes - gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at gate, PD direct; start about 100k/3.9 nF for ~20 A into 1000 uF); this supersedes the plain RG_PU 100 ohm of Q-0001 (covers EMC E2 too); check MOSFET SOA, heat budget and fast short-circuit response'. Ruling Q-0001 (T-0006) verbatim, valid where Q-0043 does not replace it: 'yes - RG_PU 100 ohm, PD kept direct, RGATE_PD as a 0 ohm footprint; recheck switching loss, SOA, heat budget and short-circuit response; no PWM on HC2 outputs until measured on the bench'. Do not fit RG_PU 100 ohm; do keep a 0 ohm RGATE_PD footprint and the no-PWM rule. Ruling Q-0045 (T-0061) verbatim: 'loads not known yet - size the HC2 gate slew control for about 20 A into 1000 uF and measure the real loads on the prototype'. Order: (1) Read TPS4811-Q1 section 8.3.2.1, Eq. 3 and Eq. 4, and the BSC030N08NS5 datasheet (Qg, SOA Diagram 3). (2) Size R1/C1 for IINRUSH ~20 A into 1000 uF at 28-30 V (E24/E12 values, C1 >=25 V C0G/X7R, basic parts). Check: CBST C103/C203 > Qg(total) + 10*C1; MOSFET energy during the ramp against SOA (~0.4 J over 1-2 ms); the gate PD path stays direct (0 ohm RGATE_PD), so the 80 A short-circuit turn-off is not slowed; turn-on into a short (current ramps slowly, ISCP still trips within tSC). (3) Edit: R104/R204 role per TI topology (R1 in PU path), C1 + ~10 ohm at the gate, RGATE_PD 0 ohm footprint. (4) T-0059 (two-way): record in design-notes section 4a and the user notes the bootstrap delay at first switch-on (~76-100 ms, Eq. 1), the new turn-on ramp time, and the 3.8 min retry reset by toggling INP. (5) Add to HC2 STATUS: no PWM until bench-measured, and a prototype test of real load capacitance and inrush. Checks: ERC and netlist on pdm-hc2 (declare every changed ref), heat budget at 40 C on a scratch copy with RDS(on) 11.7 mOhm (T-0057 is deferred), and confirm 15 A still stands. Failure-mode note: bilge forced-run and searchlight outputs, slower turn-on, behaviour into a stalled pump. Stop and ask if no R1/C1 pair meets both the 1000 uF / ~20 A target and the MOSFET SOA (that would need a maximum load capacitance or a different MOSFET, i.e. decision 19), or if slew control would delay the short-circuit protection.",
@@ -2311,7 +2315,29 @@
       "plan": "T-0063",
       "depends_on": [
         "T-0064"
-      ]
+      ],
+      "started": "2026-11-02T21:31:55",
+      "ran_model": "opus",
+      "session": "017e9ad8-2739-4b53-894d-8254f11e9175",
+      "cost_usd": 1.6533,
+      "attempts": 1,
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-02",
+      "note": "2 part-facts lookups (0.86 USD)",
+      "summary": "1 fixed, 3 blocked, merged 9d0b6d53; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-02-fix-pdm-hc2-T-0070.md"
     },
     {
       "id": "T-0071",
