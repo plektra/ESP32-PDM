@@ -29,6 +29,18 @@ netlist checked. Details, part facts and the bilge-output failure mode: design-n
 identical); custom `LMR51610.kicad_mod` removed from `lib/`. ERC 0 errors, warnings 6 → 5 (U3 mismatch cleared);
 netlist: only U3's footprint changed. The PG-TDSO-14 paste fix in the same package affects only pdm-4ch. Details: design-notes §8.4.
 
+**2026-11-02 (T-0070, unattended): gate slew control blocked (one-way, owner).** The BSC030N08NS5 SOA (Diagram 3,
+30 V, single pulse, Tc 25 °C: ≈ 1.5 A at 1 ms, ≈ 0.4 A at 10 ms) and Zth (Diagram 4) do not allow the ruled
+20 A ramp into 1000 µF: 600 W peak, 0.45 J in the input MOSFET over 1.5 ms, ΔTj ≈ 100 K above case (≈ 125 K with a
+15 A load attached); even 100 µF at 20 A is above the 100 µs SOA line. No R1/C1 pair meets both targets, so R104/R204
+stay 10 Ω PU→gate and no slew parts were added. The owner chooses: a maximum load capacitance, or a linear-mode
+MOSFET / pre-charge path (decision 19). Numbers: `docs/reviews/2026-11-02-fix-pdm-hc2-T-0070.md`. T-0059 done: the
+bootstrap delay (≈ 76–100 ms) and the 3.8 min retry are in design-notes §4a and the README.
+
+**Rules until bench-measured:** no PWM on HC2 outputs (Q-0001). Prototype test: measure the real load input
+capacitance and inrush of every intended HC2 load (Q-0045), and check whether an INP toggle cuts the 3.8 min
+auto-retry short.
+
 **Blocked (owner, one-way):** the PTC check failed. 1812L050/60GR is rated I_max 40 A, but a hard short behind F1/F3/F4
 can draw ≈ 188 A (30 V / 0.16 Ω). F2 therefore stays SMD0805B050TF. Question in the T-0065 report.
 
@@ -37,6 +49,8 @@ searchlight choice (decision 16, open). Decision 21 **[proposed]** (SW_SUPPLY se
 
 ## Next
 
+0. Gate slew control (T-0054/T-0006, Q-0043/Q-0001): waiting for the owner's answer to the T-0070 SOA question;
+   then set R104/R204 (R1), C1 + 10 Ω and a 0 Ω RGATE_PD footprint, recheck SOA, heat budget, short-circuit response.
 1. Open in KiCad: tidy the label-wired `hc_channel` sheet and the parts the panel-cable script placed, *Update
    Symbols from Library* (keep Q3–Q6 on the BC817 symbol with value MMBT5551), ERC.
 2. `/validate pdm-hc2 deep` (part facts of TPS48110A-Q1, BSC030N08NS5, the equations) and `/emc pdm-hc2`.

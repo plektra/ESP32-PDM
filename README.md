@@ -47,6 +47,9 @@ per order, so order mixed builds together to pay it once.
 - **Reverse battery (`pdm-4ch`):** the output switches survive a reversed battery of at most 28 V for less than 2
   minutes, with each load at least 12 Ω (BTT6050 datasheet). Heavier loads rely on the battery fuse to clear. The
   loads see reverse voltage. A series diode in the switch supply protects the panel LEDs.
+- **`pdm-hc2` timing:** after power is connected, the first switch-on of each output (also from a panel switch)
+  takes about 0.1 s. After an overcurrent or short-circuit trip the output stays off for about 4 minutes and then
+  tries again. HC2 outputs are on/off only (no dimming/PWM).
 - **USB-C is a service port only.** Connect only a battery-powered laptop, or use a USB isolator. The
   board's GND is the boat's battery negative. A laptop on a shore-powered charger can tie its protective
   earth to battery negative through the USB cable, which can cause ground-loop currents, galvanic
