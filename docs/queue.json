@@ -2173,7 +2173,7 @@
       "id": "T-0067",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "failed",
       "created": "2026-11-01",
       "title": "CAN sheet: barrier Y-cap/CMC footprints, TXD pull-up, CA-IS3050G check",
       "brief": "Shared can sheet, identical on both boards. Constraints first: ruling Q-0031 (T-0039) verbatim: 'keep the isolated CAN side powered from NET-S (NMEA 2000 practice, LEN)'. Ruling Q-0012 (T-0019) verbatim: 'IEC 60945 as a design target, no certification; one pre-compliance scan on the first prototypes decides the DNP footprints; the N2K shield stays unconnected at the node (4-pole J4)'. Record both in design-notes (EMC and CAN sections); J4 stays 4-pole. Order: (1) T-0030. Ruling Q-0023 verbatim: 'yes - part-facts check of CA-IS3050G (supplies, pinout, timing), swap only if it passes; Q-0004 footprints and Q-0039 pull-up then apply to it'. Read the Chipanalog CA-IS3050G datasheet: VCC1 at 3.3 V, VCC2 at 5 V from U6 (TPS7B91, or L78M05 if P2 swapped it), bus fault protection against the N2K bus, loop delay against ISO 11898 at 250 kbit/s, TXD dominant timeout, isolation rating, pinout and package (SOIC-8 vs SOIC-8-WB). Also check the JLCPCB part C528763 (stock, footprint). Swap only if every check passes; otherwise keep ISO1044 and record why. (2) T-0048. Ruling Q-0039 verbatim: 'yes - 10 k pull-up from ISO1044 TXD to +3V3 on the shared can sheet'. Apply it to the transceiver that step 1 leaves (basic 10 k 0402, C25744). (3) T-0010. Ruling Q-0004 verbatim: 'yes - as footprints only: Y-capacitor GND_CAN-GND DNP, CMC footprint fitted with 0 ohm bridges; decide at pre-compliance scan'. Add a 1206 Y-class (1-2.2 nF, >=1 kV) footprint from GND_CAN to GND, DNP. Add a CMC footprint in series with CANH/CANL: CMC DNP, with two fitted 0 ohm bridges (or a footprint that accepts both). Note layout rule 9 (barrier clearance, Y-cap the only crossing) in STATUS. Checks: ERC and netlist on both boards after each step, can.kicad_sch identical on both boards, LCSC on fitted parts, DNP on the Y-cap and CMC. Stop and ask if: the Y-capacitor path would create a DC path across the barrier (it must stay a capacitor only, invariant 6 spirit / NMEA isolation); the CA-IS3050G needs a supply arrangement other than NET-S (that would contradict Q-0031).",
@@ -2188,23 +2188,16 @@
       "depends_on": [
         "T-0065"
       ],
-      "started": "2026-11-02T20:44:20",
+      "started": "2026-11-02T21:09:46",
       "model": "opus",
       "session": "88c26d80-00c0-4e75-8b0a-f07c66c5f39c",
-      "cost_usd": 2.5767,
-      "attempts": 1,
+      "cost_usd": 6.7426,
+      "attempts": 2,
       "finished": "2026-11-02",
-      "note": "no report written (aborted_streaming): ",
-      "summary": "interrupted, queued again, resumes where it stopped",
-      "interrupted": true,
-      "resume": {
-        "session": "88c26d80-00c0-4e75-8b0a-f07c66c5f39c",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0067",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0067-4_j9c4_d",
-        "report": "docs/reviews/2026-11-02-fix-shared-T-0067.md",
-        "head": "4962f04ba47b61d5b54f8f977246031ce1996068",
-        "reason": "an interruption"
-      }
+      "note": "merge conflict with auto/pilot (retry rebuilds it on the new base): merging docs/design-notes.md\nAuto-merging hardware/pdm-4ch/STATUS.md\nCONFLICT (content): Merge conflict in hardware/pdm-4ch/STATUS.md\nAutomatic merge failed; fix conflicts and then commit the result.\n",
+      "summary": "failed",
+      "interrupted": null,
+      "ran_model": "opus"
     },
     {
       "id": "T-0068",
