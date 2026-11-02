@@ -2349,5 +2349,29 @@
       ],
       "verify": true
     }
-  ]
+  ],
+  "board_size_start": {
+    "pdm-4ch": {
+      "parts": 167,
+      "dnp": 0,
+      "unique": 58
+    },
+    "pdm-hc2": {
+      "parts": 169,
+      "dnp": 0,
+      "unique": 66
+    }
+  },
+  "board_size": {
+    "pdm-4ch": {
+      "parts": 186,
+      "dnp": 9,
+      "unique": 64
+    },
+    "pdm-hc2": {
+      "parts": 184,
+      "dnp": 5,
+      "unique": 74
+    }
+  }
 }
