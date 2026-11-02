@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 76,
-    "Q": 48
+    "Q": 49
   },
   "tasks": [
     {
@@ -326,7 +326,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E8"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0006",
       "why_big": [
         "reviewer classed it big: Shared analog_sw sheet and the invariant 1 signal path.",
@@ -335,7 +335,9 @@
       ],
       "ruling": "yes - C14-C17 to 470 nF; README note: dry (unlit) switch contacts, and the output-off behaviour below about 8 V during 12 V cranking",
       "answered": "2026-11-01",
-      "package": "T-0068"
+      "package": "T-0068",
+      "fixed_by": "T-0068",
+      "merged": "86fbfe032596247f98089fced286837714dc8838"
     },
     {
       "id": "T-0013",
@@ -1395,7 +1397,7 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V2"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0034",
       "why_big": [
         "reviewer classed it big: Any circuit fix touches the shared analog_sw sheet and invariant 1 (hardware switch path).",
@@ -1403,7 +1405,9 @@
       ],
       "ruling": "correct the margin claim in design-notes and measure on the prototype; RIN 4.7 k goes on the prototype test list as the planned fix if the margin is short; no circuit change now",
       "answered": "2026-11-01",
-      "package": "T-0068"
+      "package": "T-0068",
+      "fixed_by": "T-0068",
+      "merged": "86fbfe032596247f98089fced286837714dc8838"
     },
     {
       "id": "T-0043",
@@ -1514,27 +1518,28 @@
         "board": "pdm-4ch",
         "location": "analog_sw: R3/R4/R7/R8 4.7 k 1206 switch loads",
         "summary": "0.19 W continuous at 30 V in a 0.25 W part (77 %), 0.49 W during a 48 V clamp.",
-        "fix": "Two 1206 resistors in series (2.2 k + 2.4 k) or a 2010 part, same value.",
+        "fix": "For R3/R4/R7/R8: (a) 2 k + 2 k 1206 basic (C17944, 4.0 k total: 6.4 -> 7.5 mA at 30 V, 0.11 W per part = 45 %, total panel load +0.13 W at 30 V, two parts per line, no new fee), or (b) 2.2 k + 2.4 k 1206 extended (two new loading fees per order), or (c) keep 4.7 k 1206 (77 % at 30 V)?",
         "class": "big",
         "reason": "Passive-only change, but on the shared analog_sw sheet.",
         "touches": [
           "shared-sheet"
         ],
-        "cost_delta_usd": 0.02
+        "cost_delta_usd": 0.02,
+        "default": "2 k + 2 k 1206 basic (C17944)"
       },
       "source": {
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V6"
       },
-      "state": "parked",
-      "question": "Q-0038",
+      "state": "blocked-owner",
+      "question": "Q-0048",
       "why_big": [
-        "reviewer classed it big: Passive-only change, but on the shared analog_sw sheet.",
-        "touches shared-sheet"
+        "found while fixing (T-0068): Ruling Q-0038 asks for 2.2 k + 2.4 k 1206 basic parts; JLCPCB has no basic/preferred 1206 2.2 k or 2.4 k (basic 1206 values include 1 k, 2 k, 4.7 k, 10 k). Any substitute departs from the ruling."
       ],
       "ruling": "yes - two 1206 resistors in series (2.2 k + 2.4 k, basic parts) for R3/R4/R7/R8",
       "answered": "2026-11-01",
-      "package": "T-0068"
+      "package": "T-0068",
+      "door": "one-way"
     },
     {
       "id": "T-0047",
@@ -1557,8 +1562,10 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V7"
       },
-      "state": "parked",
-      "package": "T-0068"
+      "state": "done",
+      "package": "T-0068",
+      "fixed_by": "T-0068",
+      "merged": "86fbfe032596247f98089fced286837714dc8838"
     },
     {
       "id": "T-0048",
@@ -1618,7 +1625,7 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V9"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0040",
       "why_big": [
         "reviewer classed it big: A hardware fix changes protection on the shared sheet.",
@@ -1626,7 +1633,9 @@
       ],
       "ruling": "add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop",
       "answered": "2026-11-01",
-      "package": "T-0068"
+      "package": "T-0068",
+      "fixed_by": "T-0068",
+      "merged": "86fbfe032596247f98089fced286837714dc8838"
     },
     {
       "id": "T-0050",
@@ -1649,8 +1658,10 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V10"
       },
-      "state": "parked",
-      "package": "T-0068"
+      "state": "done",
+      "package": "T-0068",
+      "fixed_by": "T-0068",
+      "merged": "86fbfe032596247f98089fced286837714dc8838"
     },
     {
       "id": "T-0051",
@@ -2203,7 +2214,7 @@
       "id": "T-0068",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-01",
       "title": "Panel interface (analog_sw): debounce, switch-load resistors, SW_SUPPLY diode, margins, reverse notes",
       "brief": "Shared analog_sw sheet, identical on both boards. Order: (1) T-0012. Ruling Q-0006 verbatim: 'yes - C14-C17 to 470 nF; README note: dry (unlit) switch contacts, and the output-off behaviour below about 8 V during 12 V cranking'. Basic 470 nF part, rated for the node voltage (<= ~3.3 V by the zener) and placed after R34-R37. (2) T-0046. Ruling Q-0038 verbatim: 'yes - two 1206 resistors in series (2.2 k + 2.4 k, basic parts) for R3/R4/R7/R8'. Each switch load becomes 2.2 k + 2.4 k 1206 in series; check basic LCSC codes and recompute dissipation at 30 V and at the 48 V clamp. (3) T-0049. Ruling Q-0040 verbatim: 'add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop'. Choose a basic diode: Schottky preferred for low drop, reverse rating >=60 V (the 48 V clamp plus a reversed 30 V battery), >= F4 trip current. Place it so that D54 still clamps the J5.5 line at the connector. (4) T-0042. Ruling Q-0034 verbatim: 'correct the margin claim in design-notes and measure on the prototype; RIN 4.7 k goes on the prototype test list as the planned fix if the margin is short; no circuit change now'. Rewrite design-notes section 3 with the margin at SWIN 10.5 V (3V3 down and up), including the new diode drop from step 3. Put the measurement and the RIN 4.7 k fallback on the prototype test list in pdm-4ch STATUS. (5) T-0047 (two-way, no ruling). Document in design-notes section 4 that p_other is about 2.1 W for the 4-ch board at 30 V with all panel lines on, using the values after steps 2-3, and the resulting Tj (scratch run: tools/heat_budget.py --p-other 2.1). The tool default itself stays (tools/ is outside the gates; see report). (6) T-0050 (two-way, no ruling). Qualify design-notes section 8 and the README for pdm-4ch: the reverse-battery survival holds for VS(REV) 28 V, t < 2 min, RL >= 12 ohm (BTT6050 P_4.1.2); heavier loads need the battery fuse to clear (body diode ~2.4 W > PTOT 1.6 W). Also add the panel-LED protection from step 3. Do not write the HC2 part of section 8 here (that is P9). Checks: ERC and netlist on both boards after each edit, analog_sw.kicad_sch identical on both boards, LCSC on every fitted part, heat budget scratch run. Failure-mode note (navigation lights and bilge forced-run are panel-switched): what changes with the 470 nF and the diode drop at low battery. Stop and ask (one-way, invariant 1) if, with the diode drop, the hardware switch path no longer turns an output on at SWIN >= 10.5 V by the datasheet worst case even with the planned RIN 4.7 k fallback, or would need a divider change on the shared sheet.",
@@ -2218,7 +2229,29 @@
       "plan": "T-0063",
       "depends_on": [
         "T-0065"
-      ]
+      ],
+      "started": "2026-11-02T21:22:00",
+      "ran_model": "opus",
+      "session": "aea67a43-1329-4218-b1aa-4d479a37b5b7",
+      "cost_usd": 2.6624,
+      "attempts": 1,
+      "growth": {
+        "pdm-4ch": {
+          "parts": 1,
+          "dnp": 0,
+          "unique": 1
+        },
+        "pdm-hc2": {
+          "parts": 1,
+          "dnp": 0,
+          "unique": 1
+        }
+      },
+      "finished": "2026-11-02",
+      "note": "3 part-facts lookups (0.54 USD)",
+      "summary": "5 fixed, 1 blocked, merged 86fbfe03; pdm-4ch +1 parts (+0 DNP), +1 unique, pdm-hc2 +1 parts (+0 DNP), +1 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-02-fix-shared-T-0068.md"
     },
     {
       "id": "T-0069",
@@ -2395,14 +2428,14 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 190,
+      "parts": 191,
       "dnp": 13,
-      "unique": 64
+      "unique": 65
     },
     "pdm-hc2": {
-      "parts": 184,
+      "parts": 185,
       "dnp": 5,
-      "unique": 74
+      "unique": 75
     }
   }
 }

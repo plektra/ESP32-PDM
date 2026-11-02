@@ -60,3 +60,6 @@ free number (`/handoff` adds them).
 | 51 | 2026-11-02 | shared | U3 LMR51610 footprint Package_TO_SOT_SMD:SOT-23-6 on both boards (matches TI DBV0006A pitch/width/pin order, JLC C22427220 pads inside it); lib symbol default updated; custom lib/ESP32-PDM.pretty/LMR51610.kicad_mod removed (Q-0037) (T-0066) | auto |
 | 52 | 2026-11-02 | pdm-4ch | RIS 680 ohm 1206 0.25 W = C17975 (extended; no basic 1206 680 ohm exists) (T-0069) | auto |
 | 53 | 2026-11-02 | pdm-4ch | DNP OUT pull-down R106/R206/R306/R406 47 kohm 0603 C25819 (BTT6050 Table 11 RPD example; 19 mW at 30 V) (T-0069) | auto |
+| 54 | 2026-11-02 | shared | C14-C17 470 nF/10 V X5R 0402 CL05A474KP5NNNC (C47339, preferred), same footprint; tau about 1.5 ms (T-0012/Q-0006) (T-0068) | auto |
+| 55 | 2026-11-02 | shared | SW_SUPPLY series diode D55 = DSK16 (C22466351, already on BOM; 60 V, 1 A, IFSM 25 A) between F4.2 (anode) and SW_SUPPLY/J5.5 (cathode); D54/C54 stay on J5.5 (T-0049/Q-0040) (T-0068) | auto |
+| 56 | 2026-11-02 | pdm-4ch | p_other documented as about 2.2 W at 30 V with all panel lines on (Tj 101 C at 4 A); heat_budget default unchanged (T-0047) (T-0068) | auto |
