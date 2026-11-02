@@ -58,3 +58,5 @@ free number (`/handoff` adds them).
 | 49 | 2026-11-02 | system | L1 approved alternates (T-0022): Sunltech SLW6045S8R2MST C47018494 and cjiang FNR6045S8R2MT C168074, same 8.2 uH / 0.056 ohm max / Isat 3.9 A / Irms 2.6 A / 6045 land as SWPA6045S8R2MT; stock recheck on the pre-order checklist (T-0065) | auto |
 | 50 | 2026-11-02 | pdm-4ch | PG-TDSO-14 EP paste: 4 x 2.55x0.6 mm windows at y=+/-0.6,+/-1.8 and 2 x 2.55x0.5 mm at y=+/-2.95, between the via rows; 51 % of the EP, >=0.15 mm from every via drill (BTT6050-1ERA DS Fig. 53; Q-0036) (T-0066) | auto |
 | 51 | 2026-11-02 | shared | U3 LMR51610 footprint Package_TO_SOT_SMD:SOT-23-6 on both boards (matches TI DBV0006A pitch/width/pin order, JLC C22427220 pads inside it); lib symbol default updated; custom lib/ESP32-PDM.pretty/LMR51610.kicad_mod removed (Q-0037) (T-0066) | auto |
+| 52 | 2026-11-02 | pdm-4ch | RIS 680 ohm 1206 0.25 W = C17975 (extended; no basic 1206 680 ohm exists) (T-0069) | auto |
+| 53 | 2026-11-02 | pdm-4ch | DNP OUT pull-down R106/R206/R306/R406 47 kohm 0603 C25819 (BTT6050 Table 11 RPD example; 19 mW at 30 V) (T-0069) | auto |

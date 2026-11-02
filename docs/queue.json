@@ -1045,8 +1045,10 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "L9"
       },
-      "state": "parked",
-      "package": "T-0069"
+      "state": "done",
+      "package": "T-0069",
+      "fixed_by": "T-0069",
+      "merged": "b9fcef318407c8f4bce1220275b1093644931478"
     },
     {
       "id": "T-0033",
@@ -1320,7 +1322,7 @@
         "report": "docs/reviews/2026-10-30-cost-system.md",
         "finding": "Q7"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0032",
       "why_big": [
         "reviewer classed it big: Question",
@@ -1329,7 +1331,9 @@
       ],
       "ruling": "all four BTT6050 as the standard pdm-4ch population; heavy loads go on HC2",
       "answered": "2026-11-01",
-      "package": "T-0069"
+      "package": "T-0069",
+      "fixed_by": "T-0069",
+      "merged": "b9fcef318407c8f4bce1220275b1093644931478"
     },
     {
       "id": "T-0041",
@@ -1355,7 +1359,7 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V1"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0033",
       "why_big": [
         "reviewer classed it big: The complete fix needs a firmware DEN policy (firmware architecture is big); the resistor package change alone would be small.",
@@ -1363,7 +1367,9 @@
       ],
       "ruling": "yes, all three - RIS as 1206 >=0.25 W; record firmware rule: DEN pulsed only while sampling (and dropped on full-scale IS); OUT pull-down as a DNP footprint",
       "answered": "2026-11-01",
-      "package": "T-0069"
+      "package": "T-0069",
+      "fixed_by": "T-0069",
+      "merged": "b9fcef318407c8f4bce1220275b1093644931478"
     },
     {
       "id": "T-0042",
@@ -1693,7 +1699,7 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V12"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0041",
       "why_big": [
         "reviewer classed it big: Firmware architecture question for the owner.",
@@ -1702,7 +1708,9 @@
       ],
       "ruling": "DEN pulsed only while sampling IS (and dropped on full-scale IS), not held high in Active mode (see Q-0033)",
       "answered": "2026-11-01",
-      "package": "T-0069"
+      "package": "T-0069",
+      "fixed_by": "T-0069",
+      "merged": "b9fcef318407c8f4bce1220275b1093644931478"
     },
     {
       "id": "T-0053",
@@ -2223,7 +2231,7 @@
       "id": "T-0069",
       "role": "board-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-01",
       "title": "Channel sense resistor, DEN rule, population rule",
       "brief": "pdm-4ch channel sheet (x4) and docs. (1) T-0041. Ruling Q-0033 verbatim: 'yes, all three - RIS as 1206 >=0.25 W; record firmware rule: DEN pulsed only while sampling (and dropped on full-scale IS); OUT pull-down as a DNP footprint'. Change R103/R203/R303/R403 to 680 ohm 1206, >=0.25 W, basic LCSC; the value is unchanged so the sense scaling is unchanged. Add a DNP pull-down footprint from each OUT to GND; propose its value from BTT6050 section 7.3.3.2 (RPD for open-load detection) and record it as auto. Its dissipation at 30 V must stay within the package rating if it is ever fitted. (2) T-0052. Ruling Q-0041 verbatim: 'DEN pulsed only while sampling IS (and dropped on full-scale IS), not held high in Active mode (see Q-0033)'. Rewrite design-notes section 6 (power modes / DEN) and add it to the firmware requirements list for /system firmware. (3) T-0040. Ruling Q-0032 verbatim: 'all four BTT6050 as the standard pdm-4ch population; heavy loads go on HC2'. (4) T-0032 (two-way): document the population and ordering rule in pdm-4ch STATUS and README: BTT6010 only where > 4 A, and mixed builds are ordered together so the extended fee is paid once. Checks: ERC and netlist on pdm-4ch (the RIS footprint/LCSC change and the new DNP refs only); tools/heat_budget.py at 40 C with --p-other 2.1 (the population is unchanged, BTT6050 x4 at 4 A). Stop and ask if the RIS power check at the 40 mA maximum fault current (~1.1 W) is meant to be covered by hardware: the ruling relies on the firmware DEN rule for that case, so record it only, and do not fit a 2 W part on your own.",
@@ -2236,7 +2244,29 @@
       "plan": "T-0063",
       "depends_on": [
         "T-0064"
-      ]
+      ],
+      "started": "2026-11-02T21:02:38",
+      "ran_model": "sonnet",
+      "session": "c4bf3278-cca9-4026-a320-c843d3480602",
+      "cost_usd": 0.6206,
+      "attempts": 1,
+      "growth": {
+        "pdm-4ch": {
+          "parts": 4,
+          "dnp": 4,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-02",
+      "note": "1 part-facts lookups (0.21 USD)",
+      "summary": "4 fixed, 0 blocked, merged b9fcef31; pdm-4ch +4 parts (+4 DNP), +0 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-02-fix-pdm-4ch-T-0069.md"
     },
     {
       "id": "T-0070",
@@ -2372,8 +2402,8 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 186,
-      "dnp": 9,
+      "parts": 190,
+      "dnp": 13,
       "unique": 64
     },
     "pdm-hc2": {
