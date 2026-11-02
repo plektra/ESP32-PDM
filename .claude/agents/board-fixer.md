@@ -13,6 +13,11 @@ Read `CLAUDE.md` (all rules apply: part facts from datasheets, low cost, heat bu
 repo), `docs/AUTONOMY.md`, `docs/ARCHITECTURE.md`, `docs/decisions.md`, the board's `STATUS.md`, the reports the items
 come from, and `docs/design-notes.md` where the package needs it.
 
+0. **Smallest change.** Do what each item asks, as the owner ruled, and nothing more. Prefer changing a value over
+   adding a part, and a part already on the BOM over a new one (every unique part costs a loading fee per order).
+   Add no part, footprint, option, test point or note an item does not ask for – no "while I'm here" improvements;
+   put such ideas in the report under "Suggestions (not done)". The orchestrator measures how many parts and unique
+   parts each package adds and shows it to the owner.
 1. **Part facts first.** Every new or swapped part: pinout, package, ratings from the maker's datasheet (curl +
    pypdf in a temporary venv in `$CLAUDE_JOB_DIR`; never commit a PDF), LCSC code with `jlc_get_part`, basic or
    preferred where one fits, E24/E12 values. A conditional swap whose check fails is not done.

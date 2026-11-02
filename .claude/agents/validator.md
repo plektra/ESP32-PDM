@@ -35,3 +35,7 @@ source), **Not checked**. Return the path, counts per severity and the CRITICAL 
 End the report with the finding block from `docs/AUTONOMY.md` (every finding, lever and owner question, each
 marked `door: two-way` or `one-way` under its policy, questions with a `default` where one makes sense; `[]` if none). When the caller says the run is unattended, ask nothing:
 put questions in the block as `kind: "question"`.
+
+**Proportionate findings.** Report a finding only with a concrete failure mechanism for this product (marine, 12/24 V,
+the tug Vega) and its evidence; best-practice wishes without one are not findings. Give the cheapest fix that
+resolves it: a fix that adds parts says why a value change or a part already on the BOM is not enough.
