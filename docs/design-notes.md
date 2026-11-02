@@ -188,6 +188,19 @@ Notes and open points:
   short-circuit energy with the 146 ms timer.
 - Terminals for ≥ 25 A per output and ≈ 50 A battery input; 2 oz copper; footprint
   `Texas_DGX0019A` drawn from TI's land-pattern example (verify against JLCPCB before ordering).
+- **Timing the user sees (T-0059, 2026-11-02; TPS4811-Q1 SLUSEE5E p. 8, 18, 23):**
+  - *First switch-on after power-up* waits for the bootstrap capacitor: Eq. 1 TDRV_EN = CBST × V(BST_UVLOR) /
+    I(charge pump) = 1 µF × 7.6 V / 100 µA ≈ **76 ms** (typ); with the minimum 80 µA charge-pump current ≈ 95 ms,
+    and with CBST tolerance up to ≈ 100 ms. This applies to the hardware panel-switch path too (the controller,
+    not the MCU, waits). Later switchings are immediate while VS stays up.
+  - *Turn-on edge:* unchanged for now (RG 10 Ω, no slew control, sub-µs). Gate slew control (Q-0043) is on hold:
+    the SOA check in the T-0070 report shows that 20 A into 1000 µF is outside the BSC030N08NS5 SOA (one-way
+    question to the owner). The ramp time will be recorded here once the slew values are settled.
+  - *Overcurrent/short-circuit retry:* Eq. 9 tRETRY = 22.7 × 10⁶ × CTMR = 22.7 × 10⁶ × 10 µF ≈ 227 s ≈
+    **3.8 min** in auto-retry mode. The datasheet names toggling INP or EN/UVLO (or VS below POR) as the reset for
+    latch-off mode (p. 24); that an INP toggle also cuts the auto-retry wait short is **not stated** in the
+    facts read (UNVERIFIED) – check it on the prototype, then note the result here and in the README.
+  - *No PWM on HC2 outputs* until switching loss and SOA are measured on the bench (owner ruling Q-0001).
 
 ## 5. Physical switch inputs and long leads
 
