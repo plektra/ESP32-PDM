@@ -2180,15 +2180,23 @@
       "depends_on": [
         "T-0065"
       ],
-      "started": "2026-11-02T17:33:40",
+      "started": "2026-11-02T20:44:20",
       "model": "opus",
-      "session": "6bdbd357-1f8b-4d50-bd5f-15a27772e421",
-      "cost_usd": 1.692,
+      "session": "88c26d80-00c0-4e75-8b0a-f07c66c5f39c",
+      "cost_usd": 2.5767,
       "attempts": 1,
       "finished": "2026-11-02",
       "note": "no report written (aborted_streaming): ",
-      "summary": "interrupted, queued again",
-      "interrupted": true
+      "summary": "interrupted, queued again, resumes where it stopped",
+      "interrupted": true,
+      "resume": {
+        "session": "88c26d80-00c0-4e75-8b0a-f07c66c5f39c",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0067",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0067-4_j9c4_d",
+        "report": "docs/reviews/2026-11-02-fix-shared-T-0067.md",
+        "head": "4962f04ba47b61d5b54f8f977246031ce1996068",
+        "reason": "an interruption"
+      }
     },
     {
       "id": "T-0068",
