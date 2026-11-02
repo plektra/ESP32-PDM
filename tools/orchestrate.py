@@ -39,6 +39,7 @@ import time
 import xml.etree.ElementTree as ET
 from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -724,43 +725,59 @@ def run_task(q, t, budget_left, dry_run=False):
     deep = bool(t.get('deep'))
     model = t.get('model') or spec['model'][deep]
     budget = task_budget(t, budget_left)
+    # A task paused by a usage limit or cut off keeps its worktree, scratch folder and session: it resumes there.
+    resume = t.get('resume')
+    if resume and not (resume.get('session') and Path(resume['worktree']).exists() and not dry_run):
+        resume = None
     with STATE:
-        report = report_path(t)
+        report = Path(resume['report']) if resume else report_path(t)
         RESERVED.add(report)
         if spec['kind'] == 'plan':
-            t['items'] = [i['id'] for i in approved_items(q)]
-            payload = [item_view(i) for i in approved_items(q)]
+            if not resume:
+                t['items'] = [i['id'] for i in approved_items(q)]
+            payload = [item_view(find_task(q, i)) for i in t['items']]
         elif spec['kind'] == 'fix':
             payload = [item_view(find_task(q, i)) for i in t.get('items', [])]
         else:
             payload = None
-    scratch = Path(tempfile.mkdtemp(prefix=f"pdm-{t['id']}-"))
+    if resume and Path(resume['scratch']).exists():
+        scratch = Path(resume['scratch'])
+    else:
+        scratch = Path(tempfile.mkdtemp(prefix=f"pdm-{t['id']}-"))
     inputs = None
     if payload is not None:
         inputs = scratch / 'items.json'
         inputs.write_text(json.dumps(payload, indent=1, ensure_ascii=False))
     denied = DENIED_TOOLS + ([] if spec.get('edits') else ['Edit'])
-    cmd = [CLAUDE_BIN, '-p', prompt_for(t, report, inputs), '--agent', t['role'], '--model', model,
+    prompt = resume_prompt(t, report, resume['reason']) if resume else prompt_for(t, report, inputs)
+    cmd = [CLAUDE_BIN, '-p', prompt, *(['--resume', resume['session']] if resume else []),
+           '--agent', t['role'], '--model', model,
            '--max-budget-usd', f'{budget:.2f}', '--output-format', 'stream-json', '--verbose',
            '--add-dir', str(scratch), '--allowedTools', *agent_tools(t['role']), 'Write',
            '--disallowedTools', *denied]
-    print(f"→ {t['id']} {t['role']} {t['scope']}{' deep' if deep else ''} ({model}, ≤ {budget:.2f} USD) → {report}")
+    print(f"→ {t['id']} {t['role']} {t['scope']}{' deep' if deep else ''} ({model}, ≤ {budget:.2f} USD) → {report}"
+          + (f" (resumes after {resume['reason']})" if resume else ''))
     if dry_run:
         print('  ' + ' '.join(c if ' ' not in c else repr(c[:60] + '…') for c in cmd))
         shutil.rmtree(scratch, ignore_errors=True)
         return 0.0, None
-    wt = task_worktree(t)
     with STATE:
-        if wt.exists():
-            git('worktree', 'remove', '--force', str(wt), check=False)
-        git('worktree', 'add', '--detach', str(wt), 'HEAD')
-        head = git('rev-parse', 'HEAD', cwd=wt)
+        if resume:
+            wt, head = Path(resume['worktree']), resume['head']
+        else:
+            wt = task_worktree(t)
+            if wt.exists():
+                git('worktree', 'remove', '--force', str(wt), check=False)
+            git('worktree', 'add', '--detach', str(wt), 'HEAD')
+            head = git('rev-parse', 'HEAD', cwd=wt)
         t.update(state='running', started=datetime.datetime.now().isoformat(timespec='seconds'), model=model)
         save_queue(WORKTREE, q)
         LOGS.mkdir(parents=True, exist_ok=True)
     (wt / REVIEWS).mkdir(parents=True, exist_ok=True)  # empty folders are not in git
     gate_dir = Path(tempfile.mkdtemp(prefix=f"pdm-gate-{t['id']}-"))
-    base = {b: kicad_check(wt, b, gate_dir) for b in BOARDS} if spec.get('edits') else None
+    # The gates compare against the commit the agent started from (a resumed worktree already holds edits).
+    base = ({b: kicad_check(base_tree(head, gate_dir), b, gate_dir) for b in BOARDS}
+            if spec.get('edits') else None)
     log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}",
                PDM_PDF_PYTHON=PDF_PY or 'python3')
@@ -773,8 +790,10 @@ def run_task(q, t, budget_left, dry_run=False):
             save_queue(WORKTREE, q)
     try:
         out = run_streaming(cmd, env, t['id'], log.with_suffix('.log'), wt, on_init)
-    finally:
+    except BaseException:
         shutil.rmtree(scratch, ignore_errors=True)
+        raise
+    finally:
         tmux_close(pane)
     log.write_text(json.dumps(dict(cmd=cmd, output=out), indent=2, ensure_ascii=False))
     cost = float(out.get('total_cost_usd') or 0)
@@ -841,6 +860,14 @@ def run_task(q, t, budget_left, dry_run=False):
         interrupted = (result is None and not keep and not paused and out.get('terminal_reason') in INTERRUPTED
                        and t['attempts'] < MAX_ATTEMPTS)
         summary = 'interrupted, queued again' if interrupted else summarize(spec['kind'], result, paused)
+        # Keep what the agent has done so far: the next attempt resumes its session in the same worktree.
+        hold = (paused or interrupted) and bool(t.get('session'))
+        if hold:
+            t['resume'] = dict(session=t['session'], worktree=str(wt), scratch=str(scratch), report=str(report),
+                               head=head, reason='a usage limit' if paused else 'an interruption')
+            summary += ', resumes where it stopped'
+        else:
+            t.pop('resume', None)
         t.update(state='done' if result else 'ready' if paused or interrupted else 'failed', finished=today(),
                  note='; '.join(notes) or None, summary=summary, interrupted=interrupted or None)
         if result:
@@ -851,12 +878,33 @@ def run_task(q, t, budget_left, dry_run=False):
         git('commit', '-m', f"Auto: {t['role']} {t['scope']} ({t['id']}): {summary}\n\n"
             f"Unattended run by tools/orchestrate.py, model {model}, {cost:.2f} USD.\n\n"
             f"Co-Authored-By: Claude <noreply@anthropic.com>")
-        if not keep:
+        if not keep and not hold:
             git('worktree', 'remove', '--force', str(wt), check=False)
+        if not hold:
+            shutil.rmtree(scratch, ignore_errors=True)
         RESERVED.discard(report)
         print(f"  {t['id']} {t['state']}: {summary}; {cost:.2f} USD" + (f"; {t['note']}" if t.get('note') else ''),
               flush=True)
     return cost, result
+
+
+def resume_prompt(t, report, reason):
+    block = {'plan': 'plan', 'fix': 'fix'}.get(ROLES[t['role']]['kind'], 'finding')
+    return (f"You were cut off by {reason} before you finished task {t['id']}. Continue exactly where you stopped: "
+            f"your files in this worktree, your scratch folder $CLAUDE_JOB_DIR and your earlier instructions still "
+            f"apply. Check what you already did before repeating it. Write the report to exactly `{report}` and end "
+            f"it with the {block} block.\n{NARRATE}")
+
+
+def base_tree(head, gate_dir):
+    """The schematics and libraries of commit `head`, unpacked for the gates' before-check."""
+    d = gate_dir / 'base'
+    if not d.exists():
+        d.mkdir(parents=True)
+        archive = subprocess.Popen(['git', 'archive', head, 'hardware', 'lib'], cwd=WORKTREE, stdout=subprocess.PIPE)
+        subprocess.run(['tar', '-x', '-C', str(d)], stdin=archive.stdout, check=True)
+        archive.wait()
+    return d
 
 
 def summarize(kind, result, paused):
@@ -922,6 +970,45 @@ def lock():
     except BlockingIOError:
         raise SystemExit('another orchestrator run is active')
     return fh
+
+
+RESET = re.compile(r'resets\s+(?:at\s+)?(\d{1,2})(?::(\d{2}))?\s*([ap]m)?(?:\s*\(([^)]+)\))?', re.I)
+MAX_WAITS = 6  # usage-limit waits per run
+RESET_MARGIN = datetime.timedelta(seconds=int(os.environ.get('ORCH_RESET_MARGIN', 120)))  # env: tests only
+
+
+def reset_time(text, now=None):
+    """When a usage limit resets, from a message like "resets 12:30am (Europe/Helsinki)"; None if not found."""
+    m = RESET.search(text or '')
+    if not m:
+        return None
+    hour, minute, ampm, zone = int(m.group(1)), int(m.group(2) or 0), (m.group(3) or '').lower(), m.group(4)
+    if ampm == 'pm' and hour < 12:
+        hour += 12
+    if ampm == 'am' and hour == 12:
+        hour = 0
+    try:
+        tz = ZoneInfo(zone) if zone else None
+    except (ZoneInfoNotFoundError, ValueError):
+        tz = None
+    now = now or (datetime.datetime.now(tz) if tz else datetime.datetime.now().astimezone())
+    at = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    return at if at > now else at + datetime.timedelta(days=1)
+
+
+def wait_for_reset(note, run_info):
+    """Sleep until the usage limit resets (plus a margin), showing it on the dashboard; 30 min if unknown."""
+    at = reset_time(note)
+    until = (at + RESET_MARGIN) if at else datetime.datetime.now().astimezone() + datetime.timedelta(minutes=30)
+    until = until.astimezone()  # local time for the dashboard
+    notify(f"Usage limit: waiting until {until:%H:%M}" + ('' if at else ' (reset time not found, retrying)'))
+    run_info.update(stop=f'waiting for the usage limit until {until:%H:%M}')
+    write_run(run_info)
+    while (left := (until - datetime.datetime.now().astimezone()).total_seconds()) > 0:
+        time.sleep(min(left, 60))
+    run_info.update(stop=None)
+    write_run(run_info)
+    print(f'{datetime.datetime.now():%H:%M} usage limit should have reset; carrying on', flush=True)
 
 
 def notify(text):
@@ -1270,14 +1357,17 @@ def cmd_run(args):
     if git('status', '--porcelain'):
         git('add', '--', str(QUEUE), str(INBOX))
         git('commit', '-m', f'Auto: apply {answered} owner answers')
+    resumable = {t['resume']['worktree'] for t in q['tasks'] if t.get('resume')}
     for wt in REPO.parent.glob(f'{REPO.name}-auto-T-*'):  # agent worktrees left by an interrupted run
-        git('worktree', 'remove', '--force', str(wt), check=False)
+        if str(wt) not in resumable:  # kept on purpose: a paused agent continues there
+            git('worktree', 'remove', '--force', str(wt), check=False)
     git('worktree', 'prune', check=False)
     # Up to --parallel agents at once. Each new agent's budget cap is what is left after the caps of the running
     # ones. A stop condition starts nothing new; running agents finish and are committed.
     limit = 1 if args.task else args.max_tasks
     fixes, plans_left = not args.no_fixes, args.rounds
     spent, ran, fails, new_q, stop = 0.0, 0, 0, 0, None
+    limit_hit, waits = None, 0
     running = {}  # future -> (task, cap)
     run_info = dict(started=datetime.datetime.now().isoformat(timespec='seconds'), budget=args.budget,
                     parallel=args.parallel, spent=0.0, stop=None, finished=None)
@@ -1307,6 +1397,11 @@ def cmd_run(args):
                 running[pool.submit(run_task, q, t, cap)] = (t, cap)
                 ran += 1
             if not running:
+                if limit_hit and args.wait_for_limit and waits < MAX_WAITS:
+                    waits += 1  # sleep until the usage limit resets, then carry on with the same run
+                    wait_for_reset(limit_hit, run_info)
+                    stop = limit_hit = None
+                    continue
                 break
             done, _ = wait(running, return_when=FIRST_COMPLETED)
             for fut in done:
@@ -1319,9 +1414,12 @@ def cmd_run(args):
                         save_queue(WORKTREE, q)
                     cost, result = 0.0, None
                 spent += cost
-                if not result and t['state'] == 'ready' and t.get('interrupted'):
-                    continue  # queued again; not a failure
                 if not result and t['state'] == 'ready':
+                    ran -= 1  # queued again (resumes later): does not use up --max-tasks
+                if not result and t['state'] == 'ready' and t.get('interrupted'):
+                    continue  # not a failure
+                if not result and t['state'] == 'ready':
+                    limit_hit = t['note'] or ''
                     stop = stop or f"API unavailable ({t['note'][-100:]}); {t['id']} stays ready"
                     continue
                 fails = 0 if result else fails + 1
@@ -1390,6 +1488,8 @@ def main():
             s.add_argument('--task', help='run only this task')
             s.add_argument('--dry-run', action='store_true', help='print the agent commands, run nothing')
             s.add_argument('--push', action='store_true', help=f'push {BRANCH} to origin afterwards')
+            s.add_argument('--wait-for-limit', action='store_true',
+                           help='on a usage limit, sleep until it resets and carry on (paused agents resume)')
     args = ap.parse_args()
     args.fn(args)
 
