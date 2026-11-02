@@ -33,6 +33,10 @@ Both boards share the controller, power, NMEA 2000 and switch-input design.
 - **Not a circuit breaker.** Every output wire must be protected by a fuse or breaker sized to the
   wire. The switches protect themselves, not your wiring.
 - Install in an enclosed, ventilated location; observe the continuous current ratings.
+- **USB-C is a service port only.** Connect only a battery-powered laptop, or use a USB isolator. The
+  board's GND is the boat's battery negative. A laptop on a shore-powered charger can tie its protective
+  earth to battery negative through the USB cable, which can cause ground-loop currents, galvanic
+  corrosion and damage. Unplug the USB cable after service.
 
 ## Repository layout
 
