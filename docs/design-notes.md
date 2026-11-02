@@ -198,8 +198,8 @@ Panel connector J5 (decision 17), 10 poles:
 
 | Mode | Wi-Fi | CAN | Panel LEDs | DEN (diagnostics) | Wake |
 |---|---|---|---|---|---|
-| Active | on | on | full / dimmed | on | – |
-| Eco | power-save or off | on | dimmed / off | slowed | immediate |
+| Active | on | on | full / dimmed | pulsed only while sampling IS (never held high) | – |
+| Eco | power-save or off | on | dimmed / off | pulsed, slower sampling | immediate |
 | Sleep | off | periodic listen window | off | off | local switch, timer, wake broadcast |
 
 - Entered by a command over NMEA 2000 (or Signal K); local switches always work and can wake the node.
@@ -208,6 +208,55 @@ Panel connector J5 (decision 17), 10 poles:
 - Output state is held through deep sleep with RTC GPIO hold (4-ch drives IO6–IO8 and IO11 are RTC GPIOs, IO0–IO21; the panel LED pins IO38–IO41 are not, so the LEDs are off in deep sleep). A full reset or
   OTA update drops outputs for ~0.3 s unless the physical switch is on.
 - DEN low puts the BTT6050s in standby (µA range) – this saves more than the ESP32 sleep itself.
+
+### 6.1 DEN policy and the IS sense resistor (T-0041/T-0052, Q-0033/Q-0041, 2026-11-02)
+
+**Rule for `/system firmware` (owner ruling Q-0041):** DEN (IO33, shared by the four BTT6050s) is **not** held high in
+Active mode. Firmware raises DEN only for the time needed to sample IS (ADC settling after DEN rise, then the
+conversion), then drops it. If a sample reads full scale (IS clamped near 3V3, i.e. a fault current IIS(FAULT) is
+flowing), DEN is dropped at once and the channel is reported as faulted/open load; DEN is not raised again for that
+channel until the retry interval. DEN low is also the standby state (above). Firmware requirement list: see the end of
+this section.
+
+**Why (BTT6050 datasheet Rev 1.00 p. 30, Table 9, P_7.5.7):** with DEN high and a fault, IS sources
+IIS(FAULT) = 6 / 15 / 40 mA (min/typ/max) into RIS. An unconnected output floats up in OFF and also reads as
+open load in OFF (VOUT > VS − VOL(OFF), p. 27, 30).
+
+| IIS(FAULT) | P in RIS 680 Ω (I²R) | 0603 (0.1 W) | 1206 (0.25 W) |
+|---|---|---|---|
+| 6 mA | 24 mW | ok | ok |
+| 15 mA | 153 mW | **over** | ok (61 %) |
+| 40 mA | 1.09 W | **over** | **over** |
+
+Hardware: R103/R203/R303/R403 are now 680 Ω **1206**, 0.25 W, 1 %, C17975 (UNI-ROYAL 1206W4F6800T5E). No *basic* 1206
+680 Ω exists at JLCPCB (all 25 parts are extended), so the cheapest extended one was taken; the 0603 C23228 is no
+longer used on the board. The value is unchanged, so the sense scaling (≈ 0.45 V/A) is unchanged. The 1206 covers the
+typical fault current continuously. The 40 mA maximum (1.09 W) is **not** covered by hardware – by ruling that case is
+covered by the firmware rule above (IS is clamped at ≈ 3.3 V by D102, but the current still flows through RIS until DEN
+is dropped). A 2 W part was not fitted (not asked for). If the owner wants the 40 mA case covered in hardware, RIS would need a rating of about 1.5–2 W (a larger, costlier part): open point.
+
+**OUT pull-down, DNP (R106/R206/R306/R406, auto):** 47 kΩ 0603 (C25819, basic), OUT to GND, **not fitted**. Value from
+BTT6050 datasheet §7.3.3.2 (p. 27) and the application BOM Table 11 (p. 47): "RPD can be used to pull VOUT to 0 V;
+otherwise the OUT pin is floating", example 47 kΩ. The datasheet gives no RPD formula (the diagnostic pages carry
+a "Target Data Sheet Rev. 0.11" header – recheck against the Infineon site before ordering). Checks: P at 30 V =
+30² / 47 k = 19 mW (19 % of the 0603's 0.1 W; the part's voltage rating is 75 V); load of 0.64 mA from OUT when the
+output is on at 30 V, irrelevant against the load; worst-case leakage IL(OFF)_150 21 µA × 47 k = 1.0 V, far below
+VS − VOL(OFF) (≥ 4 V), so an unconnected output no longer reads as open load in OFF once fitted. Fit it only if
+unconnected outputs must not be flagged; with it fitted open-load-in-OFF detection no longer works for a really open
+load (the output is held at 0 V), open-load in ON is unaffected.
+
+**Failure mode (RIS and DEN):** a lost or stuck-high DEN with a faulted channel only overheats RIS (one 1206
+resistor, ≈ 1 W at the 40 mA maximum, a few seconds to hot) – it cannot switch an output on or off, so no output
+fails to a hazardous state; a failed-open RIS reads as zero current (a fault would not be reported). These are not
+safety outputs on their own, but the sense path is used for the bilge-pump jam detection, so a competent person
+reviews this before installation.
+
+**Firmware requirements (for `/system firmware`):**
+1. DEN pulsed only while sampling IS, never held high in Active mode (Q-0041); in Eco sampled less often.
+2. Drop DEN immediately on a full-scale IS reading (fault current flowing); report the channel; retry later.
+3. Nothing else may hold DEN high (bootloader/reset state: IO33 pulls down; check at firmware design).
+4. Allow the settling time after the DEN rise and after IN falls (tsIS(FAULT_OL_OFF), datasheet Fig. 26) before
+   diagnosing open load in OFF.
 
 ## 7. Mechanics and connectors
 
@@ -485,7 +534,7 @@ allows IPC-7351 variants). The JLCPCB pad lies entirely inside it. Pin numbering
 - [ ] Terminal blocks and enclosure layout for DIN / flat mounting (§7)
 - [x] Verify the PG-TDSO-14 footprint against the package drawing and the JLCPCB/EasyEDA footprint (§8.4, T-0066)
 - [ ] Per-output fuse strategy (on board vs. in the installation)
-- [ ] Standard population (e.g. 2 × BTT6010 + 2 × BTT6050) vs. all-BTT6010 builds
+- [x] Standard population: all four BTT6050 (Q-0032, T-0040); heavy loads go on HC2. BTT6010 only where > 4 A, mixed builds ordered together (§3, pdm-4ch STATUS/README)
 - [ ] High-current board: MOSFET option for 21 A, halogen inrush decision, terminals (§4a)
 - [ ] Bilge pumps (Vega: SEAFLO 01 Series 3500 GPH, 24 V model SFBP2-G3500-01: 8.0 A rated, 12.5 A max
       draw per the product page; current rises with pumping head; start-up and jammed-impeller current not
