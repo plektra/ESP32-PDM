@@ -22,6 +22,8 @@ Run every command from the repo folder.
 | Just merged orchestrator updates | `tools/agents-tmux.sh --kill`, then start as after a reboot |
 
 `--wait-for-limit` sleeps through the 5-hour usage limit and carries on. `--budget` is the most this run may spend.
+To try a cheaper model on one package: `python3 tools/orchestrate.py run --task T-0068 --fixer-model sonnet`, then
+compare model, cost and result in the "Done" table of `docs/ROADMAP.md`.
 Running `tools/agents-tmux.sh` with options while the session is open only reattaches – it does **not** start a run.
 
 ## While it runs

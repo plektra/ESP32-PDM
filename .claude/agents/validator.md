@@ -16,8 +16,10 @@ Check, highest risk first:
 1. **Part facts:** every IC, MOSFET, protection part and connector: pin numbers and functions in the symbols
    (`lib/ESP32-PDM.kicad_sym` and the schematics' embedded symbols) against the maker's datasheet; absolute maximum
    ratings against 30 V continuous / 48 V transients; footprints in `lib/ESP32-PDM.pretty` against the package
-   drawing. Download PDFs with curl, read with pypdf in a temporary venv, render drawings with pypdf + `sips`/`qlmanage`.
-   Cite document, revision and page.
+   drawing. `python3 tools/part_facts.py <LCSC> "<what>"` gives the cached facts file (written by agents) or has a
+   Sonnet agent read the datasheet; treat cached files as pointers to the source, and for pinouts and absolute
+   maximum ratings check the cited page yourself (`$PDM_PDF_PYTHON -I` with pypdf/pypdfium2). Cite document,
+   revision and page.
 2. **Circuit math:** dividers and thresholds (switch inputs, UVLO/OV), current-sense scaling and ADC ranges, current
    limits and timers, clamp currents into the ESP32, regulator dissipation, LED currents.
 3. **Heat budget:** rerun `python3 tools/heat_budget.py` for the stated ratings; check the inputs against datasheets.
