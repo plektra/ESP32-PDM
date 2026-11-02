@@ -47,7 +47,7 @@ CLAUDE.md, README.md, LICENSE
 .claude/commands/   /board /system /handoff /progress /validate /cost /emc /inbox
 .claude/agents/     architect, validator, cost-controller, emc-reviewer, part-facts, stock-check, planner, board-fixer
 docs/               CONTINUE-FROM-HERE.md, ARCHITECTURE.md, decisions.md, design-notes.md, WORKING-WITH-CLAUDE.md,
-                    AUTONOMY.md, queue.json, OWNER-INBOX.md
+                    AUTONOMY.md, RUNNING-AGENTS.md, ROADMAP.md (generated), queue.json, OWNER-INBOX.md
   reviews/          validator, cost and EMC reports
 hardware/pdm-4ch/   KiCad project + STATUS.md
 hardware/pdm-hc2/   KiCad project + STATUS.md

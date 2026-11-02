@@ -27,6 +27,10 @@ reports in `docs/reviews/` that the items come from.
    question ids). Status `confirmed` (the owner ruled). A ruling that changes an existing decision gets
    `"amends": N`. Do not repeat decisions that are already in `docs/decisions.md`.
 
+Plan only what the items ask. Add no improvements, extra footprints or options of your own; when an item can be met
+by a value change or a part already on the BOM, say so in the brief. Two items that solve the same problem become one
+change, not two.
+
 Every item appears exactly once, in a package or in `deferred`. Write the report to the path the caller gives:
 a short overview for the owner (packages, deferred items and why, decisions), ending with this block:
 

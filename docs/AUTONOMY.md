@@ -130,5 +130,15 @@ agents without the owner:
 5. **Re-check:** after a board's packages, a validator reviews it again; its findings go through the door rules, and
    the next planning round picks up what it approves (`run --rounds`, default 2 per run).
 
+**Restraint (against over-engineering).**
+- Board-fixers make the smallest change that meets each item: a value change before a new part, a part already on
+  the BOM before a new one, nothing "while I'm here" (ideas go to the report as suggestions). The planner plans only
+  what the items ask. Reviewers report only findings with a concrete failure mechanism for this product and give the
+  cheapest fix.
+- The gates measure every package's growth – parts, DNP parts and unique fitted parts per board – and
+  `docs/ROADMAP.md` and the dashboard show it per package and since the agents started.
+- A re-check after fixes reviews only what changed (`git diff` since the plan), not the whole board again, so
+  rounds converge instead of finding new work each time.
+
 One board-fixer per board at a time (a `shared` package holds both). `run --no-fixes` runs reviews only. The owner
 merges `auto/pilot` into `main`, and reviews it before any order – ordering is a one-way door.

@@ -61,7 +61,10 @@ Boards: `pdm-4ch`, `pdm-hc2`.
 | `deep` reviews (before layout or an order) | Opus |
 | `stock-check` | Haiku |
 
-## Unattended runs (pilot)
+## Unattended runs
+
+**Day to day: `docs/RUNNING-AGENTS.md`** (start, watch, answer, stop, tmux keys). What the agents will change and
+have changed: `docs/ROADMAP.md` (generated).
 
 Policy, finding format, queue and inbox: `docs/AUTONOMY.md` (decision 23). Agents decide two-way doors (cheap to
 undo: listed in the inbox digest, `orchestrate.py undo <task>` brings one back to you); one-way doors (money, your
