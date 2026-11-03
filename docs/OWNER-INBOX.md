@@ -6,7 +6,18 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (6)
+## Open (7)
+
+## Q-0060 · INFO · system · question
+
+- **From:** `docs/reviews/2026-10-30-emc-system.md` E14 (F1, F3, F4 (1812L050/60GR)); task T-0018
+- **Summary:** Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet.
+- **Proposed:** Series resistor for F1/F3/F4: (1) alloy 2512 FOJAN FRM252WJR200TK C7420022 0.2 ohm 2 W (0.028 USD, extended), accepted on its 5 s/50 J overload rating plus a prototype hard-short test at 30 V; (2) two basic C25334 0.1 ohm 1206 in series per PTC (no fee, +6 parts, no pulse rating); (3) look for a pulse-rated part outside the cheap range; or (4) 100 A PTC (C70113) alone and document the residual risk? In each case F1-F4 become C70113 (R1max 1.0 ohm, better for F2 on USB than C427396).
+- **Why it needs you:** found while fixing (T-0104): Ruling Q-0047 step 'check the resistor's pulse energy against the PTC trip time; if no basic/cheap part passes, return to the owner' failed: PTCs C70113 and C427396 pass (60 V / Imax 100 A, Ihold 0.5 A, 1812), series R 0.20 ohm gives 86 A <= 100 A and SWIN stays >= 2.0 V, but the energy until trip (<= 9.6 A2s x 0.2 ohm = 1.9 J at ~1.5 kW peak, ~1.3 ms; PTC curves stop at 10 A) cannot be checked: no basic/cheap 0.1-0.22 ohm resistor (C25334 basic, C2960770, C327006, alloy C7420022, C19633830) publishes a ms pulse rating, only 5 s overload tests. Nothing changed; F2 swap (T-0026) not done. F4 feeds the panel switches (bilge forced run, nav lights): competent-person review before installation.
+
+**Answer:** 
+
+---
 
 ## Q-0054 · MAJOR · system · finding
 
@@ -150,7 +161,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0038 · system · Pluggable or fixed screw terminals (L5)? → until system-mechanical: Q-0030: terminal type for J4/J5/J10/J11 decided in /system mechanical with the J10 pole sizing (leaning pluggable J4/J5, fixed J10/J11)
 - T-0091 · system · TPS48110A stock is 989 and L1 1231, both single-source or thin; nothing is below 500 → until order: Stock re-check of TPS48110A (989) and L1 SWPA6045S8R2MT (1231) only means something on the day of the order. It is already on both STATUS pre-order checklists, and the L1 alternates are on file (decision 49).
 
-## Answered (47)
+## Answered (46)
 
 - Q-0050 (pdm-hc2): MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → **covered by Q-0049: short EMC-only gate slew within the MOSFET SOA** (parked)
 - Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (done)
@@ -162,7 +173,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0008 (system): USB shield is tied to battery negative (shore PE loop via a laptop) and the ESD diode is listed with a 40 V clamp against 3.6 V ESP32 pins (unverified). → **yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option** (done)
 - Q-0009 (system): 1 nF collector capacitors and the 2.2 uF buck input capacitor are probably 50 V parts against a 48.4 V TVS clamp; TI advises twice VIN for CIN. → **yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides** (done)
 - Q-0010 (system): Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined. → **yes - GND pole(s) rated like the VS input, decided in /system mechanical; wide GND copper to J10.2** (deferred)
-- Q-0047 (system): Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet. → **(a) - 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint) after a datasheet check, plus a series resistor of about 0.15-0.22 ohm per PTC so that 30 V / R_total <= Imax; check the resistor's pulse energy against the PTC trip time, and if no basic/cheap part passes, return to the owner; then do the dependent F2 swap (T-0026); F4 is safety-relevant, so a competent person reviews it before installation** (parked)
 - Q-0012 (system): Is IEC 60945 (marine) compliance a goal or only good practice, is a pre-compliance scan planned, and may the N2K shield stay unconnected at the node (4-pole J4)? This sets how far E3-E7 must go. → **IEC 60945 as a design target, no certification; one pre-compliance scan on the first prototypes decides the DNP footprints; the N2K shield stays unconnected at the node (4-pole J4)** (done)
 - Q-0013 (system): LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first. → **swap to LMR51610YF only if the pre-compliance scan shows PFM noise (see Q-0005); check price and stock then** (deferred)
 - Q-0014 (system): 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn → **yes - add the listed basic/preferred LCSC codes after checking each against value and footprint; J5/J10/J11 in /system mechanical** (done)

@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 113,
-    "Q": 60
+    "Q": 61
   },
   "tasks": [
     {
@@ -533,7 +533,7 @@
         "board": "system",
         "location": "F1, F3, F4 (1812L050/60GR)",
         "summary": "Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet.",
-        "fix": "How should F1/F3/F4 be made safe against a hard short? (a) 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint, after datasheet check) plus a pulse-rated series resistor per PTC so that 30 V / R_total <= Imax (about 0.15-0.22 ohm); or (b) accept and document the residual risk (current limited only by battery, cable and terminals)?",
+        "fix": "Series resistor for F1/F3/F4: (1) alloy 2512 FOJAN FRM252WJR200TK C7420022 0.2 ohm 2 W (0.028 USD, extended), accepted on its 5 s/50 J overload rating plus a prototype hard-short test at 30 V; (2) two basic C25334 0.1 ohm 1206 in series per PTC (no fee, +6 parts, no pulse rating); (3) look for a pulse-rated part outside the cheap range; or (4) 100 A PTC (C70113) alone and document the residual risk? In each case F1-F4 become C70113 (R1max 1.0 ohm, better for F2 on USB than C427396).",
         "class": "big",
         "reason": "Question for the owner or validator, not a design change.",
         "touches": [],
@@ -544,10 +544,10 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E14"
       },
-      "state": "parked",
-      "question": "Q-0047",
+      "state": "blocked-owner",
+      "question": "Q-0060",
       "why_big": [
-        "found while fixing (T-0065): Datasheet check failed: 1812L050/60GR Imax 40 A at 60 V (LUTE 1812L Rev. 2020 p. 3), Rmin 0.150 ohm; prospective short current behind F1/F3/F4 = 30 V / (0.150 + 0.010) ohm = 188 A (4.7 x Imax). Protection problem (F4 feeds the panel switches incl. bilge forced run / nav lights), so not changed; the dependent F2 swap of T-0026 was not done either."
+        "found while fixing (T-0104): Ruling Q-0047 step 'check the resistor's pulse energy against the PTC trip time; if no basic/cheap part passes, return to the owner' failed: PTCs C70113 and C427396 pass (60 V / Imax 100 A, Ihold 0.5 A, 1812), series R 0.20 ohm gives 86 A <= 100 A and SWIN stays >= 2.0 V, but the energy until trip (<= 9.6 A2s x 0.2 ohm = 1.9 J at ~1.5 kW peak, ~1.3 ms; PTC curves stop at 10 A) cannot be checked: no basic/cheap 0.1-0.22 ohm resistor (C25334 basic, C2960770, C327006, alloy C7420022, C19633830) publishes a ms pulse rating, only 5 s overload tests. Nothing changed; F2 swap (T-0026) not done. F4 feeds the panel switches (bilge forced run, nav lights): competent-person review before installation."
       ],
       "ruling": "(a) - 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint) after a datasheet check, plus a series resistor of about 0.15-0.22 ohm per PTC so that 30 V / R_total <= Imax; check the resistor's pulse energy against the PTC trip time, and if no basic/cheap part passes, return to the owner; then do the dependent F2 swap (T-0026); F4 is safety-relevant, so a competent person reviews it before installation",
       "answered": "2026-11-02",
@@ -3350,7 +3350,7 @@
       "id": "T-0104",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "PTC interrupt rating: F1/F3/F4 100 A PTC + series resistor, then the F2 swap",
       "brief": "Owner ruling Q-0047 (verbatim): \"(a) - 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint) after a datasheet check, plus a series resistor of about 0.15-0.22 ohm per PTC so that 30 V / R_total <= Imax; check the resistor's pulse energy against the PTC trip time, and if no basic/cheap part passes, return to the owner; then do the dependent F2 swap (T-0026); F4 is safety-relevant, so a competent person reviews it before installation\". Background: docs/reviews/2026-11-02-fix-shared-T-0065.md (1812L050/60GR I_max 40 A, R_min 0.150 ohm, prospective short 30 V / 0.16 ohm = 188 A). Shared change, identical on both boards: F1 (power-usb, VS feed to the buck), F3 (can, NET-S feed), F4 (analog_sw, VS -> F4 -> D55 -> SW_SUPPLY/J5.5), F2 (power-usb, USB VBUS J3 -> F2 -> FB1/C4). Steps in order: 1) part_facts.py C70113 and C427396: I_max at V_max (must be >= 100 A at >= 30 V, V_max 60 V), I_hold/I_trip at 25 and 60 C (I_hold 0.5 A class as now; F1 carries the buck input current, F4 about 50-55 mA), R_min/R1max, time-to-trip curve, package 1812 matching the present 1812 footprint, JLCPCB class/price/stock. Pick the one that passes and is cheaper (basic/preferred first). 2) Series resistor per PTC on F1, F3, F4: R_series >= 30 V / I_max - R_min(PTC) (do not count cable or terminals), E24 value in the 0.15-0.22 ohm range of the ruling. Pulse energy check: from the PTC time-to-trip at the prospective current (30 V / (R_min + R_series)) take I^2*t, then E = I^2*t*R_series; compare it with the resistor's short-time overload / single-pulse rating from its datasheet (part_facts.py). Also check the continuous dissipation and drop at I_hold, and that the extra drop in the F4 path (about 10 mV at 55 mA) does not change the SWIN margin in design-notes section 3. Prefer a basic 1206 or 2512 thick-film or a current-sense chip resistor; one part type for all three positions. 3) Edit with tools/ksch.py: F1/F3/F4 value, LCSC and footprint (if the 1812 footprint differs, verify it against the package drawing); add one series resistor next to each of F1, F3, F4 on the supply side, so that the TVS stays at the connector side. 4) Dependent F2 swap (T-0026, decision 32): F2 SMD0805B050TF C269104 -> the same PTC part as F1/F3/F4, footprint 0805 -> 1812 (Fuse_1812). F2 is on 5 V USB VBUS (host-limited), so the ruling's series resistor is not needed there. Check I_hold against the USB current. 5) ERC and netlist on both boards before/after: only F1-F4 and the three new resistors (with their new nets) may differ. Run tools/fix_check.py --scope shared. 6) Documents: design-notes section 8.3 (calculation, part facts, failure mode: a hard short at J5.5 or on NET-S now limited to <= I_max, F4 trips and disables the panel switches while bus control keeps working), ARCHITECTURE power-usb/analog_sw rows if they name the PTC (not the invariants), both STATUS files (drop the 'Blocked: PTC' paragraph and the pre-order item 'Resolve the F1/F3/F4 PTC I_max question'; note that F2 is now swapped). Safety note in the report and STATUS: F4 feeds the panel switches (bilge forced run, navigation lights); a competent person reviews F1/F3/F4 before installation. Stop and ask (one-way): if neither C70113 nor C427396 shows I_max >= 100 A at >= 30 V in its datasheet, or neither fits the 1812 footprint; if no basic/cheap resistor passes the pulse-energy check (the ruling says return to the owner); if the series resistor would cut the SWIN margin in design-notes section 3 below 2.0 V.",
@@ -3358,7 +3358,30 @@
         "T-0018"
       ],
       "plan": "T-0103",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-03T11:23:11",
+      "ran_model": "opus",
+      "session": "e0ad7d75-ffa8-40e1-9461-7c69849857eb",
+      "cost_usd": 3.208,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": "8 part-facts lookups (1.30 USD)",
+      "summary": "0 fixed, 1 blocked, merged 8981e0b5; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-shared-T-0104.md"
     },
     {
       "id": "T-0105",
