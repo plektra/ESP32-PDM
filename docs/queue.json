@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 126,
+    "T": 129,
     "Q": 66
   },
   "tasks": [
@@ -4074,7 +4074,7 @@
       "id": "T-0122",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-03",
       "depends_on": [
         "T-0118",
@@ -4083,7 +4083,10 @@
         "T-0121"
       ],
       "verify": true,
-      "since": "1d30964d8974a6c4d5f0df5acf2cfc381b79da04"
+      "since": "1d30964d8974a6c4d5f0df5acf2cfc381b79da04",
+      "started": "2026-11-03T22:55:31",
+      "ran_model": "sonnet",
+      "session": "240383d6-f0ef-4c75-95eb-67ee152ed887"
     },
     {
       "id": "T-0123",
@@ -4112,7 +4115,7 @@
       "id": "T-0124",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [
         "T-0118",
@@ -4123,13 +4126,23 @@
       "verify": true,
       "since": "1d30964d8974a6c4d5f0df5acf2cfc381b79da04",
       "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
-      "recheck": "cost"
+      "recheck": "cost",
+      "started": "2026-11-03T22:55:31",
+      "ran_model": "sonnet",
+      "session": "9aac0101-ba40-42b8-bcf7-473de550cab5",
+      "cost_usd": 0.4026,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "3 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-cost-system-3.md"
     },
     {
       "id": "T-0125",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-03",
       "depends_on": [
         "T-0118",
@@ -4140,7 +4153,85 @@
       "verify": true,
       "since": "1d30964d8974a6c4d5f0df5acf2cfc381b79da04",
       "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
-      "recheck": "emc"
+      "recheck": "emc",
+      "started": "2026-11-03T22:55:31",
+      "ran_model": "sonnet",
+      "session": "4f9a598c-953e-4b20-96cf-934bc63eef5f"
+    },
+    {
+      "id": "T-0126",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L1",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "location": "root sheet: Q30 IPT007N06N C122552",
+        "summary": "Q30 is the most expensive new part (3.06 USD at 10 boards); AGM601LL C5464765 (TOLL-8L, 60 V, 1.25 mΩ, 0.85 USD) would save about 2.2 USD per board if the heat budget still passes",
+        "fix": "check TOLL-8L pinout against Infineon_PG-HSOF-8-1, rerun tools/heat_budget.py with Q30 at 1.25 mΩ, swap if it passes",
+        "door": "two-way",
+        "reason": "part swap before any order, no decision named, reverse-battery protection and heat budget kept (policy: part swaps)",
+        "touches": [
+          "protection"
+        ],
+        "cost_delta_usd": -2.2
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system-3.md",
+        "finding": "L1"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0127",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L2",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "location": "channel: C104-C404 C170101",
+        "summary": "C170101 instead of C13832 saves the loading fee only below about 14 boards per order; above that C13832 is cheaper",
+        "fix": "revisit at order time if the run is 15 boards or more",
+        "door": "two-way",
+        "reason": "capacitor value change within decision 26 range, cheap to revert",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system-3.md",
+        "finding": "L2"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0128",
+      "role": "system",
+      "scope": "pdm-4ch",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "Q1",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "summary": "Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)?",
+        "default": "yes, if Tj stays within the existing margin",
+        "door": "two-way",
+        "reason": "a sensible default exists and the swap is a git revert",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system-3.md",
+        "finding": "Q1"
+      },
+      "door": "two-way",
+      "state": "done",
+      "ruling": "assumed: yes, if Tj stays within the existing margin"
     }
   ],
   "board_size_start": {
