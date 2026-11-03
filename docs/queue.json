@@ -3979,7 +3979,7 @@
       "id": "T-0120",
       "role": "board-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-03",
       "title": "pdm-4ch VS-tab capacitors C104-C404 to 2.2 uF/100 V C170101",
       "brief": "Owner rulings (verbatim). Q-0063: \"yes: pdm-4ch C104-C404 become 2.2 uF/100 V C170101 (same 1206 footprint); amend decision 26 to '>= 1 uF/100 V (2.2 uF C170101)'. Revisit if runs grow past about 12 boards.\" Q-0064: \"yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).\" Both items ask for the same single change. Steps. (1) Channel sheets 1-4: C104, C204, C304 and C404 value 1uF/100V -> 2.2uF/100V, LCSC C13832 -> C170101. The footprint stays C_1206_3216Metric. C170101 is already on the BOM as C1/C30; confirm X7R, 100 V, 1206 from the cached docs/part-facts/C170101.md. (2) Run tools/sch_query.py pdm-4ch parts and check that no C13832 is left on pdm-4ch, so the fee is really gone. (3) ERC and netlist: only those four refs change. Run tools/fix_check.py --scope pdm-4ch --refs C104,C204,C304,C404. Unique extended parts -1 (C13832). (4) Documents. design-notes sections 8.1/8.2: the VS-tab value is 2.2 uF. pdm-4ch STATUS: resolve the 'For /system' T-0107 owner question (1). Rewrite the T-0107 pre-order line: pdm-4ch no longer carries C13832; revisit the choice when runs grow past about 12 boards (ruling). Decision 44 (auto) is superseded by the owner's amendment of decision 26; say so in the report. No heat-budget run (no output change). STOP and ask only if C170101 fails the check or is out of stock.",
@@ -3988,7 +3988,10 @@
         "T-0115"
       ],
       "plan": "T-0117",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-03T22:41:57",
+      "ran_model": "opus",
+      "session": "4cee32ac-9057-48d9-a8ec-a69aa5b8d5a4"
     },
     {
       "id": "T-0121",
@@ -4023,14 +4026,24 @@
       "id": "T-0123",
       "role": "validator",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [
         "T-0118",
         "T-0119"
       ],
       "verify": true,
-      "since": "1d30964d8974a6c4d5f0df5acf2cfc381b79da04"
+      "since": "1d30964d8974a6c4d5f0df5acf2cfc381b79da04",
+      "started": "2026-11-03T22:41:58",
+      "ran_model": "sonnet",
+      "session": "a52664b8-3252-4529-b6ce-dc13d238f78b",
+      "cost_usd": 0.2312,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-validate-pdm-hc2-4.md"
     },
     {
       "id": "T-0124",
