@@ -119,7 +119,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E2"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0050",
       "why_big": [
         "found while fixing (T-0070): Superseded by Q-0043 (do not fit RG_PU 100 ohm); waits on the T-0054 answer. The no-PWM rule is recorded in STATUS and design-notes 4a."
@@ -127,7 +127,9 @@
       "ruling": "covered by Q-0049: short EMC-only gate slew within the MOSFET SOA",
       "answered": "2026-11-03",
       "package": "T-0106",
-      "door": "one-way"
+      "door": "one-way",
+      "fixed_by": "T-0106",
+      "merged": "c036d2a6161e641ec1cbdf94096e4ba540e4b10b"
     },
     {
       "id": "T-0007",
@@ -1777,7 +1779,7 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H1"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0053",
       "why_big": [
         "found while fixing (T-0072): The ruled 68 k breaker (Q-0042, applied and merged in T-0072) gives IOC ~17.5 A (15.2-19.7 A over tolerances); decision 19 [proposed] plans a ~21 A load on HC2, which this breaker trips. Decision 19 is the owner's (policy item 2)."
@@ -1785,8 +1787,8 @@
       "ruling": "no - drop the 21 A option; decision 19 is withdrawn by the owner (2026-11-03); the breaker stays as in decision 39",
       "answered": "2026-11-03",
       "package": "T-0106",
-      "fixed_by": "T-0072",
-      "merged": "901c6f45f1f6be300049fd0588cf8340258c96ea",
+      "fixed_by": "T-0106",
+      "merged": "c036d2a6161e641ec1cbdf94096e4ba540e4b10b",
       "door": "one-way"
     },
     {
@@ -1813,7 +1815,7 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H2"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0049",
       "why_big": [
         "found while fixing (T-0070): No R1/C1 pair meets 20 A into 1000 uF within the BSC030N08NS5 SOA: 600 W peak / 0.45 J over 1.5 ms vs SOA ~45 W at 1 ms (30 V); Zth gives dTj ~100 K above case (125 K with a 15 A load); slow turn-on into a short would also leave SOA before the 80 A trip. Fix needs a maximum load capacitance or a different MOSFET/pre-charge path (decision 19, proposed)."
@@ -1821,7 +1823,9 @@
       "ruling": "(1) maximum load capacitance: rate HC2 for about 50-100 uF load input capacitance, confirmed by the prototype measurement (Q-0045); fit only a short gate slew for EMC (within the MOSFET SOA at that capacitance); README: HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights, while DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on the 4-channel board; split grouped LED lights if the prototype shows short-circuit trips",
       "answered": "2026-11-03",
       "package": "T-0106",
-      "door": "one-way"
+      "door": "one-way",
+      "fixed_by": "T-0106",
+      "merged": "c036d2a6161e641ec1cbdf94096e4ba540e4b10b"
     },
     {
       "id": "T-0055",
@@ -2015,7 +2019,7 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "Q1"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0051",
       "why_big": [
         "found while fixing (T-0070): The ruled sizing target (20 A into 1000 uF) is outside the MOSFET SOA; the prototype load measurement is recorded in STATUS."
@@ -2023,7 +2027,9 @@
       "ruling": "typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and electronics go on the 4-channel board; see Q-0049",
       "answered": "2026-11-03",
       "package": "T-0106",
-      "door": "one-way"
+      "door": "one-way",
+      "fixed_by": "T-0106",
+      "merged": "c036d2a6161e641ec1cbdf94096e4ba540e4b10b"
     },
     {
       "id": "T-0062",
@@ -3437,7 +3443,7 @@
       "id": "T-0106",
       "role": "board-fixer",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "Short EMC gate slew, maximum load capacitance, HC2 load guidance",
       "brief": "Owner rulings (verbatim). Q-0049 (T-0054): \"(1) maximum load capacitance: rate HC2 for about 50-100 uF load input capacitance, confirmed by the prototype measurement (Q-0045); fit only a short gate slew for EMC (within the MOSFET SOA at that capacitance); README: HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights, while DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on the 4-channel board; split grouped LED lights if the prototype shows short-circuit trips\". Q-0050 (T-0006): \"covered by Q-0049: short EMC-only gate slew within the MOSFET SOA\". Q-0051 (T-0061): \"typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and other electronics go on the 4-channel board; see Q-0049\". Q-0053 (T-0053): \"no - drop the 21 A option; decision 19 is withdrawn by the owner (2026-11-03); the breaker stays as in decision 39\". These amend the 1000 uF / 20 A sizing of decision 25; its topology stays (TPS4811-Q1 section 8.3.2.1 / Fig. 8-6: R1 in the PU path = R104/R204, C1 + about 10 ohm at the gate, PD direct, RGATE_PD as a 0 ohm footprint). Inputs: docs/part-facts/C17556513.md (Eq. 3 I_inrush = 0.63 x V(BST-SRC) x C_LOAD / (R1 x C1), Eq. 4 CBST > Qg + 10 x C1, tSC 4/5 us), docs/part-facts/C501507.md (BSC030N08NS5 SOA Diagram 3 at 30 V: 10 us ~185 A, 100 us ~15 A; Zth Diagram 4), and the method and script of docs/reviews/2026-11-02-fix-pdm-hc2-T-0070.md. Steps: 1) Size R1/C1 so that ALL of these hold at 30 V: (a) with C_LOAD = 100 uF (aim) plus a 15 A resistive load, inrush + load stays below the minimum ISCP threshold (about 71 A with RISCP 4.7 k) with margin, so the fast trip does not fire at turn-on; (b) the input-side MOSFET Q11/Q21 stays inside SOA Diagram 3 and Tj < 150 C from Zth for that ramp, starting from the hot case and from a retry after running at 15 A (heat budget); (c) turn-on into a hard short (slow gate rise, 30 V across Q11 until ISCP trips plus tSC) stays inside SOA - T-0070 showed 100 k / 3.9 nF fails this; (d) the output dV/dt is far below today's 400-800 V/us (EMC report 2026-10-30, E2; PROFET reference 0.8 V/us), ramp in the tens of microseconds; (e) Eq. 4 with the existing CBST; (f) turn-off unchanged (PD direct). If 100 uF cannot meet (a)-(c), take the largest C_LOAD between 50 and 100 uF that does, and state it as the rating. Prefer R/C values and parts already on the BOM (e.g. C1523 1 nF, C25744 10 k, C25076 100 ohm). 2) tools/ksch.py on hc_channel (both channels): R104/R204 value = R1, add C1 + 10 ohm at the gate and the 0 ohm RGATE_PD footprint per decision 25. ERC and netlist before/after; only these refs may change. fix_check.py --scope pdm-hc2. 3) Rerun tools/heat_budget.py --channels 2 --part HC-2xBSC030 at 40 C (rating stays about 15 A; no PWM). 4) README: in the boards/limitations text, HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights; DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on pdm-4ch; give the maximum load input capacitance; split grouped LED work lights if they trip. Keep the existing no-PWM and timing bullets. 5) design-notes section 4a: sizing, SOA/Zth calculation, the rating, and a failure-mode note for bilge forced-run outputs (slew does not delay the fast trip; a large capacitive load trips and waits 3.8 min; a competent person reviews the bilge outputs before installation). 6) hardware/pdm-hc2/STATUS.md: replace the T-0070 'blocked' paragraph and Next item 0 with the result. Prototype test list: measure the real load capacitance and inrush of each intended HC2 load, including grouped LED work lights (Q-0045), confirm the 50-100 uF rating, and split LED groups that trip. T-0053: R113/R213 stay 68 k C36871 (decision 39, T-0072), no change; note that decision 19 and the 21 A option are withdrawn. Stop and ask (one-way): if no R1/C1 meets (a)-(c) even at 50 uF; if meeting them would need a change to RISCP/the fast-trip level, the breaker (decision 39), CBST or the MOSFET (decision 19 is withdrawn); if the heat budget moves the 15 A rating.",
@@ -3448,7 +3454,41 @@
         "T-0053"
       ],
       "plan": "T-0103",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-03T11:46:32",
+      "ran_model": "opus",
+      "session": "a099f491-28dc-4d68-9991-515761477d8d",
+      "cost_usd": 3.2838,
+      "attempts": 1,
+      "refs": [
+        "C114",
+        "C214",
+        "R104",
+        "R115",
+        "R116",
+        "R204",
+        "R215",
+        "R216",
+        "U11",
+        "U12"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 6,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": "1 part-facts lookups (0.46 USD); not merged: docs/part-facts/C501507.md",
+      "summary": "4 fixed, 0 blocked, merged c036d2a6; pdm-hc2 +6 parts (+0 DNP), +0 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-pdm-hc2-T-0106.md"
     },
     {
       "id": "T-0107",
@@ -3573,7 +3613,7 @@
       "unique": 61
     },
     "pdm-hc2": {
-      "parts": 216,
+      "parts": 222,
       "dnp": 11,
       "unique": 70
     }
