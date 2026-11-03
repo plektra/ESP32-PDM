@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 117,
-    "Q": 65
+    "Q": 66
   },
   "tasks": [
     {
@@ -3337,9 +3337,13 @@
         "report": "docs/reviews/2026-11-03-cost-system.md",
         "finding": "Q3"
       },
-      "door": "two-way",
-      "state": "done",
-      "ruling": "assumed: No: plain Economic PCBA with all parts assembled by JLCPCB"
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0065",
+      "undone": "2026-11-03",
+      "why_big": [
+        "you took it back from the agents (was: assumed: No: plain Economic PCBA with all parts assembled by JLCPCB)"
+      ]
     },
     {
       "id": "T-0103",

@@ -6,7 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (11)
+## Open (12)
 
 ## Q-0060 · INFO · system · question
 
@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** Series resistor for F1/F3/F4: (1) alloy 2512 FOJAN FRM252WJR200TK C7420022 0.2 ohm 2 W (0.028 USD, extended), accepted on its 5 s/50 J overload rating plus a prototype hard-short test at 30 V; (2) two basic C25334 0.1 ohm 1206 in series per PTC (no fee, +6 parts, no pulse rating); (3) look for a pulse-rated part outside the cheap range; or (4) 100 A PTC (C70113) alone and document the residual risk? In each case F1-F4 become C70113 (R1max 1.0 ohm, better for F2 on USB than C427396).
 - **Why it needs you:** found while fixing (T-0104): Ruling Q-0047 step 'check the resistor's pulse energy against the PTC trip time; if no basic/cheap part passes, return to the owner' failed: PTCs C70113 and C427396 pass (60 V / Imax 100 A, Ihold 0.5 A, 1812), series R 0.20 ohm gives 86 A <= 100 A and SWIN stays >= 2.0 V, but the energy until trip (<= 9.6 A2s x 0.2 ohm = 1.9 J at ~1.5 kW peak, ~1.3 ms; PTC curves stop at 10 A) cannot be checked: no basic/cheap 0.1-0.22 ohm resistor (C25334 basic, C2960770, C327006, alloy C7420022, C19633830) publishes a ms pulse rating, only 5 s overload tests. Nothing changed; F2 swap (T-0026) not done. F4 feeds the panel switches (bilge forced run, nav lights): competent-person review before installation.
 
-**Answer:** 
+**Answer:** Option (1): series 0.2 ohm 2 W alloy 2512 FOJAN FRM252WJR200TK C7420022 for F1/F3/F4, accepted on its 5 s/50 J overload rating; a hard-short test at 30 V on the prototype is mandatory before installation. F1-F4 become C70113.
 
 ---
 
@@ -26,7 +26,7 @@ lines are read; other edits are lost.
 - **Proposed:** Withdraw or limit the 4-ch reversal claim in README and design-notes section 8 and key J10 on pdm-4ch like HC2 (decision 34, /system mechanical); a reverse-blocking element on VS only in a later revision.
 - **Why it needs you:** reviewer: one-way door (Policy item 3: weakens a stated safety behaviour (a part that can burn); the keyed connector is the owner's mechanical choice (decision 34).); touches safety
 
-**Answer:** 
+**Answer:** Add reverse blocking now, this revision: a reverse-blocking element (P-FET or ideal-diode controller) on VS in front of the bulk capacitors on pdm-4ch, sized for the 40-50 A path and checked with the heat budget at 40 C. Until it is in, limit the README/design-notes claim to the BTT6050 and warn that C31 is not reverse-rated. Still key J10 (decision 34).
 
 ---
 
@@ -37,7 +37,7 @@ lines are read; other edits are lost.
 - **Proposed:** Same as T-0096: may C18 become 1 nF/2 kV C9196 instead of the 4.7 nF named in decision 31?
 - **Why it needs you:** found while fixing (T-0107): The RIS half is done through T-0098 (2 x C4410). The C18 half needs the owner's ruling on decision 31 (see T-0096).
 
-**Answer:** 
+**Answer:** yes: same ruling as Q-0061 (C18 -> 1 nF/2 kV C9196, decision 31 amended).
 
 ---
 
@@ -48,7 +48,7 @@ lines are read; other edits are lost.
 - **Proposed:** Owner sets the order quantity per board
 - **Why it needs you:** reviewer: one-way door (policy item 1: an order is money); touches money
 
-**Answer:** 
+**Answer:** First order 5 pdm-4ch + 5 pdm-hc2 as decision 33; quantity revisited for later runs.
 
 ---
 
@@ -59,7 +59,7 @@ lines are read; other edits are lost.
 - **Proposed:** Panelise pdm-4ch and pdm-hc2 at the PCB phase if the JLCPCB multi-design surcharge does not cancel the saving (decision 33)
 - **Why it needs you:** reviewer: one-way door (policy item 1: it shapes an order; already conditional in confirmed decision 33); touches money; changes your decision 33
 
-**Answer:** 
+**Answer:** yes, as decision 33: combined 1:1 panel at the PCB phase if the JLCPCB multi-design surcharge does not cancel the saving.
 
 ---
 
@@ -70,7 +70,7 @@ lines are read; other edits are lost.
 - **Proposed:** Leave J4/J5/J10/J11 out of the PCBA order, buy and solder them by hand
 - **Why it needs you:** reviewer: one-way door (policy item 1 and 4: the owner buys parts and does the soldering of high-current terminals); touches money; touches owner-fact
 
-**Answer:** 
+**Answer:** yes: leave J4, J5, J10 and J11 out of the PCBA order; the owner buys and hand-solders all four.
 
 ---
 
@@ -81,7 +81,7 @@ lines are read; other edits are lost.
 - **Proposed:** Make J3, F2, C18, R13, D4-D6, FB1 DNP or pads for a pogo jig on a later run
 - **Why it needs you:** reviewer: one-way door (policy item 2: contradicts confirmed decision 31 (USB-C stays fitted on the prototype run)); changes your decision 31
 
-**Answer:** 
+**Answer:** no: USB-C (J3 and its protection) stays fitted on every run; amend decision 31 (no DNP/pogo-pad variant for later runs).
 
 ---
 
@@ -92,7 +92,7 @@ lines are read; other edits are lost.
 - **Proposed:** May C18 change from 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic, already on the BOM)? This saves about 0.31 USD per board at 10 on both boards, and the shield RC corner moves from 34 Hz to 160 Hz.
 - **Why it needs you:** found while fixing (T-0107): Confirmed decision 31 sets the USB shield RC as 1 MOhm || 4.7 nF; changing C18 to 1 nF contradicts an owner decision (policy item 2). The cost report only saw auto decision 46.
 
-**Answer:** 
+**Answer:** yes: C18 becomes 1 nF/2 kV C9196 on both boards; amend decision 31 to 1 MOhm || 1 nF/2 kV.
 
 ---
 
@@ -103,7 +103,7 @@ lines are read; other edits are lost.
 - **Proposed:** Owner checks the coupon centre and the cart at order time
 - **Why it needs you:** reviewer: one-way door (policy items 1 and 4: money, facts only the owner has); touches money; touches owner-fact
 
-**Answer:** 
+**Answer:** yes: the owner checks the JLCPCB coupon centre and the cart at order time.
 
 ---
 
@@ -114,7 +114,18 @@ lines are read; other edits are lost.
 - **Proposed:** May pdm-4ch C104-C404 change from 1 uF/100 V C13832 to 2.2 uF/100 V C170101? This would remove the C13832 loading fee on pdm-4ch, about -0.27 USD per board at 5, but it is more expensive from 9 boards up.
 - **Why it needs you:** found while fixing (T-0107): C30 (both boards) and HC2 C102/C202 are swapped to C170101. pdm-4ch C104-C404 are not: confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab.
 
-**Answer:** 
+**Answer:** yes: pdm-4ch C104-C404 become 2.2 uF/100 V C170101 (same 1206 footprint); amend decision 26 to '>= 1 uF/100 V (2.2 uF C170101)'. Revisit if runs grow past about 12 boards.
+
+---
+
+## Q-0065 · INFO · system · question
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` Q3 (); task T-0102
+- **Summary:** Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)?
+- **Proposed:** No: plain Economic PCBA with all parts assembled by JLCPCB
+- **Why it needs you:** you took it back from the agents (was: assumed: No: plain Economic PCBA with all parts assembled by JLCPCB)
+
+**Answer:** Not all by JLCPCB: Economic PCBA without J4, J5, J10, J11; the owner hand-solders those four (ruling Q-0057). The owner checks the monthly assembly coupon at order time (ruling Q-0059).
 
 ---
 
@@ -125,15 +136,14 @@ lines are read; other edits are lost.
 - **Proposed:** keep 1 uF C13832 at C104-C404 until the owner rules
 - **Why it needs you:** reviewer: one-way door (confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab)
 
-**Answer:** 
+**Answer:** yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).
 
 ---
 
-## Decided by agents (3) – two-way doors
+## Decided by agents (2) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0102 · INFO · system · Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → assumed No: plain Economic PCBA with all parts assembled by JLCPCB
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
