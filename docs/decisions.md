@@ -67,3 +67,7 @@ free number (`/handoff` adds them).
 | 58 | 2026-11-03 | pdm-hc2 | RVS R114/R214 100 ohm C25076 VS -> VS_CTRL (pin 20); C102/C202 moved to VS_CTRL as CVS 1 uF/100 V 1206 C13832 (Table 9-3); drop <= 70 mV at I(Q) 700 uA; RSET and UV/OV divider stay on VS (T-0071) | auto |
 | 59 | 2026-11-03 | pdm-hc2 | CS X cap C108/C208 1 nF C1523 fitted (tau 0.1 us << tSC 4 us); Y caps C109/C110/C209/C210 100 pF/100 V C296717 DNP (unbalanced source impedance, needs ferrites; Q-0012) (T-0071) | auto |
 | 60 | 2026-11-03 | pdm-hc2 | EN/UVLO C111/C211, OV C112/C212 and IWRN C113/C213 1 nF C1523 fitted (OV delay <= 0.4 ms; 10 nF rejected at 4 ms; IWRN 47 us vs tOC 146 ms) (T-0071) | auto |
+| 61 | 2026-11-03 | shared-can | U5 ISO1044 -> Chipanalog CA-IS3050G (C528763, SOIC-8-WB, KiCad SOIC-8_7.5x5.85mm_P1.27mm, new symbol ESP32-PDM:CA-IS3050G); datasheet v1.10 checks passed (VCC1 2.5-5.5 V, VCC2 4.5-5.5 V, +/-58 V bus, loop <=210 ns, DTO 2-8 ms, 5 kVrms); LEN 1 worst case 49.3 mA (T-0067) | auto |
+| 62 | 2026-11-03 | shared-can | TXD pull-up R70 10 k 0402 C25744 to +3V3 (T-0067) | auto |
+| 63 | 2026-11-03 | shared-can | barrier Y-cap C70 = 1 nF/2 kV X7R 1206 C9196 (reuses C50-C53 part), DNP, GND_CAN-GND, capacitor only (T-0067) | auto |
+| 64 | 2026-11-03 | shared-can | CMC FL1 = cjiang FACT4532-510-2P-T C20624726 (51 uH, 4532), DNP, footprint Coilank_ACM4532 placeholder, bus side on pins 1/4; bridges R71/R72 0 ohm 0402 C17168 (reuses R43 part), fitted (T-0067) | auto |
