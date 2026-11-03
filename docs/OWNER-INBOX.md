@@ -6,7 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (10)
+## Open (11)
 
 ## Q-0060 · INFO · system · question
 
@@ -118,10 +118,23 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (3) – two-way doors
+## Q-0064 · INFO · pdm-4ch · question
+
+- **From:** `docs/reviews/2026-11-03-cost-system-2.md` Q1 (); task T-0115
+- **Summary:** May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards
+- **Proposed:** keep 1 uF C13832 at C104-C404 until the owner rules
+- **Why it needs you:** reviewer: one-way door (confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab)
+
+**Answer:** 
+
+---
+
+## Decided by agents (5) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0114 · INFO · pdm-hc2 · C13832 removal costs 0.162 USD per board against a 3.07 USD fee per order, so it pays only up to about 19 boards per order → for orders above about 20 HC2 boards revert C30/C102/C202 to C13832; no change for 5-30 boards planned now
+- T-0113 · INFO · pdm-4ch · C30 swap to 2.2 uF C170101 adds about 0.054 USD per board on pdm-4ch with no fee saved, because C13832 stays at C104-C404 → none now; becomes free of cost when C104-C404 are also changed to C170101 (open owner question from T-0107)
 - T-0102 · INFO · system · Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → assumed No: plain Economic PCBA with all parts assembled by JLCPCB
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)

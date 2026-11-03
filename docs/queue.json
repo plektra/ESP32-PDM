@@ -1,7 +1,7 @@
 {
   "next": {
-    "T": 113,
-    "Q": 64
+    "T": 116,
+    "Q": 65
   },
   "tasks": [
     {
@@ -3651,7 +3651,7 @@
       "id": "T-0111",
       "role": "cost-controller",
       "scope": "system",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [
         "T-0104",
@@ -3666,7 +3666,14 @@
       "recheck": "cost",
       "started": "2026-11-03T15:13:35",
       "ran_model": "sonnet",
-      "session": "6cb9c37a-69f3-4ba2-8164-1a2ca1866bf4"
+      "session": "6cb9c37a-69f3-4ba2-8164-1a2ca1866bf4",
+      "cost_usd": 0.296,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "2 decided by agents, 1 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-cost-system-2.md"
     },
     {
       "id": "T-0112",
@@ -3688,6 +3695,87 @@
       "finished": "2026-11-03",
       "summary": "skipped: no connector, filter or protection part changed (refs: C102, C114, C202, C214, C30, R103, R104, R107, R115, R116, R203, R204…)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0113",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "C1",
+        "kind": "finding",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "location": "root sheet: C30 (C170101)",
+        "summary": "C30 swap to 2.2 uF C170101 adds about 0.054 USD per board on pdm-4ch with no fee saved, because C13832 stays at C104-C404",
+        "fix": "none now; becomes free of cost when C104-C404 are also changed to C170101 (open owner question from T-0107)",
+        "door": "two-way",
+        "reason": "one component value on a shared sheet, easy to change back",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": 0.054
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system-2.md",
+        "finding": "C1"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0114",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "C2",
+        "kind": "finding",
+        "severity": "INFO",
+        "board": "pdm-hc2",
+        "location": "C30, C102, C202 (C170101)",
+        "summary": "C13832 removal costs 0.162 USD per board against a 3.07 USD fee per order, so it pays only up to about 19 boards per order",
+        "fix": "for orders above about 20 HC2 boards revert C30/C102/C202 to C13832; no change for 5-30 boards planned now",
+        "door": "two-way",
+        "reason": "component values, reversible at order time",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": 0.162
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system-2.md",
+        "finding": "C2"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0115",
+      "role": "system",
+      "scope": "pdm-4ch",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "Q1",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "summary": "May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards",
+        "default": "keep 1 uF C13832 at C104-C404 until the owner rules",
+        "door": "one-way",
+        "reason": "confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system-2.md",
+        "finding": "Q1"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0064",
+      "why_big": [
+        "reviewer: one-way door (confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab)"
+      ]
     }
   ],
   "board_size_start": {
