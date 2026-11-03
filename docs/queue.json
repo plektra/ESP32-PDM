@@ -3607,7 +3607,7 @@
       "id": "T-0109",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [
         "T-0104",
@@ -3616,13 +3616,23 @@
         "T-0108"
       ],
       "verify": true,
-      "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469"
+      "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469",
+      "started": "2026-11-03T15:13:35",
+      "ran_model": "sonnet",
+      "session": "0be1be04-a89a-4be5-91b0-c6baee669243",
+      "cost_usd": 0.2123,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-validate-pdm-4ch-3.md"
     },
     {
       "id": "T-0110",
       "role": "validator",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-03",
       "depends_on": [
         "T-0104",
@@ -3632,13 +3642,16 @@
         "T-0108"
       ],
       "verify": true,
-      "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469"
+      "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469",
+      "started": "2026-11-03T15:13:35",
+      "ran_model": "sonnet",
+      "session": "28c38efe-4389-4ac5-ad7d-043942847fb2"
     },
     {
       "id": "T-0111",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-03",
       "depends_on": [
         "T-0104",
@@ -3650,7 +3663,10 @@
       "verify": true,
       "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469",
       "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
-      "recheck": "cost"
+      "recheck": "cost",
+      "started": "2026-11-03T15:13:35",
+      "ran_model": "sonnet",
+      "session": "6cb9c37a-69f3-4ba2-8164-1a2ca1866bf4"
     },
     {
       "id": "T-0112",
