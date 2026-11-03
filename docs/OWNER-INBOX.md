@@ -15,10 +15,12 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (50)
+## Applied by agents (52)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0115 · pdm-4ch · May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → T-0120 (`70cdd9cf`)
+- T-0099 · system · Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → T-0120 (`70cdd9cf`)
 - T-0098 · pdm-4ch · RIS 680 ohm 1206 C17975 (extended) replaced by two 1 kohm 1206 C4410 (basic) in parallel: 0.26 USD per board at 10, sense scale 0.33 V/A → T-0107 (`d6c2bb6e`)
 - T-0096 · system · 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic): 0.31 USD per board at 10, RC corner 34 Hz to 160 Hz → T-0119 (`196bdd9c`)
 - T-0090 · system · Two avoidable extended-part types: 4.7 nF/1 kV USB-shield capacitor and the 680 ohm 1206 RIS, 3.07 USD per order and design each → T-0119 (`196bdd9c`)
@@ -152,6 +154,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0058 (system): USB-C as service pads on later runs saves 3 extended fees and parts: 1.20 USD per board at 10 → **no: USB-C (J3 and its protection) stays fitted on every run; amend decision 31 (no DNP/pogo-pad variant for later runs).** (deferred)
 - Q-0061 (system): 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic): 0.31 USD per board at 10, RC corner 34 Hz to 160 Hz → **yes: C18 becomes 1 nF/2 kV C9196 on both boards; amend decision 31 to 1 MOhm || 1 nF/2 kV.** (done)
 - Q-0059 (system): A monthly JLCPCB assembly coupon may waive the 8.18 USD setup per order (conditions for 2 oz and Economic PCBA unverified) → **yes: the owner checks the JLCPCB coupon centre and the cart at order time.** (deferred)
-- Q-0063 (system): Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → **yes: pdm-4ch C104-C404 become 2.2 uF/100 V C170101 (same 1206 footprint); amend decision 26 to '>= 1 uF/100 V (2.2 uF C170101)'. Revisit if runs grow past about 12 boards.** (parked)
+- Q-0063 (system): Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → **yes: pdm-4ch C104-C404 become 2.2 uF/100 V C170101 (same 1206 footprint); amend decision 26 to '>= 1 uF/100 V (2.2 uF C170101)'. Revisit if runs grow past about 12 boards.** (done)
 - Q-0065 (system): Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → **Not all by JLCPCB: Economic PCBA without J4, J5, J10, J11; the owner hand-solders those four (ruling Q-0057). The owner checks the monthly assembly coupon at order time (ruling Q-0059).** (deferred)
-- Q-0064 (pdm-4ch): May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → **yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).** (parked)
+- Q-0064 (pdm-4ch): May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → **yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).** (done)

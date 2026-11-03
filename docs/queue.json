@@ -3295,14 +3295,16 @@
         "finding": "L8"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0063",
       "why_big": [
         "found while fixing (T-0107): C30 (both boards) and HC2 C102/C202 are swapped to C170101. pdm-4ch C104-C404 are not: confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab."
       ],
       "ruling": "yes: pdm-4ch C104-C404 become 2.2 uF/100 V C170101 (same 1206 footprint); amend decision 26 to '>= 1 uF/100 V (2.2 uF C170101)'. Revisit if runs grow past about 12 boards.",
       "answered": "2026-11-03",
-      "package": "T-0120"
+      "package": "T-0120",
+      "fixed_by": "T-0120",
+      "merged": "70cdd9cfccc789f10030ec2d4d5cb4eb8ef46e01"
     },
     {
       "id": "T-0100",
@@ -3825,14 +3827,16 @@
         "finding": "Q1"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0064",
       "why_big": [
         "reviewer: one-way door (confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab)"
       ],
       "ruling": "yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).",
       "answered": "2026-11-03",
-      "package": "T-0120"
+      "package": "T-0120",
+      "fixed_by": "T-0120",
+      "merged": "70cdd9cfccc789f10030ec2d4d5cb4eb8ef46e01"
     },
     {
       "id": "T-0116",
@@ -3979,7 +3983,7 @@
       "id": "T-0120",
       "role": "board-fixer",
       "scope": "pdm-4ch",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-03",
       "title": "pdm-4ch VS-tab capacitors C104-C404 to 2.2 uF/100 V C170101",
       "brief": "Owner rulings (verbatim). Q-0063: \"yes: pdm-4ch C104-C404 become 2.2 uF/100 V C170101 (same 1206 footprint); amend decision 26 to '>= 1 uF/100 V (2.2 uF C170101)'. Revisit if runs grow past about 12 boards.\" Q-0064: \"yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).\" Both items ask for the same single change. Steps. (1) Channel sheets 1-4: C104, C204, C304 and C404 value 1uF/100V -> 2.2uF/100V, LCSC C13832 -> C170101. The footprint stays C_1206_3216Metric. C170101 is already on the BOM as C1/C30; confirm X7R, 100 V, 1206 from the cached docs/part-facts/C170101.md. (2) Run tools/sch_query.py pdm-4ch parts and check that no C13832 is left on pdm-4ch, so the fee is really gone. (3) ERC and netlist: only those four refs change. Run tools/fix_check.py --scope pdm-4ch --refs C104,C204,C304,C404. Unique extended parts -1 (C13832). (4) Documents. design-notes sections 8.1/8.2: the VS-tab value is 2.2 uF. pdm-4ch STATUS: resolve the 'For /system' T-0107 owner question (1). Rewrite the T-0107 pre-order line: pdm-4ch no longer carries C13832; revisit the choice when runs grow past about 12 boards (ruling). Decision 44 (auto) is superseded by the owner's amendment of decision 26; say so in the report. No heat-budget run (no output change). STOP and ask only if C170101 fails the check or is out of stock.",
@@ -3991,7 +3995,32 @@
       "depends_on": [],
       "started": "2026-11-03T22:41:57",
       "ran_model": "opus",
-      "session": "4cee32ac-9057-48d9-a8ec-a69aa5b8d5a4"
+      "session": "4cee32ac-9057-48d9-a8ec-a69aa5b8d5a4",
+      "cost_usd": 0.4098,
+      "attempts": 1,
+      "refs": [
+        "C104",
+        "C204",
+        "C304",
+        "C404"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -1
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "2 fixed, 0 blocked, merged 70cdd9cf; pdm-4ch +0 parts (+0 DNP), -1 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-pdm-4ch-T-0120.md"
     },
     {
       "id": "T-0121",
@@ -4096,7 +4125,7 @@
     "pdm-4ch": {
       "parts": 207,
       "dnp": 15,
-      "unique": 60
+      "unique": 59
     },
     "pdm-hc2": {
       "parts": 225,
