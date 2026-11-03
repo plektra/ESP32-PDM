@@ -2976,14 +2976,16 @@
         "finding": "C1"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0062",
       "why_big": [
         "found while fixing (T-0107): The RIS half is done through T-0098 (2 x C4410). The C18 half needs the owner's ruling on decision 31 (see T-0096)."
       ],
       "ruling": "yes: same ruling as Q-0061 (C18 -> 1 nF/2 kV C9196, decision 31 amended).",
       "answered": "2026-11-03",
-      "package": "T-0119"
+      "package": "T-0119",
+      "fixed_by": "T-0119",
+      "merged": "196bdd9c3657b4e92f8e8b5bc307a55be56db4d3"
     },
     {
       "id": "T-0091",
@@ -3187,14 +3189,16 @@
         "finding": "L5"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0061",
       "why_big": [
         "found while fixing (T-0107): Confirmed decision 31 sets the USB shield RC as 1 MOhm || 4.7 nF; changing C18 to 1 nF contradicts an owner decision (policy item 2). The cost report only saw auto decision 46."
       ],
       "ruling": "yes: C18 becomes 1 nF/2 kV C9196 on both boards; amend decision 31 to 1 MOhm || 1 nF/2 kV.",
       "answered": "2026-11-03",
-      "package": "T-0119"
+      "package": "T-0119",
+      "fixed_by": "T-0119",
+      "merged": "196bdd9c3657b4e92f8e8b5bc307a55be56db4d3"
     },
     {
       "id": "T-0097",
@@ -3933,7 +3937,7 @@
       "id": "T-0119",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "USB shield capacitor C18 to 1 nF/2 kV C9196",
       "brief": "Owner rulings (verbatim). Q-0061: \"yes: C18 becomes 1 nF/2 kV C9196 on both boards; amend decision 31 to 1 MOhm || 1 nF/2 kV.\" Q-0062: \"yes: same ruling as Q-0061 (C18 -> 1 nF/2 kV C9196, decision 31 amended).\" Both items ask for the same single change. Steps. (1) power-usb on both boards: C18 value 4.7nF/1kV -> 1nF/2kV, LCSC C107198 -> C9196. The footprint stays C_1206_3216Metric. C9196 is already on the BOM as C50-C53/C70/C114/C214 and needs no new part-facts lookup. R13 1 M and R14 (DNP) stay. (2) ERC and netlist on both boards: only C18's value and LCSC may differ. Run tools/fix_check.py --scope shared --refs C18. Unique extended parts -1 (C107198 gone). (3) Documents. design-notes section 8.3: the shield RC is now 1 MOhm || 1 nF, with the corner at about 160 Hz (was 34 Hz). Both STATUS files: resolve the 'For /system' T-0107 owner question on C18. Remove C107198 from the pre-order stock-recheck line and from the T-0065 unique-extended-part note. Decision 46 (auto) is superseded by the owner's amendment of decision 31; record that in the report, not as a new auto row. No heat-budget run (no output change). STOP and ask only if C9196 is no longer basic or stocked.",
@@ -3944,7 +3948,32 @@
       "plan": "T-0117",
       "depends_on": [
         "T-0118"
-      ]
+      ],
+      "started": "2026-11-03T22:39:36",
+      "ran_model": "opus",
+      "session": "0ef54757-5098-4a04-b974-f4b35e1e4ad5",
+      "cost_usd": 0.4739,
+      "attempts": 1,
+      "refs": [
+        "C18"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -1
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -1
+        }
+      },
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "2 fixed, 0 blocked, merged 196bdd9c; pdm-4ch +0 parts (+0 DNP), -1 unique, pdm-hc2 +0 parts (+0 DNP), -1 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-shared-T-0119.md"
     },
     {
       "id": "T-0120",
@@ -4054,12 +4083,12 @@
     "pdm-4ch": {
       "parts": 207,
       "dnp": 15,
-      "unique": 61
+      "unique": 60
     },
     "pdm-hc2": {
       "parts": 225,
       "dnp": 11,
-      "unique": 69
+      "unique": 68
     }
   },
   "sync_seen": "a4144207333c"
