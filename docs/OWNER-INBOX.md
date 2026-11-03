@@ -118,20 +118,20 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (3) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
 - T-0102 · INFO · system · Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → assumed No: plain Economic PCBA with all parts assembled by JLCPCB
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
-- T-0089 · MINOR · system · The cable practice that the immunity design assumes (screened panel cable with drain at the PDM end, bundled battery pair away from VHF coax, load returns to the battery negative bus, diode at inductive loads, PWM limits, N2K drop length) is not in the README. → Add the Installation guidance section of this report to the README; text only.
 
-## Applied by agents (46)
+## Applied by agents (47)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
 - T-0098 · pdm-4ch · RIS 680 ohm 1206 C17975 (extended) replaced by two 1 kohm 1206 C4410 (basic) in parallel: 0.26 USD per board at 10, sense scale 0.33 V/A → T-0107 (`d6c2bb6e`)
+- T-0089 · system · The cable practice that the immunity design assumes (screened panel cable with drain at the PDM end, bundled battery pair away from VHF coax, load returns to the battery negative bus, diode at inductive loads, PWM limits, N2K drop length) is not in the README. → T-0108 (`c9bce1a7`)
 - T-0076 · pdm-4ch · U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work. → T-0078 (`d42065e2`)
 - T-0062 · pdm-hc2 · Should the HC2 hardware breaker sit near the continuous rating (about 17.5 A) or stay at 25 A with a documented external breaker requirement? Is an OUT voltage divider (spare IO4/IO5) wanted for float-run detection, or are SW3/SW4 enough? → T-0072 (`901c6f45`)
 - T-0061 · pdm-hc2 · Which HC2 loads have more than about 50 uF input capacitance (LED work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target. → T-0106 (`c036d2a6`)

@@ -2940,8 +2940,10 @@
         "finding": "E17"
       },
       "door": "two-way",
-      "state": "parked",
-      "package": "T-0108"
+      "state": "done",
+      "package": "T-0108",
+      "fixed_by": "T-0108",
+      "merged": "c9bce1a7c34a70d2abf959a2bcdc22c47fba1577"
     },
     {
       "id": "T-0090",
@@ -3566,7 +3568,7 @@
       "id": "T-0108",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "README installation guidance (text only)",
       "brief": "Two-way agent item from docs/reviews/2026-11-03-emc-system.md, section 'Installation guidance (for the README)'. Text only: no schematic, library or ARCHITECTURE change, and both netlists unchanged. Add an 'Installation' section to README.md with the report's bullets: battery feed (fuse at the battery, twisted/bundled pair, >= 0.5 m from the VHF feed, crossing at 90 deg, check polarity), loads (return with the feed to the battery negative bus, never through the PDM ground, fuse each output wire), inductive loads (diode/TVS at the load), PWM (none above 200 Hz on pdm-4ch; none on pdm-hc2 until measured, decision 25), panel cable (one screened multicore <= 10 m, drain only at J5.10, dry contacts, not shared with other loads), NMEA 2000 (drop <= 6 m, backbone grounded once, no drain at the node, away from the VHF coax), position (enclosed, vented, away from the VHF antenna and coax). Do not repeat what 'Important limitations' already says (load dump, USB service rule, HC2 external breaker, reverse battery, dry contacts). Point to those bullets instead, and keep the wording consistent with them and with the HC2 load text written by P3. Generic wording only: no vessel names, no personal data. Run fix_check.py --scope shared (README only). Stop and ask (one-way): if a bullet would contradict a confirmed decision or the current README (e.g. a different PWM rule than decision 25 as amended).",
@@ -3576,7 +3578,30 @@
       "plan": "T-0103",
       "depends_on": [
         "T-0106"
-      ]
+      ],
+      "started": "2026-11-03T15:12:30",
+      "ran_model": "opus",
+      "session": "3c828b4a-04b1-4de6-94cc-b316eb6991d3",
+      "cost_usd": 0.2511,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "1 fixed, 0 blocked, merged c9bce1a7; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-shared-T-0108.md"
     },
     {
       "id": "T-0109",
