@@ -132,6 +132,17 @@ agents without the owner:
 5. **Re-check:** after a board's packages, a validator reviews it again; its findings go through the door rules, and
    the next planning round picks up what it approves (`run --rounds`, default 2 per run).
 
+**System sync (decision 71).** Interactive `/system` sessions keep the choices; the bookkeeping they used to
+collect runs unattended. A board-fixer package with scope `sync` changes no design: it may edit only
+`docs/ARCHITECTURE.md` (not the Invariants section), `docs/design-notes.md`, the boards' `STATUS.md` and the inputs
+of `tools/heat_budget.py`, to match what is already merged and decided (a part an ARCHITECTURE row still names, a
+decision cross-reference, a tool default the design notes prove). The planner plans such items as `sync`; once the
+fixes of a run have settled, the orchestrator also queues a sweep of the "For /system" lists whenever they changed.
+The sweep syncs the bookkeeping items and leaves every choice – mechanics, terminals, firmware, pin map, invariants,
+money, safety and installation rules, owner facts – word for word for `/system`. Gates as above (files, netlists
+unchanged on both boards), plus: the Invariants section is unchanged word for word and `tools/heat_budget.py` still
+runs. A sync package holds both boards.
+
 **Self-repair.** A problem the agent can fix itself never fails the task at once: a missing or malformed block,
 a report at the wrong path or a failed gate is sent back to the agent's own session with the exact problem (up to
 2 repairs, same worktree, while budget is left). Only then is the task `failed`; its report is kept as

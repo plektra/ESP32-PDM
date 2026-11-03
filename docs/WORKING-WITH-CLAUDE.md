@@ -23,6 +23,7 @@ Boards: `pdm-4ch`, `pdm-hc2`.
 |---|---|---|---|
 | **Board designer** (schematic / PCB) | `/board <board> [phase]` | that board's files and `STATUS.md` | proposes; you decide |
 | **Architect** | `/system [topic]` | `docs/ARCHITECTURE.md`, shared sheets, pin map, mechanics, order of work | proposes; you decide |
+| **System sync** (unattended) | `tools/orchestrate.py run` (scope `sync`) | bookkeeping in `docs/ARCHITECTURE.md` (not invariants), `STATUS.md` "For /system", `tools/heat_budget.py` inputs | two-way doors only; choices stay with the architect (decision 71) |
 | **Architecture reviewer** | runs in `/handoff` when shared things changed (sub-agent `architect`) | nothing | no; reports conflicts |
 | **Validator** | `/validate <scope> [deep]` (sub-agent `validator`) | its reports | no; findings by severity |
 | **Cost controller** | `/cost <scope> [deep]` (sub-agent `cost-controller`) | its reports | no; proposes cost levers |

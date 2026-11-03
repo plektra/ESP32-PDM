@@ -35,11 +35,25 @@ come from, and `docs/design-notes.md` where the package needs it.
    with the reminder that a competent person reviews it before installation; the board's `STATUS.md` (where it
    stands, next steps, "For /system", today's date). `docs/ARCHITECTURE.md` only in a `shared` package and only as
    the owner ruled. Never edit `docs/decisions.md`, `docs/queue.json`, `docs/OWNER-INBOX.md`, `CLAUDE.md`, `tools/`
-   or `.claude/`; never commit (the orchestrator does).
+   (except `tools/heat_budget.py` in a `sync` package) or `.claude/`; never commit (the orchestrator does).
 5. **Stop at one-way doors.** If an item turns out to need money, a change to one of the owner's decisions beyond
    the ruling, weakening safety, or a fact only the owner has, leave it undone and report it as blocked with
    `door: one-way` and the question. Something you cannot finish for another reason (needs another package, the
    mechanical decision, a measurement) is blocked with `door: two-way` and the reason.
+
+**Scope `sync` (decision 71).** No design change: you bring documents and tool inputs in line with what is already
+merged and decided. Allowed files: `docs/ARCHITECTURE.md` (never its Invariants section – a gate compares it word
+for word), `docs/design-notes.md`, the boards' `STATUS.md` and `tools/heat_budget.py`. Per item, either:
+- **sync it** – it is bookkeeping and a two-way door: an ARCHITECTURE row or budget that still names a part or value
+  the boards no longer have, a cross-reference to a decision already recorded, a `heat_budget.py` input or default
+  proven by a datasheet or by `docs/design-notes.md` (cite it in a comment; run the tool before and after and give
+  both results in `checks` – decision 9). Then remove the item from the "For /system" list of each STATUS.md that
+  carries it; or
+- **leave it** word for word – anything that is a choice rather than a record: mechanics, terminals, enclosure,
+  firmware, pin-map changes, a new or relaxed invariant, money, a safety rule or installation requirement, a fact
+  only the owner has, or anything you are not sure about. Those stay for an interactive `/system` session.
+In the fix block list each item once, as a short label, in `synced` or `left` (with the reason); `done`, `blocked`
+and `refs` stay empty.
 
 Report to the path the caller gives: what changed and why (per item), checks run with results, open points. End
 with this block:
