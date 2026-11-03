@@ -8327,14 +8327,6 @@
 		(uuid "2ac3c777-970e-4e16-9805-65410f3e9830")
 	)
 	(no_connect
-		(at 120.65 88.9)
-		(uuid "d45e72fc-2dc2-43ab-a23d-0412723f114e")
-	)
-	(no_connect
-		(at 120.65 91.44)
-		(uuid "e3c40eab-0f6f-4455-82b6-bf5b7ea99382")
-	)
-	(no_connect
 		(at 151.13 91.44)
 		(uuid "9bde812a-cddb-4754-a4b2-195400cf2953")
 	)
@@ -10236,6 +10228,848 @@
 			(project "ESP32-PDM-HC2"
 				(path "/d0898527-243c-48e9-a217-df57be741056"
 					(reference "#PWR0906")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "OUT1_SENSE"
+		(at 120.65 88.9 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "73870a37-86a6-4ea4-b992-91bc8c8a7cc1")
+	)
+	(label "OUT2_SENSE"
+		(at 120.65 91.44 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "8f22636f-eb11-4101-bca6-ec1e312cb48d")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 40.64 186.69 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "17e9324c-582f-463f-a08b-256c79c2d069")
+		(property "Reference" "R63"
+			(at 43.18 185.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "220k"
+			(at 43.18 187.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 40.64 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 40.64 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 40.64 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25767"
+			(at 40.64 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "76ef3646-3232-4633-9829-b061dcb27f14")
+		)
+		(pin "2"
+			(uuid "d321677a-9b5f-46ba-93f9-37ac1fff6af3")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "R63")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "OUT1"
+		(at 40.64 182.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "c7df904e-e8c0-4437-91f1-c6090697dadc")
+	)
+	(label "OUT1_SENSE"
+		(at 40.64 190.5 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "c59c2181-ed6f-4089-85c6-1a8293304921")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 50.8 196.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6efda9a4-9a5b-4479-a736-c55d8a73c28e")
+		(property "Reference" "R64"
+			(at 53.34 195.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "22k"
+			(at 53.34 198.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 50.8 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 50.8 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 50.8 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25768"
+			(at 50.8 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "9ea27966-fe8e-4df9-89ca-132f66bcd662")
+		)
+		(pin "2"
+			(uuid "2a797c6d-4da3-4b48-9cbc-4b6bf9a322b7")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "R64")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "OUT1_SENSE"
+		(at 50.8 193.04 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "7c72ed4d-ab38-4578-aa39-d3d0ef61e488")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 50.8 200.66 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e19553fa-24af-4300-bc57-a60300e3a97a")
+		(property "Reference" "#PWR0908"
+			(at 53.34 199.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 53.34 201.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 50.8 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 50.8 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 50.8 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "71bb600a-9d69-4c33-a7c5-686a9f912203")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "#PWR0908")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 60.96 196.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3d61f044-909e-4d40-9afa-c1ae81dd62d0")
+		(property "Reference" "C62"
+			(at 63.5 195.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 63.5 198.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 60.96 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 60.96 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 60.96 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 60.96 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "1786d059-fb2e-499a-9404-5b5c5a8a138d")
+		)
+		(pin "2"
+			(uuid "b0b63de0-e97e-4359-a589-3f0cfc9281f6")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "C62")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "OUT1_SENSE"
+		(at 60.96 193.04 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "82b77537-57bc-4089-a1b6-dc7df881cd69")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 60.96 200.66 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "77ab71fa-4be8-4937-b56f-c62264964f80")
+		(property "Reference" "#PWR0909"
+			(at 63.5 199.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 63.5 201.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 60.96 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 60.96 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 60.96 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8531b6c4-2f6f-4a95-adfb-01e2ea8389b3")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "#PWR0909")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 83.82 186.69 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "fd98450c-c70d-4515-b874-4b933191708d")
+		(property "Reference" "R65"
+			(at 86.36 185.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "220k"
+			(at 86.36 187.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 83.82 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 83.82 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 83.82 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25767"
+			(at 83.82 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "cc67337c-514c-450f-9447-dc5a18b99ef3")
+		)
+		(pin "2"
+			(uuid "7652829b-be14-4947-b96c-243aeb21aa09")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "R65")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "OUT2"
+		(at 83.82 182.88 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "2b0aac9c-26cc-4529-af5a-26ce14056b6c")
+	)
+	(label "OUT2_SENSE"
+		(at 83.82 190.5 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "52408dc6-08aa-402e-8396-d4127cff73db")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 93.98 196.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "267a2e91-0d68-4978-a29a-3c57c23fc1c0")
+		(property "Reference" "R66"
+			(at 96.52 195.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "22k"
+			(at 96.52 198.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 93.98 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 93.98 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 93.98 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25768"
+			(at 93.98 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d3eb7f30-83ce-486d-b1cf-1b2c5992d813")
+		)
+		(pin "2"
+			(uuid "b725a8b6-598e-459c-abb6-2fbbaa205859")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "R66")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "OUT2_SENSE"
+		(at 93.98 193.04 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "9e65b741-f9b4-4f28-9543-e48c3675a148")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 93.98 200.66 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7c052898-2f15-4e89-9159-ff7f99c723e6")
+		(property "Reference" "#PWR0910"
+			(at 96.52 199.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 96.52 201.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 93.98 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 93.98 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 93.98 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "10d8b9eb-5c68-4bb3-acb7-bccf247dc9c7")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "#PWR0910")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 104.14 196.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a3939510-b49e-4e1e-904f-68f0fc57e64a")
+		(property "Reference" "C63"
+			(at 106.68 195.58 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 106.68 198.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 104.14 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 104.14 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 104.14 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C307331"
+			(at 104.14 196.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7da9ed67-a7bb-499a-9fdf-552961be1e1e")
+		)
+		(pin "2"
+			(uuid "25311bb0-4175-4d5f-b273-2fcad8a6bb31")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "C63")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "OUT2_SENSE"
+		(at 104.14 193.04 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "da9bfe1b-24db-43e6-91b2-8e65599b5bdc")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 104.14 200.66 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8632151d-d6d9-4941-862c-ea8ae5a37e9e")
+		(property "Reference" "#PWR0911"
+			(at 106.68 199.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 106.68 201.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 104.14 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 104.14 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 104.14 200.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "db647bd6-f3a0-4303-88ed-5d0e7814859d")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "#PWR0911")
 					(unit 1)
 				)
 			)

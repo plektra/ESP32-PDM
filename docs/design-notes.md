@@ -15,8 +15,9 @@ Values marked *estimate* are engineering estimates, not measurements.
 - ESP32-S3 (NMEA 2000 / SensESP / Signal K ecosystem, Wi-Fi, OTA updates).
 - Two boards, no relays (the point of the product is to replace them):
   - **4-channel** board, PROFET+24V per channel, fitted per build: BTT6050 (≈ 4 A) or BTT6010 (≈ 8 A).
-  - **High-current** board (planned): smart high-side controller TPS48111-Q1 + external MOSFETs,
-    ≈ 8–20 A per channel (bilge pumps 12 A, work lights, wipers; searchlight see §4).
+  - **High-current** board `pdm-hc2`: smart high-side controller TPS48110A-Q1 + back-to-back MOSFETs
+    (BSC030N08NS5), ≈ 15 A continuous per channel, built-in breaker ≈ 17.5 A (bilge pumps 12 A, work lights,
+    wipers; searchlight see §4a, decision 19).
 - Installed in an enclosed location, in a vented 3D-printed enclosure. Two mounting styles:
   DIN rail (PCB perpendicular to the rail, 1–2 module widths) and flat (wall/ceiling).
 - Engine-room ambient up to 40 °C.
@@ -165,7 +166,7 @@ Per channel (source: TI TPS4811-Q1 datasheet SLUSEE5E):
 | 2 × BSC030N08NS5 (C501507) | 80 V, 3 mΩ | back-to-back, common source: blocks back-feed (bilge float switch powering the pump while the channel is off) |
 | RSNS | 1 mΩ 2512 3 W (C2903470) | 25 mV at 25 A; Kelvin-connect CS+/CS− at layout |
 | RSET | 100 Ω | VS → CS+ |
-| RIWRN | 47 kΩ | overcurrent (circuit breaker) ≈ 25 A: 11.9 × RSET / (RSNS × IOC) |
+| RIWRN | 68 kΩ (C36871) | overcurrent (circuit breaker) ≈ 17.5 A: 11.9 × RSET / (RSNS × IOC) (§4a.2, decision 39) |
 | RISCP + 1 nF | 4.7 kΩ | fast short-circuit ≈ 80 A: ISC × RSNS / 15.6 µA − 464 |
 | CTMR | 10 µF | overcurrent time 82 µA·t/1.2 → ≈ 146 ms; auto-retry 22.7·10⁶ × CTMR ≈ 3.8 min |
 | RIMON | 12 kΩ | gain 0.9 × RIMON / RSET = 108 → 25 A = 2.7 V; 10 kΩ + BAT54S clamp + 1 nF to the ADC |
@@ -177,8 +178,9 @@ Per channel (source: TI TPS4811-Q1 datasheet SLUSEE5E):
 
 Heat (`tools/heat_budget.py --part HC-2xBSC030 --rth-ja 20 --r-box 0.9`, estimate, 40 °C, vented):
 2 × 12.5 A → Tj ≈ 71 °C; 2 × 15 A → 87 °C; 2 × 20 A → 137 °C (too hot). **Continuous rating ≈ 15 A per
-channel.** The hardware breaker (25 A / 146 ms) allows motor starts; continuous protection comes from the
-temperature sensor and the firmware soft fuse.
+channel.** The hardware breaker (≈ 17.5 A / 146 ms, §4a.2) allows short motor starts; between 15 A and the breaker,
+protection comes from the required external breaker (≤ 15–18 A) and the firmware soft fuse. The temperature sensor
+(140–160 °C at the MMBT3904) is a backstop, not a continuous protection.
 
 Notes and open points:
 - **Searchlight 21 A** needs lower-RDS(on) MOSFETs (e.g. onsemi NTMFS5C612NL C348543, ≈ 1.5–2 mΩ; check
@@ -250,6 +252,49 @@ OV inactive (no over-voltage cut-off). A shorted C113 puts IWRN at GND = overcur
 C102 or open R114 removes the controller supply (channel off). An open C107 only makes the temperature reading noisier.
 Use X7R/C0G from the BOM only, no flex-sensitive placement near board edges or mounting holes. A competent person must
 review these protection circuits before installation.
+
+### 4a.2 Breaker level and OUT sense (T-0072: T-0053, T-0062; Q-0042/Q-0046, decision 39; 2026-11-03)
+
+**Breaker (R113/R213 RIWRN 47 k → 68 k, 0402 1 % C36871, preferred).** TPS4811-Q1 SLUSEE5E Eq. 6 (p. 22–23):
+RIWRN = 11.9 × RSET / (RSNS × IOC + V(OS_SET)), V(OS_SET) = 0 ± 0.2 mV (p. 9, p. 26). With RSET 100 Ω, RSNS 1 mΩ:
+VSNS = 1190 / 68 k = 17.5 mV → **IOC ≈ 17.5 A** (nominal).
+- Spread: the datasheet gives V(SNS_WRN) only at two settings (p. 9): 29.2/30.6/31.5 mV (39.7 k) and 8/10/12 mV
+  (120 k). Interpolating the absolute error between them gives about −1.8/+1.6 mV at 17.5 mV (−10/+9 %,
+  `UNVERIFIED`, no table row at 68 k). With 1 % RSET, RIWRN and RSNS: **IOC ≈ 15.2–19.7 A**.
+- Timer unchanged: Eq. 7 tOC = CTMR × 1.2 V / 82 µA = 10 µF × 1.2 / 82 µA ≈ **146 ms** (C105/C205). Fast trip
+  unchanged (≈ 80 A, 4–5 µs).
+- Heat (scratch copy of `tools/heat_budget.py` with RDS(on)-path 11.7 mΩ at 150 °C, BSC030N08NS5 Diagram 9;
+  `--channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002`, 40 °C, both channels loaded):
+  15 A → Tj 88 °C, 17.5 A → 111 °C, 18 A → 117 °C, 18.5 A → 123 °C, 19.7 A (upper IOC) → 139 °C; with
+  `--p-other 1.9` 17.5 A → 113 °C, 18 A → 118 °C. All below the MOSFET Tj max 150 °C (Table 2), so the hardware
+  breaker now closes the gap that the 25 A setting left (Tj 169 °C at 22 A).
+- Motor starts: a start current above IOC is passed only if it falls below IOC within ≈ 122 ms (lower end of tOC).
+  The SEAFLO SFBP2-G3500-01 start current is not published: **measure it before ordering** (HC2 pre-order checklist).
+  At the lower tolerance end (≈ 15.2 A) a pump drawing 12.5 A max still has ≈ 20 % margin in steady state.
+- Required outside the board (README, label): an external breaker ≤ 15–18 A per output, and a **firmware soft fuse**
+  on IMON (for `/system firmware`: e.g. I²t against the 15 A rating, alarm and switch-off above it while the ESP32 runs).
+- Failure mode (bilge forced run, safety-relevant): a lower IOC means a stalled or hard-working pump above ≈ 15–20 A
+  is switched off after 146 ms and retried after ≈ 3.8 min instead of running on. That only affects the manual forced
+  run; the float-switch circuit stays wired to the battery (decision 15, invariant 8). The trip is reported (FLT_I).
+  A competent person reviews the bilge wiring and breaker sizes before installation.
+
+**OUT sense (R63/R64/C62 OUT1 → IO4, R65/R66/C63 OUT2 → IO5; HC2 root sheet).** Same parts as VBAT_SENSE
+(220 k C25767, 22 k C25768, 100 nF C307331, all already on the BOM); the no-connects on IO4/IO5 are removed. The shared
+controller sheet parts are unchanged; only the HC2 root pin use differs (pin map, decision 39).
+- IO4 = ADC1_CH3, IO5 = ADC1_CH4 (ESP32-S3-MINI-1 datasheet v1.7 Table 3-1; invariant 10). Ratio 22/242; ATTEN3
+  calibrated range 0–2.9 V (chip datasheet Table 5-6) → full scale ≈ 31.9 V; 28.8 V → 2.62 V. τ = (220 k ‖ 22 k) ×
+  100 nF = 2 ms.
+- Float-switch run with the PDM unpowered (3V3 off): the divider's Thevenin source is 2.62 V / 20 k, so the pin never
+  sees more than 2.62 V and at most (28.8 − 0.5) / 220 k ≈ 0.13 mA flows into the pin's ESD path. Espressif states no
+  injection-current limit and nothing about back-powering (part facts C2913206, `UNVERIFIED`); the current is the same
+  order as the accepted VBAT_SENSE divider. At the D103 clamp (53 V, transient) ≤ 0.24 mA.
+- Freewheel (OUT −0.5 V via D102): pin −45 mV, inside V_IL min −0.3 V. Reverse/negative OUT (e.g. −30 V): the pin's
+  ESD diode to GND clamps, current ≤ 30 V / 220 k ≈ 0.14 mA.
+- Failure mode (invariant 8): the divider is a passive 242 k load on the pump feed (≈ 0.12 mA at 28.8 V); a shorted
+  lower resistor or capacitor raises it to 28.8 V / 220 k ≈ 0.13 mA; a shorted 220 k puts OUT straight on IO4/IO5,
+  which may destroy that ESP32 pin, but the fault current is then limited by the pin and the PDM-leg breaker, not by
+  the float circuit, which stays wired to the battery and works without the PDM. A float-driven run is now seen as
+  "OUT high while the channel is off". A competent person reviews the bilge wiring before installation.
 
 ## 5. Physical switch inputs and long leads
 
@@ -420,6 +465,12 @@ most marine electronics, this device relies on that system-level protection.
   ground diode does not change that. There the battery fuse has to clear. The loads see reverse voltage in every case.
   The panel LEDs on J5 are protected by D55 in the SW_SUPPLY feed (§5, T-0049): with a reversed battery only the
   Schottky leakage (≤ 0.2 mA) reaches them.
+- Reverse battery (`pdm-hc2`, T-0072/T-0055, Q-0044, decision 40): the survival statement above does **not** apply to
+  HC2. A reversed battery puts the full battery voltage negative on TPS48110A-Q1 VS/CS+/CS−/ISCP (abs max −1 V to
+  GND, SLUSEE5E §6.1); D30 SMCJ30CA is bidirectional and does not conduct below ≈ 33 V, so nothing limits the current
+  and both controllers are likely destroyed (mechanism `UNVERIFIED`). The back-to-back MOSFETs still block the loads
+  and the buck is protected by D2. Mitigation for this revision: keyed/polarised J10 (chosen in `/system mechanical`)
+  plus a README and label warning. Full reverse-polarity protection is deferred to a later HC2 revision.
 
 ### 8.1 Battery input J10: TVS, capacitors, ferrite position (decision 26, T-0064, 2026-11-01)
 
@@ -678,8 +729,9 @@ allows IPC-7351 variants). The JLCPCB pad lies entirely inside it. Pin numbering
       given). BTT6010 at 8 A → Tj ≈ 86 °C, at 10 A ≈ 123 °C, at ≥ 11 A thermal shutdown: a pump working
       hard must not be cut off, so it goes on a high-current channel. Wiring per manual: float switch and
       manual switch in parallel to the pump; the PDM channel replaces the manual switch. Back-to-back
-      MOSFETs block back-feed when the float switch runs the pump; an OUT voltage divider lets the PDM see
-      float-driven runs. Timed overcurrent reports a jammed impeller instead of blowing a fuse.
+      MOSFETs block back-feed when the float switch runs the pump; on HC2 the OUT voltage divider on IO4/IO5
+      (§4a.2) sees float-driven runs (OUT high while the channel is off), and SW3/SW4 too if the installer wires
+      the pump feed to them. IMON cannot see them (that current does not pass the shunt). Timed overcurrent reports a jammed impeller instead of blowing a fuse.
       Previous note: owner reported 12 A per pump (2026-10-30), consistent with the 12.5 A max draw.
       Original analysis: too much for one PROFET channel
       (BTT6010 @ 12 A → Tj ≈ 186 °C) → high-current board. Automatic float-switch circuit wired directly

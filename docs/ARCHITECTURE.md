@@ -27,7 +27,7 @@ them is a system change: make it on both boards in the same session (or note it 
 | Pin | 4-channel | High-current |
 |---|---|---|
 | IO1 | MOD_ID (ADC) | MOD_ID (ADC) |
-| IO2–IO5 | channel current sense IS1–IS4 (ADC) | IO2/IO3 IMON1/2 (ADC); IO4/IO5 spare |
+| IO2–IO5 | channel current sense IS1–IS4 (ADC) | IO2/IO3 IMON1/2 (ADC); IO4/IO5 OUT1/OUT2 sense (ADC1, 220 k/22 k + 100 nF, float-run detection; decision 39) |
 | IO6–IO8, IO11 | channel drive ch1–3 on IO6–IO8, ch4 on IO11 (diode-OR with the switch inputs) | IO6/IO7 drive ch1/2; IO8, IO11 unused (2.2 k pull-downs R1/R2) |
 | IO9 | NTC (ADC1) | NTC (ADC1) |
 | IO10 | VBAT_SENSE (ADC1) | VBAT_SENSE (ADC1) |
@@ -66,7 +66,7 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 | Ambient | 40 °C engine room (enclosure air +2…10 °C) | decision 9 |
 | 4-ch, BTT6050 per channel | 4 A at 2 oz copper (3.5 A provisional in 1 module width) | `tools/heat_budget.py` |
 | 4-ch, BTT6010 per channel | ≈ 8 A | `tools/heat_budget.py --mix` |
-| HC2 per channel | ≈ 15 A continuous; breaker 25 A / 146 ms; fast trip 80 A | `tools/heat_budget.py --part HC-2xBSC030`, TPS4811-Q1 equations |
+| HC2 per channel | ≈ 15 A continuous; breaker ~17.5 A / 146 ms (RIWRN 68 k, ≈ 15–20 A over tolerances); fast trip 80 A; external breaker ≤ 15–18 A per output plus firmware soft fuse (decision 39) | `tools/heat_budget.py --part HC-2xBSC030`, TPS4811-Q1 equations |
 | Shared supply path | ≤ 2 mΩ (terminal + VS copper); input terminal ≈ 40 A (4-ch) / ≈ 50 A (HC2) | design-notes §4 |
 | Controller power | ≈ 0.47 A at 3.3 V peak (ESP32 radio); panel LEDs no longer on 3.3 V; F1 500 mA hold | design-notes |
 | Panel switch supply | ≈ 50 mA (4 × 6.4 mA switch load + 4 × 5 mA LEDs at 30 V); F4 500 mA hold; MMBT5551 ≈ 0.13 W each at 30 V | decision 17 |

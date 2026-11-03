@@ -12,7 +12,7 @@ level and pass ERC (apart from library-version notices); no PCB layout yet. Not 
 | Board | Channels | Output stage | Continuous current per channel (estimate, 40 °C, vented) |
 |---|---|---|---|
 | `pdm-4ch` | 4 | Infineon PROFET+24V, fitted per channel: BTT6050-1ERA / BTT6010-1ERA | ≈ 4 A / ≈ 8 A |
-| `pdm-hc2` | 2 | TI TPS48110A-Q1 + back-to-back MOSFETs, adjustable breaker (25 A / 146 ms) | ≈ 15 A |
+| `pdm-hc2` | 2 | TI TPS48110A-Q1 + back-to-back MOSFETs, built-in breaker ≈ 17.5 A / 146 ms (≈ 15–20 A over tolerances) | ≈ 15 A |
 
 Both boards share the controller, power, NMEA 2000 and switch-input design.
 
@@ -47,6 +47,14 @@ per order, so order mixed builds together to pay it once.
 - **Reverse battery (`pdm-4ch`):** the output switches survive a reversed battery of at most 28 V for less than 2
   minutes, with each load at least 12 Ω (BTT6050 datasheet). Heavier loads rely on the battery fuse to clear. The
   loads see reverse voltage. A series diode in the switch supply protects the panel LEDs.
+- **`pdm-hc2` external breaker (required):** each HC2 output must have its own external breaker or fuse that trips at
+  **at most 15–18 A** (within minutes), in addition to the wire protection above. The built-in breaker trips at about
+  17.5 A (≈ 15–20 A over part tolerances) only after 146 ms; between the 15 A rating and that level the board relies on
+  the external breaker and the firmware soft fuse. The board label states the same. A bilge-pump output's breaker sits
+  between J11 and the junction with the float-switch circuit, so the float circuit never depends on the PDM.
+- **`pdm-hc2` reverse battery destroys the board:** a reversed battery connection destroys both HC2 output controllers
+  (TPS48110A-Q1, rated −1 V). There is no reverse-polarity protection on this revision. Use the keyed/polarised
+  battery connector J10 only as marked, check polarity before connecting; the board label carries this warning.
 - **`pdm-hc2` timing:** after power is connected, the first switch-on of each output (also from a panel switch)
   takes about 0.1 s. After an overcurrent or short-circuit trip the output stays off for about 4 minutes and then
   tries again. HC2 outputs are on/off only (no dimming/PWM).
