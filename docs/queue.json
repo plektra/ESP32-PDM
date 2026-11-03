@@ -2650,25 +2650,37 @@
       "id": "T-0079",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "failed",
       "created": "2026-11-03",
       "depends_on": [
         "T-0078"
       ],
       "verify": true,
-      "since": "5397e4099fa0e96c357cd3dc911b574ccca08ee3"
+      "since": "5397e4099fa0e96c357cd3dc911b574ccca08ee3",
+      "started": "2026-11-03T09:18:33",
+      "ran_model": "sonnet",
+      "session": "11c120c7-41e4-4563-9e27-b6fdef6f7519",
+      "cost_usd": 0.0816,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": "report docs/reviews/2026-11-03-validate-pdm-4ch-2.md: no finding block",
+      "summary": "failed",
+      "interrupted": null
     },
     {
       "id": "T-0080",
       "role": "validator",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-03",
       "depends_on": [
         "T-0078"
       ],
       "verify": true,
-      "since": "5397e4099fa0e96c357cd3dc911b574ccca08ee3"
+      "since": "5397e4099fa0e96c357cd3dc911b574ccca08ee3",
+      "started": "2026-11-03T09:18:33",
+      "ran_model": "sonnet",
+      "session": "14ebda91-d5fb-4b23-8c18-75ecd12f25d7"
     }
   ],
   "board_size_start": {
