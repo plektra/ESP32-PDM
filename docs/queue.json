@@ -2671,7 +2671,7 @@
       "id": "T-0080",
       "role": "validator",
       "scope": "pdm-hc2",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [
         "T-0078"
@@ -2680,7 +2680,14 @@
       "since": "5397e4099fa0e96c357cd3dc911b574ccca08ee3",
       "started": "2026-11-03T09:18:33",
       "ran_model": "sonnet",
-      "session": "14ebda91-d5fb-4b23-8c18-75ecd12f25d7"
+      "session": "14ebda91-d5fb-4b23-8c18-75ecd12f25d7",
+      "cost_usd": 0.1968,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-validate-pdm-hc2-2.md"
     }
   ],
   "board_size_start": {
