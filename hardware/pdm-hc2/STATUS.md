@@ -7,6 +7,8 @@ TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` �
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
 
+**2026-11-03 (T-0073: T-0021/T-0031/T-0033/T-0043/T-0051/T-0060, unattended, shared – same on both boards):** `LCSC` fields added (cost report C1, each checked against value, package and net voltage): C2 C14663, C4/C6 C15849, C5 C19666, C7/C9 C28233, C8 C45783, C10/C11 C307331, C12 C52923, D12/D13 BAT54C C22466350 (preferred; pinout 1/2 anodes, 3 common cathode), R1/R2/R5/R6 C25879, R11/R12 C25905, R15–R17/R21/R24/R27 C25744 – all basic except the BAT54C, no new unique extended part. C13 and FB1/FB2 already had codes from T-0065. R1/R2 and the NTC TH1 (C52155402) stay (Q-0025, Q-0024). VBAT full scale ≈ 32 V and the IO3 strap rule are in design-notes §2.
+
 **2026-11-03 (T-0071: T-0056/T-0005/T-0008, unattended, `hc_channel` ×2):** controller pin filtering, all from
 parts already on the BOM. C107/C207 1 nF (C1523) DIODE–GND across Q13/Q23 (TI 9.6.1, mandatory). RVS R114/R214 100 Ω
 (C25076) VS → new net `VS_CTRL` on U11/U12 pin 20; C102/C202 became the CVS: 1 µF/100 V 1206 (C13832) on `VS_CTRL`
@@ -109,8 +111,14 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0067: check the KiCad footprints `SOIC-8_7.5x5.85mm_P1.27mm` (U5) and `L_CommonModeChoke_Coilank_ACM4532`
   (FL1) against the JLCPCB footprints of C528763 and C20624726. The FL1 pad numbering must match windings 1→2 / 4→3
   before FL1 is ever fitted (design-notes §8.5).
+- T-0060 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IMON2 network
+  (design-notes §2).
+- T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
+  positions.
 
 ## For /system
+
+- T-0073: decision 18's "33 V full scale" is amended to ≈ 32 V (decision 38, design-notes §2).
 
 - T-0067: ARCHITECTURE `can` row says "ISO1044"; it is now CA-IS3050G (SOIC-8-WB, ≈ 7.5 × 11.5 mm with leads) plus
   DNP FL1/C70 and fitted R70–R72. LEN recheck: 49.3 mA worst case (LEN 1, 0.7 mA margin) / 79.8 mA continuous
