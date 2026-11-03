@@ -52,22 +52,20 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (6) – two-way doors
+## Decided by agents (3) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
 - T-0060 · INFO · pdm-hc2 · IO3 strapping pin is held low by the IMON2 network; harmless while EFUSE_STRAP_JTAG_SEL is not burnt (same as V11 on pdm-4ch). → No hardware change; production must not burn that eFuse.
 - T-0058 · MINOR · pdm-hc2 · Section 1 still names TPS48111-Q1 and 8-20 A; section 9 says an OUT voltage divider lets the PDM see float-driven runs, but no such divider exists and IMON cannot see that current. → Correct both sections to the as-drawn design (TPS48110A-Q1, about 15 A; float runs only visible via SW3/SW4 if wired); OUT divider decision goes to Q2.
-- T-0056 · MINOR · pdm-hc2 · No 1 nF bypass across the MMBT3904 remote sensor; TPS4811-Q1 section 9.6.1 says it must be placed (EMC E4 lists it only as a tune-in-test footprint). → Add 1 nF 0402 (C1523, already on the BOM) from DIODE to GND at each MMBT3904; Kelvin emitter return to controller GND.
 - T-0051 · INFO · pdm-4ch · IO3 (JTAG source strap) is tied low through 10.7 k; harmless unless EFUSE_STRAP_JTAG_SEL is burnt. → Note in the firmware/production docs: never burn EFUSE_STRAP_JTAG_SEL.
-- T-0008 · MAJOR · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → Footprints per TI Table 9-3: about 1 nF X cap and 100 pF Y caps on CS+/CS-, 10 nF on EN/UVLO and OVSET, 1 nF on DIODE, 100 pF on IWRN; tune in test.
-- T-0005 · MAJOR · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → Add RVS 100 ohm and CVS 1 uF/100 V in the VS supply of each controller after checking IVS.
 
-## Applied by agents (21)
+## Applied by agents (24)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
 - T-0059 · pdm-hc2 · First switch-on after power-up waits about 76-100 ms for the bootstrap (Eq. 1), also on the hardware switch path; overcurrent/short retry is about 3.8 min, reset by toggling INP. → T-0070 (`9d0b6d53`)
+- T-0056 · pdm-hc2 · No 1 nF bypass across the MMBT3904 remote sensor; TPS4811-Q1 section 9.6.1 says it must be placed (EMC E4 lists it only as a tune-in-test footprint). → T-0071 (`80bb3bd1`)
 - T-0052 · pdm-4ch · Should DEN be held high in Active mode, or pulsed only while sampling IS? V1 (RIS overload on fault or open output) depends on it. → T-0069 (`b9fcef31`)
 - T-0050 · pdm-4ch · 'Switches survive with the ground network' holds only for VS(REV) 28 V, t < 2 min, RL >= 12 ohm (P_4.1.2); at 4 A the body diode dissipates about 2.4 W > PTOT 1.6 W. → T-0068 (`86fbfe03`)
 - T-0049 · pdm-4ch · With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V. → T-0068 (`86fbfe03`)
@@ -87,7 +85,9 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0012 · system · Hardware switch path has tau 0.32 ms (no real debounce), turns the output off below about 8 V at the switch (12 V cranking), and a lamp across the switch contacts above about 1.4 mA turns it on. → T-0068 (`86fbfe03`)
 - T-0011 · system · Buck is the 1.1 MHz PFM variant; PFM drops into the 150-350 kHz band at light load, the datasheet's separate 0.1 uF at VIN is missing, C1 is only 50 V, and SW ringing can land in the tightly limited 156-165 MHz band. → T-0065 (`e5fedd96`)
 - T-0009 · pdm-hc2 · HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them. → T-0064 (`dbc672cd`)
+- T-0008 · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → T-0071 (`80bb3bd1`)
 - T-0007 · system · Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → T-0064 (`dbc672cd`)
+- T-0005 · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → T-0071 (`80bb3bd1`)
 
 ## Deferred (14)
 

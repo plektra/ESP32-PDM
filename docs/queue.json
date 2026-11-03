@@ -89,8 +89,10 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E1"
       },
-      "state": "parked",
-      "package": "T-0071"
+      "state": "done",
+      "package": "T-0071",
+      "fixed_by": "T-0071",
+      "merged": "80bb3bd16dcbb0064c56b8a295a3c806dca705c1"
     },
     {
       "id": "T-0006",
@@ -187,8 +189,10 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E4"
       },
-      "state": "parked",
-      "package": "T-0071"
+      "state": "done",
+      "package": "T-0071",
+      "fixed_by": "T-0071",
+      "merged": "80bb3bd16dcbb0064c56b8a295a3c806dca705c1"
     },
     {
       "id": "T-0009",
@@ -1851,8 +1855,10 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H4"
       },
-      "state": "parked",
-      "package": "T-0071"
+      "state": "done",
+      "package": "T-0071",
+      "fixed_by": "T-0071",
+      "merged": "80bb3bd16dcbb0064c56b8a295a3c806dca705c1"
     },
     {
       "id": "T-0057",
@@ -2343,7 +2349,7 @@
       "id": "T-0071",
       "role": "board-fixer",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-01",
       "title": "HC2 controller pin filtering (VS RC, CS/EN/OV/IWRN filters, DIODE 1 nF)",
       "brief": "hc_channel sheet x2; all three items are two-way agent items (no owner ruling). Order: (1) T-0056: add 1 nF 0402 (C1523) from DIODE to GND at each MMBT3904 (Q13/Q23), fitted; TPS4811-Q1 section 9.6.1 makes it mandatory. Note the Kelvin emitter return in STATUS for the PCB. (2) T-0005: add RVS 100 ohm and CVS 1 uF/100 V in the VS feed of U11/U12 pin 20 (TPS4811-Q1 Table 9-3). First read IVS (operating and with the charge pump active) and check that the drop is < ~0.3 V and does not move the UVLO/OV thresholds or the CS+ reference (CS+ is fed from VS via RSET). Make C102/C202 the CVS or keep them, and record the choice as auto. (3) T-0008: footprints per TI Table 9-3: X cap ~1 nF across CS+/CS-, Y caps ~100 pF CS+/CS- to GND/SRC, 10 nF on EN/UVLO and on OVSET, 100 pF on IWRN; the DIODE capacitor is already done in step 1. For each one, check the time constant against the protection it filters: CS filter << tSC 4-5 us (80 A fast trip) and << tOC; EN/UVLO and OVSET filters should not hide a real OV/UV event longer than intended. Fit the values that pass with a clear margin (basic parts, auto decision) and mark the rest DNP. Final values are decided at the pre-compliance scan (Q-0012). Checks: ERC and netlist on pdm-hc2 after each step, LCSC or DNP on every new part, CS amplifier offset with the Y caps (matched values). Failure-mode note: the filters sit on the breaker and short-circuit sensing of safety-relevant outputs. Stop and ask if any filter would slow the 80 A short-circuit trip or the breaker beyond the datasheet response, or if RVS would put VS below V(VS_PORR) during the gate-drive load.",
@@ -2356,23 +2362,28 @@
       "depends_on": [
         "T-0070"
       ],
-      "started": "2026-11-02T21:38:36",
+      "started": "2026-11-03T03:59:47",
       "ran_model": "opus",
       "session": "6b4108fb-730d-4484-9775-469421cfcb7c",
-      "cost_usd": 1.6437,
-      "attempts": 1,
-      "resume": {
-        "session": "6b4108fb-730d-4484-9775-469421cfcb7c",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0071",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0071-zj0qgapm",
-        "report": "docs/reviews/2026-11-02-fix-pdm-hc2-T-0071.md",
-        "head": "c2782cdfb8ec2252a9f099121a6561d4e57dc214",
-        "reason": "a usage limit"
+      "cost_usd": 5.1365,
+      "attempts": 2,
+      "finished": "2026-11-03",
+      "note": "not merged: docs/part-facts/C17556513.md",
+      "summary": "3 fixed, 0 blocked, merged 80bb3bd1; pdm-hc2 +16 parts (+4 DNP), +0 unique",
+      "interrupted": null,
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 16,
+          "dnp": 4,
+          "unique": 0
+        }
       },
-      "finished": "2026-11-02",
-      "note": "1 part-facts lookups (0.42 USD); no report written (api_error): You've hit your 5-hour limit · resets 1:20am (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "report": "docs/reviews/2026-11-02-fix-pdm-hc2-T-0071.md"
     },
     {
       "id": "T-0072",
@@ -2476,8 +2487,8 @@
       "unique": 65
     },
     "pdm-hc2": {
-      "parts": 185,
-      "dnp": 5,
+      "parts": 201,
+      "dnp": 9,
       "unique": 75
     }
   }

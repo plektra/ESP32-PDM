@@ -63,3 +63,7 @@ free number (`/handoff` adds them).
 | 54 | 2026-11-02 | shared | C14-C17 470 nF/10 V X5R 0402 CL05A474KP5NNNC (C47339, preferred), same footprint; tau about 1.5 ms (T-0012/Q-0006) (T-0068) | auto |
 | 55 | 2026-11-02 | shared | SW_SUPPLY series diode D55 = DSK16 (C22466351, already on BOM; 60 V, 1 A, IFSM 25 A) between F4.2 (anode) and SW_SUPPLY/J5.5 (cathode); D54/C54 stay on J5.5 (T-0049/Q-0040) (T-0068) | auto |
 | 56 | 2026-11-02 | pdm-4ch | p_other documented as about 2.2 W at 30 V with all panel lines on (Tj 101 C at 4 A); heat_budget default unchanged (T-0047) (T-0068) | auto |
+| 57 | 2026-11-03 | pdm-hc2 | DIODE bypass C107/C207 1 nF 0402 C1523 fitted across MMBT3904 (TPS4811-Q1 9.6.1); emitter Kelvin to U GND at PCB (T-0071) | auto |
+| 58 | 2026-11-03 | pdm-hc2 | RVS R114/R214 100 ohm C25076 VS -> VS_CTRL (pin 20); C102/C202 moved to VS_CTRL as CVS 1 uF/100 V 1206 C13832 (Table 9-3); drop <= 70 mV at I(Q) 700 uA; RSET and UV/OV divider stay on VS (T-0071) | auto |
+| 59 | 2026-11-03 | pdm-hc2 | CS X cap C108/C208 1 nF C1523 fitted (tau 0.1 us << tSC 4 us); Y caps C109/C110/C209/C210 100 pF/100 V C296717 DNP (unbalanced source impedance, needs ferrites; Q-0012) (T-0071) | auto |
+| 60 | 2026-11-03 | pdm-hc2 | EN/UVLO C111/C211, OV C112/C212 and IWRN C113/C213 1 nF C1523 fitted (OV delay <= 0.4 ms; 10 nF rejected at 4 ms; IWRN 47 us vs tOC 146 ms) (T-0071) | auto |
