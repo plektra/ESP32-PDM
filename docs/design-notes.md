@@ -35,6 +35,15 @@ Values marked *estimate* are engineering estimates, not measurements.
 Pin use (ESP32-S3, 4-channel): IN drive IO6–IO8 and IO11, current sense IO2–IO5 (ADC1), switch state IO14/IO15/IO16/IO21,
 panel LED sinks IO38–IO41, VBAT_SENSE IO10 (ADC1), NTC IO9 (ADC1), DEN IO33, variant ID IO1 (ADC1), CAN IO17/IO18, USB IO19/IO20.
 
+VBAT_SENSE full scale (decision 18 as amended by decision 38, T-0043): divider R60 220 k / R61 22 k (+ C60 100 nF),
+ratio 22/242 = 1/11. The ESP32-S3 ADC is calibrated only for 0–2900 mV at 12 dB attenuation (datasheet v2.2,
+Table 5-6), so full scale is 2.9 V × 11 ≈ **31.9 V, about 32 V** (not 33 V). 30 V still reads (2.73 V at the pin).
+
+IO3 strapping pin (T-0051, T-0060): IO3 selects the JTAG source only when eFuse `EFUSE_STRAP_JTAG_SEL` is burnt. On
+both boards IO3 is held low by the channel-2 current-sense network – pdm-4ch: IS2 via R204 10 k + RIS R203 680 Ω
+(≈ 10.7 k to GND); pdm-hc2: IMON2 via R212 10 k + R211 12 k (22 k to GND). With the eFuse unburnt (default) this is
+harmless. **Firmware and production rule: never burn `EFUSE_STRAP_JTAG_SEL`.** JTAG stays on the built-in USB-Serial/JTAG.
+
 Variant ID (`MOD_ID`, IO1): 10 kΩ pull-up R29, variant resistor R42 to GND. 4-channel = 10 kΩ (1.65 V).
 Proposed table: 1-channel 2.2 kΩ (0.59 V), 2-channel 4.7 kΩ (1.05 V), 4-channel 10 kΩ (1.65 V);
 0 V and 3.3 V are treated as faults.

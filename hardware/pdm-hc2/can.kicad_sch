@@ -3011,6 +3011,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C307331"
+			(at 116.84 91.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "5d127a6a-0fbe-4a0a-82ad-940117c77858")
 		)
@@ -3502,6 +3511,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C307331"
+			(at 149.86 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "dff927f9-856e-45b3-a14d-d003c803d7af")
 		)
@@ -3564,6 +3582,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 140.97 69.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C52923"
 			(at 140.97 69.85 0)
 			(effects
 				(font

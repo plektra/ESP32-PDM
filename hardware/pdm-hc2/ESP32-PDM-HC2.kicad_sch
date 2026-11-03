@@ -4845,6 +4845,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C25879"
+			(at 82.55 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "94e1ba93-4233-46eb-b38d-4085e9d12750")
 		)
@@ -4907,6 +4916,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 82.55 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25879"
 			(at 82.55 77.47 0)
 			(effects
 				(font
@@ -4985,6 +5003,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C25879"
+			(at 82.55 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "9059f78c-7a99-4a1c-807a-7526ed4f2d8e")
 		)
@@ -5046,6 +5073,15 @@
 			)
 		)
 		(property "Description" "dual schottky barrier diode, common cathode"
+			(at 71.12 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C22466350"
 			(at 71.12 73.66 0)
 			(effects
 				(font
@@ -5592,6 +5628,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C25879"
+			(at 82.55 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "f8bf1a39-1796-4a72-b52c-6613518ef8b9")
 		)
@@ -5919,6 +5964,15 @@
 				(hide yes)
 			)
 		)
+		(property "LCSC" "C45783"
+			(at 130.81 62.23 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "7a202e71-cd95-4f1f-bca8-5239d1d824ab")
 		)
@@ -6045,6 +6099,15 @@
 			)
 		)
 		(property "Description" "dual schottky barrier diode, common cathode"
+			(at 71.12 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C22466350"
 			(at 71.12 90.17 0)
 			(effects
 				(font

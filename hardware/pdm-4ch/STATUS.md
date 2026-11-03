@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-02
+Updated: 2026-11-03
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-03 (T-0073: T-0021/T-0031/T-0033/T-0043/T-0051/T-0060, unattended, shared – same on both boards):** `LCSC` fields added (cost report C1, each checked against value, package and net voltage): C2 C14663, C4/C6 C15849, C5 C19666, C7/C9 C28233, C8 C45783, C10/C11 C307331, C12 C52923, D12–D15 BAT54C C22466350 (preferred; pinout 1/2 anodes, 3 common cathode), R1/R2/R5/R6 C25879, R11/R12 C25905, R15–R17/R21/R24/R27 C25744 – all basic except the BAT54C, no new unique extended part. C13 and FB1/FB2 already had codes from T-0065. R1/R2 and the NTC TH1 (C52155402) stay (Q-0025, Q-0024). VBAT full scale ≈ 32 V and the IO3 strap rule are in design-notes §2.
 
 **2026-11-02 (T-0068, Q-0006/Q-0040/Q-0034, unattended, shared `analog_sw` – same on both boards):** C14–C17 → 470 nF
 0402 (C47339, preferred; debounce τ ≈ 1.5 ms). New D55 DSK16 (C22466351, already on the BOM) in series after F4 in the
@@ -115,9 +117,14 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0067: check the KiCad footprints `SOIC-8_7.5x5.85mm_P1.27mm` (U5) and `L_CommonModeChoke_Coilank_ACM4532`
   (FL1) against the JLCPCB footprints of C528763 and C20624726. The FL1 pad numbering must match windings 1→2 / 4→3
   before FL1 is ever fitted (design-notes §8.5).
+- T-0051 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IS2 network
+  (design-notes §2).
+- T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
+  positions.
 
 ## For /system
 
+- T-0073: decision 18's "33 V full scale" is amended to ≈ 32 V (decision 38, design-notes §2).
 - T-0068/T-0047: `tools/heat_budget.py --p-other` default is still 0.6 W. design-notes §4 documents ≈ 2.2 W for the 4-ch
   board at 30 V with all panel lines on (Tj 101 °C vs 100 °C). Raise the default or its help text in a tools session.
 - T-0068/T-0046 blocked (owner): no basic 1206 2.2 k / 2.4 k. Options: 2 k + 2 k basic (C17944) or 2.2 k + 2.4 k
