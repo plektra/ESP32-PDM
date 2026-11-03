@@ -1,11 +1,18 @@
 # pdm-4ch status
 
-Updated: 2026-11-03 (T-0085)
+Updated: 2026-11-03 (T-0104)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-03 (T-0104: T-0018, Q-0047/decision 73, unattended, shared – documents only):** the 100 A PTCs pass the
+datasheet check (TECHFUSE mSMD050-60V C70113 and JDT ASMD1812-050-60V C427396: 60 V / I_max 100 A, I_hold 0.50 A, 1812
+body as now; C70113 preferred, R1max 1.0 Ω). The series resistor (0.20 Ω → 86 A, ≤ 1.9 J in ≈ 1.3 ms, ≈ 1.5 kW peak) is
+**not shown to pass**: no basic or cheap 0.1–0.22 Ω resistor publishes a ms pulse rating (5 s overload tests only).
+Following the ruling, nothing was changed (F1/F3/F4 stay 1812L050/60GR, F2 stays SMD0805B050TF) and the question is
+back with the owner. Details: design-notes §8.3, `docs/reviews/2026-11-03-fix-shared-T-0104.md`.
 
 **2026-11-03 (T-0085, unattended, scope sync – documents only):** ARCHITECTURE `can` row (CA-IS3050G, L78M05ABDT, LEN)
 and root row (C30/C31, FL30/JP30, VBAT_IN) brought in line with the schematic; `tools/heat_budget.py --p-other`
@@ -64,8 +71,10 @@ to +3V3. DNP CMC FL1 (FACT4532-510-2P-T) in series with CANH/CANL, bridged by fi
 CANH/CANL_BUS and _XCVR). DNP Y-cap C70 1 nF/2 kV 1206 GND_CAN–GND (capacitor only). The bus side stays on NET-S (Q-0031);
 J4 stays 4-pole with the shield open (Q-0012). ERC unchanged (5 `lib_symbol_mismatch`), netlist checked. Details: design-notes §8.5.
 
-**Blocked (owner, one-way):** the PTC check failed. 1812L050/60GR is rated I_max 40 A, but a hard short behind F1/F3/F4
-can draw ≈ 188 A (30 V / 0.16 Ω). F2 therefore stays SMD0805B050TF. Question in the T-0065 report.
+**Blocked (owner, one-way):** PTC interrupt rating. 1812L050/60GR is rated I_max 40 A against ≈ 188 A for a hard short
+behind F1/F3/F4. The ruled fix (Q-0047: 100 A PTC + 0.15–0.22 Ω series resistor) stops at the resistor's pulse rating, which
+no cheap part publishes (T-0104). F2 stays SMD0805B050TF until this is settled. Question in the T-0104 report.
+F4 feeds the panel switches (bilge forced run, navigation lights): a competent person reviews F1/F3/F4 before installation.
 
 **Waiting for the owner:** decision 21 **[proposed]** (sense SW_SUPPLY on IO12 so a tripped F4 can be reported).
 
@@ -141,8 +150,9 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - RIS at the 40 mA maximum fault current (≈ 1.1 W) is covered only by firmware; hardware cover would need a ≥ 1.5 W
   resistor – owner decision if wanted.
 
-- T-0065: the PTC interrupt-rating problem (F1/F3/F4, I_max 40 A vs ≈ 188 A) is a system protection question for the
-  owner; F4 feeds the panel switches (bilge forced run, navigation lights), so a competent person reviews it.
+- T-0065/T-0104: the PTC interrupt-rating problem (F1/F3/F4, I_max 40 A vs ≈ 188 A) is still open. The 100 A PTC passed its
+  check, but the series resistor's ms pulse rating is unproven (owner question, T-0104 report). F4 feeds the panel switches
+  (bilge forced run, navigation lights), so a competent person reviews it.
 - T-0065 unique extended parts: −PESD0402V05, −TPS7B91; +C170101 (2.2 µF/100 V), +C107198 (4.7 nF/1 kV).
 
 - T-0064 added two unique extended parts (C487384 bulk 100 µF/63 V, C13832 1 µF/100 V); no basic/preferred part
