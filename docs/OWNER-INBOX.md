@@ -74,7 +74,7 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (9) – two-way doors
+## Decided by agents (8) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
@@ -84,7 +84,6 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 - T-0099 · INFO · system · Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → Only if the first run stays at 5 boards: swap the five or three capacitors to 2.2 uF/100 V C170101
 - T-0098 · INFO · pdm-4ch · RIS 680 ohm 1206 C17975 (extended) replaced by two 1 kohm 1206 C4410 (basic) in parallel: 0.26 USD per board at 10, sense scale 0.33 V/A → Replace each RIS by two C4410 in parallel; firmware scale constant becomes 500 ohm; check C4410 power rating with part-facts
 - T-0096 · INFO · system · 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic): 0.31 USD per board at 10, RC corner 34 Hz to 160 Hz → Change the value and LCSC code of C18 on both boards (shared sheet), then run the part-facts check on C9196
-- T-0091 · INFO · system · TPS48110A stock is 989 and L1 1231, both single-source or thin; nothing is below 500 → Re-check stock on the day of the order; L1 alternates are on file (decision 49)
 - T-0090 · MINOR · system · Two avoidable extended-part types: 4.7 nF/1 kV USB-shield capacitor and the 680 ohm 1206 RIS, 3.07 USD per order and design each → C18 -> 1 nF/2 kV C9196 (basic, already used); RIS -> two 1 kOhm 1206 C4410 in parallel (see L5, L7)
 - T-0089 · MINOR · system · The cable practice that the immunity design assumes (screened panel cable with drain at the PDM end, bundled battery pair away from VHF coax, load returns to the battery negative bus, diode at inductive loads, PWM limits, N2K drop length) is not in the README. → Add the Installation guidance section of this report to the README; text only.
 
@@ -134,7 +133,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0007 · system · Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → T-0064 (`dbc672cd`)
 - T-0005 · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → T-0071 (`80bb3bd1`)
 
-## Deferred (13)
+## Deferred (14)
 
 - T-0016 · system · Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined. → until system-mechanical: Q-0010: GND pole(s) at J10 rated like the VS input are chosen with the terminal blocks in /system mechanical; wide GND copper to J10.2 is a PCB-phase rule
 - T-0020 · system · LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first. → until prototype: Q-0013: swap to LMR51610YF only if the pre-compliance scan of the first prototypes shows PFM noise; check price and stock then
@@ -149,6 +148,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0036 · system · Is a combined 1:1 panel of pdm-4ch + pdm-hc2 acceptable (L2)? → until pcb: Q-0028: combined 1:1 panel, decided at the PCB phase after checking the multi-design surcharge
 - T-0037 · system · Is a fitted USB-C service connector required, or are pads/DNP plus OTA enough (L4)? → until order: Q-0029: USB-C fitted on the prototype run; reconsider DNP/pogo pads plus OTA for later runs
 - T-0038 · system · Pluggable or fixed screw terminals (L5)? → until system-mechanical: Q-0030: terminal type for J4/J5/J10/J11 decided in /system mechanical with the J10 pole sizing (leaning pluggable J4/J5, fixed J10/J11)
+- T-0091 · system · TPS48110A stock is 989 and L1 1231, both single-source or thin; nothing is below 500 → until order: Stock re-check of TPS48110A (989) and L1 SWPA6045S8R2MT (1231) only means something on the day of the order. It is already on both STATUS pre-order checklists, and the L1 alternates are on file (decision 49).
 
 ## Answered (47)
 

@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 103,
+    "T": 113,
     "Q": 60
   },
   "tasks": [
@@ -126,7 +126,7 @@
       ],
       "ruling": "covered by Q-0049: short EMC-only gate slew within the MOSFET SOA",
       "answered": "2026-11-03",
-      "package": "T-0070",
+      "package": "T-0106",
       "door": "one-way"
     },
     {
@@ -551,7 +551,7 @@
       ],
       "ruling": "(a) - 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint) after a datasheet check, plus a series resistor of about 0.15-0.22 ohm per PTC so that 30 V / R_total <= Imax; check the resistor's pulse energy against the PTC trip time, and if no basic/cheap part passes, return to the owner; then do the dependent F2 swap (T-0026); F4 is safety-relevant, so a competent person reviews it before installation",
       "answered": "2026-11-02",
-      "package": "T-0065",
+      "package": "T-0104",
       "door": "one-way"
     },
     {
@@ -1559,7 +1559,7 @@
       ],
       "ruling": "(a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8",
       "answered": "2026-11-03",
-      "package": "T-0068",
+      "package": "T-0105",
       "door": "one-way"
     },
     {
@@ -1782,7 +1782,7 @@
       ],
       "ruling": "no - drop the 21 A option; decision 19 is withdrawn by the owner (2026-11-03); the breaker stays as in decision 39",
       "answered": "2026-11-03",
-      "package": "T-0072",
+      "package": "T-0106",
       "fixed_by": "T-0072",
       "merged": "901c6f45f1f6be300049fd0588cf8340258c96ea",
       "door": "one-way"
@@ -1818,7 +1818,7 @@
       ],
       "ruling": "(1) maximum load capacitance: rate HC2 for about 50-100 uF load input capacitance, confirmed by the prototype measurement (Q-0045); fit only a short gate slew for EMC (within the MOSFET SOA at that capacitance); README: HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights, while DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on the 4-channel board; split grouped LED lights if the prototype shows short-circuit trips",
       "answered": "2026-11-03",
-      "package": "T-0070",
+      "package": "T-0106",
       "door": "one-way"
     },
     {
@@ -2020,7 +2020,7 @@
       ],
       "ruling": "typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and electronics go on the 4-channel board; see Q-0049",
       "answered": "2026-11-03",
-      "package": "T-0070",
+      "package": "T-0106",
       "door": "one-way"
     },
     {
@@ -2932,7 +2932,8 @@
         "finding": "E17"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0108"
     },
     {
       "id": "T-0090",
@@ -2959,7 +2960,8 @@
         "finding": "C1"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0107"
     },
     {
       "id": "T-0091",
@@ -2983,7 +2985,9 @@
         "finding": "C3"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "deferred",
+      "until": "order",
+      "reason": "Stock re-check of TPS48110A (989) and L1 SWPA6045S8R2MT (1231) only means something on the day of the order. It is already on both STATUS pre-order checklists, and the L1 alternates are on file (decision 49)."
     },
     {
       "id": "T-0092",
@@ -3144,7 +3148,8 @@
         "finding": "L5"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0107"
     },
     {
       "id": "T-0097",
@@ -3205,7 +3210,8 @@
         "finding": "L7"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0107"
     },
     {
       "id": "T-0099",
@@ -3233,7 +3239,8 @@
         "finding": "L8"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0107"
     },
     {
       "id": "T-0100",
@@ -3306,6 +3313,188 @@
       "door": "two-way",
       "state": "done",
       "ruling": "assumed: No: plain Economic PCBA with all parts assembled by JLCPCB"
+    },
+    {
+      "id": "T-0103",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-03",
+      "depends_on": [],
+      "items": [
+        "T-0006",
+        "T-0018",
+        "T-0046",
+        "T-0053",
+        "T-0054",
+        "T-0061",
+        "T-0089",
+        "T-0090",
+        "T-0091",
+        "T-0096",
+        "T-0098",
+        "T-0099"
+      ],
+      "started": "2026-11-03T11:18:03",
+      "ran_model": "opus",
+      "session": "6b8a9ff3-de01-4da9-b672-7e47f0e66d34",
+      "cost_usd": 1.436,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "5 packages, 1 deferred, 3 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-plan-system-T-0103.md"
+    },
+    {
+      "id": "T-0104",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-03",
+      "title": "PTC interrupt rating: F1/F3/F4 100 A PTC + series resistor, then the F2 swap",
+      "brief": "Owner ruling Q-0047 (verbatim): \"(a) - 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint) after a datasheet check, plus a series resistor of about 0.15-0.22 ohm per PTC so that 30 V / R_total <= Imax; check the resistor's pulse energy against the PTC trip time, and if no basic/cheap part passes, return to the owner; then do the dependent F2 swap (T-0026); F4 is safety-relevant, so a competent person reviews it before installation\". Background: docs/reviews/2026-11-02-fix-shared-T-0065.md (1812L050/60GR I_max 40 A, R_min 0.150 ohm, prospective short 30 V / 0.16 ohm = 188 A). Shared change, identical on both boards: F1 (power-usb, VS feed to the buck), F3 (can, NET-S feed), F4 (analog_sw, VS -> F4 -> D55 -> SW_SUPPLY/J5.5), F2 (power-usb, USB VBUS J3 -> F2 -> FB1/C4). Steps in order: 1) part_facts.py C70113 and C427396: I_max at V_max (must be >= 100 A at >= 30 V, V_max 60 V), I_hold/I_trip at 25 and 60 C (I_hold 0.5 A class as now; F1 carries the buck input current, F4 about 50-55 mA), R_min/R1max, time-to-trip curve, package 1812 matching the present 1812 footprint, JLCPCB class/price/stock. Pick the one that passes and is cheaper (basic/preferred first). 2) Series resistor per PTC on F1, F3, F4: R_series >= 30 V / I_max - R_min(PTC) (do not count cable or terminals), E24 value in the 0.15-0.22 ohm range of the ruling. Pulse energy check: from the PTC time-to-trip at the prospective current (30 V / (R_min + R_series)) take I^2*t, then E = I^2*t*R_series; compare it with the resistor's short-time overload / single-pulse rating from its datasheet (part_facts.py). Also check the continuous dissipation and drop at I_hold, and that the extra drop in the F4 path (about 10 mV at 55 mA) does not change the SWIN margin in design-notes section 3. Prefer a basic 1206 or 2512 thick-film or a current-sense chip resistor; one part type for all three positions. 3) Edit with tools/ksch.py: F1/F3/F4 value, LCSC and footprint (if the 1812 footprint differs, verify it against the package drawing); add one series resistor next to each of F1, F3, F4 on the supply side, so that the TVS stays at the connector side. 4) Dependent F2 swap (T-0026, decision 32): F2 SMD0805B050TF C269104 -> the same PTC part as F1/F3/F4, footprint 0805 -> 1812 (Fuse_1812). F2 is on 5 V USB VBUS (host-limited), so the ruling's series resistor is not needed there. Check I_hold against the USB current. 5) ERC and netlist on both boards before/after: only F1-F4 and the three new resistors (with their new nets) may differ. Run tools/fix_check.py --scope shared. 6) Documents: design-notes section 8.3 (calculation, part facts, failure mode: a hard short at J5.5 or on NET-S now limited to <= I_max, F4 trips and disables the panel switches while bus control keeps working), ARCHITECTURE power-usb/analog_sw rows if they name the PTC (not the invariants), both STATUS files (drop the 'Blocked: PTC' paragraph and the pre-order item 'Resolve the F1/F3/F4 PTC I_max question'; note that F2 is now swapped). Safety note in the report and STATUS: F4 feeds the panel switches (bilge forced run, navigation lights); a competent person reviews F1/F3/F4 before installation. Stop and ask (one-way): if neither C70113 nor C427396 shows I_max >= 100 A at >= 30 V in its datasheet, or neither fits the 1812 footprint; if no basic/cheap resistor passes the pulse-energy check (the ruling says return to the owner); if the series resistor would cut the SWIN margin in design-notes section 3 below 2.0 V.",
+      "items": [
+        "T-0018"
+      ],
+      "plan": "T-0103",
+      "depends_on": []
+    },
+    {
+      "id": "T-0105",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-03",
+      "title": "Panel switch loads R3/R4/R7/R8 -> 2 k + 2 k basic",
+      "brief": "Owner ruling Q-0048 (verbatim): \"(a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8\". This replaces the 2.2 k + 2.4 k of decision 35 (no basic part exists, T-0068 report). Shared analog_sw sheet, identical on both boards. Steps: 1) part_facts.py C17944 (2 kOhm 1206, power rating 0.25 W, voltage rating >= 48 V clamp; per part 0.11 W at 30 V, about 0.29 W per part during a 48 V clamp - check the short-time overload rating for the clamp case). 2) tools/ksch.py: each of R3/R4/R7/R8 becomes two C17944 in series (keep the existing ref for one half, add the second with the next free refs, new mid-point net). 3) Recheck in design-notes section 3: switch load 4.0 k (6.4 -> 7.5 mA at 30 V); the ON/OFF thresholds and the SWIN margin at 10.5 V with D55 and the P1 series resistor, and the leakage rejection for dry contacts. 4) Heat: the panel load rises by about 0.13 W at 30 V. Update the p_other figure in design-notes section 4 (about 2.2 -> 2.3 W) and rerun tools/heat_budget.py for pdm-4ch at 40 C (4 x BTT6050 at 4 A, --p-other with the new value). Change the tool default only if the notes prove it. 5) ARCHITECTURE: analog_sw row '4.7 k load' -> '2 x 2 k load' and the panel switch supply budget (4 x 7.5 mA + 4 x 5 mA, about 55 mA; F4 hold unchanged). Do not touch the invariants. 6) ERC and netlist on both boards before/after; only R3/R4/R7/R8, the four new resistors and their mid-point nets may differ; fix_check.py --scope shared. 7) Both STATUS files: drop the 'Blocked: T-0046' and 'For /system: T-0068/T-0046' notes. Stop and ask (one-way): if the 4 A pdm-4ch rating at 40 C no longer holds with the new p_other, or if the SWIN margin falls below 2.0 V.",
+      "items": [
+        "T-0046"
+      ],
+      "plan": "T-0103",
+      "depends_on": [
+        "T-0104"
+      ]
+    },
+    {
+      "id": "T-0106",
+      "role": "board-fixer",
+      "scope": "pdm-hc2",
+      "state": "ready",
+      "created": "2026-11-03",
+      "title": "Short EMC gate slew, maximum load capacitance, HC2 load guidance",
+      "brief": "Owner rulings (verbatim). Q-0049 (T-0054): \"(1) maximum load capacitance: rate HC2 for about 50-100 uF load input capacitance, confirmed by the prototype measurement (Q-0045); fit only a short gate slew for EMC (within the MOSFET SOA at that capacitance); README: HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights, while DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on the 4-channel board; split grouped LED lights if the prototype shows short-circuit trips\". Q-0050 (T-0006): \"covered by Q-0049: short EMC-only gate slew within the MOSFET SOA\". Q-0051 (T-0061): \"typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and other electronics go on the 4-channel board; see Q-0049\". Q-0053 (T-0053): \"no - drop the 21 A option; decision 19 is withdrawn by the owner (2026-11-03); the breaker stays as in decision 39\". These amend the 1000 uF / 20 A sizing of decision 25; its topology stays (TPS4811-Q1 section 8.3.2.1 / Fig. 8-6: R1 in the PU path = R104/R204, C1 + about 10 ohm at the gate, PD direct, RGATE_PD as a 0 ohm footprint). Inputs: docs/part-facts/C17556513.md (Eq. 3 I_inrush = 0.63 x V(BST-SRC) x C_LOAD / (R1 x C1), Eq. 4 CBST > Qg + 10 x C1, tSC 4/5 us), docs/part-facts/C501507.md (BSC030N08NS5 SOA Diagram 3 at 30 V: 10 us ~185 A, 100 us ~15 A; Zth Diagram 4), and the method and script of docs/reviews/2026-11-02-fix-pdm-hc2-T-0070.md. Steps: 1) Size R1/C1 so that ALL of these hold at 30 V: (a) with C_LOAD = 100 uF (aim) plus a 15 A resistive load, inrush + load stays below the minimum ISCP threshold (about 71 A with RISCP 4.7 k) with margin, so the fast trip does not fire at turn-on; (b) the input-side MOSFET Q11/Q21 stays inside SOA Diagram 3 and Tj < 150 C from Zth for that ramp, starting from the hot case and from a retry after running at 15 A (heat budget); (c) turn-on into a hard short (slow gate rise, 30 V across Q11 until ISCP trips plus tSC) stays inside SOA - T-0070 showed 100 k / 3.9 nF fails this; (d) the output dV/dt is far below today's 400-800 V/us (EMC report 2026-10-30, E2; PROFET reference 0.8 V/us), ramp in the tens of microseconds; (e) Eq. 4 with the existing CBST; (f) turn-off unchanged (PD direct). If 100 uF cannot meet (a)-(c), take the largest C_LOAD between 50 and 100 uF that does, and state it as the rating. Prefer R/C values and parts already on the BOM (e.g. C1523 1 nF, C25744 10 k, C25076 100 ohm). 2) tools/ksch.py on hc_channel (both channels): R104/R204 value = R1, add C1 + 10 ohm at the gate and the 0 ohm RGATE_PD footprint per decision 25. ERC and netlist before/after; only these refs may change. fix_check.py --scope pdm-hc2. 3) Rerun tools/heat_budget.py --channels 2 --part HC-2xBSC030 at 40 C (rating stays about 15 A; no PWM). 4) README: in the boards/limitations text, HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights; DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on pdm-4ch; give the maximum load input capacitance; split grouped LED work lights if they trip. Keep the existing no-PWM and timing bullets. 5) design-notes section 4a: sizing, SOA/Zth calculation, the rating, and a failure-mode note for bilge forced-run outputs (slew does not delay the fast trip; a large capacitive load trips and waits 3.8 min; a competent person reviews the bilge outputs before installation). 6) hardware/pdm-hc2/STATUS.md: replace the T-0070 'blocked' paragraph and Next item 0 with the result. Prototype test list: measure the real load capacitance and inrush of each intended HC2 load, including grouped LED work lights (Q-0045), confirm the 50-100 uF rating, and split LED groups that trip. T-0053: R113/R213 stay 68 k C36871 (decision 39, T-0072), no change; note that decision 19 and the 21 A option are withdrawn. Stop and ask (one-way): if no R1/C1 meets (a)-(c) even at 50 uF; if meeting them would need a change to RISCP/the fast-trip level, the breaker (decision 39), CBST or the MOSFET (decision 19 is withdrawn); if the heat budget moves the 15 A rating.",
+      "items": [
+        "T-0006",
+        "T-0054",
+        "T-0061",
+        "T-0053"
+      ],
+      "plan": "T-0103",
+      "depends_on": []
+    },
+    {
+      "id": "T-0107",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-03",
+      "title": "Extended-part fee levers: C18 -> C9196, RIS -> 2 x C4410, 1 uF/100 V -> C170101",
+      "brief": "Two-way agent items from docs/reviews/2026-11-03-cost-system.md (C1, L5, L7, L8). T-0090 is the combined finding behind T-0096 (C18) and T-0098 (RIS), so it is done by those two changes, not by a third. Value and part swaps only, no new footprints. 1) T-0096 (shared power-usb, identical on both boards): C18 4.7 nF/1 kV C107198 -> 1 nF/2 kV X7R 1206 C9196 (basic, already on the BOM as C50-C53/C70). part_facts.py C9196 (rated voltage, X7R, 1206 footprint unchanged). The R13 || C18 corner moves from 34 Hz to 160 Hz; note it in design-notes section 8.3 (the shield RC is a pre-compliance footprint, decision 31). 2) T-0098 (pdm-4ch only, per-channel sheet): each RIS R103/R203/R303/R403 680 ohm C17975 -> two 1 kOhm 1206 C4410 (basic) in parallel = 500 ohm. part_facts.py C4410 (power 0.25 W, 1206). Check that IS at full load stays below the ADC range and the 3.3 V clamp: BTT6050 at 4.5 A about 1.5 V, BTT6010 at 8 A about 2.7 V (use kILIS from the BTT6050/BTT6010 facts). Decision 36 asks for RIS as 1206 >= 0.25 W: two 0.25 W parts meet it. The 40 mA fault case (0.8 W total) stays covered by the firmware DEN rule (design-notes section 6.1). Record the new firmware scale constant (500 ohm, 0.33 V/A) in design-notes section 6.1 and in the pdm-4ch STATUS for /system firmware. 3) T-0099: the item's condition holds (decision 33: first order 5 + 5 boards). Swap 1 uF/100 V C13832 -> 2.2 uF/100 V X7R 1206 C170101 (already on the BOM as C1, same 1206 footprint) at: C30 (shared root controller part, both boards; decision 26 allows 1-2.2 uF at J10) and HC2 C102/C202 (CVS on VS_CTRL, auto decision 58 - check the TPS4811-Q1 CVS recommendation in docs/part-facts/C17556513.md, and the RVS 100 ohm x 2.2 uF time constant against the VS_CTRL behaviour). Do NOT change pdm-4ch C104-C404: confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab, so changing it is a one-way door. Report it as a question for the owner (default: keep 1 uF C13832; the C13832 fee then stays on pdm-4ch only). Add to both STATUS pre-order checklists: for runs of 9+ (pdm-4ch) / 15+ (pdm-hc2) boards, C13832 for these places is cheaper again. 4) ERC and netlist on both boards before/after: only C18, C30, C102/C202 (values/LCSC), and R103/R203/R303/R403 plus the four new parallel resistors may change. fix_check.py --scope shared. Update STATUS on both boards and the unique-part counts (cost report: extended types 19 -> 17 on pdm-4ch, 20 -> 18 or 19 on pdm-hc2). Stop and ask (one-way): if C9196 or C4410 fail their facts check (voltage/power); if IS at the rated current would exceed the ADC range with 500 ohm; if TPS4811-Q1 gives an upper limit for CVS below 2.2 uF (then leave C102/C202 and C30 as they are, because a partial swap saves nothing on HC2).",
+      "items": [
+        "T-0090",
+        "T-0096",
+        "T-0098",
+        "T-0099"
+      ],
+      "plan": "T-0103",
+      "depends_on": [
+        "T-0105",
+        "T-0106"
+      ]
+    },
+    {
+      "id": "T-0108",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "ready",
+      "created": "2026-11-03",
+      "title": "README installation guidance (text only)",
+      "brief": "Two-way agent item from docs/reviews/2026-11-03-emc-system.md, section 'Installation guidance (for the README)'. Text only: no schematic, library or ARCHITECTURE change, and both netlists unchanged. Add an 'Installation' section to README.md with the report's bullets: battery feed (fuse at the battery, twisted/bundled pair, >= 0.5 m from the VHF feed, crossing at 90 deg, check polarity), loads (return with the feed to the battery negative bus, never through the PDM ground, fuse each output wire), inductive loads (diode/TVS at the load), PWM (none above 200 Hz on pdm-4ch; none on pdm-hc2 until measured, decision 25), panel cable (one screened multicore <= 10 m, drain only at J5.10, dry contacts, not shared with other loads), NMEA 2000 (drop <= 6 m, backbone grounded once, no drain at the node, away from the VHF coax), position (enclosed, vented, away from the VHF antenna and coax). Do not repeat what 'Important limitations' already says (load dump, USB service rule, HC2 external breaker, reverse battery, dry contacts). Point to those bullets instead, and keep the wording consistent with them and with the HC2 load text written by P3. Generic wording only: no vessel names, no personal data. Run fix_check.py --scope shared (README only). Stop and ask (one-way): if a bullet would contradict a confirmed decision or the current README (e.g. a different PWM rule than decision 25 as amended).",
+      "items": [
+        "T-0089"
+      ],
+      "plan": "T-0103",
+      "depends_on": [
+        "T-0106"
+      ]
+    },
+    {
+      "id": "T-0109",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-03",
+      "depends_on": [
+        "T-0104",
+        "T-0105",
+        "T-0107",
+        "T-0108"
+      ],
+      "verify": true,
+      "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469"
+    },
+    {
+      "id": "T-0110",
+      "role": "validator",
+      "scope": "pdm-hc2",
+      "state": "ready",
+      "created": "2026-11-03",
+      "depends_on": [
+        "T-0104",
+        "T-0105",
+        "T-0106",
+        "T-0107",
+        "T-0108"
+      ],
+      "verify": true,
+      "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469"
+    },
+    {
+      "id": "T-0111",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-03",
+      "depends_on": [
+        "T-0104",
+        "T-0105",
+        "T-0106",
+        "T-0107",
+        "T-0108"
+      ],
+      "verify": true,
+      "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469",
+      "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
+      "recheck": "cost"
+    },
+    {
+      "id": "T-0112",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-03",
+      "depends_on": [
+        "T-0104",
+        "T-0105",
+        "T-0106",
+        "T-0107",
+        "T-0108"
+      ],
+      "verify": true,
+      "since": "d6cef248342ffc450ab1240131b4ca37fbdf0469",
+      "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
+      "recheck": "emc"
     }
   ],
   "board_size_start": {
