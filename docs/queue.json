@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 81,
+    "T": 83,
     "Q": 54
   },
   "tasks": [
@@ -1907,7 +1907,8 @@
         "finding": "H5"
       },
       "state": "parked",
-      "note": "re-approved 2026-11-03: tools/heat_budget.py is editable in a sync package (decision 71)"
+      "note": "re-approved 2026-11-03: tools/heat_budget.py is editable in a sync package (decision 71)",
+      "package": "T-0082"
     },
     {
       "id": "T-0058",
@@ -2688,6 +2689,41 @@
       "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
       "interrupted": null,
       "report": "docs/reviews/2026-11-03-validate-pdm-hc2-2.md"
+    },
+    {
+      "id": "T-0081",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-03",
+      "depends_on": [],
+      "items": [
+        "T-0057"
+      ],
+      "started": "2026-11-03T09:59:20",
+      "ran_model": "opus",
+      "session": "5ffcd539-238a-4c18-a374-e8252c621c89",
+      "cost_usd": 0.2147,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "1 packages, 0 deferred, 0 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-plan-system-T-0081.md"
+    },
+    {
+      "id": "T-0082",
+      "role": "board-fixer",
+      "scope": "sync",
+      "state": "ready",
+      "created": "2026-11-03",
+      "title": "HC2 heat-budget RDS(on) at 150 C per BSC030N08NS5 Diagram 9",
+      "brief": "Sync package (decision 71): no design change, no schematic or netlist change. 1) In tools/heat_budget.py set PARTS['HC-2xBSC030'] = (0.0070, 0.0117), with a comment citing the source: 'BSC030N08NS5 Rev 2.3 Diagram 9 (p. 8): max 3.0 mOhm at 25 C, ~5.35 mOhm at 150 C; path = 2 x FET + 1 mOhm shunt'. Change no other PARTS entry or default. 2) Run python3 tools/heat_budget.py --channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002 --currents 12.5,15,17.5,18,19.7,20 at 40 C. Expected values (validator H5 and T-0072 scratch copy): 15 A ~88 C, 17.5 A ~111 C, 18 A ~117 C, 19.7 A ~139 C, 20 A ~143 C. 3) In docs/design-notes.md section 4a, update the heat line under the parts table ('2 x 12.5 A -> Tj ~71 C; 2 x 15 A -> 87 C; 2 x 20 A -> 137 C') to the tool's new output, and add --r-path 0.002 to the quoted command if the numbers come from that run. In section 4a.2 you may replace 'scratch copy of tools/heat_budget.py with RDS(on)-path 11.7 mOhm' with the tool itself, with the same numbers. Keep the text 'Continuous rating ~15 A per channel'. 4) Gates: only tools/heat_budget.py and docs/design-notes.md change; netlists of both boards unchanged; ARCHITECTURE invariants untouched; the tool runs. Stop and ask (one-way door) if the rerun puts 15 A at or above ~100 C, or 19.7 A (upper IOC) at or above 150 C (Tj max, Table 2). Either would change the HC2 rating or the breaker setting (decisions 39 / T-0072).",
+      "items": [
+        "T-0057"
+      ],
+      "plan": "T-0081",
+      "depends_on": []
     }
   ],
   "board_size_start": {
