@@ -1,11 +1,21 @@
 # pdm-4ch status
 
-Updated: 2026-11-03 (T-0107)
+Updated: 2026-11-03 (T-0118)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-03 (T-0118: T-0018, Q-0060/decision 81, unattended, shared – `power-usb`, `can`, `analog_sw`, same on both
+boards):** F1–F4 are now TECHFUSE mSMD050-60V C70113 (60 V, I_max 100 A, I_hold 0.50 A, R1max 1.0 Ω, 1812; F2 moved from
+`Fuse_0805_2012Metric` to `Fuse_1812_4532Metric`). New 0.2 Ω 2 W alloy 2512 FOJAN FRM252WJR200TK C7420022 in series on the
+protected side: R54 (F1 → D1/D2), R55 (F3 → D10/FB2), R56 (F4 → D55); F2 has none. Hard short behind a resistor: 30 V /
+0.35 Ω ≈ 86 A < 100 A. Checks: switch path ≈ 2.03 V ≥ 2.0 V at a 10.5 V battery via D55 (F4 + R56 1.2 Ω, less than the
+old 1.4 Ω); L78M05 input ≈ 8.5 V at NET-S 9 V; buck input −0.22 V at 0.18 A; USB-only at the 0.40 A peak 3.74 V typ (was
+3.80 V; below the 4 V minimum with either part, same result in every corner). ERC 0 errors, 5 warnings (unchanged);
+netlist differs only in F1–F4 and R54–R56. +3 parts, +0 unique (+C70113 +C7420022 −C19078719 −C269104). Heat budget: no
+output change, losses in mW. Details: design-notes §8.3, `docs/reviews/2026-11-03-fix-shared-T-0118.md`.
 
 **2026-11-03 (T-0107: T-0098, T-0099, unattended, shared – cost levers L7/L8):** RIS is now two 1 kΩ 1206 0.25 W in parallel = 500 Ω per channel: R103 ‖ R107, R203 ‖ R207, R303 ‖ R307, R403 ‖ R407 (C4410, basic). The extended 680 Ω C17975 is no longer used. IS at full load is ≤ 1.63 V (BTT6050 4.5 A, kILIS min) and ≤ 1.27 V (BTT6010 9 A), below the 2.9 V ADC range and the 3.3 V clamp. **Firmware scale constant: RIS 500 Ω (≈ 0.33 V/A for the BTT6050).** C30 (root, battery input J10, same on both boards) is now 2.2 µF/100 V X7R 1206 C170101 (the part already used as C1; decision 26 allows 1–2.2 µF at J10). C104–C404 are unchanged: 1 µF C13832, because confirmed decision 26 names them (that is an owner question). The C18 swap (T-0096) is blocked too: confirmed decision 31 names 4.7 nF, so it goes to the owner. ERC 0 errors, 5 warnings (unchanged). The netlist differs only in the refs above. +4 parts, +0 unique. Extended types 19 → 18 (−C17975). Details: design-notes §6.1 and §8.1, `docs/reviews/2026-11-03-fix-shared-T-0107.md`.
 
@@ -80,10 +90,11 @@ to +3V3. DNP CMC FL1 (FACT4532-510-2P-T) in series with CANH/CANL, bridged by fi
 CANH/CANL_BUS and _XCVR). DNP Y-cap C70 1 nF/2 kV 1206 GND_CAN–GND (capacitor only). The bus side stays on NET-S (Q-0031);
 J4 stays 4-pole with the shield open (Q-0012). ERC unchanged (5 `lib_symbol_mismatch`), netlist checked. Details: design-notes §8.5.
 
-**Blocked (owner, one-way):** PTC interrupt rating. 1812L050/60GR is rated I_max 40 A against ≈ 188 A for a hard short
-behind F1/F3/F4. The ruled fix (Q-0047: 100 A PTC + 0.15–0.22 Ω series resistor) stops at the resistor's pulse rating, which
-no cheap part publishes (T-0104). F2 stays SMD0805B050TF until this is settled. Question in the T-0104 report.
-F4 feeds the panel switches (bilge forced run, navigation lights): a competent person reviews F1/F3/F4 before installation.
+**PTC interrupt rating: settled (T-0118, decision 81).** F1–F4 C70113 (I_max 100 A), 0.2 Ω C7420022 R54/R55/R56 in series
+with F1/F3/F4 (≈ 86 A for a 30 V hard short). The resistor is accepted on its 5 s / 50 J overload rating; the 30 V
+hard-short prototype test below is mandatory before installation. An overstressed resistor fails open (for F4: panel
+supply permanently off, bus control keeps working). F4 feeds the panel switches (bilge forced run, navigation lights):
+a competent person reviews F1–F4 and R54–R56 before installation.
 
 **Waiting for the owner:** decision 21 **[proposed]** (sense SW_SUPPLY on IO12 so a tripped F4 can be reported).
 
@@ -123,6 +134,10 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Prototype test list
 
+- **T-0118 / decision 81 – PTC hard short (mandatory before installation):** from a 30 V battery-like supply (low source
+  impedance), short J5.5 to GND (behind F4/R56), then behind F1 (D1/D2 node) and behind F3 (D10/FB2 node). Scope the
+  current; afterwards inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Pass before installation
+  (design-notes §8.3).
 - **T-0042 / Q-0034 – switch-path margin:** measure IN − device GND (U11–U14 pin IN vs the channel's ground network) at
   SWIN = 10.5 V with the channel on, once with the 3.3 V rail removed and once with it present. Repeat at a 10.5 V battery
   with D55's drop (SWIN ≈ 9.8–10.1 V). Pass: ≥ 2.0 V (VIN(H) min). If short, the planned fix is **RIN R101/R201/R301/R401 →
@@ -140,7 +155,9 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - H5VL10B has no published TLP curve (8/20 µs clamp only); accepted on that data (design-notes §8.3).
 - Check the KiCad footprints `D_SOD-882`, `TO-252-2`, `L_0805_2012Metric` against the JLCPCB footprints of C7420372,
   C58069, C1017.
-- Resolve the F1/F3/F4 PTC I_max question before ordering.
+- T-0118: check the KiCad `Fuse_1812_4532Metric` pads (1.125 × 3.4 mm, pitch 4.275 mm) of F1–F4 against the JLCPCB
+  footprint of C70113 (datasheet pads 1.78 × 3.2 mm, gap 3.2 mm), and `R_2512_6332Metric` (R54–R56) against the JLCPCB
+  footprint of C7420022. C70113 is up to 1.8 mm high. Recheck stock of C70113 and C7420022.
 - T-0067: check the KiCad footprints `SOIC-8_7.5x5.85mm_P1.27mm` (U5) and `L_CommonModeChoke_Coilank_ACM4532`
   (FL1) against the JLCPCB footprints of C528763 and C20624726. The FL1 pad numbering must match windings 1→2 / 4→3
   before FL1 is ever fitted (design-notes §8.5).
@@ -164,9 +181,8 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - RIS at the 40 mA maximum fault current (≈ 1.1 W) is covered only by firmware; hardware cover would need a ≥ 1.5 W
   resistor – owner decision if wanted.
 
-- T-0065/T-0104: the PTC interrupt-rating problem (F1/F3/F4, I_max 40 A vs ≈ 188 A) is still open. The 100 A PTC passed its
-  check, but the series resistor's ms pulse rating is unproven (owner question, T-0104 report). F4 feeds the panel switches
-  (bilge forced run, navigation lights), so a competent person reviews it.
+- T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended
+  parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).
 - T-0065 unique extended parts: −PESD0402V05, −TPS7B91; +C170101 (2.2 µF/100 V), +C107198 (4.7 nF/1 kV).
 
 - T-0064 added two unique extended parts (C487384 bulk 100 µF/63 V, C13832 1 µF/100 V); no basic/preferred part

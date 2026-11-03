@@ -10527,7 +10527,7 @@
 	)
 	(symbol
 		(lib_id "Device:Polyfuse")
-		(at 99.06 64.77 90)
+		(at 91.44 64.77 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10536,7 +10536,7 @@
 		(fields_autoplaced yes)
 		(uuid "903397a0-b05f-4e3d-bf33-8936329bc61d")
 		(property "Reference" "F4"
-			(at 101.6 63.5 0)
+			(at 93.98 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10544,8 +10544,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1812L050/60GR"
-			(at 101.6 66.04 0)
+		(property "Value" "mSMD050-60V"
+			(at 93.98 66.04 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10554,7 +10554,7 @@
 			)
 		)
 		(property "Footprint" "Fuse:Fuse_1812_4532Metric"
-			(at 99.06 64.77 0)
+			(at 91.44 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10563,7 +10563,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 99.06 64.77 0)
+			(at 91.44 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10572,7 +10572,7 @@
 			)
 		)
 		(property "Description" "Switch-supply fuse (same part as F1): short in the panel cable trips it"
-			(at 99.06 64.77 0)
+			(at 91.44 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10580,8 +10580,8 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C19078719"
-			(at 99.06 64.77 0)
+		(property "LCSC" "C70113"
+			(at 91.44 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10606,7 +10606,7 @@
 	)
 	(symbol
 		(lib_id "power:VS")
-		(at 95.25 64.77 0)
+		(at 87.63 64.77 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -10615,7 +10615,7 @@
 		(fields_autoplaced yes)
 		(uuid "58c250f0-8134-49d2-9f40-83d56a35ee4f")
 		(property "Reference" "#PWR0312"
-			(at 97.79 63.5 0)
+			(at 90.17 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10624,7 +10624,7 @@
 			)
 		)
 		(property "Value" "VS"
-			(at 97.79 66.04 0)
+			(at 90.17 66.04 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10633,7 +10633,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 95.25 64.77 0)
+			(at 87.63 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10642,7 +10642,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 95.25 64.77 0)
+			(at 87.63 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10651,7 +10651,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 95.25 64.77 0)
+			(at 87.63 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11405,6 +11405,85 @@
 			(project "ESP32-PDM-HC2"
 				(path "/d0898527-243c-48e9-a217-df57be741056/ed8f8cb2-5bf2-45a6-acc3-4c3a149c5309"
 					(reference "R48")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 99.06 64.77 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a4b4daa6-866c-402e-be03-f895a7d8eddb")
+		(property "Reference" "R56"
+			(at 101.6 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "200m"
+			(at 101.6 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_2512_6332Metric"
+			(at 99.06 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 99.06 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "0.2 ohm 2 W alloy 2512, FOJAN FRM252WJR200TK (PTC series resistor, T-0118)"
+			(at 99.06 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C7420022"
+			(at 99.06 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4ee070c1-dd6d-46a7-9aaa-b1721db00a40")
+		)
+		(pin "2"
+			(uuid "0fa656be-aa47-479a-a7a1-534fcdfc9332")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056/ed8f8cb2-5bf2-45a6-acc3-4c3a149c5309"
+					(reference "R56")
 					(unit 1)
 				)
 			)
