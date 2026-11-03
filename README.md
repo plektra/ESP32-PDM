@@ -68,6 +68,28 @@ per order, so order mixed builds together to pay it once.
   earth to battery negative through the USB cable, which can cause ground-loop currents, galvanic
   corrosion and damage. Unplug the USB cable after service.
 
+## Installation
+
+The interference immunity of the boards assumes the cable practice below. It adds to the points in
+[Important limitations](#important-limitations) (load dump, wire fuses, dry contacts, reverse battery, the `pdm-hc2`
+external breaker, USB service only), which are not repeated here.
+
+- **Battery feed.** Fuse at the battery, sized to the wire. Run + and − as a twisted or tightly bundled pair, as short
+  as possible, at least 0.5 m from the VHF antenna feed and the transmitter; where they must cross, cross at 90°.
+  Check polarity before connecting (see the reverse-battery points above).
+- **Loads.** Run each load's return with its feed (same cable, twisted) back to the battery negative bus. Never return
+  load current through the PDM ground. Fuse each output wire (see "Not a circuit breaker" above).
+- **Inductive loads** (solenoids, relays, horns, motors): fit a diode or TVS at the load.
+- **PWM.** No PWM above 200 Hz on `pdm-4ch`. No PWM at all on `pdm-hc2` until it has been measured on the bench
+  (its outputs are on/off only, see above).
+- **Panel cable.** One screened multicore, at most 10 m, with the switch, LED and supply wires inside the same cable.
+  Connect the drain only at the PDM end (J5.10). Dry contacts only (see above). Do not share the cable with other
+  loads.
+- **NMEA 2000.** Drop cable at most 6 m; ground the backbone shield once, at the power tap. The node has no shield pin,
+  so do not connect the drain at the node. Keep the drop away from the VHF coax.
+- **Position.** An enclosed, vented box (see above), as far from the VHF antenna and its coax as practical. The plastic
+  box gives no shielding: the cables act as the antenna, so cable practice matters more than box position.
+
 ## Repository layout
 
 ```
