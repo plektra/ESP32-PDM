@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 129,
+    "T": 131,
     "Q": 66
   },
   "tasks": [
@@ -4142,7 +4142,7 @@
       "id": "T-0125",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [
         "T-0118",
@@ -4156,7 +4156,14 @@
       "recheck": "emc",
       "started": "2026-11-03T22:55:31",
       "ran_model": "sonnet",
-      "session": "4f9a598c-953e-4b20-96cf-934bc63eef5f"
+      "session": "4f9a598c-953e-4b20-96cf-934bc63eef5f",
+      "cost_usd": 0.3965,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "2 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-emc-system-2.md"
     },
     {
       "id": "T-0126",
@@ -4232,6 +4239,55 @@
       "door": "two-way",
       "state": "done",
       "ruling": "assumed: yes, if Tj stays within the existing margin"
+    },
+    {
+      "id": "T-0129",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "E18",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-4ch",
+        "location": "root sheet: Q30 IPT007N06N / D30 SMCJ30CA, design-notes 8.6 (b)",
+        "summary": "A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V.",
+        "fix": "Correct the 8.6 (b) statement: Q30 avalanches, EAS 1100 mJ covers the roughly 45 mJ stored in the VS capacitors; no part change.",
+        "door": "two-way",
+        "reason": "Documentation only; no part or decision changes (policy: two-way, documentation).",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-emc-system-2.md",
+        "finding": "E18"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0130",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "E19",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "summary": "Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)?",
+        "default": "No; treat E18 as documentation only and take no hardware action",
+        "door": "two-way",
+        "reason": "A sensible default exists; a TVS on VS could be added later at the cost of one part.",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-emc-system-2.md",
+        "finding": "E19"
+      },
+      "door": "two-way",
+      "state": "done",
+      "ruling": "assumed: No; treat E18 as documentation only and take no hardware action"
     }
   ],
   "board_size_start": {

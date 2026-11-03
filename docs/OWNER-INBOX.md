@@ -8,10 +8,12 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (5) – two-way doors
+## Decided by agents (7) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
+- T-0129 · MINOR · pdm-4ch · A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → Correct the 8.6 (b) statement: Q30 avalanches, EAS 1100 mJ covers the roughly 45 mJ stored in the VS capacitors; no part change.
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0127 · INFO · pdm-4ch · C170101 instead of C13832 saves the loading fee only below about 14 boards per order; above that C13832 is cheaper → revisit at order time if the run is 15 boards or more
 - T-0126 · INFO · pdm-4ch · Q30 is the most expensive new part (3.06 USD at 10 boards); AGM601LL C5464765 (TOLL-8L, 60 V, 1.25 mΩ, 0.85 USD) would save about 2.2 USD per board if the heat budget still passes → check TOLL-8L pinout against Infineon_PG-HSOF-8-1, rerun tools/heat_budget.py with Q30 at 1.25 mΩ, swap if it passes
