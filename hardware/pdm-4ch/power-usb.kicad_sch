@@ -8301,7 +8301,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4.7nF/1kV"
+		(property "Value" "1nF/2kV"
 			(at 33.02 143.51 0)
 			(effects
 				(font
@@ -8337,7 +8337,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C107198"
+		(property "LCSC" "C9196"
 			(at 30.48 142.24 0)
 			(effects
 				(font
