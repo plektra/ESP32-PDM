@@ -202,6 +202,55 @@ Notes and open points:
     facts read (UNVERIFIED) – check it on the prototype, then note the result here and in the README.
   - *No PWM on HC2 outputs* until switching loss and SOA are measured on the bench (owner ruling Q-0001).
 
+### 4a.1 Controller pin filtering (T-0071: T-0056, T-0005, T-0008; 2026-11-03, auto)
+
+Source: TPS4811-Q1 SLUSEE5E, facts file `docs/part-facts/C17556513.md` (p. 7–10, 16, 37–40, Table 9-3, Fig. 9-18).
+Refs are channel 1 / channel 2 (same sheet `hc_channel` ×2). All new fitted parts are already on the BOM; the
+orchestrator adds no unique part.
+
+| Ref | Value / LCSC | Node | Check |
+|---|---|---|---|
+| C107/C207 | 1 nF 0402 C1523, fitted | DIODE–GND, across MMBT3904 | 9.6.1 (p. 40): "a small 1000pF bypass capacitor **must** be placed in parallel with the MMBT3904". I(DIODE) 10/160 µA into the BJT (r_e ≈ 2.6 kΩ at 10 µA) → τ ≈ 3 µs, negligible for a thermal sensor |
+| R114/R214 | RVS 100 Ω 0402 C25076, fitted | VS → VS_CTRL (U11/U12 pin 20) | Table 9-3: 100 Ω. I(Q) 613/700 µA typ/max (p. 8, GND-pin current; no separate IVS row, the charge pump current 80–126 µA is drawn from VS inside I(Q) – stated test condition EN = 2 V, so assumed) → drop **61/70 mV**, < 0.3 V. Even at a 6 V crank dip VS pin ≈ 5.9 V ≫ V(VS_PORR) 3.2 V max. The gate-drive peak (PU 3.75 A) comes from CBST, not VS. P = 49 µW |
+| C102/C202 | CVS 1 µF/100 V X7R 1206 C13832 (was 100 nF/100 V C28233, now moved from VS to VS_CTRL), fitted | VS_CTRL–GND | Table 9-3: 0.1–10 µF. τ = 100 Ω × 1 µF = 100 µs (f_c 1.6 kHz), so the pin's 60 V/µs dV/dt limit cannot be reached through RVS. Part already on the BOM (C30). DC bias at 24–30 V leaves ≈ 0.5–0.7 µF, still inside the range |
+| C108/C208 | X cap 1 nF 0402 C1523, fitted | CS+ (CSP) – CS− (SNS) | CS+ is fed through RSET 100 Ω, CS− sits on the shunt: differential τ = 100 Ω × 1 nF = **0.1 µs** = 2.5 % of tSC 4 µs typ (5 µs max) and ≪ tOC 146 ms. Voltage across it ≤ 0.3 V (abs. max CS+–CS−) |
+| C109/C209, C110/C210 | Y caps 100 pF/100 V C0G 0603 C296717, **DNP** | CS+–GND, CS−–GND | Timing passes (100 Ω × 100 pF = 10 ns), but they are **not matched in effect**: CS− has no series impedance (on the shunt), so C110 does nothing and C109 alone turns common-mode VS noise into a differential error of C_Y/(C_X+C_Y) ≈ 9 %. Fig. 9-18 uses them only with FB1/FB2 in both lines. DC offset from the caps is zero (ceramic, no DC current; V(OS_SET) ±200 µV unchanged). Fit them only together with balanced ferrites, at the pre-compliance scan (Q-0012) |
+| C111/C211 | 1 nF 0402 C1523, fitted | EN/UVLO–GND | Table 9-3 CEN 1–1000 nF. Divider 1 MΩ/100 kΩ/39 kΩ; see the time table below |
+| C112/C212 | 1 nF 0402 C1523, fitted | OV–GND | see below |
+| C113/C213 | 1 nF 0402 C1523, fitted | IWRN–GND | Table 9-3 CIWRN 10 pF–100 nF. 47 kΩ × 1 nF = 47 µs vs tOC 146 ms (CTMR 10 µF): 0.03 %. Does not touch the short-circuit comparator (ISCP/CS−). 1 nF instead of the suggested 100 pF to reuse C1523; if CTMR is ever removed (tOC 25 µs), drop it to 100 pF |
+
+UV/OV response (numeric step simulation of the RC ladder, both caps equal, threshold 1.18 V):
+
+| Event | 1 nF (fitted) | 10 nF (rejected) |
+|---|---|---|
+| OV, VS step 24 → 48 V (TVS clamp) | 0.10 ms | 1.0 ms |
+| OV, VS step 24 → 36 V | 0.30 ms | 3.0 ms |
+| OV, VS step 12 → 36 V | 0.40 ms | 4.0 ms |
+| UV, VS step 24 → 6 V | 0.21 ms | 2.1 ms |
+| EN delay at power-up 0 → 24 V | 0.07 ms | 0.66 ms |
+
+Criterion: the OV cut-off (34.5 V) must act well inside the shortest ISO 16750-2 load-dump pulse (40 ms). 1 nF keeps it
+≤ 1 % (0.4 ms); 10 nF reaches 10 % (4 ms) – no clear margin, so 1 nF is fitted. 1 nF (≈ 1 Ω at 156 MHz) already
+shorts VHF pick-up, which is what the EMC finding was about. Plus tPD(OV_OFF) 4 µs / tPD(UVLO_OFF) 6 µs max (p. 10).
+Short ISO 7637 spikes (< 100 µs) no longer reach OV; they are clamped by D30 and the 300 µF on VS.
+
+RVS pulse load: VS carries ≈ 300 µF of bulk (C31, C106, C206) and the SMCJ30CA, so its slew is slow; RVS sees at
+most a fraction of a volt during transients. A full 24 V step would put ½ C ΔV² ≈ 0.3 mJ into the 0402 – UNVERIFIED
+against the resistor's pulse rating, not expected in practice.
+
+Layout (PCB phase): C107/C207 right at Q13/Q23, MMBT3904 emitter Kelvin-routed to U11/U12 GND (pin 6), not via the
+power ground; C102/C202 and R114/R214 next to pin 20; C108/C208 across pins 17/18 at the IC; C111–C113 at their pins.
+
+**Failure mode (safety; these filters sit on the breaker, short-circuit and UV/OV sensing of the bilge and navigation
+outputs):** the 80 A short-circuit trip is slowed by ≈ 0.1 µs (C108) and the 25 A breaker by ≤ 47 µs on a 146 ms timer
+– both inside the datasheet response. A shorted C108 (CS+ = CS−) blinds both current comparators: the channel keeps
+running without breaker or short-circuit protection; only the fuse upstream and the temperature trip remain. A
+shorted C111 holds EN low (channel off, fails safe-off – for the bilge pump this means **no pump**); a shorted C112 keeps
+OV inactive (no over-voltage cut-off). A shorted C113 puts IWRN at GND = overcurrent protection off. A shorted
+C102 or open R114 removes the controller supply (channel off). An open C107 only makes the temperature reading noisier.
+Use X7R/C0G from the BOM only, no flex-sensitive placement near board edges or mounting holes. A competent person must
+review these protection circuits before installation.
+
 ## 5. Physical switch inputs and long leads
 
 Per input (sheet `analog_sw`): SMAJ30CA at the connector → 4.7 kΩ 1206 load (contact wetting,

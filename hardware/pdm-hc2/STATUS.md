@@ -1,11 +1,20 @@
 # pdm-hc2 status
 
-Updated: 2026-11-02
+Updated: 2026-11-03
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
+
+**2026-11-03 (T-0071: T-0056/T-0005/T-0008, unattended, `hc_channel` ×2):** controller pin filtering, all from
+parts already on the BOM. C107/C207 1 nF (C1523) DIODE–GND across Q13/Q23 (TI 9.6.1, mandatory). RVS R114/R214 100 Ω
+(C25076) VS → new net `VS_CTRL` on U11/U12 pin 20; C102/C202 became the CVS: 1 µF/100 V 1206 (C13832) on `VS_CTRL`
+(drop ≤ 70 mV; PWR_FLAG on `VS_CTRL`). CS X cap C108/C208 1 nF (τ 0.1 µs ≪ tSC 4 µs); Y caps C109/C110, C209/C210
+100 pF/100 V **DNP** (unbalanced source impedance, fit only with ferrites at Q-0012); C111–C113/C211–C213 1 nF on
+EN/UVLO, OV, IWRN (OV reacts in ≤ 0.4 ms; 10 nF rejected at 4 ms). ERC 0 errors, 5 warnings (unchanged); netlist
+checked. Values and failure mode: design-notes §4a.1. **For the PCB:** C107/C207 at the MMBT3904, emitter
+Kelvin-routed to U11/U12 GND pin 6; RVS/CVS at pin 20; C108/C208 across pins 17/18.
 
 **2026-11-02 (T-0068, shared `analog_sw` – same as `pdm-4ch`):** C14–C17 → 470 nF (C47339, debounce τ ≈ 1.5 ms); new D55
 DSK16 (C22466351, already on the BOM) after F4 in the SW_SUPPLY feed (panel-LED reverse protection, −0.3–0.7 V on the
