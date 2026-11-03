@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 85,
+    "T": 86,
     "Q": 54
   },
   "tasks": [
@@ -2802,6 +2802,40 @@
       "summary": "0 fixed, 0 blocked, merged 0a052c20; no part changes",
       "interrupted": null,
       "report": "docs/reviews/2026-11-03-fix-sync-T-0084.md"
+    },
+    {
+      "id": "T-0085",
+      "role": "board-fixer",
+      "scope": "sync",
+      "state": "done",
+      "created": "2026-11-03",
+      "depends_on": [],
+      "items": [],
+      "sweep": true,
+      "title": "Sync the \"For /system\" lists",
+      "brief": "Sweep the \"For /system\" items of both boards under the rules for scope `sync` in your instructions: do the bookkeeping ones, leave the rest word for word.\n\npdm-4ch STATUS.md, For /system:\n- T-0073: decision 18's \"33 V full scale\" is amended to ≈ 32 V (decision 38, design-notes §2).\n- T-0068/T-0047: `tools/heat_budget.py --p-other` default is still 0.6 W. design-notes §4 documents ≈ 2.2 W for the 4-ch\n  board at 30 V with all panel lines on (Tj 101 °C vs 100 °C). Raise the default or its help text in a tools session.\n- T-0068/T-0046 blocked (owner): no basic 1206 2.2 k / 2.4 k. Options: 2 k + 2 k basic (C17944) or 2.2 k + 2.4 k\n  extended. R3/R4/R7/R8 stay 4.7 k for now (0.19 W at 30 V, 77 %).\n\n- T-0069: firmware requirements for DEN (design-notes §6.1) belong in the `/system firmware` list. T-0069 swapped one\n  unique extended part (−/+): C23228 (basic) is replaced by C17975 (extended, 1206 680 Ω); C25819 (basic) is added.\n- RIS at the 40 mA maximum fault current (≈ 1.1 W) is covered only by firmware; hardware cover would need a ≥ 1.5 W\n  resistor – owner decision if wanted.\n\n- T-0067: ARCHITECTURE `can` row says \"ISO1044\"; it is now CA-IS3050G (SOIC-8-WB, ≈ 7.5 × 11.5 mm with leads) plus\n  DNP FL1/C70 and fitted R70–R72. LEN recheck: 49.3 mA worst case (LEN 1, 0.7 mA margin) / 79.8 mA continuous\n  dominant (LEN 2). Measure the NET-S current on the first prototype.\n- T-0065: ARCHITECTURE `can` row still says \"TPS7B91\"; it is now L78M05ABDT (DPAK, ≈ 10.4 × 6.7 mm footprint –\n  include in the `/system mechanical` area budget). The NET-S current stays LEN 1 (normal traffic 44.8 mA) / LEN 2\n  (continuous dominant 76.8 mA), only 5 mA margin to 50 mA. Recheck if the CAN transceiver changes (T-0030).\n- T-0065: the PTC interrupt-rating problem (F1/F3/F4, I_max 40 A vs ≈ 188 A) is a system protection question for the\n  owner; F4 feeds the panel switches (bilge forced run, navigation lights), so a competent person reviews it.\n- T-0065 unique extended parts: −PESD0402V05, −TPS7B91; +C170101 (2.2 µF/100 V), +C107198 (4.7 nF/1 kV).\n\n- T-0064 added two unique extended parts (C487384 bulk 100 µF/63 V, C13832 1 µF/100 V); no basic/preferred part\n  exists. If T-0065/decision 30 needs a 100 V ceramic for C1, reuse C13832 to avoid a third fee.\n- ARCHITECTURE \"Shared sheets\" table, root row: add C30/C31, FL30 (DNP)/JP30 and net VBAT_IN to the battery input\n  description (only invariant 4 was changed in T-0064).\n\n- Terminal blocks: J5 is still a 2×5 pin header; ~20 poles in 1 module width (power 2, outputs 4, panel 10, CAN 4–5).\n\npdm-hc2 STATUS.md, For /system:\n- T-0073: decision 18's \"33 V full scale\" is amended to ≈ 32 V (decision 38, design-notes §2).\n\n- T-0067: ARCHITECTURE `can` row says \"ISO1044\"; it is now CA-IS3050G (SOIC-8-WB, ≈ 7.5 × 11.5 mm with leads) plus\n  DNP FL1/C70 and fitted R70–R72. LEN recheck: 49.3 mA worst case (LEN 1, 0.7 mA margin) / 79.8 mA continuous\n  dominant (LEN 2). Measure the NET-S current on the first prototype.\n\n- T-0072/T-0055: **J10 keyed/polarised** (decision 40) – choose it in `/system mechanical` (J10 not chosen yet); the\n  board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).\n- T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the\n  15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,\n  full scale ≈ 31.9 V) and reports \"OUT high while off\" as a float-driven run.\n- **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list).\n\n- T-0065: ARCHITECTURE `can` row still says \"TPS7B91\"; it is now L78M05ABDT (DPAK, ≈ 10.4 × 6.7 mm footprint –\n  include in the `/system mechanical` area budget). The NET-S current stays LEN 1 (normal traffic 44.8 mA) / LEN 2\n  (continuous dominant 76.8 mA), only 5 mA margin to 50 mA. Recheck if the CAN transceiver changes (T-0030).\n- T-0065: the PTC interrupt-rating problem (F1/F3/F4, I_max 40 A vs ≈ 188 A) is a system protection question for the\n  owner; F4 feeds the panel switches (bilge forced run, navigation lights), so a competent person reviews it.\n- T-0065 unique extended parts: −PESD0402V05, −TPS7B91; +C170101 (2.2 µF/100 V), +C107198 (4.7 nF/1 kV).\n\n- **Bilge output fusing (T-0064 failure mode, needs README/installation rule):** D103/D203 sit outside the\n  back-to-back MOSFETs. If a TVS fails short, a float-switch run feeds the short through the PDM output wire. The\n  float circuit stays independent (invariant 8) only if the PDM leg has its own fuse, between J11 and the junction\n  with the float circuit, that opens before the float fuse. Add this to the README next to the external breaker of\n  decision 39; a competent person reviews the bilge wiring before installation.\n- T-0064 added two unique extended parts (C487384, C13832); see pdm-4ch STATUS.\n\n- Module width: probably 2 module widths because of the terminals; confirm with the enclosure.",
+      "started": "2026-11-03T10:03:09",
+      "ran_model": "opus",
+      "session": "88d1f977-d78f-45b1-8f9e-01177202ac45",
+      "cost_usd": 0.7065,
+      "attempts": 1,
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "5 synced, 12 left for /system, merged 78c1506a",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-sync-T-0085.md"
     }
   ],
   "board_size_start": {
@@ -2827,5 +2861,6 @@
       "dnp": 11,
       "unique": 70
     }
-  }
+  },
+  "sync_seen": "a4144207333c"
 }
