@@ -1,7 +1,7 @@
 {
   "next": {
-    "T": 88,
-    "Q": 54
+    "T": 90,
+    "Q": 55
   },
   "tasks": [
     {
@@ -2843,17 +2843,89 @@
       "id": "T-0086",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-03",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-03T11:12:59",
+      "ran_model": "sonnet",
+      "session": "0f4fc164-2f2a-4446-9bdf-37b52051cd6c"
     },
     {
       "id": "T-0087",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-03T11:12:59",
+      "ran_model": "sonnet",
+      "session": "498a7669-0fc0-41b4-b998-72df353ea541",
+      "cost_usd": 1.1174,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": "1 part-facts lookups (0.30 USD)",
+      "summary": "1 decided by agents, 1 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-emc-system.md"
+    },
+    {
+      "id": "T-0088",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "E16",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "system",
+        "location": "root sheet: C31 100 uF/63 V on VS (C487384); hc_channel: C106/C206 (HC2); README reverse-battery bullet for pdm-4ch",
+        "summary": "The VS bulk capacitors are polarised aluminium electrolytics with no reverse rating in their datasheet and nothing in front of them at J10, while the README says pdm-4ch survives a reversed battery of up to 28 V for 2 min; a reversed battery can overheat and vent C31.",
+        "fix": "Withdraw or limit the 4-ch reversal claim in README and design-notes section 8 and key J10 on pdm-4ch like HC2 (decision 34, /system mechanical); a reverse-blocking element on VS only in a later revision.",
+        "door": "one-way",
+        "reason": "Policy item 3: weakens a stated safety behaviour (a part that can burn); the keyed connector is the owner's mechanical choice (decision 34).",
+        "touches": [
+          "safety",
+          "connector",
+          "mechanical"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-emc-system.md",
+        "finding": "E16"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0054",
+      "why_big": [
+        "reviewer: one-way door (Policy item 3: weakens a stated safety behaviour (a part that can burn); the keyed connector is the owner's mechanical choice (decision 34).)",
+        "touches safety"
+      ]
+    },
+    {
+      "id": "T-0089",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "E17",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "system",
+        "location": "README.md: installation section",
+        "summary": "The cable practice that the immunity design assumes (screened panel cable with drain at the PDM end, bundled battery pair away from VHF coax, load returns to the battery negative bus, diode at inductive loads, PWM limits, N2K drop length) is not in the README.",
+        "fix": "Add the Installation guidance section of this report to the README; text only.",
+        "door": "two-way",
+        "reason": "Documentation, cheap to undo (policy: two-way, documentation); it adds no part and changes no decision.",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-emc-system.md",
+        "finding": "E17"
+      },
+      "door": "two-way",
+      "state": "parked"
     }
   ],
   "board_size_start": {

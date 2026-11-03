@@ -6,7 +6,24 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-No open questions.
+## Open (1)
+
+## Q-0054 · MAJOR · system · finding
+
+- **From:** `docs/reviews/2026-11-03-emc-system.md` E16 (root sheet: C31 100 uF/63 V on VS (C487384); hc_channel: C106/C206 (HC2); README reverse-battery bullet for pdm-4ch); task T-0088
+- **Summary:** The VS bulk capacitors are polarised aluminium electrolytics with no reverse rating in their datasheet and nothing in front of them at J10, while the README says pdm-4ch survives a reversed battery of up to 28 V for 2 min; a reversed battery can overheat and vent C31.
+- **Proposed:** Withdraw or limit the 4-ch reversal claim in README and design-notes section 8 and key J10 on pdm-4ch like HC2 (decision 34, /system mechanical); a reverse-blocking element on VS only in a later revision.
+- **Why it needs you:** reviewer: one-way door (Policy item 3: weakens a stated safety behaviour (a part that can burn); the keyed connector is the owner's mechanical choice (decision 34).); touches safety
+
+**Answer:** 
+
+---
+
+## Decided by agents (1) – two-way doors
+
+Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
+
+- T-0089 · MINOR · system · The cable practice that the immunity design assumes (screened panel cable with drain at the PDM end, bundled battery pair away from VHF coax, load returns to the battery negative bus, diode at inductive loads, PWM limits, N2K drop length) is not in the README. → Add the Installation guidance section of this report to the README; text only.
 
 ## Applied by agents (41)
 
