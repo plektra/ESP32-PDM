@@ -2400,7 +2400,7 @@
       "id": "T-0072",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "failed",
       "created": "2026-11-01",
       "title": "HC2 breaker level, float-run OUT divider, reverse-battery documentation",
       "brief": "Shared scope only because docs/ARCHITECTURE.md (HC2 budget, pin map) changes; hardware edits are on pdm-hc2 (hc_channel, HC2 root). Do not touch the shared sheets. Order: (1) T-0053. Ruling Q-0042 verbatim: 'option (c) - RIWRN 68k (IOC about 17.5 A) plus README/label requirement for an external breaker <=15-18 A per output plus a firmware soft fuse; update the ARCHITECTURE HC2 budget; measure the bilge pump start current before ordering'. Set R113/R213 to 68 k (basic, E12). Recompute IOC with Eq. 6 and the spread, and keep the 146 ms timer. Update the ARCHITECTURE budget row ('breaker ~17.5 A / 146 ms; fast trip 80 A'). Write the README and label requirement and the firmware soft-fuse requirement (for /system firmware). Put 'measure bilge pump start current before ordering' on the HC2 pre-order checklist. Heat check on a scratch copy of heat_budget.py with 11.7 mOhm: Tj at 17.5-18 A. Ruling Q-0046 (T-0062) verbatim: 'breaker level as ruled in Q-0042 (RIWRN 68k, about 17.5 A, plus external breaker and firmware soft fuse); add an OUT voltage divider on spare IO4/IO5 for float-run detection - pin-map change via /system'. (2) T-0062: add a divider from OUT1 to IO4 and OUT2 to IO5 (ADC1, invariant 10). Suggested start: same as VBAT_SENSE, 220 k/22 k + 100 nF, 1 % basic parts, so the full scale is ~32 V. Place it in hc_channel or the HC2 root without changing the shared controller part, and remove the no-connect flags on IO4/IO5. Check: injection current into an unpowered ESP32 pin when a float switch drives OUT; the OUT line during freewheel (-0.5 V) and reverse. Update the ARCHITECTURE pin map row (HC2: IO4/IO5 OUT1/OUT2 sense). Failure-mode note: the divider must not make the float-switch circuit depend on the PDM (invariant 8); a shorted lower resistor still loads the pump feed by <0.2 mA only. (3) T-0058 (two-way): correct design-notes section 1 (TPS48110A-Q1, ~15 A) and section 9 (float runs now seen by the OUT divider on IO4/IO5, and by SW3/SW4 if wired). (4) T-0055. Ruling Q-0044 verbatim: 'keyed/polarised J10 plus README and label warning, and correct design-notes section 8 (reversal survival does not apply to HC2); full reverse-polarity protection deferred to a later HC2 revision (keep it on the list)'. Write the README and label warning that reverse connection destroys the HC2 controllers. Add the HC2 paragraph to design-notes section 8 (after the P5 edit). Put 'J10 keyed/polarised' into HC2 STATUS 'For /system' (mechanical; J10 not chosen yet), and 'full reverse-polarity protection' into the next-revision list. Do not change decision 19 ([proposed], ~21 A searchlight): a 17.5 A breaker excludes that load. Report it as an owner question (per-build RIWRN or drop the option) with door one-way. Checks: ERC and netlist on both boards (pdm-4ch must be unchanged), LCSC on fitted parts. Stop and ask if: the 68 k breaker would trip on a measured or datasheet bilge-pump start current (that is the owner's measurement, so leave the value as ruled and flag it); the OUT divider needs a pin other than IO4/IO5.",
@@ -2415,23 +2415,15 @@
         "T-0068",
         "T-0071"
       ],
-      "started": "2026-11-03T08:18:41",
+      "started": "2026-11-03T08:26:23",
       "ran_model": "opus",
       "session": "dda7bd6b-38cd-4715-a0d3-e07c44660d25",
-      "cost_usd": 1.9276,
-      "attempts": 0,
-      "resume": {
-        "session": "dda7bd6b-38cd-4715-a0d3-e07c44660d25",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0072",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0072-ykz7u6ft",
-        "report": "docs/reviews/2026-11-03-fix-shared-T-0072.md",
-        "head": "57a08dcb813f93af8065a409f1bf8a350c61e6fb",
-        "reason": "an interruption"
-      },
+      "cost_usd": 3.9927,
+      "attempts": 1,
       "finished": "2026-11-03",
-      "note": "2 part-facts lookups (0.46 USD); no report written (aborted_tools): ",
-      "summary": "interrupted, queued again, resumes where it stopped",
-      "interrupted": true
+      "note": "merge conflict with auto/pilot (retry rebuilds it on the new base): merging docs/design-notes.md\nAuto-merging hardware/pdm-hc2/STATUS.md\nCONFLICT (content): Merge conflict in hardware/pdm-hc2/STATUS.md\nAutomatic merge failed; fix conflicts and then commit the result.\n",
+      "summary": "failed",
+      "interrupted": null
     },
     {
       "id": "T-0073",
