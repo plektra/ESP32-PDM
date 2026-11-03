@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-03 (T-0119)
+Updated: 2026-11-03 (T-0120)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-03 (T-0120: T-0099/T-0115, owner Q-0063/Q-0064, unattended, `channel`):** VS-tab capacitors C104–C404 are now 2.2 µF/100 V X7R 1206 C170101 (Samsung CL31B225KCHSNNE, already on the BOM as C1/C30) instead of 1 µF C13832. Same footprint C_1206_3216Metric. Decision 26 amended by the owner to "≥ 1 µF/100 V (2.2 µF C170101)"; this supersedes auto decision 44. No C13832 is left on pdm-4ch. ERC 0 errors, 5 warnings (unchanged); netlist differs only in C104–C404. 207 parts (+0), 59 unique (−1). Details: design-notes §8.1, `docs/reviews/2026-11-03-fix-pdm-4ch-T-0120.md`.
 
 **2026-11-03 (T-0119: T-0096/T-0090, owner Q-0061/Q-0062, decision 83, unattended, shared – `power-usb`, same on both boards):** USB shield capacitor C18 is now 1 nF/2 kV X7R 1206 C9196 (basic, already on the BOM) instead of 4.7 nF/1 kV C107198 (extended). Footprint, R13 1 MΩ and R14 0 Ω DNP unchanged. Shield RC 1 MΩ ‖ 1 nF, corner ≈ 160 Hz (was 34 Hz). ERC 0 errors, 5 warnings (unchanged); netlist differs only in C18 value/LCSC. 207 parts (+0), 60 unique (−1). Details: design-notes §8.3, `docs/reviews/2026-11-03-fix-shared-T-0119.md`.
 
@@ -126,7 +128,7 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
    board edges and screws.
 7. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384
-   and C13832; before fitting D103–D403 read the demagnetisation note in design-notes §8.2.
+   and C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2.
 
 **PCB rule 9 – isolation barrier (EMC review 2026-10-30, updated T-0067):** no copper (pour, trace, via) under U5
 between pins 1–4 and 5–8. Keep the GND and GND_CAN islands apart around the body by the package creepage (CA-IS3050G
@@ -165,7 +167,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
   before FL1 is ever fitted (design-notes §8.5).
 - T-0051 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IS2 network
   (design-notes §2).
-- T-0107: C30 uses C170101 2.2 µF instead of C13832 1 µF, which saves a loading fee only on short runs. pdm-4ch still carries C13832 for C104–C404, so this swap saves nothing here. For runs of **9+ pdm-4ch boards** C13832 is cheaper again at these places (cost report L8). RIS is now 2 × C4410 per channel.
+- T-0107/T-0120: C30 and C104–C404 use C170101 2.2 µF instead of C13832 1 µF. pdm-4ch no longer carries C13832, so its loading fee is gone; this pays on short runs only. Revisit the choice if runs grow past about 12 boards (owner ruling Q-0063). RIS is now 2 × C4410 per channel.
 - T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
   positions.
 
@@ -173,7 +175,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 - T-0107 (sync): the ARCHITECTURE root row still says "C30 1 µF/100 V". It is now 2.2 µF/100 V C170101 (decision 26 range 1–2.2 µF).
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
-- T-0107 owner question (one-way): C104–C404 1 µF → 2.2 µF C170101 would remove the last C13832 on pdm-4ch, but confirmed decision 26 names 1 µF at each VS tab. Default: keep 1 µF. (The C18 question is settled: decision 83, done in T-0119.)
 - T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.
 
 - T-0105 (sync): `tools/heat_budget.py --p-other` default 2.2 → 2.3 W (design-notes §4; result unchanged, Tj ≈ 101 °C).
