@@ -6,7 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (7)
+## Open (10)
 
 ## Q-0060 · INFO · system · question
 
@@ -25,6 +25,17 @@ lines are read; other edits are lost.
 - **Summary:** The VS bulk capacitors are polarised aluminium electrolytics with no reverse rating in their datasheet and nothing in front of them at J10, while the README says pdm-4ch survives a reversed battery of up to 28 V for 2 min; a reversed battery can overheat and vent C31.
 - **Proposed:** Withdraw or limit the 4-ch reversal claim in README and design-notes section 8 and key J10 on pdm-4ch like HC2 (decision 34, /system mechanical); a reverse-blocking element on VS only in a later revision.
 - **Why it needs you:** reviewer: one-way door (Policy item 3: weakens a stated safety behaviour (a part that can burn); the keyed connector is the owner's mechanical choice (decision 34).); touches safety
+
+**Answer:** 
+
+---
+
+## Q-0062 · MINOR · system · finding
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` C1 (C18 (C107198) and R103/R203/R303/R403 (C17975): extended parts where basic parts fit); task T-0090
+- **Summary:** Two avoidable extended-part types: 4.7 nF/1 kV USB-shield capacitor and the 680 ohm 1206 RIS, 3.07 USD per order and design each
+- **Proposed:** Same as T-0096: may C18 become 1 nF/2 kV C9196 instead of the 4.7 nF named in decision 31?
+- **Why it needs you:** found while fixing (T-0107): The RIS half is done through T-0098 (2 x C4410). The C18 half needs the owner's ruling on decision 31 (see T-0096).
 
 **Answer:** 
 
@@ -74,6 +85,17 @@ lines are read; other edits are lost.
 
 ---
 
+## Q-0061 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` L5 (C18 on both boards); task T-0096
+- **Summary:** 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic): 0.31 USD per board at 10, RC corner 34 Hz to 160 Hz
+- **Proposed:** May C18 change from 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic, already on the BOM)? This saves about 0.31 USD per board at 10 on both boards, and the shield RC corner moves from 34 Hz to 160 Hz.
+- **Why it needs you:** found while fixing (T-0107): Confirmed decision 31 sets the USB shield RC as 1 MOhm || 4.7 nF; changing C18 to 1 nF contradicts an owner decision (policy item 2). The cost report only saw auto decision 46.
+
+**Answer:** 
+
+---
+
 ## Q-0059 · INFO · system · lever
 
 - **From:** `docs/reviews/2026-11-03-cost-system.md` L6 (ordering, JLCPCB account); task T-0097
@@ -85,23 +107,31 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (8) – two-way doors
+## Q-0063 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` L8 (C30, C104-C404 (4-ch), C30, C102, C202 (HC2)); task T-0099
+- **Summary:** Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards
+- **Proposed:** May pdm-4ch C104-C404 change from 1 uF/100 V C13832 to 2.2 uF/100 V C170101? This would remove the C13832 loading fee on pdm-4ch, about -0.27 USD per board at 5, but it is more expensive from 9 boards up.
+- **Why it needs you:** found while fixing (T-0107): C30 (both boards) and HC2 C102/C202 are swapped to C170101. pdm-4ch C104-C404 are not: confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab.
+
+**Answer:** 
+
+---
+
+## Decided by agents (4) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
 - T-0102 · INFO · system · Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → assumed No: plain Economic PCBA with all parts assembled by JLCPCB
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
-- T-0099 · INFO · system · Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → Only if the first run stays at 5 boards: swap the five or three capacitors to 2.2 uF/100 V C170101
-- T-0098 · INFO · pdm-4ch · RIS 680 ohm 1206 C17975 (extended) replaced by two 1 kohm 1206 C4410 (basic) in parallel: 0.26 USD per board at 10, sense scale 0.33 V/A → Replace each RIS by two C4410 in parallel; firmware scale constant becomes 500 ohm; check C4410 power rating with part-facts
-- T-0096 · INFO · system · 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic): 0.31 USD per board at 10, RC corner 34 Hz to 160 Hz → Change the value and LCSC code of C18 on both boards (shared sheet), then run the part-facts check on C9196
-- T-0090 · MINOR · system · Two avoidable extended-part types: 4.7 nF/1 kV USB-shield capacitor and the 680 ohm 1206 RIS, 3.07 USD per order and design each → C18 -> 1 nF/2 kV C9196 (basic, already used); RIS -> two 1 kOhm 1206 C4410 in parallel (see L5, L7)
 - T-0089 · MINOR · system · The cable practice that the immunity design assumes (screened panel cable with drain at the PDM end, bundled battery pair away from VHF coax, load returns to the battery negative bus, diode at inductive loads, PWM limits, N2K drop length) is not in the README. → Add the Installation guidance section of this report to the README; text only.
 
-## Applied by agents (45)
+## Applied by agents (46)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0098 · pdm-4ch · RIS 680 ohm 1206 C17975 (extended) replaced by two 1 kohm 1206 C4410 (basic) in parallel: 0.26 USD per board at 10, sense scale 0.33 V/A → T-0107 (`d6c2bb6e`)
 - T-0076 · pdm-4ch · U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work. → T-0078 (`d42065e2`)
 - T-0062 · pdm-hc2 · Should the HC2 hardware breaker sit near the continuous rating (about 17.5 A) or stay at 25 A with a documented external breaker requirement? Is an OUT voltage divider (spare IO4/IO5) wanted for float-run detection, or are SW3/SW4 enough? → T-0072 (`901c6f45`)
 - T-0061 · pdm-hc2 · Which HC2 loads have more than about 50 uF input capacitance (LED work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target. → T-0106 (`c036d2a6`)

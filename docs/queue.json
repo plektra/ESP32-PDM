@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 113,
-    "Q": 61
+    "Q": 64
   },
   "tasks": [
     {
@@ -2955,21 +2955,26 @@
         "board": "system",
         "location": "C18 (C107198) and R103/R203/R303/R403 (C17975): extended parts where basic parts fit",
         "summary": "Two avoidable extended-part types: 4.7 nF/1 kV USB-shield capacitor and the 680 ohm 1206 RIS, 3.07 USD per order and design each",
-        "fix": "C18 -> 1 nF/2 kV C9196 (basic, already used); RIS -> two 1 kOhm 1206 C4410 in parallel (see L5, L7)",
+        "fix": "Same as T-0096: may C18 become 1 nF/2 kV C9196 instead of the 4.7 nF named in decision 31?",
         "door": "two-way",
         "reason": "agent decisions 46 and 52 (auto), component values, no must-stay function touched",
         "touches": [
           "shared-sheet"
         ],
-        "cost_delta_usd": -0.31
+        "cost_delta_usd": -0.31,
+        "default": "keep 4.7 nF C107198"
       },
       "source": {
         "report": "docs/reviews/2026-11-03-cost-system.md",
         "finding": "C1"
       },
-      "door": "two-way",
-      "state": "parked",
-      "package": "T-0107"
+      "door": "one-way",
+      "state": "blocked-owner",
+      "package": "T-0107",
+      "question": "Q-0062",
+      "why_big": [
+        "found while fixing (T-0107): The RIS half is done through T-0098 (2 x C4410). The C18 half needs the owner's ruling on decision 31 (see T-0096)."
+      ]
     },
     {
       "id": "T-0091",
@@ -3143,21 +3148,26 @@
         "board": "system",
         "location": "C18 on both boards",
         "summary": "4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic): 0.31 USD per board at 10, RC corner 34 Hz to 160 Hz",
-        "fix": "Change the value and LCSC code of C18 on both boards (shared sheet), then run the part-facts check on C9196",
+        "fix": "May C18 change from 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic, already on the BOM)? This saves about 0.31 USD per board at 10 on both boards, and the shield RC corner moves from 34 Hz to 160 Hz.",
         "door": "two-way",
         "reason": "component value on a shared sheet, decision 46 is auto",
         "touches": [
           "shared-sheet"
         ],
-        "cost_delta_usd": -0.31
+        "cost_delta_usd": -0.31,
+        "default": "keep 4.7 nF C107198 until the owner rules (recommended by the cost report: swap)"
       },
       "source": {
         "report": "docs/reviews/2026-11-03-cost-system.md",
         "finding": "L5"
       },
-      "door": "two-way",
-      "state": "parked",
-      "package": "T-0107"
+      "door": "one-way",
+      "state": "blocked-owner",
+      "package": "T-0107",
+      "question": "Q-0061",
+      "why_big": [
+        "found while fixing (T-0107): Confirmed decision 31 sets the USB shield RC as 1 MOhm || 4.7 nF; changing C18 to 1 nF contradicts an owner decision (policy item 2). The cost report only saw auto decision 46."
+      ]
     },
     {
       "id": "T-0097",
@@ -3218,8 +3228,10 @@
         "finding": "L7"
       },
       "door": "two-way",
-      "state": "parked",
-      "package": "T-0107"
+      "state": "done",
+      "package": "T-0107",
+      "fixed_by": "T-0107",
+      "merged": "d6c2bb6e0a2084af1781b050f820d8e89c04bf82"
     },
     {
       "id": "T-0099",
@@ -3233,22 +3245,27 @@
         "board": "system",
         "location": "C30, C104-C404 (4-ch), C30, C102, C202 (HC2)",
         "summary": "Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards",
-        "fix": "Only if the first run stays at 5 boards: swap the five or three capacitors to 2.2 uF/100 V C170101",
+        "fix": "May pdm-4ch C104-C404 change from 1 uF/100 V C13832 to 2.2 uF/100 V C170101? This would remove the C13832 loading fee on pdm-4ch, about -0.27 USD per board at 5, but it is more expensive from 9 boards up.",
         "door": "two-way",
         "reason": "component value, no must-stay function touched",
         "touches": [
           "shared-sheet",
           "new-extended-part"
         ],
-        "cost_delta_usd": 0.0
+        "cost_delta_usd": 0.0,
+        "default": "keep 1 uF C13832 at C104-C404"
       },
       "source": {
         "report": "docs/reviews/2026-11-03-cost-system.md",
         "finding": "L8"
       },
-      "door": "two-way",
-      "state": "parked",
-      "package": "T-0107"
+      "door": "one-way",
+      "state": "blocked-owner",
+      "package": "T-0107",
+      "question": "Q-0063",
+      "why_big": [
+        "found while fixing (T-0107): C30 (both boards) and HC2 C102/C202 are swapped to C170101. pdm-4ch C104-C404 are not: confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab."
+      ]
     },
     {
       "id": "T-0100",
@@ -3494,7 +3511,7 @@
       "id": "T-0107",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "Extended-part fee levers: C18 -> C9196, RIS -> 2 x C4410, 1 uF/100 V -> C170101",
       "brief": "Two-way agent items from docs/reviews/2026-11-03-cost-system.md (C1, L5, L7, L8). T-0090 is the combined finding behind T-0096 (C18) and T-0098 (RIS), so it is done by those two changes, not by a third. Value and part swaps only, no new footprints. 1) T-0096 (shared power-usb, identical on both boards): C18 4.7 nF/1 kV C107198 -> 1 nF/2 kV X7R 1206 C9196 (basic, already on the BOM as C50-C53/C70). part_facts.py C9196 (rated voltage, X7R, 1206 footprint unchanged). The R13 || C18 corner moves from 34 Hz to 160 Hz; note it in design-notes section 8.3 (the shield RC is a pre-compliance footprint, decision 31). 2) T-0098 (pdm-4ch only, per-channel sheet): each RIS R103/R203/R303/R403 680 ohm C17975 -> two 1 kOhm 1206 C4410 (basic) in parallel = 500 ohm. part_facts.py C4410 (power 0.25 W, 1206). Check that IS at full load stays below the ADC range and the 3.3 V clamp: BTT6050 at 4.5 A about 1.5 V, BTT6010 at 8 A about 2.7 V (use kILIS from the BTT6050/BTT6010 facts). Decision 36 asks for RIS as 1206 >= 0.25 W: two 0.25 W parts meet it. The 40 mA fault case (0.8 W total) stays covered by the firmware DEN rule (design-notes section 6.1). Record the new firmware scale constant (500 ohm, 0.33 V/A) in design-notes section 6.1 and in the pdm-4ch STATUS for /system firmware. 3) T-0099: the item's condition holds (decision 33: first order 5 + 5 boards). Swap 1 uF/100 V C13832 -> 2.2 uF/100 V X7R 1206 C170101 (already on the BOM as C1, same 1206 footprint) at: C30 (shared root controller part, both boards; decision 26 allows 1-2.2 uF at J10) and HC2 C102/C202 (CVS on VS_CTRL, auto decision 58 - check the TPS4811-Q1 CVS recommendation in docs/part-facts/C17556513.md, and the RVS 100 ohm x 2.2 uF time constant against the VS_CTRL behaviour). Do NOT change pdm-4ch C104-C404: confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab, so changing it is a one-way door. Report it as a question for the owner (default: keep 1 uF C13832; the C13832 fee then stays on pdm-4ch only). Add to both STATUS pre-order checklists: for runs of 9+ (pdm-4ch) / 15+ (pdm-hc2) boards, C13832 for these places is cheaper again. 4) ERC and netlist on both boards before/after: only C18, C30, C102/C202 (values/LCSC), and R103/R203/R303/R403 plus the four new parallel resistors may change. fix_check.py --scope shared. Update STATUS on both boards and the unique-part counts (cost report: extended types 19 -> 17 on pdm-4ch, 20 -> 18 or 19 on pdm-hc2). Stop and ask (one-way): if C9196 or C4410 fail their facts check (voltage/power); if IS at the rated current would exceed the ADC range with 500 ohm; if TPS4811-Q1 gives an upper limit for CVS below 2.2 uF (then leave C102/C202 and C30 as they are, because a partial swap saves nothing on HC2).",
@@ -3509,23 +3526,41 @@
         "T-0105",
         "T-0106"
       ],
-      "started": "2026-11-03T12:02:11",
+      "started": "2026-11-03T15:06:19",
       "ran_model": "opus",
       "session": "250bcdcb-4f2b-413e-a8d5-b7b956f19fe8",
-      "cost_usd": 0.5438,
-      "attempts": 1,
-      "resume": {
-        "session": "250bcdcb-4f2b-413e-a8d5-b7b956f19fe8",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0107",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0107-hn774sjk",
-        "report": "docs/reviews/2026-11-03-fix-shared-T-0107.md",
-        "head": "30ae711b1590810183e6a7e9ef5e46a3ba1737bb",
-        "reason": "a usage limit"
-      },
+      "cost_usd": 3.2086,
+      "attempts": 2,
       "finished": "2026-11-03",
-      "note": "3 part-facts lookups (0.20 USD); no report written (api_error): You've hit your 5-hour limit · resets 3pm (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "note": "4 part-facts lookups (0.69 USD); not merged: docs/part-facts/C17556513.md, docs/part-facts/C534868.md",
+      "summary": "1 fixed, 3 blocked, merged d6c2bb6e; pdm-4ch +4 parts (+0 DNP), +0 unique, pdm-hc2 +0 parts (+0 DNP), -1 unique",
+      "interrupted": null,
+      "refs": [
+        "C102",
+        "C202",
+        "C30",
+        "R103",
+        "R107",
+        "R203",
+        "R207",
+        "R303",
+        "R307",
+        "R403",
+        "R407"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 4,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -1
+        }
+      },
+      "report": "docs/reviews/2026-11-03-fix-shared-T-0107.md"
     },
     {
       "id": "T-0108",
@@ -3625,14 +3660,14 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 200,
+      "parts": 204,
       "dnp": 15,
       "unique": 61
     },
     "pdm-hc2": {
       "parts": 222,
       "dnp": 11,
-      "unique": 70
+      "unique": 69
     }
   },
   "sync_seen": "a4144207333c"
