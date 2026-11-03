@@ -450,6 +450,9 @@ TOOLS_HINT = ("Part facts: `python3 tools/part_facts.py <LCSC code> \"<what you 
               "`$PDM_PDF_PYTHON -I` (pypdf, pypdfium2, Pillow). Keep scripts in `$CLAUDE_JOB_DIR/scripts/` with names "
               "that do not shadow Python modules (never inspect.py, json.py, …); `rm -rf` is not available to you. "
               "Batch independent steps into one command where you can.\n")
+CHECK_HINT = ("Before your final message run `python3 tools/report_check.py`: the orchestrator's own check of the "
+              "report's machine-readable block (a report with nothing to report still needs the block, empty). Hand "
+              "in only when it says OK.\n")
 FIX_HINT = ("Before writing the report run `python3 tools/fix_check.py --scope $PDM_SCOPE --refs <refs you touched>`: "
             "the orchestrator's own merge gates. Hand in only when it says OK.\n")
 FACTS_DIR = 'docs/part-facts'
@@ -487,13 +490,13 @@ def prompt_for(t, report, inputs=None):
               f"docs/AUTONOMY.md (decision 23). Nobody will answer questions.\n{NARRATE}{TOOLS_HINT}")
     if kind == 'plan':
         return (common + f"The approved items to plan are in `{inputs}` (JSON). Write your report to exactly "
-                f"`{report}` and end it with the plan block. Change no other file in the repository. Your final "
+                f"`{report}` and end it with the plan block. Change no other file in the repository. {CHECK_HINT}Your final "
                 f"message: the report path and the number of packages, deferred items and decision rows.")
     if kind == 'fix':
         return (common + f"Work package {t['id']}: {t.get('title', '')} (scope {t['scope']}).\n"
                 f"Brief from the planner:\n{t.get('brief', '')}\n"
                 f"The items with their findings and the owner's rulings are in `{inputs}` (JSON).\n"
-                f"{FIX_HINT}"
+                f"{FIX_HINT}{CHECK_HINT}"
                 f"Write your report to exactly `{report}` and end it with the fix block; list every reference "
                 f"designator you touched in `refs`. Your final message: the report path and what was done or "
                 f"blocked.")
@@ -510,7 +513,8 @@ def prompt_for(t, report, inputs=None):
             f"The owner watches your progress live: before each new check write one short line saying what you check "
             f"and why, and when you find a problem write one line `FINDING (SEVERITY): what is wrong`.\n{TOOLS_HINT}"
             f"Write your report to exactly `{report}` and end it with the finding block. Change no other file in "
-            f"the repository; scratch work goes in $CLAUDE_JOB_DIR. Your final message: the report path and counts "
+            f"the repository; scratch work goes in $CLAUDE_JOB_DIR. {CHECK_HINT}Your final message: the report path and "
+            f"counts "
             f"per severity.")
 
 
@@ -934,12 +938,15 @@ def run_task(q, t, budget_left, dry_run=False):
         inputs = scratch / 'items.json'
         inputs.write_text(json.dumps(payload, indent=1, ensure_ascii=False))
     denied = DENIED_TOOLS + ([] if spec.get('edits') else ['Edit'])
+
+    def agent_cmd(prompt, session, usd):
+        return [CLAUDE_BIN, '-p', prompt, *(['--resume', session] if session else []),
+                '--agent', t['role'], '--model', model,
+                '--max-budget-usd', f'{usd:.2f}', '--output-format', 'stream-json', '--verbose',
+                '--add-dir', str(scratch), '--allowedTools', *agent_tools(t['role']), 'Write',
+                '--disallowedTools', *denied]
     prompt = resume_prompt(t, report, resume['reason']) if resume else prompt_for(t, report, inputs)
-    cmd = [CLAUDE_BIN, '-p', prompt, *(['--resume', resume['session']] if resume else []),
-           '--agent', t['role'], '--model', model,
-           '--max-budget-usd', f'{budget:.2f}', '--output-format', 'stream-json', '--verbose',
-           '--add-dir', str(scratch), '--allowedTools', *agent_tools(t['role']), 'Write',
-           '--disallowedTools', *denied]
+    cmd = agent_cmd(prompt, resume['session'] if resume else None, budget)
     print(f"→ {t['id']} {t['role']} {t['scope']}{' deep' if deep else ''} ({model}, ≤ {budget:.2f} USD) → {report}"
           + (f" (resumes after {resume['reason']})" if resume else ''))
     if dry_run:
@@ -967,7 +974,8 @@ def run_task(q, t, budget_left, dry_run=False):
     ledger = log.with_name(log.stem + '-facts.jsonl')  # tools/part_facts.py lookups of this attempt and their cost
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}",
                PDM_PDF_PYTHON=PDF_PY or 'python3', PDM_BASE=head, PDM_SCOPE=t['scope'],
-               PDM_COST_LEDGER=str(ledger), PDM_FACTS_MAX=str(FACTS_MAX))
+               PDM_COST_LEDGER=str(ledger), PDM_FACTS_MAX=str(FACTS_MAX), PDM_REPORT=str(report),
+               PDM_BLOCK=block_name(spec['kind']))
     (scratch / 'scripts').mkdir(exist_ok=True)
     pane = tmux_pane(t, log.with_suffix('.log'))
 
@@ -975,30 +983,43 @@ def run_task(q, t, budget_left, dry_run=False):
         with STATE:
             t['session'] = session
             save_queue(WORKTREE, q)
-    try:
-        out = run_streaming(cmd, env, t['id'], log.with_suffix('.log'), wt, on_init)
-    except BaseException:
-        shutil.rmtree(scratch, ignore_errors=True)
-        raise
-    finally:
-        tmux_close(pane)
-    log.write_text(json.dumps(dict(cmd=cmd, output=out), indent=2, ensure_ascii=False))
-    lookups = [json.loads(x) for x in ledger.read_text().splitlines() if x.strip()] if ledger.exists() else []
-    cost = float(out.get('total_cost_usd') or 0) + sum(float(x.get('cost_usd') or 0) for x in lookups)
-    notes = [f"{len(lookups)} part-facts lookups ({sum(float(x.get('cost_usd') or 0) for x in lookups):.2f} USD)"] \
-        if lookups else []
-    if out.get('permission_denials'):
-        denied_calls = sorted({d.get('tool_name', '?') for d in out['permission_denials']})
-        notes.append(f"{len(out['permission_denials'])} tool calls denied ({', '.join(denied_calls)}); log {log.name}")
-    keep = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=wt, capture_output=True, text=True).stdout.strip() != head
-    changed = changed_paths(wt)
-    new_reports = [p for p in changed if p.startswith(f'{REVIEWS}/') and p.endswith('.md')]
-    got = str(report) if str(report) in changed else (new_reports[0] if len(new_reports) == 1 else None)
-    text = (wt / got).read_text() if got else None
-    # Board-fixer gates run outside the lock (kicad-cli takes a while); other agents keep working meanwhile.
-    gate_fails, block, sizes = [], None, None
-    if spec.get('edits') and got and not keep:
+
+    outs, cmds, notes = [], [], []
+
+    def run_agent(c):
+        """One agent call (first run or a repair); returns its result event and the cost of all calls so far."""
+        cmds.append(c)
         try:
+            outs.append(run_streaming(c, env, t['id'], log.with_suffix('.log'), wt, on_init))
+        except BaseException:
+            shutil.rmtree(scratch, ignore_errors=True)
+            tmux_close(pane)
+            raise
+        log.write_text(json.dumps(dict(cmd=cmds, output=outs), indent=2, ensure_ascii=False))
+        return outs[-1], sum(float(o.get('total_cost_usd') or 0) for o in outs)
+
+    def may_repair(o, used):
+        return (repairs < MAX_REPAIRS and t.get('session') and repairable(o) and budget - used >= REPAIR_MIN_USD)
+
+    # Run, check the hand-in exactly as the merge below will, and on a problem the agent can fix itself (missing
+    # or malformed block, wrong report path, a failed gate) resume its session with the exact problem instead of
+    # failing the task. Board-fixer gates run outside the lock (kicad-cli takes a while); others keep working.
+    repairs = 0
+    out, used = run_agent(cmd)
+    while True:
+        keep = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=wt, capture_output=True,
+                              text=True).stdout.strip() != head
+        changed = changed_paths(wt)
+        new_reports = [p for p in changed if p.startswith(f'{REVIEWS}/') and p.endswith('.md')]
+        got = str(report) if str(report) in changed else (new_reports[0] if len(new_reports) == 1 else None)
+        text = (wt / got).read_text() if got else None
+        gate_fails, block, sizes = [], None, None
+        if keep:
+            break  # the agent moved HEAD: kept for inspection, never repaired
+        problems = [f'no report at `{report}`' + (f' (found several: {", ".join(new_reports)})'
+                                                  if len(new_reports) > 1 else '')] if got is None \
+            else check_report(spec['kind'], text)
+        if spec.get('edits') and got and not problems:
             block = parse_tagged(text, 'fix')
             after = {b: kicad_check(wt, b, gate_dir) for b in BOARDS}
             if any(base[b] is None for b in BOARDS):
@@ -1006,9 +1027,47 @@ def run_task(q, t, budget_left, dry_run=False):
             else:
                 gate_fails = fix_gates(wt, t, base, after, block, changed, got)
                 sizes = {b: (board_size(base[b]), board_size(after[b])) for b in BOARDS if after[b]}
-        except (ValueError, json.JSONDecodeError) as e:
-            gate_fails.append(f'report {got}: {e}')
+            problems = list(gate_fails)
+        elif spec.get('edits') and got:
+            gate_fails = [f'report {got}: {p}' for p in problems]
+        if not problems or not may_repair(out, used):
+            break
+        repairs += 1
+        print(f"  {t['id']} repair {repairs}/{MAX_REPAIRS}: {'; '.join(problems)[:200]}", flush=True)
+        notes.append(f"repair {repairs}: {'; '.join(problems)[:150]}")
+        out, used = run_agent(agent_cmd(repair_prompt(t, report, problems), t['session'], budget - used))
     shutil.rmtree(gate_dir, ignore_errors=True)
+
+    # A gated board-fixer change: commit it in its worktree and merge the newest auto/pilot into it here, outside
+    # the lock, so the merge under the lock is a formality. Conflicts only in Markdown docs (design-notes, STATUS)
+    # are handed back to the agent to resolve; anything else is left for a rebuild on the new base.
+    sha, fix_paths = None, []
+    if spec.get('edits') and got and not keep and not gate_fails:
+        fix_paths, conflicts = premerge(wt, t, got, changed, model, used)
+        if conflicts and all(p.endswith('.md') for p in conflicts) and may_repair(out, used):
+            notes.append(f"merge conflict in {', '.join(conflicts)}: resolved by the agent")
+            print(f"  {t['id']} resolving merge conflict in {', '.join(conflicts)}", flush=True)
+            out, used = run_agent(agent_cmd(conflict_prompt(t, conflicts), t['session'], budget - used))
+            left = unresolved(wt, conflicts)
+            if left:
+                notes[-1] = f"merge conflict in {', '.join(conflicts)} not resolved: {left}"
+            else:
+                git('add', '--', *conflicts, cwd=wt)
+                git('commit', '--no-edit', cwd=wt)
+                conflicts = []
+        if conflicts:
+            git('merge', '--abort', cwd=wt, check=False)
+        sha = git('rev-parse', 'HEAD', cwd=wt)
+    tmux_close(pane)
+    lookups = [json.loads(x) for x in ledger.read_text().splitlines() if x.strip()] if ledger.exists() else []
+    cost = used + sum(float(x.get('cost_usd') or 0) for x in lookups)
+    if lookups:
+        notes.insert(0, f"{len(lookups)} part-facts lookups "
+                        f"({sum(float(x.get('cost_usd') or 0) for x in lookups):.2f} USD)")
+    denials = [d for o in outs for d in (o.get('permission_denials') or [])]
+    if denials:
+        denied_calls = sorted({d.get('tool_name', '?') for d in denials})
+        notes.append(f"{len(denials)} tool calls denied ({', '.join(denied_calls)}); log {log.name}")
 
     with STATE:
         t['cost_usd'] = round(t.get('cost_usd', 0) + cost, 4)
@@ -1021,7 +1080,7 @@ def run_task(q, t, budget_left, dry_run=False):
             notes.append(f"no report written ({out.get('terminal_reason') or out.get('subtype') or 'unknown'}): "
                          f"{str(out.get('result', ''))[:200]}")
         elif spec.get('edits'):
-            result, merge_note = finish_fix(q, t, wt, changed, got, block, gate_fails, model, cost, sizes)
+            result, merge_note = finish_fix(q, t, wt, sha, fix_paths, changed, got, block, gate_fails, sizes)
             notes += merge_note
             commit_paths.append(str(DECISIONS))
         else:
@@ -1045,18 +1104,26 @@ def run_task(q, t, budget_left, dry_run=False):
             except (ValueError, json.JSONDecodeError, KeyError, SystemExit) as e:
                 notes.append(f'report {got}: {e}')
                 result = None
+                rejected = REVIEWS / f"{Path(got).stem}-rejected.md"  # the work is kept for the owner, not lost
+                (WORKTREE / rejected).write_text(text + f'\n\n## Rejected by the orchestrator\n\n- {e}\n')
+                commit_paths.append(str(rejected))
+                notes.append(f'report kept as {rejected}')
         # A usage limit or API outage is not the task's fault: leave it ready and let the caller stop the run.
-        # An interrupted agent (killed, stream cut) is queued again, up to MAX_ATTEMPTS.
+        # An interrupted agent (killed, stream cut) is queued again, up to MAX_ATTEMPTS; so is a board-fixer whose
+        # change no longer merges into auto/pilot (rebuilt from scratch on the new base).
         paused = result is None and not keep and (out.get('terminal_reason') == 'api_error'
                                                   or bool(UNAVAILABLE.search(str(out.get('result', '')))))
         if result is None and STOPPING.is_set():  # the owner's Ctrl-C is not the task's fault
             t['attempts'] -= 1
+        rebuild = bool(t.pop('rebuild', False)) and result is None and t['attempts'] < MAX_ATTEMPTS
         interrupted = (result is None and not keep and not paused
-                       and (STOPPING.is_set() or (out.get('terminal_reason') in INTERRUPTED
-                                                  and t['attempts'] < MAX_ATTEMPTS)))
-        summary = 'interrupted, queued again' if interrupted else summarize(spec['kind'], result, paused)
-        # Keep what the agent has done so far: the next attempt resumes its session in the same worktree.
-        hold = (paused or interrupted) and bool(t.get('session'))
+                       and (STOPPING.is_set() or rebuild or (out.get('terminal_reason') in INTERRUPTED
+                                                             and t['attempts'] < MAX_ATTEMPTS)))
+        summary = ('merge conflict, queued again on the new base' if rebuild else 'interrupted, queued again'
+                   if interrupted else summarize(spec['kind'], result, paused))
+        # Keep what the agent has done so far: the next attempt resumes its session in the same worktree (not
+        # after a pre-merge: that worktree's HEAD has moved, so the task starts afresh).
+        hold = (paused or interrupted) and not rebuild and sha is None and bool(t.get('session'))
         if hold:
             t['resume'] = dict(session=t['session'], worktree=str(wt), scratch=str(scratch), report=str(report),
                                head=head, reason='a usage limit' if paused else 'an interruption')
@@ -1080,11 +1147,71 @@ def run_task(q, t, budget_left, dry_run=False):
         RESERVED.discard(report)
         print(f"  {t['id']} {t['state']}: {summary}; {cost:.2f} USD" + (f"; {t['note']}" if t.get('note') else ''),
               flush=True)
+        if t['state'] == 'failed':
+            notify(f"{t['id']} {t['role']} {t['scope']} failed: {(t.get('note') or '')[-160:]}")
     return cost, result
 
 
+MAX_REPAIRS = 2  # times an agent is sent back to fix its own hand-in before the task fails
+REPAIR_MIN_USD = 0.30  # budget a repair needs at least
+
+
+def block_name(kind):
+    return {'plan': 'plan', 'fix': 'fix'}.get(kind, 'finding')
+
+
+def check_report(kind, text):
+    """What the orchestrator would reject in a report's machine-readable block; [] when it is fine.
+    Shared with tools/report_check.py, so agents run the same check before they hand in."""
+    try:
+        if kind == 'plan':
+            plan = parse_tagged(text, 'plan')
+            if not isinstance(plan, dict):
+                return ['plan block is not a JSON object']
+            return [f"package {p.get('id')}: bad scope {p.get('scope')!r} (use one of {', '.join(FIX_SCOPES)})"
+                    for p in plan.get('packages', []) if p.get('scope') not in FIX_SCOPES]
+        if kind == 'fix':
+            block = parse_tagged(text, 'fix')
+            return [] if isinstance(block, dict) else ['fix block is not a JSON object']
+        parse_block(text)
+    except json.JSONDecodeError as e:
+        return [f'{block_name(kind)} block is not valid JSON: {e}']
+    except (ValueError, KeyError, TypeError) as e:
+        return [str(e)]
+    return []
+
+
+def repairable(out):
+    """Whether the agent can be resumed to fix its hand-in: it ended normally, not cut off or out of API."""
+    res = str(out.get('result', ''))
+    return not (STOPPING.is_set() or out.get('terminal_reason') in INTERRUPTED + ('api_error',)
+                or UNAVAILABLE.search(res) or res.startswith(('timeout after', 'exit ')))
+
+
+def repair_prompt(t, report, problems):
+    block = block_name(ROLES[t['role']]['kind'])
+    empty = (" A report with nothing to report still ends with an empty block:\n<!-- findings:begin -->\n```json\n[]\n"
+             "```\n<!-- findings:end -->\n" if block == 'finding' else '')
+    gates = (" For gate failures fix the design (or report the item as blocked), then run `python3 tools/fix_check.py "
+             "--scope $PDM_SCOPE --refs <refs>` until it says OK." if block == 'fix' else '')
+    return (f"The orchestrator checked your hand-in for task {t['id']} and cannot accept it yet:\n"
+            + ''.join(f'- {p}\n' for p in problems) +
+            f"Fix exactly these problems; do not redo work that is already done. The report must be at exactly "
+            f"`{report}` and end with the {block} block in the format of docs/AUTONOMY.md.{empty}{gates}\n"
+            f"Then run `python3 tools/report_check.py` and hand in when it says OK. Your final message as before.\n"
+            f"{NARRATE}")
+
+
+def conflict_prompt(t, conflicts):
+    return (f"Your change for task {t['id']} passed the gates and was committed. Merging the newest {BRANCH} into "
+            f"your worktree (other agents' merged work) conflicts in: {', '.join(conflicts)}. Resolve the conflict "
+            f"markers (<<<<<<< ======= >>>>>>>) in exactly these files: keep both sides' content, merge entries "
+            f"that describe the same thing, keep dates and order. Change no other file and run no git command; the "
+            f"orchestrator commits the merge. Your final message: one line on how you resolved it.\n{NARRATE}")
+
+
 def resume_prompt(t, report, reason):
-    block = {'plan': 'plan', 'fix': 'fix'}.get(ROLES[t['role']]['kind'], 'finding')
+    block = block_name(ROLES[t['role']]['kind'])
     return (f"You were cut off by {reason} before you finished task {t['id']}. Continue exactly where you stopped: "
             f"your files in this worktree, your scratch folder $CLAUDE_JOB_DIR and your earlier instructions still "
             f"apply. Check what you already did before repeating it. Write the report to exactly `{report}` and end "
@@ -1114,15 +1241,9 @@ def summarize(kind, result, paused):
     return f"{result['agent']} decided by agents, {result['owner']} for the owner, {result['duplicates']} duplicates"
 
 
-def finish_fix(q, t, wt, changed, got, block, gate_fails, model, cost, sizes=None):
-    """Under STATE: commit a gated board-fixer change in its worktree and merge it into auto/pilot.
-    Returns (result or None, notes). On failure nothing is merged; the report is kept for the owner."""
-    if gate_fails:
-        keep_report = REVIEWS / f"{Path(got).stem}-rejected.md"
-        (WORKTREE / keep_report).write_text((wt / got).read_text() + '\n\n## Rejected by the orchestrator\n\n'
-                                            + '\n'.join(f'- {f}' for f in gate_fails) + '\n')
-        git('add', '--', str(keep_report))
-        return None, ['gates failed: ' + '; '.join(gate_fails), f'report kept as {keep_report}']
+def premerge(wt, t, got, changed, model, cost):
+    """Outside the lock: commit a gated board-fixer change in its worktree, then merge the newest auto/pilot into
+    it. Returns (committed paths, conflicted paths); the merge is left in progress when it conflicts."""
     paths = [p for p in changed if p == got or (fix_allowed(p, t['scope']) and not p.endswith('.kicad_prl')
                                                 and not p.lower().endswith('.pdf'))]
     # A fact sheet another agent merged meanwhile stays as it is (two versions of one file would not merge).
@@ -1131,12 +1252,41 @@ def finish_fix(q, t, wt, changed, got, block, gate_fails, model, cost, sizes=Non
     git('commit', '-m', f"{t['scope']}: {t.get('title', 'work package')} ({t['id']})\n\n"
         f"Unattended board-fixer, model {model}, {cost:.2f} USD; gates passed (ERC, netlist, LCSC, shared sheets).\n\n"
         f"Co-Authored-By: Claude <noreply@anthropic.com>", cwd=wt)
-    sha = git('rev-parse', 'HEAD', cwd=wt)
+    r = subprocess.run(['git', 'merge', '--no-ff', '--no-edit', '-m', f"Merge {BRANCH} into {t['id']}", BRANCH],
+                       cwd=wt, capture_output=True, text=True)
+    if not r.returncode:
+        return paths, []
+    conflicts = git('diff', '--name-only', '--diff-filter=U', cwd=wt, check=False).split()
+    return paths, conflicts or [f'(merge refused: {(r.stderr or r.stdout).strip()[-150:]})']
+
+
+CONFLICT_MARK = re.compile(r'^(<{7}|>{7})( |$)', re.M)
+
+
+def unresolved(wt, conflicts):
+    """Why an agent's conflict resolution cannot be committed; '' when it can."""
+    marked = [p for p in conflicts if not (wt / p).exists() or CONFLICT_MARK.search((wt / p).read_text())]
+    if marked:
+        return 'conflict markers left in ' + ', '.join(marked)
+    other = set(git('diff', '--name-only', cwd=wt, check=False).split()) - set(conflicts)
+    return ('also changed ' + ', '.join(sorted(other))) if other else ''
+
+
+def finish_fix(q, t, wt, sha, paths, changed, got, block, gate_fails, sizes=None):
+    """Under STATE: merge a gated (and pre-merged) board-fixer commit into auto/pilot.
+    Returns (result or None, notes). On failure nothing is merged; the report is kept for the owner."""
+    if gate_fails:
+        keep_report = REVIEWS / f"{Path(got).stem}-rejected.md"
+        (WORKTREE / keep_report).write_text((wt / got).read_text() + '\n\n## Rejected by the orchestrator\n\n'
+                                            + '\n'.join(f'- {f}' for f in gate_fails) + '\n')
+        git('add', '--', str(keep_report))
+        return None, ['gates failed: ' + '; '.join(gate_fails), f'report kept as {keep_report}']
     r = subprocess.run(['git', 'merge', '--no-ff', '--no-edit', '-m', f"Auto: merge {t['id']} {t.get('title', '')}",
                         sha], cwd=WORKTREE, capture_output=True, text=True)
     if r.returncode:
         git('merge', '--abort', check=False)
-        return None, [f'merge conflict with auto/pilot (retry rebuilds it on the new base): {r.stdout[-200:]}']
+        t['rebuild'] = True  # run_task queues it again (up to MAX_ATTEMPTS) to be rebuilt on the new base
+        return None, [f'merge conflict with auto/pilot: {r.stdout[-200:]}']
     result = apply_fix(q, t, block, git('rev-parse', 'HEAD'))
     result['report'] = got
     if sizes:  # board growth: per package, and the running board size against the size before the first fix
