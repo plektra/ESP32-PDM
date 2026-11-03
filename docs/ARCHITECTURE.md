@@ -17,9 +17,9 @@ them is a system change: make it on both boards in the same session (or note it 
 
 | Sheet | Contents |
 |---|---|
-| root (controller) | ESP32-S3-MINI-1-N8, native USB on IO19/IO20, boot/reset buttons, variant ID, battery input J10 + SMCJ30CA, battery-voltage divider (R60/R61/C60), NTC TH1 (R62/C61) |
+| root (controller) | ESP32-S3-MINI-1-N8, native USB on IO19/IO20, boot/reset buttons, variant ID, battery input J10 + SMCJ30CA (D30) and C30 1 µF/100 V on the terminal net VBAT_IN, FL30 (DNP ferrite) bridged by JP30 copper to VS, C31 100 µF/63 V on VS (decision 41), battery-voltage divider (R60/R61/C60), NTC TH1 (R62/C61) |
 | `power-usb` | LMR51610 buck (4–65 V) → 3.3 V, 60 V PTC, SMAJ30CA, diode-OR with USB VBUS |
-| `can` | ISO1044 isolated CAN, TPS7B91 5 V from NET-S, SMAJ18CA, PESD2CAN |
+| `can` | CA-IS3050G isolated CAN (SOIC-8-WB) with TXD pull-up R70, DNP CMC FL1 (bridged by 0 Ω R71/R72) and DNP Y-cap C70 (design-notes §8.5); L78M05ABDT 5 V from NET-S (DPAK, footprint ≈ 10.4 × 6.7 mm, decision 45, design-notes §8.3); SMAJ18CA, PESD2CAN; LEN 1 (49.3 mA worst case, measure on the first prototype) |
 | `analog_sw` | Panel connector J5 (decision 17): 4 protected switch inputs (SMAJ30CA, 4.7 k load, 10 k + 4.7 k/BZT52C3V3 divider, 100 nF); fused switch supply SW_SUPPLY (F4 PTC, SMAJ30CA, 100 nF); 4 constant-current LED sinks (MMBT5551 + 470 Ω, ≈ 5 mA, SMAJ30CA + 100 Ω + 1 nF per line) |
 
 ### Pin map (ESP32-S3)

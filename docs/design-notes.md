@@ -117,7 +117,7 @@ P_total · R_box, junction rise P_channel · RthJA, solved together.
 
 Assumptions (*estimates* until a prototype is measured): vented enclosure with the PCB vertical
 (chimney airflow), R_box 0.6 K/W (4-ch) / 0.9 K/W (2-ch, 1 module width), RthJA 40 K/W per switch
-with 2 oz copper (50 K/W with 1 oz), 0.6 W for the ESP32/regulator/LEDs, RDS(on) at datasheet max
+with 2 oz copper (50 K/W with 1 oz), 2.2 W `--p-other` default (ESP32/regulators/LEDs 0.6 W plus the panel interface, see below), RDS(on) at datasheet max
 rising linearly to 150 °C.
 
 **`--p-other` with the panel interface (T-0047, 2026-11-02).** The 0.6 W default covers the ESP32, regulators and status
@@ -133,8 +133,8 @@ interface (`analog_sw`, values after T-0068) adds ≈ 1.6 W:
 
 Total **p_other ≈ 2.2 W** (the validator's estimate was 2.1 W). `tools/heat_budget.py --p-other 2.1` and `--p-other 2.2`
 both give 4 × BTT6050 at 4 A → enclosure air 45.2–45.3 °C, **Tj ≈ 101 °C** (100 °C with 0.6 W): the 4 A rating stands.
-Use `--p-other 2.2` for 24 V installations with a busy panel. The tool's default is unchanged (tools/ is outside this
-package).
+Use `--p-other 2.2` for 24 V installations with a busy panel. Since T-0085 (2026-11-03) this is the tool's default
+(was 0.6 W); give `--p-other 0.6` for the controller alone.
 
 | Variant | Switch | Ambient | Copper | Continuous per channel (Tj ≤ ~110 °C) |
 |---|---|---|---|---|
@@ -269,7 +269,8 @@ VSNS = 1190 / 68 k = 17.5 mV → **IOC ≈ 17.5 A** (nominal).
 - Timer unchanged: Eq. 7 tOC = CTMR × 1.2 V / 82 µA = 10 µF × 1.2 / 82 µA ≈ **146 ms** (C105/C205). Fast trip
   unchanged (≈ 80 A, 4–5 µs).
 - Heat (`tools/heat_budget.py`, RDS(on)-path 11.7 mΩ at 150 °C, BSC030N08NS5 Diagram 9;
-  `--channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002`, 40 °C, both channels loaded):
+  `--channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002 --p-other 0.6` – the default before T-0085 –,
+  40 °C, both channels loaded):
   15 A → Tj 88 °C, 17.5 A → 111 °C, 18 A → 117 °C, 18.5 A → 123 °C, 19.7 A (upper IOC) → 139 °C; with
   `--p-other 1.9` 17.5 A → 113 °C, 18 A → 118 °C. All below the MOSFET Tj max 150 °C (Table 2), so the hardware
   breaker now closes the gap that the 25 A setting left (Tj 169 °C at 22 A).

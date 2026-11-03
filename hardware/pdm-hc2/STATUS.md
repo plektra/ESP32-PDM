@@ -1,11 +1,15 @@
 # pdm-hc2 status
 
-Updated: 2026-11-03 (T-0078)
+Updated: 2026-11-03 (T-0085)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
+
+**2026-11-03 (T-0085, unattended, scope sync – documents only):** ARCHITECTURE `can` row (CA-IS3050G, L78M05ABDT, LEN)
+and root row (C30/C31, FL30/JP30, VBAT_IN) brought in line with the schematic; `tools/heat_budget.py --p-other`
+default 0.6 → 2.2 W (design-notes §4). The 32 V full scale is already recorded (decision 38). No schematic change.
 
 **2026-11-03 (T-0078: T-0076, Q-0052, unattended, shared lib + `can` – same on both boards):** U5 CA-IS3050G symbol pin
 numbers corrected to the datasheet (v1.10 Table 6-1): pin 2 RXD, pin 3 TXD (they were swapped, the CA-IS3052G order).
@@ -131,12 +135,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
-- T-0073: decision 18's "33 V full scale" is amended to ≈ 32 V (decision 38, design-notes §2).
-
-- T-0067: ARCHITECTURE `can` row says "ISO1044"; it is now CA-IS3050G (SOIC-8-WB, ≈ 7.5 × 11.5 mm with leads) plus
-  DNP FL1/C70 and fitted R70–R72. LEN recheck: 49.3 mA worst case (LEN 1, 0.7 mA margin) / 79.8 mA continuous
-  dominant (LEN 2). Measure the NET-S current on the first prototype.
-
 - T-0072/T-0055: **J10 keyed/polarised** (decision 40) – choose it in `/system mechanical` (J10 not chosen yet); the
   board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).
 - T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the
@@ -144,9 +142,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
   full scale ≈ 31.9 V) and reports "OUT high while off" as a float-driven run.
 - **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list).
 
-- T-0065: ARCHITECTURE `can` row still says "TPS7B91"; it is now L78M05ABDT (DPAK, ≈ 10.4 × 6.7 mm footprint –
-  include in the `/system mechanical` area budget). The NET-S current stays LEN 1 (normal traffic 44.8 mA) / LEN 2
-  (continuous dominant 76.8 mA), only 5 mA margin to 50 mA. Recheck if the CAN transceiver changes (T-0030).
 - T-0065: the PTC interrupt-rating problem (F1/F3/F4, I_max 40 A vs ≈ 188 A) is a system protection question for the
   owner; F4 feeds the panel switches (bilge forced run, navigation lights), so a competent person reviews it.
 - T-0065 unique extended parts: −PESD0402V05, −TPS7B91; +C170101 (2.2 µF/100 V), +C107198 (4.7 nF/1 kV).
