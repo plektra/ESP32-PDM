@@ -71,3 +71,5 @@ free number (`/handoff` adds them).
 | 62 | 2026-11-03 | shared-can | TXD pull-up R70 10 k 0402 C25744 to +3V3 (T-0067) | auto |
 | 63 | 2026-11-03 | shared-can | barrier Y-cap C70 = 1 nF/2 kV X7R 1206 C9196 (reuses C50-C53 part), DNP, GND_CAN-GND, capacitor only (T-0067) | auto |
 | 64 | 2026-11-03 | shared-can | CMC FL1 = cjiang FACT4532-510-2P-T C20624726 (51 uH, 4532), DNP, footprint Coilank_ACM4532 placeholder, bus side on pins 1/4; bridges R71/R72 0 ohm 0402 C17168 (reuses R43 part), fitted (T-0067) | auto |
+| 65 | 2026-11-03 | system | LCSC codes from cost report C1 applied on both boards after value/package/net-voltage check: C2 C14663, C4/C6 C15849, C5 C19666, C7/C9 C28233, C8 C45783, C10/C11 C307331, C12 C52923, D12-D15 C22466350 (BAT54C, preferred), R1/R2/R5/R6 C25879, R11/R12 C25905, R15-R17/R21/R24/R27 C25744; C13 and FB1/FB2 keep the T-0065 codes (T-0073) | auto |
+| 66 | 2026-11-03 | system | Firmware/production rule: never burn EFUSE_STRAP_JTAG_SEL (IO3 held low by IS2 on pdm-4ch, IMON2 on pdm-hc2); design-notes §2 and both STATUS pre-order checklists (T-0073) | auto |

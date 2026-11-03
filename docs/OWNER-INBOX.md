@@ -52,35 +52,39 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (3) – two-way doors
+## Decided by agents (1) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0060 · INFO · pdm-hc2 · IO3 strapping pin is held low by the IMON2 network; harmless while EFUSE_STRAP_JTAG_SEL is not burnt (same as V11 on pdm-4ch). → No hardware change; production must not burn that eFuse.
 - T-0058 · MINOR · pdm-hc2 · Section 1 still names TPS48111-Q1 and 8-20 A; section 9 says an OUT voltage divider lets the PDM see float-driven runs, but no such divider exists and IMON cannot see that current. → Correct both sections to the as-drawn design (TPS48110A-Q1, about 15 A; float runs only visible via SW3/SW4 if wired); OUT divider decision goes to Q2.
-- T-0051 · INFO · pdm-4ch · IO3 (JTAG source strap) is tied low through 10.7 k; harmless unless EFUSE_STRAP_JTAG_SEL is burnt. → Note in the firmware/production docs: never burn EFUSE_STRAP_JTAG_SEL.
 
-## Applied by agents (29)
+## Applied by agents (35)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0060 · pdm-hc2 · IO3 strapping pin is held low by the IMON2 network; harmless while EFUSE_STRAP_JTAG_SEL is not burnt (same as V11 on pdm-4ch). → T-0073 (`1939dfbc`)
 - T-0059 · pdm-hc2 · First switch-on after power-up waits about 76-100 ms for the bootstrap (Eq. 1), also on the hardware switch path; overcurrent/short retry is about 3.8 min, reset by toggling INP. → T-0070 (`9d0b6d53`)
 - T-0056 · pdm-hc2 · No 1 nF bypass across the MMBT3904 remote sensor; TPS4811-Q1 section 9.6.1 says it must be placed (EMC E4 lists it only as a tune-in-test footprint). → T-0071 (`80bb3bd1`)
 - T-0052 · pdm-4ch · Should DEN be held high in Active mode, or pulsed only while sampling IS? V1 (RIS overload on fault or open output) depends on it. → T-0069 (`b9fcef31`)
+- T-0051 · pdm-4ch · IO3 (JTAG source strap) is tied low through 10.7 k; harmless unless EFUSE_STRAP_JTAG_SEL is burnt. → T-0073 (`1939dfbc`)
 - T-0050 · pdm-4ch · 'Switches survive with the ground network' holds only for VS(REV) 28 V, t < 2 min, RL >= 12 ohm (P_4.1.2); at 4 A the body diode dissipates about 2.4 W > PTOT 1.6 W. → T-0068 (`86fbfe03`)
 - T-0049 · pdm-4ch · With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V. → T-0068 (`86fbfe03`)
 - T-0048 · pdm-4ch · No external pull-up on ISO1044 TXD; TI says not to rely on the internal one, and GPIO17 has a 60 us low glitch at power-up, which can put a dominant pulse on the N2K bus. → T-0067 (`5ffcfb6f`)
 - T-0047 · pdm-4ch · p_other 0.6 W omits about 1.5 W of panel-interface dissipation at 30 V (switch loads, dividers, LED sinks); Tj rises from 100 to 101 C at 4 A, so the rating stands. → T-0068 (`86fbfe03`)
 - T-0045 · pdm-4ch · Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct. → T-0066 (`14b42e65`)
 - T-0044 · pdm-4ch · Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab). → T-0066 (`14b42e65`)
+- T-0043 · pdm-4ch · ESP32-S3 ADC calibrated range is 0-2900 mV (datasheet v2.2 Table 5-6), so VBAT full scale is 31.9 V, not 33 V; 30 V still reads. → T-0073 (`1939dfbc`)
 - T-0042 · pdm-4ch · At SWIN 10.5 V with the 3.3 V rail down, IN minus device GND is about 1.8-2.0 V once ON, against VIN(H) min 2.0 V; the claimed 0.4 V margin does not hold (UNVERIFIED zener knee). → T-0068 (`86fbfe03`)
 - T-0041 · pdm-4ch · IS fault current (6/15/40 mA, P_7.5.7) into 680 ohm dissipates 0.15 W typ / ~1.1 W max in a 0.1 W 0603 whenever DEN is high and a channel is faulted, including an unconnected output floating up in OFF (open-load-in-OFF). → T-0069 (`b9fcef31`)
 - T-0040 · pdm-4ch · Standard population for Vega's pdm-4ch: all BTT6050 (24.87 $) or a 2+2 mix with BTT6010 (28.58 $ at 10)? → T-0069 (`b9fcef31`)
 - T-0039 · system · Must the isolated CAN side stay powered from NET-S? If not, an isolated CAN part with integrated isolated supply could also remove the TPS7B91/FB2/D11 chain → T-0067 (`5ffcfb6f`)
+- T-0033 · pdm-hc2 · Removing R1/R2 on HC2 saves only ~0.01 $/board; recommendation is to keep the controller part identical → T-0073 (`1939dfbc`)
 - T-0032 · pdm-4ch · Each BTT6010 channel adds 1.57 $ at 10 and a mixed build adds one 3.07 $ fee per order (2+2 mix: +3.71 $/board); fit BTT6010 only where > 4 A and order mixed builds together → T-0069 (`b9fcef31`)
+- T-0031 · system · No basic NTC exists; an MMBT3904 diode sensor (preferred) would remove one extended fee: -0.32 $/board at 10, at the cost of accuracy and calibration → T-0073 (`1939dfbc`)
 - T-0030 · system · CA-IS3050G (C528763, 5 kV RMS, 0.92 $ at 10+) instead of ISO1044 (1.62 $): -0.71 $/board, second source; different package/pinout → T-0067 (`5ffcfb6f`)
 - T-0026 · system · Four basic/preferred swaps remove 4 extended fees: FB->GZ2012D601TF C1017, F2->1812L050/60GR, PESD0402V05->H5VL10B C7420372, TPS7B91->L78M05ABDT C58069 → T-0065 (`e5fedd96`)
 - T-0022 · system · Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458 → T-0065 (`e5fedd96`)
+- T-0021 · system · 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn → T-0073 (`1939dfbc`)
 - T-0019 · system · Is IEC 60945 (marine) compliance a goal or only good practice, is a pre-compliance scan planned, and may the N2K shield stay unconnected at the node (4-pole J4)? This sets how far E3-E7 must go. → T-0067 (`5ffcfb6f`)
 - T-0017 · pdm-4ch · SMCJ30CA clamps at 48.4 V at 31 A, the BTT6050 absolute maximum is 48 V, but VS(LD) is 65 V (ISO 7637-1), so short clamp excursions are covered; recorded only. → T-0064 (`dbc672cd`)
 - T-0015 · system · 1 nF collector capacitors and the 2.2 uF buck input capacitor are probably 50 V parts against a 48.4 V TVS clamp; TI advises twice VIN for CIN. → T-0065 (`e5fedd96`)
@@ -125,7 +129,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0047 (system): Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet. → **(a) - 1812 60 V PTC with Imax 100 A (TECHFUSE mSMD050-60V C70113 or JDT ASMD1812-050-60V C427396, same footprint) after a datasheet check, plus a series resistor of about 0.15-0.22 ohm per PTC so that 30 V / R_total <= Imax; check the resistor's pulse energy against the PTC trip time, and if no basic/cheap part passes, return to the owner; then do the dependent F2 swap (T-0026); F4 is safety-relevant, so a competent person reviews it before installation** (parked)
 - Q-0012 (system): Is IEC 60945 (marine) compliance a goal or only good practice, is a pre-compliance scan planned, and may the N2K shield stay unconnected at the node (4-pole J4)? This sets how far E3-E7 must go. → **IEC 60945 as a design target, no certification; one pre-compliance scan on the first prototypes decides the DNP footprints; the N2K shield stays unconnected at the node (4-pole J4)** (done)
 - Q-0013 (system): LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first. → **swap to LMR51610YF only if the pre-compliance scan shows PFM noise (see Q-0005); check price and stock then** (deferred)
-- Q-0014 (system): 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn → **yes - add the listed basic/preferred LCSC codes after checking each against value and footprint; J5/J10/J11 in /system mechanical** (parked)
+- Q-0014 (system): 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn → **yes - add the listed basic/preferred LCSC codes after checking each against value and footprint; J5/J10/J11 in /system mechanical** (done)
 - Q-0015 (system): Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458 → **yes - recheck stock before ordering; datasheet-check the L1 second sources SLW6045S8R2MST C47018494 / FNR6045S8R2MT C168074** (done)
 - Q-0016 (system): 52/59 unique parts cost 1.53 $ each only under Standard PCBA; merging package variants would save ~9 $ per order then → **only if Standard PCBA is forced (see Q-0026): then merge the 100 nF and 1 uF package variants** (deferred)
 - Q-0017 (system): Order 30 instead of 10 per run: -6.05 $/board (4-ch), -7.00 $/board (HC2); 10 instead of 5 saves -9.0/-9.8 $ → **5 + 5 for the first order (see Q-0027); revisit the quantity for later runs** (deferred)
@@ -135,8 +139,8 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0021 (system): Fixed screw terminals instead of pluggable header + plug: about -1.0 $/board (the plug halves alone cost 1.20 $) → **decide in /system mechanical (see Q-0030)** (deferred)
 - Q-0022 (system): LMR51610XDBVR (400 kHz, C20539658, 0.52 $) instead of the Y variant (1.35 $): -0.83 $/board; needs a re-designed L/C and conflicts with EMC lever L1 → **no for now - keep LMR51610Y; revisit after the pre-compliance scan** (deferred)
 - Q-0023 (system): CA-IS3050G (C528763, 5 kV RMS, 0.92 $ at 10+) instead of ISO1044 (1.62 $): -0.71 $/board, second source; different package/pinout → **yes - part-facts check of CA-IS3050G (supplies, pinout, timing), swap only if it passes; Q-0004 footprints and Q-0039 pull-up then apply to it** (done)
-- Q-0024 (system): No basic NTC exists; an MMBT3904 diode sensor (preferred) would remove one extended fee: -0.32 $/board at 10, at the cost of accuracy and calibration → **keep the NTC (accuracy without calibration is worth 3.07 USD per order)** (parked)
-- Q-0025 (pdm-hc2): Removing R1/R2 on HC2 saves only ~0.01 $/board; recommendation is to keep the controller part identical → **no - keep R1/R2 so the controller part stays identical on both boards** (parked)
+- Q-0024 (system): No basic NTC exists; an MMBT3904 diode sensor (preferred) would remove one extended fee: -0.32 $/board at 10, at the cost of accuracy and calibration → **keep the NTC (accuracy without calibration is worth 3.07 USD per order)** (done)
+- Q-0025 (pdm-hc2): Removing R1/R2 on HC2 saves only ~0.01 $/board; recommendation is to keep the controller part identical → **no - keep R1/R2 so the controller part stays identical on both boards** (done)
 - Q-0026 (system): Does JLCPCB accept 2 oz copper with Economic PCBA? If not, Standard PCBA adds +5.1 $ (4-ch) / +5.6 $ (HC2) per board at 10 → **owner checks the JLCPCB quote page (2 oz + Economic PCBA) before layout; Q-0016 merge only if Standard PCBA is forced** (deferred)
 - Q-0027 (system): How many pdm-4ch and pdm-hc2 boards per order (5, 10, 30)? This is the largest cost lever → **5 + 5 (5 pdm-4ch and 5 pdm-hc2) for the first order** (deferred)
 - Q-0028 (system): Is a combined 1:1 panel of pdm-4ch + pdm-hc2 acceptable (L2)? → **yes - combined 1:1 panel of pdm-4ch + pdm-hc2, decided at the PCB phase after checking the JLCPCB multi-design surcharge** (deferred)
@@ -146,7 +150,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0032 (pdm-4ch): Standard population for Vega's pdm-4ch: all BTT6050 (24.87 $) or a 2+2 mix with BTT6010 (28.58 $ at 10)? → **all four BTT6050 as the standard pdm-4ch population; heavy loads go on HC2** (done)
 - Q-0033 (pdm-4ch): IS fault current (6/15/40 mA, P_7.5.7) into 680 ohm dissipates 0.15 W typ / ~1.1 W max in a 0.1 W 0603 whenever DEN is high and a channel is faulted, including an unconnected output floating up in OFF (open-load-in-OFF). → **yes, all three - RIS as 1206 >=0.25 W; record firmware rule: DEN pulsed only while sampling (and dropped on full-scale IS); OUT pull-down as a DNP footprint** (done)
 - Q-0034 (pdm-4ch): At SWIN 10.5 V with the 3.3 V rail down, IN minus device GND is about 1.8-2.0 V once ON, against VIN(H) min 2.0 V; the claimed 0.4 V margin does not hold (UNVERIFIED zener knee). → **correct the margin claim in design-notes and measure on the prototype; RIN 4.7 k goes on the prototype test list as the planned fix if the margin is short; no circuit change now** (done)
-- Q-0035 (pdm-4ch): ESP32-S3 ADC calibrated range is 0-2900 mV (datasheet v2.2 Table 5-6), so VBAT full scale is 31.9 V, not 33 V; 30 V still reads. → **yes - correct VBAT full scale to about 32 V in decision 18 and design-notes** (parked)
+- Q-0035 (pdm-4ch): ESP32-S3 ADC calibrated range is 0-2900 mV (datasheet v2.2 Table 5-6), so VBAT full scale is 31.9 V, not 33 V; 30 V still reads. → **yes - correct VBAT full scale to about 32 V in decision 18 and design-notes** (done)
 - Q-0036 (pdm-4ch): Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab). → **move the paste windows between the thermal vias (no plugged-via surcharge); recheck the footprint against the package drawing** (done)
 - Q-0037 (pdm-4ch): Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct. → **use the standard KiCad Package_TO_SOT_SMD:SOT-23-6 after checking it against TI DBV0006A and the JLCPCB footprint** (done)
 - Q-0039 (pdm-4ch): No external pull-up on ISO1044 TXD; TI says not to rely on the internal one, and GPIO17 has a 60 us low glitch at power-up, which can put a dominant pulse on the N2K bus. → **yes - 10 k pull-up from ISO1044 TXD to +3V3 on the shared can sheet** (done)
