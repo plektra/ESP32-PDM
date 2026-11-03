@@ -2650,7 +2650,7 @@
       "id": "T-0079",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "failed",
+      "state": "ready",
       "created": "2026-11-03",
       "depends_on": [
         "T-0078"
@@ -2663,7 +2663,7 @@
       "cost_usd": 0.0816,
       "attempts": 1,
       "finished": "2026-11-03",
-      "note": "report docs/reviews/2026-11-03-validate-pdm-4ch-2.md: no finding block",
+      "note": null,
       "summary": "failed",
       "interrupted": null
     },
