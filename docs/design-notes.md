@@ -870,6 +870,13 @@ L78M05ABDT (ST DS0425 Rev 24):
   **DNP** as the hard-tie option. Choice (auto): RC fitted, 0 Ω DNP. 1 MΩ bleeds static charge; 4.7 nF gives an RF/ESD
   return (Z ≈ 0.3 Ω at 100 MHz, ignoring ESL) but blocks the 50 Hz/DC loop to shore PE. No basic 4.7 nF part ≥ 250 V exists
   (searched 2026-11-02), so this is one new extended part. 1206 sizes keep creepage for ESD on the shield.
+- **Update T-0119 (2026-11-03, owner Q-0061/Q-0062, decision 83 amends decision 31; supersedes auto decision 46):** C18 is now
+  **1 nF/2 kV X7R 1206, FH 1206B102K202NT (C9196, basic)** – the part already used as C50–C53 (pdm-4ch) and C70/C114/C214
+  (pdm-hc2). Footprint unchanged (`C_1206_3216Metric`); R13 1 MΩ fitted and R14 0 Ω DNP unchanged. Shield RC is now
+  1 MΩ ‖ 1 nF: corner 1/(2π × 1 MΩ × 1 nF) ≈ 160 Hz (was ≈ 34 Hz with 4.7 nF). RF/ESD return |Z_C| ≈ 1.6 Ω at 100 MHz
+  (was ≈ 0.3 Ω; ESL ignored in both figures). At
+  50 Hz |Z_C| ≈ 3.2 MΩ, so the shore-PE loop still sees ≈ 0.76 MΩ (R13 ‖ C18), µA-level current. The 2 kV rating is
+  higher than the old 1 kV for ESD on the shield. One unique extended part fewer (−C107198) on both boards.
 - TLP/clamp check of the ESD part left by step 2 (H5VL10B): **no TLP curve is published**. Clamp data are 8/20 µs only
   (≤ 8 V at 1 A, ≤ 10 V at 5 A, Fig. 4). Extrapolating the 0.5 Ω dynamic resistance to the 8 kV contact first peak (≈ 30 A)
   gives roughly 20–25 V for the first nanoseconds (estimate, not datasheet). That is far below the replaced part's 40 V.
@@ -909,6 +916,7 @@ SWPA 1231, SLW 1512, FNR 1677. Recheck before ordering.
 R43 0.001, C13 0.042, C50–C53 4 × 0.023, FB1/FB2 2 × 0.020, D4–D6 3 × 0.0065 (was 3 × 0.0133), U6 0.207 (was 0.21).
 That is roughly +0.3 USD per board in part price. Unique extended parts: −PESD0402V05, −TPS7B91 (and the ferrite, which had
 no LCSC code before) removed; +C170101, +C107198 added. That is about one loading fee fewer per order (check the quote).
+T-0119: C107198 is gone again (C18 → C9196, basic, already on the BOM).
 
 ### 8.4 Custom footprints: TDSO-14 paste, LMR51610 on SOT-23-6 (T-0066, Q-0036/Q-0037, 2026-11-02)
 
