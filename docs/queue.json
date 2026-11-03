@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 116,
+    "T": 117,
     "Q": 65
   },
   "tasks": [
@@ -3728,7 +3728,9 @@
         "finding": "C1"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "deferred",
+      "until": "owner",
+      "reason": "No change now. The pdm-4ch C30 C170101 swap costs +0.054 USD per board with no fee saved only while C104-C404 keep C13832. Whether they move to C170101 is the open owner question from T-0107/T-0099 (confirmed decision 26 names 1 uF at each VS tab). C30 stays identical on both boards (shared root sheet)."
     },
     {
       "id": "T-0114",
@@ -3755,7 +3757,9 @@
         "finding": "C2"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "deferred",
+      "until": "order",
+      "reason": "Depends on the order quantity. For orders above about 20 pdm-hc2 boards, revert C30/C102/C202 to C13832 1 uF/100 V (inside decision 26 and TPS4811 Table 9-3). Re-price with tier prices at order time, since STATUS says 15+ and cost-system-2 says about 19 at 1+ prices. C30 is on the shared root sheet: weigh this against keeping both boards identical. No change for the planned 5-30 boards."
     },
     {
       "id": "T-0115",
@@ -3783,6 +3787,28 @@
       "why_big": [
         "reviewer: one-way door (confirmed decision 26 names 1 uF/100 V at each BTT6050 VS tab)"
       ]
+    },
+    {
+      "id": "T-0116",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-03",
+      "depends_on": [],
+      "items": [
+        "T-0113",
+        "T-0114"
+      ],
+      "started": "2026-11-03T15:16:02",
+      "ran_model": "opus",
+      "session": "7671866f-dbc6-4753-9e79-b898797d4bb7",
+      "cost_usd": 0.2891,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "0 packages, 2 deferred, 0 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-plan-system-T-0116.md"
     }
   ],
   "board_size_start": {

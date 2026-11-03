@@ -129,12 +129,10 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (5) – two-way doors
+## Decided by agents (3) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0114 · INFO · pdm-hc2 · C13832 removal costs 0.162 USD per board against a 3.07 USD fee per order, so it pays only up to about 19 boards per order → for orders above about 20 HC2 boards revert C30/C102/C202 to C13832; no change for 5-30 boards planned now
-- T-0113 · INFO · pdm-4ch · C30 swap to 2.2 uF C170101 adds about 0.054 USD per board on pdm-4ch with no fee saved, because C13832 stays at C104-C404 → none now; becomes free of cost when C104-C404 are also changed to C170101 (open owner question from T-0107)
 - T-0102 · INFO · system · Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → assumed No: plain Economic PCBA with all parts assembled by JLCPCB
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
@@ -191,7 +189,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0006 · pdm-hc2 · MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → T-0106 (`c036d2a6`)
 - T-0005 · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → T-0071 (`80bb3bd1`)
 
-## Deferred (14)
+## Deferred (16)
 
 - T-0016 · system · Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined. → until system-mechanical: Q-0010: GND pole(s) at J10 rated like the VS input are chosen with the terminal blocks in /system mechanical; wide GND copper to J10.2 is a PCB-phase rule
 - T-0020 · system · LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first. → until prototype: Q-0013: swap to LMR51610YF only if the pre-compliance scan of the first prototypes shows PFM noise; check price and stock then
@@ -207,6 +205,8 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0037 · system · Is a fitted USB-C service connector required, or are pads/DNP plus OTA enough (L4)? → until order: Q-0029: USB-C fitted on the prototype run; reconsider DNP/pogo pads plus OTA for later runs
 - T-0038 · system · Pluggable or fixed screw terminals (L5)? → until system-mechanical: Q-0030: terminal type for J4/J5/J10/J11 decided in /system mechanical with the J10 pole sizing (leaning pluggable J4/J5, fixed J10/J11)
 - T-0091 · system · TPS48110A stock is 989 and L1 1231, both single-source or thin; nothing is below 500 → until order: Stock re-check of TPS48110A (989) and L1 SWPA6045S8R2MT (1231) only means something on the day of the order. It is already on both STATUS pre-order checklists, and the L1 alternates are on file (decision 49).
+- T-0113 · pdm-4ch · C30 swap to 2.2 uF C170101 adds about 0.054 USD per board on pdm-4ch with no fee saved, because C13832 stays at C104-C404 → until owner: No change now. The pdm-4ch C30 C170101 swap costs +0.054 USD per board with no fee saved only while C104-C404 keep C13832. Whether they move to C170101 is the open owner question from T-0107/T-0099 (confirmed decision 26 names 1 uF at each VS tab). C30 stays identical on both boards (shared root sheet).
+- T-0114 · pdm-hc2 · C13832 removal costs 0.162 USD per board against a 3.07 USD fee per order, so it pays only up to about 19 boards per order → until order: Depends on the order quantity. For orders above about 20 pdm-hc2 boards, revert C30/C102/C202 to C13832 1 uF/100 V (inside decision 26 and TPS4811 Table 9-3). Re-price with tier prices at order time, since STATUS says 15+ and cost-system-2 says about 19 at 1+ prices. C30 is on the shared root sheet: weigh this against keeping both boards identical. No change for the planned 5-30 boards.
 
 ## Answered (46)
 
