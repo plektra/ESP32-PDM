@@ -512,6 +512,8 @@ def prompt_for(t, report, inputs=None):
                   f"{t['since'][:12]} (`git diff {t['since'][:12]} -- hardware lib docs/design-notes.md`) – is each "
                   f"change correct, complete and no bigger than its item needed? Do not re-review untouched circuits "
                   f"and do not repeat findings from earlier reports in docs/reviews/.")
+        if t.get('look_at'):
+            focus += f" For this re-check: {t['look_at']}."
     ruling = f" The owner ruled on this task: {t['ruling']}." if t.get('ruling') else ''
     return (f"Unattended run, task {t['id']}. Scope: {t['scope']}.{focus}{ruling} Today is {today()}.\n"
             f"Follow your instructions, CLAUDE.md and docs/AUTONOMY.md. Nobody will answer questions: put them in the "
@@ -725,6 +727,32 @@ def measure_sizes(q):
             q[key] = {b: board_size(c) for b, c in checks.items() if c}
         finally:
             shutil.rmtree(d, ignore_errors=True)
+
+
+# Re-checks after fixes: what each reviewer looks at, and which changed refs make the EMC one worth running.
+COST_RECHECK = ('price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique '
+                'extended part count per board before and after (each is a loading fee per order), and a cheaper '
+                'equivalent where one exists')
+EMC_RECHECK = ('check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the '
+               'layout rules of the last EMC report, and do they add new switching edges or coupling paths')
+EMC_REFS = re.compile(r'^(J|FL|FB|L|D|F|Q|TVS)\d', re.I)  # connectors, ferrites, inductors, diodes/TVS, fuses, switches
+
+
+def needs_recheck(q, t):
+    """'' when a cost/EMC re-check should run, else why it is skipped. Packages merged before refs were recorded
+    count as unknown, so the re-check runs."""
+    if not t.get('recheck'):
+        return ''
+    pkgs = [find_task(q, d) for d in t.get('depends_on', [])]
+    if any(p['state'] != 'done' or 'refs' not in p for p in pkgs):
+        return ''
+    refs = sorted({r for p in pkgs for r in p['refs']})
+    if t['recheck'] == 'cost' and not refs:
+        return 'no part changed in ' + ', '.join(p['id'] for p in pkgs)
+    if t['recheck'] == 'emc' and not any(EMC_REFS.match(r) for r in refs):
+        return ('no connector, filter or protection part changed (refs: ' + (', '.join(refs[:12]) or 'none')
+                + ('…' if len(refs) > 12 else '') + ')')
+    return ''
 
 
 def verify_since(q, t):
@@ -942,6 +970,14 @@ def apply_plan(q, t, plan):
         if deps:
             q['tasks'].append(dict(id=new_id(q, 'T'), role='validator', scope=board, state='ready', created=today(),
                                    depends_on=deps, verify=True, since=git('rev-parse', 'HEAD')))
+    # Cost and EMC see the whole system: one re-check each after all design packages, run only when the packages'
+    # declared refs show it is needed (needs_recheck), otherwise closed as skipped without an agent.
+    deps = [p['id'] for p in pkg_ids.values() if p['scope'] != 'sync']
+    if deps:
+        for role, focus in (('cost-controller', COST_RECHECK), ('emc-reviewer', EMC_RECHECK)):
+            q['tasks'].append(dict(id=new_id(q, 'T'), role=role, scope='system', state='ready', created=today(),
+                                   depends_on=deps, verify=True, since=git('rev-parse', 'HEAD'), look_at=focus,
+                                   recheck=ROLES[role]['kind']))
     left = [i for i in items if i not in seen]
     return dict(packages=len(pkg_ids), deferred=deferred, decisions=numbers, unplanned=left)
 
@@ -974,6 +1010,7 @@ def apply_fix(q, t, block, merged):
             s.update(state='blocked-owner', question=new_id(q, 'Q'), door='one-way',
                      why_big=[f"{s['unfinished']} work packages (last {t['id']}) returned it neither done nor blocked; "
                               f"check whether it is already done or say how to proceed"])
+    t['refs'] = sorted(set(block.get('refs') or []))  # read by the cost/EMC re-checks (needs_recheck)
     rows = [(d.get('area', t['scope']), f"{d.get('text', '')} ({t['id']})", 'auto') for d in block.get('decisions', [])]
     numbers = add_decisions(WORKTREE, rows) if rows else []
     if t.get('sweep'):
@@ -2006,6 +2043,15 @@ def cmd_run(args):
                         todo = [find_task(q, args.task)] if args.task else runnable(q)
                         todo = [t for t in todo if t['state'] == 'ready' and t['role'] in ROLES
                                 and (fixes or t['role'] not in FIX_ROLES) and not task_locks(t) & held]
+                        skipped = [(t, needs_recheck(q, t)) for t in todo if not args.task]
+                        skipped = [(t, why) for t, why in skipped if why]
+                        for t, why in skipped:
+                            t.update(state='done', finished=today(), summary=f'skipped: {why}', cost_usd=0.0)
+                            print(f"  {t['id']} {t['role']} skipped: {why}", flush=True)
+                        if skipped:
+                            save_queue(WORKTREE, q)
+                            commit_state(f"Auto: skip {', '.join(t['id'] for t, _ in skipped)} (nothing to re-check)")
+                            todo = [t for t in todo if t['state'] == 'ready']
                         if not todo:
                             break
                         left = args.budget - spent - sum(cap for _, cap in running.values())
