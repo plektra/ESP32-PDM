@@ -1,11 +1,18 @@
 # pdm-4ch status
 
-Updated: 2026-11-03 (T-0104)
+Updated: 2026-11-03 (T-0105)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-03 (T-0105: T-0046, Q-0048/decision 74, unattended, shared `analog_sw` – same on both boards):** the switch
+loads R3/R4/R7/R8 (4.7 k) are now two 2 k 1206 in series each: R3+R45, R4+R46, R7+R47, R8+R48 (C17944, basic, 4.0 k):
+0.11 W per part at 30 V (44 %, was 77 %), 0.29 W per part in a 48 V clamp (inside the 5 s overload rating). Thresholds
+and the 10.5 V margin unchanged (≤ 2 mV at IN); leakage rejection slightly better; p_other ≈ 2.3 W → Tj ≈ 101 °C at
+4 × 4 A, the 4 A rating stands. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those eight resistors and
+four new mid-point nets. +4 parts, +0 unique. Details: design-notes §3, §4, §5.
 
 **2026-11-03 (T-0104: T-0018, Q-0047/decision 73, unattended, shared – documents only):** the 100 A PTCs pass the
 datasheet check (TECHFUSE mSMD050-60V C70113 and JDT ASMD1812-050-60V C427396: 60 V / I_max 100 A, I_hold 0.50 A, 1812
@@ -30,8 +37,7 @@ unchanged (5 `lib_symbol_mismatch`, none on U5); the netlist differs only in tho
 SW_SUPPLY feed: protects the panel LEDs against reverse battery and costs 0.3–0.7 V of switch supply. D54/C54 stay on
 J5.5. Margin at SWIN 10.5 V corrected (design-notes §3), p_other ≈ 2.2 W documented (§4, Tj 101 °C at 4 A, the rating
 stands), reverse-battery limits qualified (§8, README). README: dry contacts and 12 V cranking note. ERC 0 errors,
-5 warnings (unchanged). +1 part, +1 unique part. **Blocked:** T-0046 (R3/R4/R7/R8 split): no basic 1206 2.2 k / 2.4 k
-exists; question for the owner in `docs/reviews/2026-11-02-fix-shared-T-0068.md`.
+5 warnings (unchanged). +1 part, +1 unique part. T-0046 (R3/R4/R7/R8 split) was done later in T-0105 (2 k + 2 k).
 
 **2026-11-02 (T-0069, Q-0032/Q-0033/Q-0041, unattended):** RIS R103/R203/R303/R403 now 680 Ω **1206** (C17975, extended – no
 basic exists; value unchanged). New DNP OUT pull-downs R106/R206/R306/R406 47 kΩ 0603 (C25819) per channel. DEN policy
@@ -142,8 +148,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
-- T-0068/T-0046 blocked (owner): no basic 1206 2.2 k / 2.4 k. Options: 2 k + 2 k basic (C17944) or 2.2 k + 2.4 k
-  extended. R3/R4/R7/R8 stay 4.7 k for now (0.19 W at 30 V, 77 %).
+- T-0105 (sync): `tools/heat_budget.py --p-other` default 2.2 → 2.3 W (design-notes §4; result unchanged, Tj ≈ 101 °C).
 
 - T-0069: firmware requirements for DEN (design-notes §6.1) belong in the `/system firmware` list. T-0069 swapped one
   unique extended part (−/+): C23228 (basic) is replaced by C17975 (extended, 1206 680 Ω); C25819 (basic) is added.

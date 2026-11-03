@@ -20,7 +20,7 @@ them is a system change: make it on both boards in the same session (or note it 
 | root (controller) | ESP32-S3-MINI-1-N8, native USB on IO19/IO20, boot/reset buttons, variant ID, battery input J10 + SMCJ30CA (D30) and C30 1 µF/100 V on the terminal net VBAT_IN, FL30 (DNP ferrite) bridged by JP30 copper to VS, C31 100 µF/63 V on VS (decision 41), battery-voltage divider (R60/R61/C60), NTC TH1 (R62/C61) |
 | `power-usb` | LMR51610 buck (4–65 V) → 3.3 V, 60 V PTC, SMAJ30CA, diode-OR with USB VBUS |
 | `can` | CA-IS3050G isolated CAN (SOIC-8-WB) with TXD pull-up R70, DNP CMC FL1 (bridged by 0 Ω R71/R72) and DNP Y-cap C70 (design-notes §8.5); L78M05ABDT 5 V from NET-S (DPAK, footprint ≈ 10.4 × 6.7 mm, decision 45, design-notes §8.3); SMAJ18CA, PESD2CAN; LEN 1 (49.3 mA worst case, measure on the first prototype) |
-| `analog_sw` | Panel connector J5 (decision 17): 4 protected switch inputs (SMAJ30CA, 4.7 k load, 10 k + 4.7 k/BZT52C3V3 divider, 100 nF); fused switch supply SW_SUPPLY (F4 PTC, SMAJ30CA, 100 nF); 4 constant-current LED sinks (MMBT5551 + 470 Ω, ≈ 5 mA, SMAJ30CA + 100 Ω + 1 nF per line) |
+| `analog_sw` | Panel connector J5 (decision 17): 4 protected switch inputs (SMAJ30CA, 2 × 2 k load, 10 k + 4.7 k/BZT52C3V3 divider, 100 nF); fused switch supply SW_SUPPLY (F4 PTC, SMAJ30CA, 100 nF); 4 constant-current LED sinks (MMBT5551 + 470 Ω, ≈ 5 mA, SMAJ30CA + 100 Ω + 1 nF per line) |
 
 ### Pin map (ESP32-S3)
 
@@ -69,7 +69,7 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 | HC2 per channel | ≈ 15 A continuous; breaker ~17.5 A / 146 ms (RIWRN 68 k, ≈ 15–20 A over tolerances); fast trip 80 A; external breaker ≤ 15–18 A per output plus firmware soft fuse (decision 39) | `tools/heat_budget.py --part HC-2xBSC030`, TPS4811-Q1 equations |
 | Shared supply path | ≤ 2 mΩ (terminal + VS copper); input terminal ≈ 40 A (4-ch) / ≈ 50 A (HC2) | design-notes §4 |
 | Controller power | ≈ 0.47 A at 3.3 V peak (ESP32 radio); panel LEDs no longer on 3.3 V; F1 500 mA hold | design-notes |
-| Panel switch supply | ≈ 50 mA (4 × 6.4 mA switch load + 4 × 5 mA LEDs at 30 V); F4 500 mA hold; MMBT5551 ≈ 0.13 W each at 30 V | decision 17 |
+| Panel switch supply | ≈ 60 mA (4 × 7.5 mA switch load + 4 × 2.6 mA divider + 4 × 5 mA LEDs at 30 V); F4 500 mA hold; MMBT5551 ≈ 0.13 W each at 30 V | decisions 17, 74 |
 
 ## Open system items
 

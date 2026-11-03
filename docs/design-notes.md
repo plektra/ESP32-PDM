@@ -105,6 +105,13 @@ prototype** at SWIN 10.5 V (3V3 removed and present, channel on, with and withou
 planned fix is RIN R101–R401 → 4.7 kΩ (halves the IIN drop). The other option (the shared divider) is an owner decision.
 `UNVERIFIED`: the BZT52C3V3 knee below 1 mA.
 
+*Recheck with the 2 k + 2 k switch load (T-0105, Q-0048/decision 74, 2026-11-03).* The load R3+R45 … R8+R48 sits from
+SWIN to GND, in parallel with the divider, so it does not enter the divider ratio or the thresholds above; it only adds
+current through the source. At SWIN 10.5 V the load current rises from 2.23 mA (4.7 k) to 2.63 mA (4.0 k), +0.4 mA per
+closed line, +1.6 mA with all four. Through F4 (≈ 1.4 Ω), D55 (ΔVF ≈ 0.04 V × ln(34/32) ≈ 2 mV) and ≈ 1.4 Ω of 10 m panel
+cable (assumed 0.25 mm², supply and return) that costs ≤ ≈ 6 mV at SWIN, ≤ ≈ 2 mV at IN (× 0.32). The table stands: the
+thinnest case (battery 10.5 V via D55, 3V3 down) stays ≈ 2.05 V before turn-on, ≥ VIN(H) 2.0 V.
+
 The footprint is drawn from the datasheet package outline (Figure 53): lead pads 1.6 × 0.6 mm at
 x = ±2.6 mm (0.47 mm clearance to the 2.65 × 6.4 mm exposed pad), 10 × 0.3 mm thermal vias,
 bottom-side copper pad, 51 % paste coverage in six windows between the via rows (no paste over a via, T-0066).
@@ -122,16 +129,18 @@ rising linearly to 150 °C.
 
 **`--p-other` with the panel interface (T-0047, 2026-11-02).** The 0.6 W default covers the ESP32, regulators and status
 LEDs only. On the 4-ch board at VS 30 V with all four panel switches closed and all four panel LEDs lit, the panel
-interface (`analog_sw`, values after T-0068) adds ≈ 1.6 W:
+interface (`analog_sw`, values after T-0068) adds ≈ 1.6 W (≈ 1.7 W with the T-0105 loads):
 
 | Part | Per line | × 4 |
 |---|---|---|
-| Switch loads R3/R4/R7/R8 4.7 k at SWIN ≈ 29.6 V (behind D55) | 0.19 W | 0.75 W |
+| Switch loads R3+R45 … R8+R48, 2 k + 2 k at SWIN ≈ 29.6 V (behind D55; T-0105, was 4.7 k: 0.19 W / 0.75 W) | 0.22 W (0.11 W per part) | 0.88 W |
 | R34–R37 10 k + D20–D23 + R38–R41 (node ≈ 3.2 V, ≈ 2.6 mA) | 0.08 W | 0.31 W |
 | LED sinks Q3–Q6 + R50–R53 + R19… (5 mA, (29.6 − 2 − 2.33) V across Q) | 0.14 W | 0.55 W |
-| D55 (≈ 56 mA × ≈ 0.4 V) and F4 (≈ 56 mA² × 1.4 Ω) | – | 0.03 W |
+| D55 (≈ 60 mA × ≈ 0.4 V) and F4 (≈ 60 mA² × 1.4 Ω) | – | 0.03 W |
 
-Total **p_other ≈ 2.2 W** (the validator's estimate was 2.1 W). `tools/heat_budget.py --p-other 2.1` and `--p-other 2.2`
+Total **p_other ≈ 2.2 W** (the validator's estimate was 2.1 W); **≈ 2.3 W since T-0105** (2 k + 2 k loads, +0.13 W):
+`--p-other 2.3` gives 4 × BTT6050 at 4 A → enclosure air 45.4 °C, Tj ≈ 101 °C – the 4 A rating stands (run 2026-11-03).
+The tool default is still 2.2 W (a `shared` package may not edit `tools/`; the 0.1 W does not change the result). `tools/heat_budget.py --p-other 2.1` and `--p-other 2.2`
 both give 4 × BTT6050 at 4 A → enclosure air 45.2–45.3 °C, **Tj ≈ 101 °C** (100 °C with 0.6 W): the 4 A rating stands.
 Use `--p-other 2.2` for 24 V installations with a busy panel. Since T-0085 (2026-11-03) this is the tool's default
 (was 0.6 W); give `--p-other 0.6` for the controller alone.
@@ -304,8 +313,8 @@ controller sheet parts are unchanged; only the HC2 root pin use differs (pin map
 
 ## 5. Physical switch inputs and long leads
 
-Per input (sheet `analog_sw`): SMAJ30CA at the connector → 4.7 kΩ 1206 load (contact wetting,
-2.5 mA at 12 V / 6.4 mA at 30 V) → 10 kΩ 1206 series → node with 4.7 kΩ, BZT52C3V3 and 470 nF →
+Per input (sheet `analog_sw`): SMAJ30CA at the connector → 4.0 kΩ load, two 2 kΩ 1206 in series (R3+R45, R4+R46,
+R7+R47, R8+R48; contact wetting 3.0 mA at 12 V / 7.5 mA at 30 V) → 10 kΩ 1206 series → node with 4.7 kΩ, BZT52C3V3 and 470 nF →
 BAT54C diode-OR into the channel IN. The node sits at ~3.2 V for any input 10.5–30 V; the EN threshold
 is ~7.5–8 V at the switch; τ ≈ 1.5 ms (3.2 kΩ × 470 nF; T-0012). The input works without the 3.3 V rail. 10 kΩ series resistors
 feed the node to the ESP32 (limits back-feed into an unpowered ESP32 to ~0.3 mA).
@@ -321,7 +330,7 @@ Panel connector J5 (decision 17), 10 poles:
 
 | Pin | Signal | At the connector |
 |---|---|---|
-| 1–4 | SWIN1–4: switch from SW_SUPPLY | SMAJ30CA, 4.7 k load, 10 k + divider (above) |
+| 1–4 | SWIN1–4: switch from SW_SUPPLY | SMAJ30CA, 2 × 2 k load, 10 k + divider (above) |
 | 5 | SW_SUPPLY = VS via PTC F4 (1812L050/60GR, same part as F1) and Schottky D55 (DSK16) | SMAJ30CA + 100 nF/100 V |
 | 6–9 | LED_K1–4: panel LED cathode (anode to SW_SUPPLY) | SMAJ30CA, 100 Ω, 1 nF at the collector |
 | 10 | GND (cable drain / spare) | – |
@@ -332,7 +341,32 @@ Panel connector J5 (decision 17), 10 poles:
   (≥ 10 m is fine; the panel has no LED resistor). Dissipation at 30 V ≈ (30 − 2 − 2.3) × 5 mA ≈ 0.13 W;
   R_θJA 416 K/W (JCET datasheet) → T_j ≈ 50 °C enclosure air + 54 K ≈ 104 °C (< 150 °C). LEDs are off
   when the 3.3 V rail is down. PWM: low frequency (100–200 Hz); the 1 nF collector capacitor slows edges.
-- Switch-supply budget ≈ 50 mA (4 × 6.4 mA switch load at 30 V + 4 × 5 mA LEDs); F4 holds 500 mA.
+- Switch-supply budget ≈ 60 mA at 30 V (4 × 7.5 mA switch load + 4 × 2.6 mA divider + 4 × 5 mA LEDs; was ≈ 50 mA
+  counting the 6.4 mA loads and leaving out the divider); F4 holds 500 mA.
+- **Switch loads 2 k + 2 k (T-0046 → T-0105, Q-0048/decision 74, 2026-11-03):** each 4.7 k load became two 2 kΩ 1206 in
+  series, R3+R45, R4+R46, R7+R47, R8+R48 (UNI-ROYAL 1206W4F2001T5E, C17944, basic; `docs/part-facts/C17944.md`):
+  0.25 W at 70 °C, derated linearly to 0 at 155 °C; RCWV = √(0.25 W × 2 kΩ) = 22.4 V; short-time overload 2.5 × RCWV =
+  55.9 V for 5 s (datasheet §9, test 4.13). Replaces the 2.2 k + 2.4 k of decision 35 (no basic part).
+  - Continuous, SWIN 29.6 V (30 V behind D55): 7.4 mA, 14.8 V and 0.11 W per part (44 %, ≤ RCWV); at 32 V 0.13 W (51 %).
+    At ≈ 50–60 °C enclosure air plus self-heating the parts stay below the 70 °C derating knee or close to it. Was 0.19 W
+    in one 0.25 W part (77 %).
+  - SMAJ30CA clamp on SWIN (≈ 48 V): 12 mA, 24 V and 0.29 W per part (115 % for the surge's µs–ms), inside the 5 s
+    overload rating of 55.9 V per part; was 0.49 W in one part. The pulse capability below 5 s is not published
+    (UNVERIFIED), but 24 V is well under the 5 s level.
+  - Thresholds unchanged (the load is parallel to the divider; §3 recheck). Wetting current up: 3.0 mA at 12 V, 7.5 mA
+    at 30 V.
+  - Leakage across an open contact (lamp or LED across a switch, against the README's dry-contact rule): below the zener
+    knee the input looks like 4.0 k ∥ 14.7 k = 3.1 kΩ (was 4.7 k ∥ 14.7 k = 3.6 kΩ). Reaching the ≈ 7.5 V EN threshold
+    now takes ≈ 2.4 mA of leakage instead of ≈ 2.1 mA: slightly better rejection; the dry-contact rule stays.
+  - Panel load +0.13 W at 30 V (p_other ≈ 2.3 W, §4); switch-supply budget below.
+- **Failure mode (safety), T-0105:** the panel inputs control safety-relevant outputs (bilge forced run, navigation lights).
+  - One half open (the usual thick-film failure): that input loses its load, the switch still works; only the wetting
+    current and the leakage rejection of that line are gone, so a leaky contact or a floating cable could switch it on.
+    Same as the old 4.7 k open.
+  - One half shorted: the load drops to 2 k (15 mA, 0.44 W in the remaining part at 30 V, above its rating); it heats
+    and drifts or opens (then as above). The switch still works. The old single 4.7 k shorted would have pulled SWIN to
+    GND and tripped F4 for all panel lines; two in series need a double fault for that.
+  - A competent person must review the panel wiring and these outputs before installation.
 - **Debounce (T-0012, Q-0006, 2026-11-02):** C14–C17 470 nF/10 V X5R 0402 (CL05A474KP5NNNC, C47339, preferred) on the
   node after R34–R37 (the node is held ≤ ≈ 3.3 V by the zener, so 10 V is ample). τ ≈ 3.2 kΩ × 470 nF ≈ 1.5 ms
   (corner ≈ 100 Hz), was 0.32 ms: contact bounce of a few ms no longer chatters the hardware path. The X5R

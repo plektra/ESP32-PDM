@@ -5115,7 +5115,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4.7k"
+		(property "Value" "2k"
 			(at 175.26 43.18 0)
 			(effects
 				(font
@@ -5151,7 +5151,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17936"
+		(property "LCSC" "C17944"
 			(at 172.72 41.91 0)
 			(effects
 				(font
@@ -5177,7 +5177,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 172.72 45.72 0)
+		(at 172.72 53.34 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -5186,7 +5186,7 @@
 		(fields_autoplaced yes)
 		(uuid "41d01407-52cc-4f0a-b16b-9a5a3005d691")
 		(property "Reference" "#PWR054"
-			(at 175.26 44.45 0)
+			(at 175.26 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5195,7 +5195,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 175.26 46.99 0)
+			(at 175.26 54.61 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5204,7 +5204,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 172.72 45.72 0)
+			(at 172.72 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5213,7 +5213,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 172.72 45.72 0)
+			(at 172.72 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5222,7 +5222,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 172.72 45.72 0)
+			(at 172.72 53.34 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6062,7 +6062,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4.7k"
+		(property "Value" "2k"
 			(at 175.26 68.58 0)
 			(effects
 				(font
@@ -6098,7 +6098,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17936"
+		(property "LCSC" "C17944"
 			(at 172.72 67.31 0)
 			(effects
 				(font
@@ -6124,7 +6124,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 172.72 71.12 0)
+		(at 172.72 78.74 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -6133,7 +6133,7 @@
 		(fields_autoplaced yes)
 		(uuid "d03144fe-7f7b-4279-b05f-635e2d42c810")
 		(property "Reference" "#PWR059"
-			(at 175.26 69.85 0)
+			(at 175.26 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6142,7 +6142,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 175.26 72.39 0)
+			(at 175.26 80.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6151,7 +6151,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 172.72 71.12 0)
+			(at 172.72 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6160,7 +6160,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 172.72 71.12 0)
+			(at 172.72 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6169,7 +6169,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 172.72 71.12 0)
+			(at 172.72 78.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7009,7 +7009,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4.7k"
+		(property "Value" "2k"
 			(at 175.26 93.98 0)
 			(effects
 				(font
@@ -7045,7 +7045,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17936"
+		(property "LCSC" "C17944"
 			(at 172.72 92.71 0)
 			(effects
 				(font
@@ -7071,7 +7071,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 172.72 96.52 0)
+		(at 172.72 104.14 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -7080,7 +7080,7 @@
 		(fields_autoplaced yes)
 		(uuid "5f922c27-ee24-4668-8abe-376ba68b0b5d")
 		(property "Reference" "#PWR064"
-			(at 175.26 95.25 0)
+			(at 175.26 102.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7089,7 +7089,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 175.26 97.79 0)
+			(at 175.26 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7098,7 +7098,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 172.72 96.52 0)
+			(at 172.72 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7107,7 +7107,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 172.72 96.52 0)
+			(at 172.72 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7116,7 +7116,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 172.72 96.52 0)
+			(at 172.72 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7956,7 +7956,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4.7k"
+		(property "Value" "2k"
 			(at 175.26 119.38 0)
 			(effects
 				(font
@@ -7992,7 +7992,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C17936"
+		(property "LCSC" "C17944"
 			(at 172.72 118.11 0)
 			(effects
 				(font
@@ -8018,7 +8018,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 172.72 121.92 0)
+		(at 172.72 129.54 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -8027,7 +8027,7 @@
 		(fields_autoplaced yes)
 		(uuid "1dfdaeff-a8ac-41a2-a150-fcb583376dc3")
 		(property "Reference" "#PWR069"
-			(at 175.26 120.65 0)
+			(at 175.26 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8036,7 +8036,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 175.26 123.19 0)
+			(at 175.26 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8045,7 +8045,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 172.72 121.92 0)
+			(at 172.72 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8054,7 +8054,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 172.72 121.92 0)
+			(at 172.72 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8063,7 +8063,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 172.72 121.92 0)
+			(at 172.72 129.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11093,5 +11093,321 @@
 			(type default)
 		)
 		(uuid "a675d4a3-b3cb-4c9c-a200-f8ec3947affb")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 172.72 49.53 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4c549bb0-658f-4e06-a55f-0b8705471b44")
+		(property "Reference" "R45"
+			(at 175.26 48.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "2k"
+			(at 175.26 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 172.72 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 172.72 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 172.72 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17944"
+			(at 172.72 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "963f81be-7d48-4935-be87-fa810bb93d89")
+		)
+		(pin "2"
+			(uuid "fa341c83-6a57-4e0d-b1e2-c59ac4466f8d")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/ed8f8cb2-5bf2-45a6-acc3-4c3a149c5309"
+					(reference "R45")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 172.72 74.93 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8827ae0b-ac87-41db-a4f6-634afceeb87d")
+		(property "Reference" "R46"
+			(at 175.26 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "2k"
+			(at 175.26 76.2 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 172.72 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 172.72 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 172.72 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17944"
+			(at 172.72 74.93 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "0e061742-e090-471e-8f5a-a927641ae64d")
+		)
+		(pin "2"
+			(uuid "3829668b-7025-4cda-9e01-4ba1129216b5")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/ed8f8cb2-5bf2-45a6-acc3-4c3a149c5309"
+					(reference "R46")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 172.72 100.33 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1bd5c285-6994-44e0-8127-a90a9b97d3e9")
+		(property "Reference" "R47"
+			(at 175.26 99.06 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "2k"
+			(at 175.26 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 172.72 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 172.72 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 172.72 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17944"
+			(at 172.72 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "65e83f23-7a0f-44b9-94e1-7d99a832e150")
+		)
+		(pin "2"
+			(uuid "a9fff47c-a379-49df-b385-34e4eb949be3")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/ed8f8cb2-5bf2-45a6-acc3-4c3a149c5309"
+					(reference "R47")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 172.72 125.73 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d67d1984-8234-4e72-a0fc-f22942903ae9")
+		(property "Reference" "R48"
+			(at 175.26 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "2k"
+			(at 175.26 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at 172.72 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 172.72 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 172.72 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17944"
+			(at 172.72 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "0e6ae3e8-f623-4da5-80e8-f8f2bf0949d2")
+		)
+		(pin "2"
+			(uuid "df82986e-b379-464e-8538-18b5bff96b2b")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056/ed8f8cb2-5bf2-45a6-acc3-4c3a149c5309"
+					(reference "R48")
+					(unit 1)
+				)
+			)
+		)
 	)
 )
