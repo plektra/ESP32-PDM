@@ -1906,9 +1906,8 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H5"
       },
-      "state": "deferred",
-      "until": "owner",
-      "reason": "fix is in tools/heat_budget.py (HC-2xBSC030 RDS(on) 0.0070/0.0117 with the datasheet reference), which no package gate allows a board-fixer to change; needs an owner or /system edit. Until then P7/P9 use a scratch copy with 11.7 mOhm"
+      "state": "parked",
+      "note": "re-approved 2026-11-03: tools/heat_budget.py is editable in a sync package (decision 71)"
     },
     {
       "id": "T-0058",
