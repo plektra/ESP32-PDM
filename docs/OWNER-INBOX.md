@@ -8,13 +8,7 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (1) – two-way doors
-
-Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
-
-- T-0057 · MINOR · pdm-hc2 · RDS(on) at 150 C is 11.2 mOhm in the tool; BSC030N08NS5 Diagram 9 max (5.35 mOhm) gives 2 x 5.35 + 1 = 11.7 mOhm; 15 A rises from 87 to 88 C, 20 A from 137 to 143 C; rating stands. → Set (0.0070, 0.0117) with the datasheet reference in a comment.
-
-## Applied by agents (40)
+## Applied by agents (41)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
@@ -23,6 +17,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0060 · pdm-hc2 · IO3 strapping pin is held low by the IMON2 network; harmless while EFUSE_STRAP_JTAG_SEL is not burnt (same as V11 on pdm-4ch). → T-0073 (`1939dfbc`)
 - T-0059 · pdm-hc2 · First switch-on after power-up waits about 76-100 ms for the bootstrap (Eq. 1), also on the hardware switch path; overcurrent/short retry is about 3.8 min, reset by toggling INP. → T-0070 (`9d0b6d53`)
 - T-0058 · pdm-hc2 · Section 1 still names TPS48111-Q1 and 8-20 A; section 9 says an OUT voltage divider lets the PDM see float-driven runs, but no such divider exists and IMON cannot see that current. → T-0072 (`901c6f45`)
+- T-0057 · pdm-hc2 · RDS(on) at 150 C is 11.2 mOhm in the tool; BSC030N08NS5 Diagram 9 max (5.35 mOhm) gives 2 x 5.35 + 1 = 11.7 mOhm; 15 A rises from 87 to 88 C, 20 A from 137 to 143 C; rating stands. → T-0082 (`24bf9f3b`)
 - T-0056 · pdm-hc2 · No 1 nF bypass across the MMBT3904 remote sensor; TPS4811-Q1 section 9.6.1 says it must be placed (EMC E4 lists it only as a tune-in-test footprint). → T-0071 (`80bb3bd1`)
 - T-0055 · pdm-hc2 · Reversed battery puts about -12...-30 V on TPS48110 VS/CS+/CS-/ISCP (abs max -1 V to GND); D30 SMCJ30CA is bidirectional and HC2 has no reverse protection; design-notes section 8 survival claim does not apply to HC2. → T-0072 (`901c6f45`)
 - T-0053 · pdm-hc2 · Hardware breaker at about 24-26 A (146 ms) and OT trip at 140-160 C at the sensor leave about 18-24 A unprotected in hardware; heat budget gives Tj 137-143 C at 20 A and 169 C at 22 A against MOSFET Tj max 150 C, so only firmware protects when the ESP32 runs. → T-0072 (`901c6f45`)
