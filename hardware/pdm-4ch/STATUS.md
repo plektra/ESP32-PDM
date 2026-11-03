@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-03 (T-0120)
+Updated: 2026-11-03 (T-0121)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-03 (T-0121: T-0088/EMC E16, owner ruling Q-0054, unattended, `pdm-4ch` root sheet only):** reverse-battery blocker on VS in front of the bulk capacitors. New net `VBAT_FL` between FL30/JP30 and **Q30 IPT007N06N** (C122552, 60 V, 0.75 mΩ max, TOLL; source VBAT_FL, drain VS), driven by **U30 TI LM74500-Q1** (C5219210, SOT-23-THIN-8; SOURCE+EN on VBAT_FL = always on without MCU, GATE → Q30) with **C32** 1 µF/50 V (C15849, basic, on the BOM) at VCAP. D30/C30 stay on VBAT_IN at J10; C31, C104–C404, U11–U14, F1, F4, R60 sit behind Q30. The LM74500 does not block reverse current: Q30 is fully on both ways, so OUT → body diode → VS → D30 (invariant 4) is kept, no TVS on VS. Reverse battery up to 30 V: VS stays unpowered, no time limit. Heat at 40 °C (`--r-path 0.00505`): 4 × 4 A Tj 101 → 102 °C, mix 8 A/4 A unchanged (90/102 °C), Q30 itself 1.8 W / Tj 122 °C at 40 A with ≥ 6 cm² 2 oz drain copper. New symbols `ESP32-PDM:IPT007N06N` and `ESP32-PDM:LM74500-Q1` in `lib/`. ERC 0 errors, 5 warnings (unchanged); netlist differs only in Q30/U30/C32 and FL30.1/JP30.1 (now VBAT_FL). 210 parts (+3), 61 unique (+2 extended). README and design-notes §8/§8.1/§8.6 updated, failure-mode note in §8.6: **a competent person reviews the blocker before installation** (panel switches for navigation lights and bilge forced run depend on Q30). Report: `docs/reviews/2026-11-03-fix-pdm-4ch-T-0121.md`.
 
 **2026-11-03 (T-0120: T-0099/T-0115, owner Q-0063/Q-0064, unattended, `channel`):** VS-tab capacitors C104–C404 are now 2.2 µF/100 V X7R 1206 C170101 (Samsung CL31B225KCHSNNE, already on the BOM as C1/C30) instead of 1 µF C13832. Same footprint C_1206_3216Metric. Decision 26 amended by the owner to "≥ 1 µF/100 V (2.2 µF C170101)"; this supersedes auto decision 44. No C13832 is left on pdm-4ch. ERC 0 errors, 5 warnings (unchanged); netlist differs only in C104–C404. 207 parts (+0), 59 unique (−1). Details: design-notes §8.1, `docs/reviews/2026-11-03-fix-pdm-4ch-T-0120.md`.
 
@@ -124,6 +126,10 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    - MLCCs on VS/VBAT_IN (C30, C104–C404): away from the terminal screws and board edges and not across a bending
      line (a cracked MLCC shorts the battery input).
    - D103–D403 (DNP) next to J11, GND return straight to J10.2.
+   - T-0121 (design-notes §8.6): Q30 in the 40 A path between JP30 and VS. VBAT_FL and VS copper as wide as the VS
+     copper, both layers. **≥ 6 cm² 2 oz copper on Q30's drain tab (VS)**, otherwise Q30 runs too hot at 40 A (minimal pad:
+     Tj ≈ 200 °C). U30 next to Q30 with short SOURCE/GATE traces. C32 at U30, away from Q30's tab. The surge loop
+     switches → VS → Q30 → D30 short and wide.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
    board edges and screws.
@@ -168,10 +174,21 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0051 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IS2 network
   (design-notes §2).
 - T-0107/T-0120: C30 and C104–C404 use C170101 2.2 µF instead of C13832 1 µF. pdm-4ch no longer carries C13832, so its loading fee is gone; this pays on short runs only. Revisit the choice if runs grow past about 12 boards (owner ruling Q-0063). RIS is now 2 × C4410 per channel.
+- T-0121: check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30, pads 1 G / 2 S / 3 D) and `TSOT-23-8` (U30; TI DDF land
+  1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C122552 and C5219210. Recheck stock (C122552
+  4707, C5219210 2923 on 2026-11-03).
 - T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
   positions.
 
 ## For /system
+
+- T-0121 (sync): the ARCHITECTURE root row should mention the pdm-4ch reverse-battery blocker: VBAT_IN → FL30/JP30 →
+  `VBAT_FL` → Q30 IPT007N06N (U30 LM74500-Q1, C32) → VS, on pdm-4ch only (HC2 unchanged, decision 40).
+- T-0121 (`/system mechanical`): J10 keyed/polarised on pdm-4ch too (decision 34; owner ruling Q-0054 "Still key J10").
+- T-0121 (sync): supply-path budget. ARCHITECTURE says "shared supply path ≤ 2 mΩ". On pdm-4ch, Q30 adds
+  ≤ 0.75 mΩ (25 °C) / ≈ 1.05–1.1 mΩ hot. Suggested wording: "terminal + VS copper ≤ 2 mΩ, plus the pdm-4ch blocker Q30
+  ≤ 1.1 mΩ hot". The heat budget shows this is harmless (design-notes §8.6: 4 × 4 A Tj +1 K; `--r-path` default 4 mΩ already
+  covers it).
 
 - T-0107 (sync): the ARCHITECTURE root row still says "C30 1 µF/100 V". It is now 2.2 µF/100 V C170101 (decision 26 range 1–2.2 µF).
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
