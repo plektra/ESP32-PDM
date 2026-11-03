@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 83,
+    "T": 85,
     "Q": 54
   },
   "tasks": [
@@ -1907,7 +1907,8 @@
         "finding": "H5"
       },
       "state": "parked",
-      "note": "re-approved 2026-11-03: tools/heat_budget.py is editable in a sync package (decision 71)"
+      "note": "re-approved 2026-11-03: tools/heat_budget.py is editable in a sync package (decision 71)",
+      "package": "T-0084"
     },
     {
       "id": "T-0058",
@@ -2745,6 +2746,41 @@
       "summary": "0 fixed, 0 blocked, merged 24bf9f3b; no part changes",
       "interrupted": null,
       "report": "docs/reviews/2026-11-03-fix-sync-T-0082.md"
+    },
+    {
+      "id": "T-0083",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-03",
+      "depends_on": [],
+      "items": [
+        "T-0057"
+      ],
+      "started": "2026-11-03T10:01:30",
+      "ran_model": "opus",
+      "session": "f2ee3412-8d01-4f87-959d-1ae57f87dd10",
+      "cost_usd": 0.2113,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "1 packages, 0 deferred, 0 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-plan-system-T-0083.md"
+    },
+    {
+      "id": "T-0084",
+      "role": "board-fixer",
+      "scope": "sync",
+      "state": "ready",
+      "created": "2026-11-03",
+      "title": "HC2 heat-budget RDS(on) at 150 C - verify T-0082 sync and close",
+      "brief": "Sync package (decision 71). This package changes no design and no schematic or netlist. Fix T-0082 (commit ca2c930) already applied T-0057. 1) Check that tools/heat_budget.py has PARTS['HC-2xBSC030'] = (0.0070, 0.0117) and that the comment above it cites BSC030N08NS5 Rev 2.3 Diagram 9 (p. 8): 3.0 mOhm at 25 C, ~5.35 mOhm at 150 C, path = 2 x FET + 1 mOhm shunt. 2) Run python3 tools/heat_budget.py --channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002 --currents 15,20. Expect 15 A ~88 C and 20 A ~143 C. 3) Check that docs/design-notes.md section 4a (heat line under the parts table) and section 4a.2 quote 11.7 mOhm and 88 C / 143 C, and that they keep 'Continuous rating ~15 A per channel'. If all three checks hold, change no file and report T-0057 as already done. 4) Only if the value or the notes have gone back to 11.2 mOhm / 87 C / 137 C: set (0.0070, 0.0117) with the comment above, update the two design-notes lines to the tool's output, and change nothing else. Gates: only tools/heat_budget.py and docs/design-notes.md may change; netlists of both boards unchanged; ARCHITECTURE invariants untouched; the tool runs. One-way door, stop and ask: if the run puts 15 A at or above ~100 C, or 19.7 A (upper IOC, T-0072) at or above 150 C (Tj max, Table 2). Either would change the HC2 rating or the breaker setting.",
+      "items": [
+        "T-0057"
+      ],
+      "plan": "T-0083",
+      "depends_on": []
     }
   ],
   "board_size_start": {
