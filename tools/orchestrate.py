@@ -26,6 +26,7 @@ Environment: CLAUDE_BIN (default `claude`), KICAD_BIN_DIR (default the macOS KiC
 import argparse
 import datetime
 import fcntl
+import hashlib
 import json
 import os
 import re
@@ -58,7 +59,11 @@ KICAD_BIN_DIR = os.environ.get('KICAD_BIN_DIR', '/Applications/KiCad/KiCad.app/C
 
 BOARDS = ('pdm-4ch', 'pdm-hc2')
 SCOPES = BOARDS + ('system',)
-FIX_SCOPES = BOARDS + ('shared',)  # a shared package changes both boards identically
+# `shared` changes both boards identically; `sync` brings docs/ARCHITECTURE.md, the STATUS files' "For /system"
+# lists and tools/heat_budget.py inputs in line with what is already merged – never the design, never an invariant.
+FIX_SCOPES = BOARDS + ('shared', 'sync')
+SYNC_FILES = ('docs/ARCHITECTURE.md', 'docs/design-notes.md', 'tools/heat_budget.py') + tuple(
+    f'hardware/{b}/STATUS.md' for b in BOARDS)
 BOARD_SCH = {'pdm-4ch': 'hardware/pdm-4ch/ESP32-PDM-4CH.kicad_sch', 'pdm-hc2': 'hardware/pdm-hc2/ESP32-PDM-HC2.kicad_sch'}
 SHARED_SHEETS = ('analog_sw', 'can', 'power-usb')
 DECISIONS = Path('docs/decisions.md')
@@ -147,9 +152,9 @@ def runnable(q):
 
 
 def task_locks(t):
-    """One board-fixer per board at a time (a shared package holds both); one planner at a time."""
+    """One board-fixer per board at a time (a shared or sync package holds both); one planner at a time."""
     if t['role'] == 'board-fixer':
-        return set(BOARDS) if t['scope'] == 'shared' else {t['scope']}
+        return set(BOARDS) if t['scope'] in ('shared', 'sync') else {t['scope']}
     return {'plan'} if t['role'] == 'planner' else set()
 
 
@@ -746,6 +751,8 @@ def shared_sheets_equal(wt):
 
 
 def fix_allowed(path, scope):
+    if scope == 'sync':
+        return path in SYNC_FILES
     boards = BOARDS if scope == 'shared' else (scope,)
     ok = ['docs/design-notes.md', 'README.md', 'lib/', f'{FACTS_DIR}/'] + [f'hardware/{b}/' for b in boards]
     if scope == 'shared':
@@ -781,7 +788,67 @@ def fix_gates(wt, t, base, after, block, changed, report):
     differ = shared_sheets_equal(wt)
     if differ:
         fails.append('shared sheets differ between the boards: ' + ', '.join(differ))
+    if t['scope'] == 'sync':
+        fails += sync_gates(wt, changed)
     return fails
+
+
+def architecture_invariants(text):
+    m = re.search(r'^## Invariants\n(.*?)(?=^## )', text, re.M | re.S)
+    return m.group(1).strip() if m else None
+
+
+def sync_gates(wt, changed):
+    """Extra gates of a sync package: the invariants stay word for word, the heat budget tool still runs."""
+    fails = []
+    if 'docs/ARCHITECTURE.md' in changed:
+        before = architecture_invariants(git('show', 'HEAD:docs/ARCHITECTURE.md', cwd=wt))
+        after = architecture_invariants((wt / 'docs/ARCHITECTURE.md').read_text())
+        if before is None or before != after:
+            fails.append('ARCHITECTURE.md: the Invariants section changed (owner only, decision 23)')
+    if 'tools/heat_budget.py' in changed:
+        r = subprocess.run([sys.executable, 'tools/heat_budget.py'], cwd=wt, capture_output=True, text=True)
+        if r.returncode:
+            fails.append(f'tools/heat_budget.py no longer runs (exit {r.returncode}): {r.stderr.strip()[-200:]}')
+    return fails
+
+
+FOR_SYSTEM = re.compile(r'^## For /system\n(.*?)(?=^## |\Z)', re.M | re.S)
+
+
+def for_system_items(root):
+    """The "For /system" section of each board's STATUS.md (text, '' when there is none)."""
+    out = {}
+    for b in BOARDS:
+        path = root / 'hardware' / b / 'STATUS.md'
+        m = FOR_SYSTEM.search(path.read_text()) if path.exists() else None
+        out[b] = m.group(1).strip() if m else ''
+    return out
+
+
+def for_system_key(root):
+    return hashlib.sha1(json.dumps(for_system_items(root), sort_keys=True).encode()).hexdigest()[:12]
+
+
+def maybe_sync(q):
+    """Queue a sync sweep of the "For /system" lists once fixes have settled and the lists changed since the last
+    sweep. The agent does the two-way bookkeeping and leaves design choices for an interactive /system session."""
+    busy = ('ready', 'running')
+    if any(t['role'] in ('planner', 'board-fixer') and t['state'] in busy for t in q['tasks']):
+        return False
+    if any(t['role'] in REVIEWERS and (t['state'] == 'running' or (t['state'] == 'ready' and deps_done(q, t)))
+           for t in q['tasks']):
+        return False
+    items = for_system_items(WORKTREE)
+    if not any(items.values()) or for_system_key(WORKTREE) == q.get('sync_seen'):
+        return False
+    listing = '\n\n'.join(f'{b} STATUS.md, For /system:\n{text}' for b, text in items.items() if text)
+    q['tasks'].append(dict(id=new_id(q, 'T'), role='board-fixer', scope='sync', state='ready', created=today(),
+                           depends_on=[], items=[], sweep=True, title='Sync the "For /system" lists',
+                           brief='Sweep the "For /system" items of both boards under the rules for scope `sync` in '
+                                 'your instructions: do the bookkeeping ones, leave the rest word for word.\n\n'
+                                 + listing))
+    return True
 
 
 def parse_tagged(text, tag):
@@ -898,6 +965,9 @@ def apply_fix(q, t, block, merged):
         find_task(q, i).pop('package', None)  # untouched: planned again
     rows = [(d.get('area', t['scope']), f"{d.get('text', '')} ({t['id']})", 'auto') for d in block.get('decisions', [])]
     numbers = add_decisions(WORKTREE, rows) if rows else []
+    if t.get('sweep'):
+        return dict(done=len(done), blocked=blocked, decisions=numbers, merged=merged,
+                    synced=len(block.get('synced') or []), left=len(block.get('left') or []))
     return dict(done=len(done), blocked=blocked, decisions=numbers, merged=merged)
 
 
@@ -1134,6 +1204,8 @@ def run_task(q, t, budget_left, dry_run=False):
                  note='; '.join(notes) or None, summary=summary, interrupted=interrupted or None)
         if result:
             t['report'] = result['report']
+        if t.get('sweep') and t['state'] in ('done', 'failed'):
+            q['sync_seen'] = for_system_key(WORKTREE)
         write_inbox(WORKTREE, q)
         save_queue(WORKTREE, q)
         git('add', '--', *commit_paths)
@@ -1235,6 +1307,8 @@ def summarize(kind, result, paused):
     if kind == 'plan':
         return (f"{result['packages']} packages, {result['deferred']} deferred, {len(result['decisions'])} decisions"
                 + (f", {len(result['unplanned'])} unplanned" if result['unplanned'] else ''))
+    if kind == 'fix' and 'synced' in result:
+        return f"{result['synced']} synced, {result['left']} left for /system, merged {result['merged'][:8]}"
     if kind == 'fix':
         return (f"{result['done']} fixed, {result['blocked']} blocked, merged {result['merged'][:8]}"
                 + (f"; {growth_text(result['growth'])}" if result.get('growth') else ''))
@@ -1823,6 +1897,8 @@ def cmd_run(args):
                     with STATE:
                         if fixes and plans_left and not args.task and maybe_plan(q):
                             plans_left -= 1
+                            save_queue(WORKTREE, q)
+                        elif fixes and not args.task and maybe_sync(q):
                             save_queue(WORKTREE, q)
                         held = set().union(*[task_locks(x) for x, _ in running.values()])
                         todo = [find_task(q, args.task)] if args.task else runnable(q)

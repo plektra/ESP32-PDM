@@ -16,7 +16,9 @@ reports in `docs/reviews/` that the items come from.
 1. **Packages.** Group items that change the same circuit into packages a single agent can finish in one session
    (at most 8 items, one coherent area). `scope` is `pdm-4ch`, `pdm-hc2`, or `shared` when a shared sheet
    (`power-usb`, `can`, `analog_sw`, the controller part of the root sheet), `lib/` or `docs/ARCHITECTURE.md`
-   changes – a shared package changes both boards identically. Put part-fact checks that decide a swap in the same
+   changes – a shared package changes both boards identically – or `sync` when the item changes no design, only
+   `docs/ARCHITECTURE.md` (not its invariants), `docs/design-notes.md`, the boards' `STATUS.md` or the inputs of
+   `tools/heat_budget.py` to match what is already decided (decision 71). Put part-fact checks that decide a swap in the same
    package as the swap. Order with `after` when one package needs another's result. Write a `brief`: what to change,
    in order, the owner's ruling verbatim where there is one, the checks to run, and what would make it a one-way door
    (stop and ask) – for example a part check that fails.
