@@ -52,8 +52,9 @@ for word), `docs/design-notes.md`, the boards' `STATUS.md` and `tools/heat_budge
 - **leave it** word for word – anything that is a choice rather than a record: mechanics, terminals, enclosure,
   firmware, pin-map changes, a new or relaxed invariant, money, a safety rule or installation requirement, a fact
   only the owner has, or anything you are not sure about. Those stay for an interactive `/system` session.
-In the fix block list each item once, as a short label, in `synced` or `left` (with the reason); `done`, `blocked`
-and `refs` stay empty.
+A **sweep** (no items, the brief lists the "For /system" text): in the fix block list each entry once, as a short
+label, in `synced` or `left` (with the reason); `done`, `blocked` and `refs` stay empty. A **planned** sync package
+(it has items) reports them like any package: each item in `done` or `blocked` – an item left out is planned again.
 
 Report to the path the caller gives: what changed and why (per item), checks run with results, open points. End
 with this block:
