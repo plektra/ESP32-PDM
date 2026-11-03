@@ -98,7 +98,7 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 - T-0090 · MINOR · system · Two avoidable extended-part types: 4.7 nF/1 kV USB-shield capacitor and the 680 ohm 1206 RIS, 3.07 USD per order and design each → C18 -> 1 nF/2 kV C9196 (basic, already used); RIS -> two 1 kOhm 1206 C4410 in parallel (see L5, L7)
 - T-0089 · MINOR · system · The cable practice that the immunity design assumes (screened panel cable with drain at the PDM end, bundled battery pair away from VHF coax, load returns to the battery negative bus, diode at inductive loads, PWM limits, N2K drop length) is not in the README. → Add the Installation guidance section of this report to the README; text only.
 
-## Applied by agents (41)
+## Applied by agents (42)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
@@ -117,6 +117,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0049 · pdm-4ch · With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V. → T-0068 (`86fbfe03`)
 - T-0048 · pdm-4ch · No external pull-up on ISO1044 TXD; TI says not to rely on the internal one, and GPIO17 has a 60 us low glitch at power-up, which can put a dominant pulse on the N2K bus. → T-0067 (`5ffcfb6f`)
 - T-0047 · pdm-4ch · p_other 0.6 W omits about 1.5 W of panel-interface dissipation at 30 V (switch loads, dividers, LED sinks); Tj rises from 100 to 101 C at 4 A, so the rating stands. → T-0068 (`86fbfe03`)
+- T-0046 · pdm-4ch · 0.19 W continuous at 30 V in a 0.25 W part (77 %), 0.49 W during a 48 V clamp. → T-0105 (`849fc1d6`)
 - T-0045 · pdm-4ch · Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct. → T-0066 (`14b42e65`)
 - T-0044 · pdm-4ch · Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab). → T-0066 (`14b42e65`)
 - T-0043 · pdm-4ch · ESP32-S3 ADC calibrated range is 0-2900 mV (datasheet v2.2 Table 5-6), so VBAT full scale is 31.9 V, not 33 V; 30 V still reads. → T-0073 (`1939dfbc`)
@@ -199,7 +200,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0035 (pdm-4ch): ESP32-S3 ADC calibrated range is 0-2900 mV (datasheet v2.2 Table 5-6), so VBAT full scale is 31.9 V, not 33 V; 30 V still reads. → **yes - correct VBAT full scale to about 32 V in decision 18 and design-notes** (done)
 - Q-0036 (pdm-4ch): Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab). → **move the paste windows between the thermal vias (no plugged-via surcharge); recheck the footprint against the package drawing** (done)
 - Q-0037 (pdm-4ch): Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct. → **use the standard KiCad Package_TO_SOT_SMD:SOT-23-6 after checking it against TI DBV0006A and the JLCPCB footprint** (done)
-- Q-0048 (pdm-4ch): 0.19 W continuous at 30 V in a 0.25 W part (77 %), 0.49 W during a 48 V clamp. → **(a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8** (parked)
+- Q-0048 (pdm-4ch): 0.19 W continuous at 30 V in a 0.25 W part (77 %), 0.49 W during a 48 V clamp. → **(a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8** (done)
 - Q-0039 (pdm-4ch): No external pull-up on ISO1044 TXD; TI says not to rely on the internal one, and GPIO17 has a 60 us low glitch at power-up, which can put a dominant pulse on the N2K bus. → **yes - 10 k pull-up from ISO1044 TXD to +3V3 on the shared can sheet** (done)
 - Q-0040 (pdm-4ch): With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V. → **add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop** (done)
 - Q-0041 (pdm-4ch): Should DEN be held high in Active mode, or pulsed only while sampling IS? V1 (RIS overload on fault or open output) depends on it. → **DEN pulsed only while sampling IS (and dropped on full-scale IS), not held high in Active mode (see Q-0033)** (done)

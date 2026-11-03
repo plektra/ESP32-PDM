@@ -1552,7 +1552,7 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V6"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0048",
       "why_big": [
         "found while fixing (T-0068): Ruling Q-0038 asks for 2.2 k + 2.4 k 1206 basic parts; JLCPCB has no basic/preferred 1206 2.2 k or 2.4 k (basic 1206 values include 1 k, 2 k, 4.7 k, 10 k). Any substitute departs from the ruling."
@@ -1560,7 +1560,9 @@
       "ruling": "(a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8",
       "answered": "2026-11-03",
       "package": "T-0105",
-      "door": "one-way"
+      "door": "one-way",
+      "fixed_by": "T-0105",
+      "merged": "849fc1d6cb509624e15a2669cb40fa1aad1155f8"
     },
     {
       "id": "T-0047",
@@ -3387,7 +3389,7 @@
       "id": "T-0105",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "Panel switch loads R3/R4/R7/R8 -> 2 k + 2 k basic",
       "brief": "Owner ruling Q-0048 (verbatim): \"(a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8\". This replaces the 2.2 k + 2.4 k of decision 35 (no basic part exists, T-0068 report). Shared analog_sw sheet, identical on both boards. Steps: 1) part_facts.py C17944 (2 kOhm 1206, power rating 0.25 W, voltage rating >= 48 V clamp; per part 0.11 W at 30 V, about 0.29 W per part during a 48 V clamp - check the short-time overload rating for the clamp case). 2) tools/ksch.py: each of R3/R4/R7/R8 becomes two C17944 in series (keep the existing ref for one half, add the second with the next free refs, new mid-point net). 3) Recheck in design-notes section 3: switch load 4.0 k (6.4 -> 7.5 mA at 30 V); the ON/OFF thresholds and the SWIN margin at 10.5 V with D55 and the P1 series resistor, and the leakage rejection for dry contacts. 4) Heat: the panel load rises by about 0.13 W at 30 V. Update the p_other figure in design-notes section 4 (about 2.2 -> 2.3 W) and rerun tools/heat_budget.py for pdm-4ch at 40 C (4 x BTT6050 at 4 A, --p-other with the new value). Change the tool default only if the notes prove it. 5) ARCHITECTURE: analog_sw row '4.7 k load' -> '2 x 2 k load' and the panel switch supply budget (4 x 7.5 mA + 4 x 5 mA, about 55 mA; F4 hold unchanged). Do not touch the invariants. 6) ERC and netlist on both boards before/after; only R3/R4/R7/R8, the four new resistors and their mid-point nets may differ; fix_check.py --scope shared. 7) Both STATUS files: drop the 'Blocked: T-0046' and 'For /system: T-0068/T-0046' notes. Stop and ask (one-way): if the 4 A pdm-4ch rating at 40 C no longer holds with the new p_other, or if the SWIN margin falls below 2.0 V.",
@@ -3397,7 +3399,39 @@
       "plan": "T-0103",
       "depends_on": [
         "T-0104"
-      ]
+      ],
+      "started": "2026-11-03T11:32:25",
+      "ran_model": "opus",
+      "session": "599ca18b-fa3f-4f95-a3d5-c49103afbef4",
+      "cost_usd": 1.4933,
+      "attempts": 1,
+      "refs": [
+        "R3",
+        "R4",
+        "R45",
+        "R46",
+        "R47",
+        "R48",
+        "R7",
+        "R8"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 4,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 4,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": "1 part-facts lookups (0.15 USD)",
+      "summary": "1 fixed, 0 blocked, merged 849fc1d6; pdm-4ch +4 parts (+0 DNP), +0 unique, pdm-hc2 +4 parts (+0 DNP), +0 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-shared-T-0105.md"
     },
     {
       "id": "T-0106",
@@ -3534,12 +3568,12 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 196,
+      "parts": 200,
       "dnp": 15,
       "unique": 61
     },
     "pdm-hc2": {
-      "parts": 212,
+      "parts": 216,
       "dnp": 11,
       "unique": 70
     }
