@@ -738,13 +738,16 @@ Every check passed, so the part was swapped:
 | Loop delay | t_loop1/2 110–210 ns (§7.8) | ISO1044 ≤ 199 ns (t_PROP(LOOP1), 2.25–5.5 V). 250 kbit/s: 2 × (210 ns + 200 m × 5 ns/m) ≈ 2.4 µs < ≈ 3.5 µs sample point (87.5 % of 4 µs) | pass |
 | TXD dominant timeout | 2–8 ms → minimum 5.5 kbit/s (§7.8, §9.5.4) | 11 dominant bits at 250 kbit/s = 44 µs | pass |
 | Isolation | 5 kV_RMS (UL 1577), V_IORM 1414 V_pk, reinforced (VDE 0884-17); CLR/CPG 8 mm; C_IO ≈ 0.5 pF (§7.4, §7.5) | ISO1044: 3 kV_RMS | pass (better) |
-| Pinout | SOIC8-WB: 1 VCC1, 2 TXD, 3 RXD, 4 GND1, 5 GND2, 6 CANL, 7 CANH, 8 VCC2 (Table 6-1) | ISO1044 D: 5 CANL, 6 CANH, 7 GND2 – **not pin-compatible** | new symbol |
+| Pinout | SOIC8-WB: 1 VCC1, 2 RXD, 3 TXD, 4 GND1, 5 GND2, 6 CANL, 7 CANH, 8 VCC2 (Table 6-1; CA-IS3052G has 2/3 swapped, Table 6-2) | ISO1044 D: 5 CANL, 6 CANH, 7 GND2 – **not pin-compatible** | new symbol |
 | Package | SOIC8-WB, body 7.40–7.60 × 5.75–5.95 mm, lead span 11.25–11.75 mm; land 0.60 × 1.80 mm pads, 10.90 mm row pitch (Fig. 11-1) | KiCad `Package_SO:SOIC-8_7.5x5.85mm_P1.27mm`: 0.6 × 1.8 mm pads at 10.65 mm pitch, pad 4.425–6.225 mm from centre, covers the foot (toe ≤ 5.875 mm) | accepted |
 | JLCPCB | C528763, extended, stock 5970 (2026-11-02), EasyEDA footprint present, 0.917 USD at 10+ | ISO1044BDR C2878225, 1.62 USD | −0.71 USD/board |
 | Heat | P_D2 ≤ 175 mW, P_D1 ≤ 25 mW (§7.3, worst case), R_θJA 110.1 K/W → ≤ +22 K | – | negligible |
 
 - Symbol: `ESP32-PDM:CA-IS3050G` in `lib/ESP32-PDM.kicad_sym`, a copy of the ISO1044BD graphic with the pins renumbered by
   name. The pin points are unchanged, so no wire moved. The netlist confirms U5.5 = GND_CAN, U5.6 = CANL, U5.7 = CANH.
+  2026-11-03 (T-0076, package T-0078): the symbol had pins 2 = TXD and 3 = RXD (the CA-IS3052G order); corrected to
+  2 = RXD, 3 = TXD (v1.10 p. 5, Fig. 6-1/Table 6-1) by renumbering only, so the pin points did not move: /IO17 → U5.3 TXD,
+  /IO18 → U5.2 RXD. R70 stays on TXD (/IO17, now U5.3).
 - **LEN recheck.** I_CC2 dominant 44 typ / 73 max mA, recessive 3 typ / 12 max mA (§7.7). The datasheet gives no
   50 %-duty figure (the ISO1044 check used 38 mA). Worst-case average (73 + 12) / 2 = 42.5 mA, plus the L78M05 I_d
   6 + 0.8 mA, gives 49.3 mA ≤ 50 mA → **LEN 1**, with only 0.7 mA margin and every value at its maximum. Typical ≈ 29 mA.
