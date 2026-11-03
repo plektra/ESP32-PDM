@@ -185,8 +185,9 @@ Per channel (source: TI TPS4811-Q1 datasheet SLUSEE5E):
 | MMBT3904 | – | temperature sensor between the MOSFETs (overtemperature → FLT_T, auto-retry 512 ms) |
 | SS510B | 100 V 5 A | freewheel diode for motor loads |
 
-Heat (`tools/heat_budget.py --part HC-2xBSC030 --rth-ja 20 --r-box 0.9`, estimate, 40 °C, vented):
-2 × 12.5 A → Tj ≈ 71 °C; 2 × 15 A → 87 °C; 2 × 20 A → 137 °C (too hot). **Continuous rating ≈ 15 A per
+Heat (`tools/heat_budget.py --channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002`, estimate,
+40 °C, vented; RDS(on) path 11.7 mΩ at 150 °C per BSC030N08NS5 Diagram 9, T-0057):
+2 × 12.5 A → Tj ≈ 71 °C; 2 × 15 A → 88 °C; 2 × 20 A → 143 °C (too hot). **Continuous rating ≈ 15 A per
 channel.** The hardware breaker (≈ 17.5 A / 146 ms, §4a.2) allows short motor starts; between 15 A and the breaker,
 protection comes from the required external breaker (≤ 15–18 A) and the firmware soft fuse. The temperature sensor
 (140–160 °C at the MMBT3904) is a backstop, not a continuous protection.
@@ -267,7 +268,7 @@ VSNS = 1190 / 68 k = 17.5 mV → **IOC ≈ 17.5 A** (nominal).
   `UNVERIFIED`, no table row at 68 k). With 1 % RSET, RIWRN and RSNS: **IOC ≈ 15.2–19.7 A**.
 - Timer unchanged: Eq. 7 tOC = CTMR × 1.2 V / 82 µA = 10 µF × 1.2 / 82 µA ≈ **146 ms** (C105/C205). Fast trip
   unchanged (≈ 80 A, 4–5 µs).
-- Heat (scratch copy of `tools/heat_budget.py` with RDS(on)-path 11.7 mΩ at 150 °C, BSC030N08NS5 Diagram 9;
+- Heat (`tools/heat_budget.py`, RDS(on)-path 11.7 mΩ at 150 °C, BSC030N08NS5 Diagram 9;
   `--channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002`, 40 °C, both channels loaded):
   15 A → Tj 88 °C, 17.5 A → 111 °C, 18 A → 117 °C, 18.5 A → 123 °C, 19.7 A (upper IOC) → 139 °C; with
   `--p-other 1.9` 17.5 A → 113 °C, 18 A → 118 °C. All below the MOSFET Tj max 150 °C (Table 2), so the hardware

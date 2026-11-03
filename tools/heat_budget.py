@@ -24,9 +24,10 @@ PARTS = {
     'BTT6030-1ERA': (0.037, 0.065),
     'BTT6010-1ERA': (0.012, 0.022),
     'TPS27S100': (0.100, 0.166),
-    # High-current channel: 2 x BSC030N08NS5 (3.0 mR max at 25 C, ~1.7x at 150 C) + 1 mR shunt in series.
+    # High-current channel: BSC030N08NS5 Rev 2.3 Diagram 9 (p. 8): max 3.0 mOhm at 25 C, ~5.35 mOhm at 150 C;
+    # path = 2 x FET + 1 mOhm shunt (T-0057, docs/design-notes.md 4a.2).
     # Heat is shared by two MOSFET packages: use --rth-ja ~20 (half of one package on 2 oz copper).
-    'HC-2xBSC030': (0.0070, 0.0112),
+    'HC-2xBSC030': (0.0070, 0.0117),
 }
 
 
