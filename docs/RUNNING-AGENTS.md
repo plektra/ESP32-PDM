@@ -5,6 +5,9 @@ Run every command from the repo folder.
 
 ## See what is planned and done
 
+- **What to do next:** `python3 tools/orchestrate.py next` – your next steps, most urgent first, each with the command
+  to run (answer the inbox, look at a failed task, start a run, merge `auto/pilot`, `/system`). The same list heads
+  the dashboard and `status`, is printed at the end of every run, and the run's notification names the first step.
 - **`docs/ROADMAP.md`** – what the agents will change next (every item, your ruling, the planner's brief), what they
   changed, how much the boards grew, what waits for you and what is deferred. Regenerated at every change, in the
   orchestrator's copy `../ESP32-PDM-auto/docs/ROADMAP.md` while a run is going.

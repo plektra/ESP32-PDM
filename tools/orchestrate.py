@@ -341,6 +341,7 @@ def apply_answers(root, q):
             t['state'] = 'done'
         else:
             t['state'] = 'ready' if t['role'] in ROLES else 'parked'
+            t.pop('package', None)  # approved now: planned afresh
         applied += 1
     write_inbox(root, q)
     return applied
@@ -511,6 +512,8 @@ def prompt_for(t, report, inputs=None):
                   f"{t['since'][:12]} (`git diff {t['since'][:12]} -- hardware lib docs/design-notes.md`) – is each "
                   f"change correct, complete and no bigger than its item needed? Do not re-review untouched circuits "
                   f"and do not repeat findings from earlier reports in docs/reviews/.")
+        if t.get('look_at'):
+            focus += f" For this re-check: {t['look_at']}."
     ruling = f" The owner ruled on this task: {t['ruling']}." if t.get('ruling') else ''
     return (f"Unattended run, task {t['id']}. Scope: {t['scope']}.{focus}{ruling} Today is {today()}.\n"
             f"Follow your instructions, CLAUDE.md and docs/AUTONOMY.md. Nobody will answer questions: put them in the "
@@ -726,6 +729,32 @@ def measure_sizes(q):
             shutil.rmtree(d, ignore_errors=True)
 
 
+# Re-checks after fixes: what each reviewer looks at, and which changed refs make the EMC one worth running.
+COST_RECHECK = ('price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique '
+                'extended part count per board before and after (each is a loading fee per order), and a cheaper '
+                'equivalent where one exists')
+EMC_RECHECK = ('check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the '
+               'layout rules of the last EMC report, and do they add new switching edges or coupling paths')
+EMC_REFS = re.compile(r'^(J|FL|FB|L|D|F|Q|TVS)\d', re.I)  # connectors, ferrites, inductors, diodes/TVS, fuses, switches
+
+
+def needs_recheck(q, t):
+    """'' when a cost/EMC re-check should run, else why it is skipped. Packages merged before refs were recorded
+    count as unknown, so the re-check runs."""
+    if not t.get('recheck'):
+        return ''
+    pkgs = [find_task(q, d) for d in t.get('depends_on', [])]
+    if any(p['state'] != 'done' or 'refs' not in p for p in pkgs):
+        return ''
+    refs = sorted({r for p in pkgs for r in p['refs']})
+    if t['recheck'] == 'cost' and not refs:
+        return 'no part changed in ' + ', '.join(p['id'] for p in pkgs)
+    if t['recheck'] == 'emc' and not any(EMC_REFS.match(r) for r in refs):
+        return ('no connector, filter or protection part changed (refs: ' + (', '.join(refs[:12]) or 'none')
+                + ('…' if len(refs) > 12 else '') + ')')
+    return ''
+
+
 def verify_since(q, t):
     """The commit a re-check compares against: recorded at planning, else the parent of its first merged package."""
     if t.get('since'):
@@ -875,8 +904,12 @@ def add_decisions(root, rows):
 # ---------------------------------------------------------------- planning and fixing
 
 def approved_items(q):
-    """Approved, not yet planned: owner-approved rulings and agents' two-way fixes waiting to be applied."""
-    return [t for t in q['tasks'] if t.get('finding') and t['state'] == 'parked' and not t.get('package')]
+    """Approved, not yet planned: owner-approved rulings and agents' two-way fixes waiting to be applied. An item
+    whose package already finished without it (blocked, then answered by the owner) is unplanned again."""
+    def planned(t):
+        p = t.get('package') and next((x for x in q['tasks'] if x['id'] == t['package']), None)
+        return bool(p) and p['state'] in ('ready', 'running')
+    return [t for t in q['tasks'] if t.get('finding') and t['state'] == 'parked' and not planned(t)]
 
 
 def maybe_plan(q):
@@ -937,6 +970,14 @@ def apply_plan(q, t, plan):
         if deps:
             q['tasks'].append(dict(id=new_id(q, 'T'), role='validator', scope=board, state='ready', created=today(),
                                    depends_on=deps, verify=True, since=git('rev-parse', 'HEAD')))
+    # Cost and EMC see the whole system: one re-check each after all design packages, run only when the packages'
+    # declared refs show it is needed (needs_recheck), otherwise closed as skipped without an agent.
+    deps = [p['id'] for p in pkg_ids.values() if p['scope'] != 'sync']
+    if deps:
+        for role, focus in (('cost-controller', COST_RECHECK), ('emc-reviewer', EMC_RECHECK)):
+            q['tasks'].append(dict(id=new_id(q, 'T'), role=role, scope='system', state='ready', created=today(),
+                                   depends_on=deps, verify=True, since=git('rev-parse', 'HEAD'), look_at=focus,
+                                   recheck=ROLES[role]['kind']))
     left = [i for i in items if i not in seen]
     return dict(packages=len(pkg_ids), deferred=deferred, decisions=numbers, unplanned=left)
 
@@ -962,7 +1003,14 @@ def apply_fix(q, t, block, merged):
             s.update(state='deferred', until='later', reason=f"{t['id']}: {b.get('reason', '')}")
         blocked += 1
     for i in mine - set(done) - {b.get('task') for b in block.get('blocked', [])}:
-        find_task(q, i).pop('package', None)  # untouched: planned again
+        s = find_task(q, i)  # untouched: planned again, but not forever
+        s.pop('package', None)
+        s['unfinished'] = s.get('unfinished', 0) + 1
+        if s['unfinished'] >= MAX_UNFINISHED:
+            s.update(state='blocked-owner', question=new_id(q, 'Q'), door='one-way',
+                     why_big=[f"{s['unfinished']} work packages (last {t['id']}) returned it neither done nor blocked; "
+                              f"check whether it is already done or say how to proceed"])
+    t['refs'] = sorted(set(block.get('refs') or []))  # read by the cost/EMC re-checks (needs_recheck)
     rows = [(d.get('area', t['scope']), f"{d.get('text', '')} ({t['id']})", 'auto') for d in block.get('decisions', [])]
     numbers = add_decisions(WORKTREE, rows) if rows else []
     if t.get('sweep'):
@@ -1224,6 +1272,7 @@ def run_task(q, t, budget_left, dry_run=False):
     return cost, result
 
 
+MAX_UNFINISHED = 2  # packages that may return an item untouched before it goes to the owner
 MAX_REPAIRS = 2  # times an agent is sent back to fix its own hand-in before the task fails
 REPAIR_MIN_USD = 0.30  # budget a repair needs at least
 
@@ -1581,6 +1630,87 @@ def limit_lines():
     return out
 
 
+ORCH = 'python3 tools/orchestrate.py'
+
+
+def next_steps(root, q, run=None):
+    """What the owner should do now, most urgent first: [(level, what, how)]. level: 'act' (only you can unblock
+    it), 'go' (start the agents), 'info' (nothing to do, for orientation)."""
+    steps, active = [], run_active()
+    tasks = q['tasks']
+    answers = read_answers(root)
+    open_q = [t for t in tasks if t['state'] == 'blocked-owner' and t.get('question') not in answers]
+    answered = [t for t in tasks if t['state'] == 'blocked-owner' and t.get('question') in answers]
+    crit = sum(1 for t in open_q if t['finding']['severity'] == 'CRITICAL')
+    if open_q:
+        steps.append(('act', f"Answer {len(open_q)} question{'s' if len(open_q) > 1 else ''} in the owner inbox"
+                      + (f" ({crit} CRITICAL – the run stopped for them)" if crit else ''),
+                      f'/inbox, or write the Answer lines in {INBOX}'))
+    for t in [t for t in tasks if t['state'] == 'failed']:
+        note = t.get('note') or ''
+        kept = re.search(r'report kept as (\S+)', note)
+        reasons = [p for p in note.split('; ') if p and not re.match(r'(repair \d|report kept as|\d+ part-facts)', p)]
+        steps.append(('act', f"{t['id']} {t['role']} {t['scope']} failed: {(reasons or [note])[-1][:100]}",
+                      (f'read {kept.group(1)}, then ' if kept else '') + f"{ORCH} retry {t['id']}"
+                      + f"  (ask the agent: {ORCH} attach {t['id']})"))
+    stop = (run or {}).get('stop') or ''
+    limited = not active and bool(stop) and bool(UNAVAILABLE.search(stop))
+    if active:
+        steps.append(('info', 'Agents are running – nothing to start', f'{ORCH} watch · {ORCH} pause to stop early'))
+    work = [t for t in tasks if t['state'] == 'ready' and t['role'] in ROLES]
+    approved = approved_items(q)
+    sweep = bool(any(for_system_items(root).values())) and for_system_key(root) != q.get('sync_seen')
+    if not active and (work or approved or answered or sweep):
+        what = [f'{len(work)} queued task' + ('s' if len(work) != 1 else '')] if work else []
+        what += [f'{len(approved)} approved item' + ('s' if len(approved) != 1 else '') + ' to plan'] if approved else []
+        what += [f'{len(answered)} answer' + ('s' if len(answered) != 1 else '') + ' to apply'] if answered else []
+        what += ['the "For /system" sweep'] if sweep else []
+        if limited:  # one step, not two: the same run continues once the limit resets
+            steps.append(('go', 'The last run stopped at a usage limit. Start a run (paused agents resume where they '
+                                'stopped): ' + ', '.join(what),
+                          f'{ORCH} run --wait-for-limit  (sleeps until the reset, then carries on)'))
+        else:
+            steps.append(('go', 'Start a run: ' + ', '.join(what), f'{ORCH} run'))
+    exists = subprocess.run(['git', 'rev-parse', '--verify', '--quiet', BRANCH], cwd=REPO,
+                            capture_output=True).returncode == 0
+    ahead = int(git('rev-list', '--count', f'main..{BRANCH}', cwd=REPO)) if exists else 0
+    if ahead and not active:
+        steps.append(('act' if not (work or approved or sweep) else 'info',
+                      f'Review and merge the agents\' work: {ahead} commit{"s" if ahead > 1 else ""} on {BRANCH} '
+                      f'not in main' + (' (or after the run)' if work or approved or sweep else ''),
+                      f'git log --stat main..{BRANCH}, then in the repo: git merge --ff-only {BRANCH}'))
+    if not sweep:
+        left = sum(1 for text in for_system_items(root).values() for line in text.splitlines()
+                   if line.startswith('- '))
+        if left:
+            steps.append(('act' if not (work or approved or open_q) else 'info',
+                          f'{left} entries left in the "For /system" lists need your choices (bookkeeping is synced by agents)',
+                          '/system (see the STATUS.md "For /system" lists)'))
+    until = Counter(t.get('until', 'later') for t in tasks if t['state'] == 'deferred')
+    if until:
+        steps.append(('info', 'Deferred until a later phase: ' + ', '.join(f'{n} {u}' for u, n in until.most_common()),
+                      'they come back when that phase starts (docs/ROADMAP.md)'))
+    if not any(level in ('act', 'go') for level, _, _ in steps):
+        steps.insert(0, ('act', 'Nothing waiting on you or the agents: start the next phase',
+                         'docs/CONTINUE-FROM-HERE.md (order of work), or /progress'))
+    order = {'act': 0, 'go': 1, 'info': 2}
+    return sorted(steps, key=lambda s: order[s[0]])
+
+
+def next_lines(root, q, run=None, width=None):
+    steps = next_steps(root, q, run)
+    out = [paint(' YOUR NEXT STEP', 'bold', 'yellow')]
+    n = 0
+    for level, what, how in steps:
+        if level == 'info':
+            out += [paint(f'  · {what}', 'dim'), paint(f'      {how}', 'dim')]
+            continue
+        n += 1
+        out.append(f"  {paint(str(n) + '.', 'bold')} {paint(what, 'bold' if n == 1 else 'reset')}")
+        out.append(paint(f'     → {how}', 'cyan'))
+    return out
+
+
 def dashboard(width, recent):
     root = state_root()
     q = load_queue(root)
@@ -1588,6 +1718,7 @@ def dashboard(width, recent):
     st = Counter(t['state'] for t in reviews)
     run = json.loads((LOGS / RUN_INFO).read_text()) if (LOGS / RUN_INFO).exists() else {}
     out = [paint(' ESP32-PDM agents ', 'bold', 'magenta') + paint(f'  {datetime.datetime.now():%H:%M:%S}', 'dim'), '']
+    out += next_lines(root, q, run) + ['']
     out.append(f" Tasks    {bar(st['done'], len(reviews))}  {paint(st['done'], 'bold')}/{len(reviews)} done   "
                f"{paint(str(st['running']) + ' running', 'cyan')}   {st['ready']} queued   "
                + (paint(f"{st['failed']} failed", 'red') if st['failed'] else '0 failed'))
@@ -1746,7 +1877,9 @@ def cmd_status(args):
     answers = read_answers(root)
     waiting = [t for t in q['tasks'] if t['state'] == 'blocked-owner' and t['question'] in answers]
     order = ('running', 'ready', 'blocked-owner', 'failed', 'parked', 'deferred', 'done')
-    print(f'State: {root / QUEUE}')
+    run = json.loads((LOGS / RUN_INFO).read_text()) if (LOGS / RUN_INFO).exists() else {}
+    print('\n'.join(next_lines(root, q, run)) + '\n')
+    print(f'State: {root / QUEUE}  (parked = approved, waiting for the planner)')
     for state in order:
         ts = [t for t in q['tasks'] if t['state'] == state]
         if not ts:
@@ -1763,6 +1896,12 @@ def cmd_status(args):
     spent = sum(t.get('cost_usd', 0) for t in q['tasks'])
     print(f"\nSpent so far: {spent:.2f} USD. Inbox: {root / INBOX}"
           + (f" ({len(waiting)} answered, applied at the next run)" if waiting else ''))
+
+
+def cmd_next(args):
+    root = state_root()
+    run = json.loads((LOGS / RUN_INFO).read_text()) if (LOGS / RUN_INFO).exists() else {}
+    print('\n'.join(next_lines(root, load_queue(root), run)))
 
 
 def cmd_add(args):
@@ -1904,6 +2043,15 @@ def cmd_run(args):
                         todo = [find_task(q, args.task)] if args.task else runnable(q)
                         todo = [t for t in todo if t['state'] == 'ready' and t['role'] in ROLES
                                 and (fixes or t['role'] not in FIX_ROLES) and not task_locks(t) & held]
+                        skipped = [(t, needs_recheck(q, t)) for t in todo if not args.task]
+                        skipped = [(t, why) for t, why in skipped if why]
+                        for t, why in skipped:
+                            t.update(state='done', finished=today(), summary=f'skipped: {why}', cost_usd=0.0)
+                            print(f"  {t['id']} {t['role']} skipped: {why}", flush=True)
+                        if skipped:
+                            save_queue(WORKTREE, q)
+                            commit_state(f"Auto: skip {', '.join(t['id'] for t, _ in skipped)} (nothing to re-check)")
+                            todo = [t for t in todo if t['state'] == 'ready']
                         if not todo:
                             break
                         left = args.budget - spent - sum(cap for _, cap in running.values())
@@ -1961,17 +2109,22 @@ def cmd_run(args):
         notify(f'Run stopped: {stop}')
     if args.push:
         git('push', '-u', 'origin', BRANCH)
+    fh.close()  # released first, so the next steps do not see this run as still active
+    steps = [s for s in next_steps(WORKTREE, q, run_info) if s[0] != 'info']
+    print('\n' + '\n'.join(next_lines(WORKTREE, q, run_info)))
+    first = f' Next: {steps[0][1]}' if steps else ''
     if ran:
-        notify(f'{ran} task(s), {spent:.2f} USD, {new_q} new question(s) for the owner')
+        notify(f'{ran} task(s), {spent:.2f} USD, {new_q} new question(s) for the owner.{first}')
     else:
         print('nothing to run')
-    fh.close()
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest='cmd', required=True)
-    s = sub.add_parser('status', help='tasks by state, spend, inbox path')
+    s = sub.add_parser('next', help='what you should do now, with the command for each step')
+    s.set_defaults(fn=cmd_next)
+    s = sub.add_parser('status', help='your next step, then tasks by state, spend, inbox path')
     s.add_argument('--limit', type=int, default=15)
     s.set_defaults(fn=cmd_status)
     s = sub.add_parser('add', help='queue a review task')

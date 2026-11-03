@@ -129,7 +129,10 @@ agents without the owner:
    (outside the lock); a conflict only in Markdown docs (design notes, `STATUS.md`) goes back to the agent to
    resolve, any other conflict re-queues the package to be rebuilt on the new base (up to 3 attempts). The items are `done` and listed under "Applied by agents" in the inbox.
    `orchestrate.py undo <item>` reverts the whole package and turns its items into questions.
-5. **Re-check:** after a board's packages, a validator reviews it again; its findings go through the door rules, and
+5. **Re-check:** after a board's packages, a validator reviews it again; after all design packages of a plan, a
+   cost controller prices the change (when any package changed a part) and an EMC reviewer checks it (when a
+   connector, ferrite, inductor, diode/TVS, fuse or switch changed) – both limited to the diff, otherwise closed as
+   skipped without an agent; their findings go through the door rules, and
    the next planning round picks up what it approves (`run --rounds`, default 2 per run).
 
 **System sync (decision 71).** Interactive `/system` sessions keep the choices; the bookkeeping they used to
