@@ -1,6 +1,6 @@
 # pdm-hc2 status
 
-Updated: 2026-11-03
+Updated: 2026-11-03 (T-0072)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
@@ -8,6 +8,14 @@ apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (sa
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
 
 **2026-11-03 (T-0073: T-0021/T-0031/T-0033/T-0043/T-0051/T-0060, unattended, shared – same on both boards):** `LCSC` fields added (cost report C1, each checked against value, package and net voltage): C2 C14663, C4/C6 C15849, C5 C19666, C7/C9 C28233, C8 C45783, C10/C11 C307331, C12 C52923, D12/D13 BAT54C C22466350 (preferred; pinout 1/2 anodes, 3 common cathode), R1/R2/R5/R6 C25879, R11/R12 C25905, R15–R17/R21/R24/R27 C25744 – all basic except the BAT54C, no new unique extended part. C13 and FB1/FB2 already had codes from T-0065. R1/R2 and the NTC TH1 (C52155402) stay (Q-0025, Q-0024). VBAT full scale ≈ 32 V and the IO3 strap rule are in design-notes §2.
+
+**2026-11-03 (T-0072: T-0053/T-0062/T-0058/T-0055, unattended, decisions 39/40):** breaker RIWRN R113/R213 47 k →
+68 k (C36871, preferred, replaces C25792): IOC ≈ 17.5 A nominal, ≈ 15.2–19.7 A over tolerances, tOC 146 ms unchanged;
+Tj 111 °C at 17.5 A, 139 °C at 19.7 A (< 150 °C). OUT sense on the root sheet: R63 220 k / R64 22 k / C62 100 nF
+OUT1 → IO4, R65/R66/C63 OUT2 → IO5 (same parts as VBAT_SENSE, no new unique part), IO4/IO5 no-connects removed.
+README: external breaker ≤ 15–18 A per output, label requirement, reverse-battery warning. design-notes §1, §4a,
+§4a.2 (calculations, failure modes), §8 (HC2 reverse battery), §9 corrected. ERC 0 errors, 5 warnings (unchanged);
+netlist checked; pdm-4ch unchanged. **For the PCB:** R63–R66/C62/C63 near U1 with the 220 k at the OUT side.
 
 **2026-11-03 (T-0071: T-0056/T-0005/T-0008, unattended, `hc_channel` ×2):** controller pin filtering, all from
 parts already on the BOM. C107/C207 1 nF (C1523) DIODE–GND across Q13/Q23 (TI 9.6.1, mandatory). RVS R114/R214 100 Ω
@@ -63,7 +71,9 @@ J4 stays 4-pole with the shield open (Q-0012). ERC unchanged (5 `lib_symbol_mism
 **Blocked (owner, one-way):** the PTC check failed. 1812L050/60GR is rated I_max 40 A, but a hard short behind F1/F3/F4
 can draw ≈ 188 A (30 V / 0.16 Ω). F2 therefore stays SMD0805B050TF. Question in the T-0065 report.
 
-**Waiting for the owner:** decision 19 **[proposed]** (21 A MOSFET option, halogen inrush), which depends on the
+**Waiting for the owner:** decision 19 **[proposed]** (21 A MOSFET option, halogen inrush) now conflicts with the
+≈ 17.5 A breaker of decision 39: a 21 A searchlight trips it. Owner question from T-0072: per-build RIWRN for that
+output, or drop the 21 A option. Before that:, which depends on the
 searchlight choice (decision 16, open). Decision 21 **[proposed]** (SW_SUPPLY sense on IO12).
 
 ## Next
@@ -99,6 +109,9 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Pre-order checklist (T-0065)
 
+- **Measure the bilge pump start current (SEAFLO SFBP2-G3500-01) before ordering** (Q-0042): it must fall below
+  ≈ 15 A (lower IOC tolerance) within ≈ 120 ms, else the breaker trips the forced run. If it does not, back to the owner.
+
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
   LMR51610YF (only if the scan asks for FPWM), plus the new C170101 and C107198.
 - L1 approved alternates (datasheet-checked, same 8.2 µH / 0.056 Ω max / I_sat 3.9 A / I_rms 2.6 A / 6045 land):
@@ -123,6 +136,14 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0067: ARCHITECTURE `can` row says "ISO1044"; it is now CA-IS3050G (SOIC-8-WB, ≈ 7.5 × 11.5 mm with leads) plus
   DNP FL1/C70 and fitted R70–R72. LEN recheck: 49.3 mA worst case (LEN 1, 0.7 mA margin) / 79.8 mA continuous
   dominant (LEN 2). Measure the NET-S current on the first prototype.
+
+- T-0072/T-0055: **J10 keyed/polarised** (decision 40) – choose it in `/system mechanical` (J10 not chosen yet); the
+  board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).
+- T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the
+  15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,
+  full scale ≈ 31.9 V) and reports "OUT high while off" as a float-driven run.
+- **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list).
+
 - T-0065: ARCHITECTURE `can` row still says "TPS7B91"; it is now L78M05ABDT (DPAK, ≈ 10.4 × 6.7 mm footprint –
   include in the `/system mechanical` area budget). The NET-S current stays LEN 1 (normal traffic 44.8 mA) / LEN 2
   (continuous dominant 76.8 mA), only 5 mA margin to 50 mA. Recheck if the CAN transceiver changes (T-0030).
