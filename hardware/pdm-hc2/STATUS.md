@@ -1,11 +1,14 @@
 # pdm-hc2 status
 
-Updated: 2026-11-03 (T-0106)
+Updated: 2026-11-03 (T-0107)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
+
+**2026-11-03 (T-0107: T-0099, unattended, shared – cost lever L8):** C30 (root, battery input J10, same on both boards) is now 2.2 µF/100 V X7R 1206 C170101 (the part already used as C1; decision 26 allows 1–2.2 µF at J10). CVS C102/C202 (VS_CTRL) are now 2.2 µF/100 V C170101 as well. TPS4811-Q1 Table 9-3 recommends 0.1–10 µF and states no upper limit. τ = 100 Ω × 2.2 µF = 0.22 ms, and the RVS drop is unchanged. pdm-hc2 therefore no longer needs C13832. The C18 swap (T-0096) is blocked: confirmed decision 31 names 4.7 nF, so it goes to the owner. ERC 0 errors, 5 warnings (unchanged). The netlist differs only in C30, C102 and C202. +0 parts, −1 unique. Extended types 20 → 19. Details: design-notes §4a.1 and §8.1, `docs/reviews/2026-11-03-fix-shared-T-0107.md`.
+
 
 **2026-11-03 (T-0105: T-0046, Q-0048/decision 74, unattended, shared `analog_sw` – same on both boards):** the switch
 loads R3/R4/R7/R8 (4.7 k) are now two 2 k 1206 in series each: R3+R45, R4+R46, R7+R47, R8+R48 (C17944, basic, 4.0 k):
@@ -154,10 +157,14 @@ R71/R72 go between D9 and U5 (D9 at J4).
   before FL1 is ever fitted (design-notes §8.5).
 - T-0060 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IMON2 network
   (design-notes §2).
+- T-0107: C30, C102 and C202 use C170101 2.2 µF/100 V instead of C13832 1 µF, which removes the C13832 loading fee for the 5-board first run. For runs of **15+ pdm-hc2 boards** C13832 at these places is cheaper again (cost report L8). C102/C202 must stay within TPS4811 Table 9-3 (0.1–10 µF).
 - T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
   positions.
 
 ## For /system
+
+- T-0107 (sync): the ARCHITECTURE root row still says "C30 1 µF/100 V". It is now 2.2 µF/100 V C170101 (decision 26 range 1–2.2 µF).
+- T-0107 owner question (one-way): C18 4.7 nF/1 kV → 1 nF/2 kV C9196 (basic, cost lever L5, −0.31 USD per board at 10) contradicts confirmed decision 31 (1 MΩ ‖ 4.7 nF). Default: keep 4.7 nF until the owner rules.
 
 - T-0072/T-0055: **J10 keyed/polarised** (decision 40) – choose it in `/system mechanical` (J10 not chosen yet); the
   board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).
