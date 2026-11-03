@@ -1,0 +1,3 @@
+# Board-fixer packages run in parallel and each add dated paragraphs to the STATUS files;
+# keep both sides instead of stopping the merge on a conflict.
+hardware/*/STATUS.md merge=union
