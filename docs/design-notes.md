@@ -27,7 +27,7 @@ Values marked *estimate* are engineering estimates, not measurements.
 |---|---|---|
 | Controller | root | ESP32-S3-MINI-1-N8, native USB (no USB-UART bridge) |
 | Power | `power-usb` | LMR51610 buck (4–65 V in) → 3.3 V, diode-OR with USB VBUS, 60 V PTC, SMAJ30CA |
-| NMEA 2000 | `can` | ISO1044 isolated CAN, L78M05 5 V linear regulator (DPAK) from NET-S (was TPS7B91, §8.3), SMAJ18CA, PESD2CAN |
+| NMEA 2000 | `can` | CA-IS3050G isolated CAN (was ISO1044, §8.5), L78M05 5 V linear regulator (DPAK) from NET-S (was TPS7B91, §8.3), SMAJ18CA, PESD2CAN; DNP CMC FL1 (0 Ω bridges R71/R72) and DNP Y-cap C70 |
 | Panel inputs | `analog_sw` | Protected direct switch inputs, LED drivers |
 | Output channels | `channel` (×4) | BTT6050-1ERA per channel |
 | Battery input | root | J10, SMCJ30CA surge clamp |
@@ -562,7 +562,7 @@ L78M05ABDT (ST DS0425 Rev 24):
   9 mA recessive, 38 mA max at 1 Mbit/s 50 % square wave. NET-S current = I_CC2 + regulator ground current. Normal
   traffic: 38 → 44.8 mA, LEN 1 before and after. Continuous dominant (fault case): 70 → 76.8 mA, LEN 2 before and
   after. **The load class does not change**, but the margin to 50 mA in the normal-traffic case is only 5 mA. A different
-  transceiver (T-0030 CA-IS3050G) must be rechecked against it.
+  transceiver (T-0030 CA-IS3050G) must be rechecked against it (done in §8.5: still LEN 1 / LEN 2).
 - Dropout 2 V: NET-S minimum 9 V − D11 (≈ 0.4 V) − F3/FB2 (< 0.05 V) ≈ 8.5 V > 7 V needed. V_O 4.8–5.2 V over
   temperature (ISO1044 V_CC2 4.5–5.5 V).
 - Capacitors: the datasheet's test circuit uses C_I 0.33 µF and C_O 0.1 µF. C13 was raised from 0.1 µF to **1 µF/50 V
@@ -662,6 +662,81 @@ allows IPC-7351 variants). The JLCPCB pad lies entirely inside it. Pin numbering
 4 EN, 5 VIN, 6 SW (Table 5-1). U3's footprint field (instance and cached symbol) and the library symbol default
 (was the non-existent `ESP32-PDM-BASE:LMR51610`) now point to `Package_TO_SOT_SMD:SOT-23-6`. Nothing else used
 `LMR51610.kicad_mod`, so it was removed from `lib/`. This also cleared U3's `lib_symbol_mismatch` warning on both boards.
+
+### 8.5 CAN sheet: CA-IS3050G, TXD pull-up, barrier Y-cap and CMC footprints (T-0067, 2026-11-02)
+
+Shared `can` sheet, identical on both boards. Owner rulings that frame this section:
+
+- **EMC target (Q-0012, T-0019):** "IEC 60945 as a design target, no certification; one pre-compliance scan on the first
+  prototypes decides the DNP footprints; the N2K shield stays unconnected at the node (4-pole J4)". J4 stays 4-pole.
+- **CAN supply (Q-0031, T-0039):** "keep the isolated CAN side powered from NET-S (NMEA 2000 practice, LEN)". The bus
+  side still runs from NET-S → F3 → FB2 → D11 → U6 (L78M05) → VCC2; nothing in this section changes that.
+
+**U5 ISO1044 → Chipanalog CA-IS3050G (Q-0023, T-0030).** Source: Chipanalog CA-IS305x datasheet v1.10 (2024-07-02).
+Every check passed, so the part was swapped:
+
+| Check | CA-IS3050G | Against | Result |
+|---|---|---|---|
+| VCC1 | 2.5–5.5 V (§7.3); TXD V_IH ≥ 2 V, V_IL ≤ 0.8 V; RXD V_OH ≥ VCC1 − 0.8 V at 4 mA | +3V3 | pass |
+| VCC2 | 4.5–5.5 V (§7.3), UVLO+ 3.9–4.4 V (§7.7) | U6 L78M05 V_O 4.8–5.2 V from NET-S (§8.3) | pass, supply unchanged (Q-0031) |
+| Bus fault | CANH/CANL ±58 V abs max, CMR ±30 V (§7.1, §7.3) | NET-S ≤ 16 V, SMAJ18CA D10 clamp; same ±58 V as ISO1044 | pass |
+| Loop delay | t_loop1/2 110–210 ns (§7.8) | ISO1044 ≤ 199 ns (t_PROP(LOOP1), 2.25–5.5 V). 250 kbit/s: 2 × (210 ns + 200 m × 5 ns/m) ≈ 2.4 µs < ≈ 3.5 µs sample point (87.5 % of 4 µs) | pass |
+| TXD dominant timeout | 2–8 ms → minimum 5.5 kbit/s (§7.8, §9.5.4) | 11 dominant bits at 250 kbit/s = 44 µs | pass |
+| Isolation | 5 kV_RMS (UL 1577), V_IORM 1414 V_pk, reinforced (VDE 0884-17); CLR/CPG 8 mm; C_IO ≈ 0.5 pF (§7.4, §7.5) | ISO1044: 3 kV_RMS | pass (better) |
+| Pinout | SOIC8-WB: 1 VCC1, 2 TXD, 3 RXD, 4 GND1, 5 GND2, 6 CANL, 7 CANH, 8 VCC2 (Table 6-1) | ISO1044 D: 5 CANL, 6 CANH, 7 GND2 – **not pin-compatible** | new symbol |
+| Package | SOIC8-WB, body 7.40–7.60 × 5.75–5.95 mm, lead span 11.25–11.75 mm; land 0.60 × 1.80 mm pads, 10.90 mm row pitch (Fig. 11-1) | KiCad `Package_SO:SOIC-8_7.5x5.85mm_P1.27mm`: 0.6 × 1.8 mm pads at 10.65 mm pitch, pad 4.425–6.225 mm from centre, covers the foot (toe ≤ 5.875 mm) | accepted |
+| JLCPCB | C528763, extended, stock 5970 (2026-11-02), EasyEDA footprint present, 0.917 USD at 10+ | ISO1044BDR C2878225, 1.62 USD | −0.71 USD/board |
+| Heat | P_D2 ≤ 175 mW, P_D1 ≤ 25 mW (§7.3, worst case), R_θJA 110.1 K/W → ≤ +22 K | – | negligible |
+
+- Symbol: `ESP32-PDM:CA-IS3050G` in `lib/ESP32-PDM.kicad_sym`, a copy of the ISO1044BD graphic with the pins renumbered by
+  name. The pin points are unchanged, so no wire moved. The netlist confirms U5.5 = GND_CAN, U5.6 = CANL, U5.7 = CANH.
+- **LEN recheck.** I_CC2 dominant 44 typ / 73 max mA, recessive 3 typ / 12 max mA (§7.7). The datasheet gives no
+  50 %-duty figure (the ISO1044 check used 38 mA). Worst-case average (73 + 12) / 2 = 42.5 mA, plus the L78M05 I_d
+  6 + 0.8 mA, gives 49.3 mA ≤ 50 mA → **LEN 1**, with only 0.7 mA margin and every value at its maximum. Typical ≈ 29 mA.
+  Continuous dominant: 73 + 6.8 = 79.8 mA → LEN 2 (was 76.8 mA). The 2–8 ms dominant timeout releases a stuck-low TXD,
+  so a continuous dominant needs a toggling fault. Measure the NET-S current on the first prototype before declaring LEN 1.
+
+**TXD pull-up R70 (Q-0039, T-0048).** R70 10 kΩ 0402 (C25744, basic, already on the BOM) from TXD (/IO17) to +3V3. The
+CA-IS3050G TXD is "weakly pulled-up internally" (Table 9-2, note 2; I_IH/I_IL ≤ 20 µA), and the ruling applies the same
+pull-up to it. Cost when TXD is low: 0.33 mA. R70 holds TXD recessive while GPIO17 is high-impedance or only weakly
+pulled during reset. A glitch actively driven low by the pin would not be removed: check TXD and the bus with a scope at
+power-up on the prototype.
+
+**Barrier Y-capacitor C70 and CMC FL1 (Q-0004, T-0010).** Both are footprints for the pre-compliance scan (Q-0012).
+
+- **C70, DNP:** 1 nF/2 kV X7R 1206, FH 1206B102K202NT (C9196, basic, the same part as C50–C53), from GND_CAN to GND.
+  - It is a capacitor only. No resistor or other DC path crosses the barrier, so the NMEA 2000 isolation stays at DC.
+  - At 1 nF the ideal impedance is ≈ 1.6 Ω at 100 MHz. 1 nF is the low end of the 1–2.2 nF range, chosen to reuse a
+    part already on the BOM.
+  - The part is not safety-certified (Y2). Both sides are SELV (N2K NET-C and the boat's DC negative), so the barrier is
+    functional isolation and a Y rating is not required.
+  - If the scan asks for C70 and a fail-open part is wanted, a certified Y2 capacitor can replace it on the same
+    1206 pads.
+- **FL1, DNP:** cjiang FACT4532-510-2P-T (C20624726, extended).
+  - Ratings: 51 µH (+50/−30 %) at 100 kHz, Z ≥ 1 kΩ (typ 2.8 kΩ) at 10 MHz, DCR ≤ 1 Ω per line, 50 V DC, I_r 200 mA.
+  - Package 4.5 × 3.2 × 2.6 mm, AEC-Q200, intended for CAN (datasheet §1, §8).
+  - Windings 1→2 and 4→3, dots on 1 and 4 (§6). The bus side is on pins 1 and 4 and U5 on 2 and 3, so CM current
+    adds and DM current cancels.
+  - Footprint placeholder: `Inductor_SMD:L_CommonModeChoke_Coilank_ACM4532` (pads 1.15 × 1.55 mm at ±1.825/±1.125 mm).
+    The cjiang land is 1.3 × 0.9 mm pads, L 5.5, G1 2.9, H 3.4, G2 1.6 mm. Both cover the electrodes (D 0.70, E 0.85 mm).
+  - **The cjiang drawing does not number the pads:** check the pad numbering against the JLCPCB footprint of C20624726
+    before FL1 is fitted. With one pair swapped, the choke works in differential mode and corrupts the bus.
+- **R71/R72, fitted:** 0 Ω 0402 (C17168, basic, the same part as R43), one across each winding (CANH_BUS–CANH_XCVR,
+  CANL_BUS–CANL_XCVR). To fit FL1, remove R71 and R72.
+- **Order on the line:** J4 → D9 (PESD2CAN at the connector) → FL1/R71/R72 → U5. The TVS stays on the cable side of the
+  CMC, as E6 recommends.
+
+**Failure modes.** No safety-relevant output is touched; the panel switches still work without the MCU and the bus.
+- C70 shorted (only if fitted): GND_CAN joins GND. The node loses its isolation and the N2K ground can carry DC return
+  current, a ground loop. No hazard on SELV, but N2K expects isolated nodes.
+- R71/R72 or FL1 open: that CAN line is cut and the node drops off the bus. Outputs stay in their last state or the
+  hardware switch state.
+- U5: the dominant timeout (2–8 ms) keeps a stuck TXD from blocking the bus.
+
+**Cost (10 pcs):**
+- U5 −0.71 USD/board; R70, R71, R72 ≈ +0.005 USD; C70 and FL1 are DNP. Net ≈ −0.70 USD/board.
+- No new unique fitted part: C25744 and C17168 are already fitted elsewhere, and C528763 replaces C2878225.
+- FL1 (C20624726) becomes one extra extended part only if the scan asks for it.
 
 ## 9. Open items
 
