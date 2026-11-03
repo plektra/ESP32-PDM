@@ -589,6 +589,19 @@ def describe(event):
     return []
 
 
+LIMITS = 'limits.json'  # latest plan usage windows (5-hour, weekly) reported by any agent, for the dashboard
+
+
+def save_limits(info):
+    """Keep the usage windows from Claude Code's rate_limit_event; the dashboard reads them."""
+    windows = info.get('unifiedWindows')
+    if not windows:
+        return
+    tmp = LOGS / f'{LIMITS}.{threading.get_ident()}.tmp'
+    tmp.write_text(json.dumps(dict(at=datetime.datetime.now().isoformat(timespec='seconds'), windows=windows)))
+    tmp.replace(LOGS / LIMITS)
+
+
 def run_streaming(cmd, env, tag, task_log, cwd, on_init=None):
     """Run one agent, writing a readable trace to its log and to live.log (tail it in tmux); return the result
     event, or an error dict shaped like one. on_init gets the session id as soon as the agent starts."""
@@ -610,6 +623,8 @@ def run_streaming(cmd, env, tag, task_log, cwd, on_init=None):
                     continue
                 if event.get('type') == 'result':
                     out = event
+                if event.get('type') == 'rate_limit_event':
+                    save_limits(event.get('rate_limit_info') or {})
                 if on_init and event.get('type') == 'system' and event.get('subtype') == 'init':
                     on_init(event.get('session_id'))
                 try:
@@ -1313,6 +1328,35 @@ def bar(done, total, width=28):
     return paint('█' * full, 'green') + paint('░' * (width - full), 'dim')
 
 
+def limit_lines():
+    """Plan usage: the 5-hour and weekly windows, as last reported by an agent."""
+    try:
+        lim = json.loads((LOGS / LIMITS).read_text())
+    except (OSError, ValueError):
+        return [paint(' Limits   not known yet (shown once an agent has started)', 'dim')]
+    now = datetime.datetime.now()
+    out = []
+    for key, name in (('five_hour', '5-hour'), ('seven_day', 'Weekly')):
+        w = lim['windows'].get(key)
+        if not w:
+            continue
+        used = float(w.get('utilization') or 0)
+        reset = datetime.datetime.fromtimestamp(w['resetsAt']) if w.get('resetsAt') else None
+        if reset and reset <= now:  # the window has reset since the agent reported it
+            used, reset_text = 0.0, 'reset since'
+        else:
+            reset_text = (f"resets {reset:%H:%M}" if reset and reset.date() == now.date() else
+                          f"resets {reset:%a %H:%M}" if reset else 'reset time unknown')
+        full = min(28, round(28 * used))
+        colour = 'red' if used >= 0.9 or w.get('status') == 'rejected' else 'yellow' if used >= 0.7 else 'green'
+        out.append(f" {name:<8} {paint('█' * full, colour) + paint('░' * (28 - full), 'dim')}  "
+                   f"{paint(f'{used:.0%}', 'bold')} used · {reset_text}"
+                   + (paint('  LIMIT HIT', 'red', 'bold') if w.get('status') == 'rejected' else ''))
+    if out:
+        out[-1] += paint(f"   (as of {ago(lim['at'])} ago)", 'dim')
+    return out
+
+
 def dashboard(width, recent):
     root = state_root()
     q = load_queue(root)
@@ -1329,6 +1373,7 @@ def dashboard(width, recent):
         out.append(f" Run      {bar(run['spent'], run['budget'])}  {run['spent']:.2f} of {run['budget']:.0f} USD"
                    f" · {run['parallel']} at once · since {run['started'][11:16]} · {state}")
     out.append(paint(f" All runs {sum(t.get('cost_usd', 0) for t in q['tasks']):.2f} USD", 'dim'))
+    out += limit_lines()
     size, start = q.get('board_size') or {}, q.get('board_size_start') or {}
     for b, s in size.items():
         g = {k: s[k] - start.get(b, s)[k] for k in s}
