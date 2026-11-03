@@ -6,73 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (6)
-
-## Q-0050 · MAJOR · pdm-hc2 · finding
-
-- **From:** `docs/reviews/2026-10-30-emc-system.md` E2 (hc_channel: R104/R204 (RG 10 ohm), GATE/PU/PD); task T-0006
-- **Summary:** MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us.
-- **Proposed:** Covered by the T-0054 question.
-- **Why it needs you:** found while fixing (T-0070): Superseded by Q-0043 (do not fit RG_PU 100 ohm); waits on the T-0054 answer. The no-PWM rule is recorded in STATUS and design-notes 4a.
-
-**Answer:** covered by Q-0049: short EMC-only gate slew within the MOSFET SOA
-
----
-
-## Q-0048 · MINOR · pdm-4ch · finding
-
-- **From:** `docs/reviews/2026-10-30-validate-pdm-4ch.md` V6 (analog_sw: R3/R4/R7/R8 4.7 k 1206 switch loads); task T-0046
-- **Summary:** 0.19 W continuous at 30 V in a 0.25 W part (77 %), 0.49 W during a 48 V clamp.
-- **Proposed:** For R3/R4/R7/R8: (a) 2 k + 2 k 1206 basic (C17944, 4.0 k total: 6.4 -> 7.5 mA at 30 V, 0.11 W per part = 45 %, total panel load +0.13 W at 30 V, two parts per line, no new fee), or (b) 2.2 k + 2.4 k 1206 extended (two new loading fees per order), or (c) keep 4.7 k 1206 (77 % at 30 V)?
-- **Why it needs you:** found while fixing (T-0068): Ruling Q-0038 asks for 2.2 k + 2.4 k 1206 basic parts; JLCPCB has no basic/preferred 1206 2.2 k or 2.4 k (basic 1206 values include 1 k, 2 k, 4.7 k, 10 k). Any substitute departs from the ruling.
-
-**Answer:** (a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8
-
----
-
-## Q-0053 · MAJOR · pdm-hc2 · finding
-
-- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` H1 (hc_channel x2: R113/R213 RIWRN 47k, C105/C205 CTMR, Q13/Q23 OT sensor; ARCHITECTURE HC2 budget); task T-0053
-- **Summary:** Hardware breaker at about 24-26 A (146 ms) and OT trip at 140-160 C at the sensor leave about 18-24 A unprotected in hardware; heat budget gives Tj 137-143 C at 20 A and 169 C at 22 A against MOSFET Tj max 150 C, so only firmware protects when the ESP32 runs.
-- **Proposed:** HC2 breaker is now ~17.5 A. For the ~21 A load option of decision 19: set a per-build RIWRN for that output (e.g. 47 k ~25 A, only together with the lower-RDS(on) MOSFETs of decision 19 and an external breaker sized for it), or drop the 21 A option from decision 19?
-- **Why it needs you:** found while fixing (T-0072): The ruled 68 k breaker (Q-0042, applied and merged in T-0072) gives IOC ~17.5 A (15.2-19.7 A over tolerances); decision 19 [proposed] plans a ~21 A load on HC2, which this breaker trips. Decision 19 is the owner's (policy item 2).
-
-**Answer:** no - drop the 21 A option; decision 19 is withdrawn by the owner (2026-11-03); the breaker stays as in decision 39
-
----
-
-## Q-0049 · MAJOR · pdm-hc2 · finding
-
-- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` H2 (hc_channel x2: R104/R204 (PU 10 ohm), PD direct, R103/R203 RISCP 4.7k); task T-0054
-- **Summary:** MOSFETs switch fully on in under 1 us, so a load with more than about 50-100 uF input capacitance probably exceeds the 71-91 A short-circuit threshold for longer than 4-5 us; the channel then stays off for 3.8 min (estimate, UNVERIFIED).
-- **Proposed:** HC2 gate slew control: (1) set a maximum load capacitance (about 50-100 uF at ~20 A with the BSC030N08NS5) and use only a short EMC slew, (2) fit a linear-mode-rated MOSFET on the input side (decision 19), or (3) move to TPS48111-Q1 with a pre-charge FET + resistor?
-- **Why it needs you:** found while fixing (T-0070): No R1/C1 pair meets 20 A into 1000 uF within the BSC030N08NS5 SOA: 600 W peak / 0.45 J over 1.5 ms vs SOA ~45 W at 1 ms (30 V); Zth gives dTj ~100 K above case (125 K with a 15 A load); slow turn-on into a short would also leave SOA before the 80 A trip. Fix needs a maximum load capacitance or a different MOSFET/pre-charge path (decision 19, proposed).
-
-**Answer:** (1) maximum load capacitance: rate HC2 for about 50-100 uF load input capacitance, confirmed by the prototype measurement (Q-0045); fit only a short gate slew for EMC (within the MOSFET SOA at that capacitance); README: HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights, while DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on the 4-channel board; split grouped LED lights if the prototype shows short-circuit trips
-
----
-
-## Q-0051 · INFO · pdm-hc2 · question
-
-- **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` Q1 (hc_channel x2 (H2)); task T-0061
-- **Summary:** Which HC2 loads have more than about 50 uF input capacitance (LED work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.
-- **Proposed:** Covered by the T-0054 question.
-- **Why it needs you:** found while fixing (T-0070): The ruled sizing target (20 A into 1000 uF) is outside the MOSFET SOA; the prototype load measurement is recorded in STATUS.
-
-**Answer:** typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and electronics go on the 4-channel board; see Q-0049
-
----
-
-## Q-0052 · CRITICAL · pdm-4ch · finding
-
-- **From:** `docs/reviews/2026-11-03-validate-pdm-4ch.md` V1 (can sheet, U5 CA-IS3050G symbol (lib/ESP32-PDM.kicad_sym), design-notes §8.5); task T-0076
-- **Summary:** U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work.
-- **Proposed:** Swap the pin numbers of TXD and RXD in the ESP32-PDM:CA-IS3050G symbol (TXD = 3, RXD = 2), update symbols on both boards, re-run ERC and netlist, correct the Pinout row in design-notes §8.5.
-- **Why it needs you:** CRITICAL
-
-**Answer:** yes
-
----
+No open questions.
 
 ## Applied by agents (39)
 
@@ -135,8 +69,9 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0038 · system · Pluggable or fixed screw terminals (L5)? → until system-mechanical: Q-0030: terminal type for J4/J5/J10/J11 decided in /system mechanical with the J10 pole sizing (leaning pluggable J4/J5, fixed J10/J11)
 - T-0057 · pdm-hc2 · RDS(on) at 150 C is 11.2 mOhm in the tool; BSC030N08NS5 Diagram 9 max (5.35 mOhm) gives 2 x 5.35 + 1 = 11.7 mOhm; 15 A rises from 87 to 88 C, 20 A from 137 to 143 C; rating stands. → until owner: fix is in tools/heat_budget.py (HC-2xBSC030 RDS(on) 0.0070/0.0117 with the datasheet reference), which no package gate allows a board-fixer to change; needs an owner or /system edit. Until then P7/P9 use a scratch copy with 11.7 mOhm
 
-## Answered (41)
+## Answered (47)
 
+- Q-0050 (pdm-hc2): MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → **covered by Q-0049: short EMC-only gate slew within the MOSFET SOA** (parked)
 - Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (done)
 - Q-0003 (pdm-hc2): HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them. → **yes - TVS from each OUT to GND at J11 with short return to J10.2; use SMAJ33CA if it is basic/cheap (stand-off margin for the 28.8 V float-switch case), else SMAJ30CA** (done)
 - Q-0004 (system): No high-frequency return across the isolation barrier (CIO about 1 pF) and no CMC option, so the N2K cable can radiate logic-ground noise and ESD lifts the whole island; not measured. → **yes - as footprints only: Y-capacitor GND_CAN-GND DNP, CMC footprint fitted with 0 ohm bridges; decide at pre-compliance scan** (done)
@@ -173,8 +108,13 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0035 (pdm-4ch): ESP32-S3 ADC calibrated range is 0-2900 mV (datasheet v2.2 Table 5-6), so VBAT full scale is 31.9 V, not 33 V; 30 V still reads. → **yes - correct VBAT full scale to about 32 V in decision 18 and design-notes** (done)
 - Q-0036 (pdm-4ch): Paste apertures overlap the open 0.3 mm thermal vias, so solder wicks into the vias (voids under the VS tab). → **move the paste windows between the thermal vias (no plugged-via surcharge); recheck the footprint against the package drawing** (done)
 - Q-0037 (pdm-4ch): Pads are 1.81 x 0.61 mm at x = +/-1.15 (inner edges under the body) instead of TI DBV0006A 1.1 x 0.6 mm at +/-1.3; numbering is correct. → **use the standard KiCad Package_TO_SOT_SMD:SOT-23-6 after checking it against TI DBV0006A and the JLCPCB footprint** (done)
+- Q-0048 (pdm-4ch): 0.19 W continuous at 30 V in a 0.25 W part (77 %), 0.49 W during a 48 V clamp. → **(a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8** (parked)
 - Q-0039 (pdm-4ch): No external pull-up on ISO1044 TXD; TI says not to rely on the internal one, and GPIO17 has a 60 us low glitch at power-up, which can put a dominant pulse on the N2K bus. → **yes - 10 k pull-up from ISO1044 TXD to +3V3 on the shared can sheet** (done)
 - Q-0040 (pdm-4ch): With reversed battery, the panel LEDs see about 24-30 V reverse (cathode held near 0 V by R19 and the Q collector-base junction); typical LED VR is 5 V. → **add a series diode in the SW_SUPPLY feed to protect the panel LEDs on reversal; recheck the switch thresholds and the Q-0034 IN margin with the extra diode drop** (done)
 - Q-0041 (pdm-4ch): Should DEN be held high in Active mode, or pulsed only while sampling IS? V1 (RIS overload on fault or open output) depends on it. → **DEN pulsed only while sampling IS (and dropped on full-scale IS), not held high in Active mode (see Q-0033)** (done)
+- Q-0053 (pdm-hc2): Hardware breaker at about 24-26 A (146 ms) and OT trip at 140-160 C at the sensor leave about 18-24 A unprotected in hardware; heat budget gives Tj 137-143 C at 20 A and 169 C at 22 A against MOSFET Tj max 150 C, so only firmware protects when the ESP32 runs. → **no - drop the 21 A option; decision 19 is withdrawn by the owner (2026-11-03); the breaker stays as in decision 39** (parked)
+- Q-0049 (pdm-hc2): MOSFETs switch fully on in under 1 us, so a load with more than about 50-100 uF input capacitance probably exceeds the 71-91 A short-circuit threshold for longer than 4-5 us; the channel then stays off for 3.8 min (estimate, UNVERIFIED). → **(1) maximum load capacitance: rate HC2 for about 50-100 uF load input capacitance, confirmed by the prototype measurement (Q-0045); fit only a short gate slew for EMC (within the MOSFET SOA at that capacitance); README: HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights, while DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on the 4-channel board; split grouped LED lights if the prototype shows short-circuit trips** (parked)
 - Q-0044 (pdm-hc2): Reversed battery puts about -12...-30 V on TPS48110 VS/CS+/CS-/ISCP (abs max -1 V to GND); D30 SMCJ30CA is bidirectional and HC2 has no reverse protection; design-notes section 8 survival claim does not apply to HC2. → **keyed/polarised J10 plus README and label warning, and correct design-notes section 8 (reversal survival does not apply to HC2); full reverse-polarity protection deferred to a later HC2 revision (keep it on the list)** (done)
+- Q-0051 (pdm-hc2): Which HC2 loads have more than about 50 uF input capacitance (LED work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target. → **typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and electronics go on the 4-channel board; see Q-0049** (parked)
 - Q-0046 (pdm-hc2): Should the HC2 hardware breaker sit near the continuous rating (about 17.5 A) or stay at 25 A with a documented external breaker requirement? Is an OUT voltage divider (spare IO4/IO5) wanted for float-run detection, or are SW3/SW4 enough? → **breaker level as ruled in Q-0042 (RIWRN 68k, about 17.5 A, plus external breaker and firmware soft fuse); add an OUT voltage divider on spare IO4/IO5 for float-run detection - pin-map change via /system** (done)
+- Q-0052 (pdm-4ch): U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work. → **yes** (parked)

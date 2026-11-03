@@ -119,13 +119,13 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E2"
       },
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0050",
       "why_big": [
         "found while fixing (T-0070): Superseded by Q-0043 (do not fit RG_PU 100 ohm); waits on the T-0054 answer. The no-PWM rule is recorded in STATUS and design-notes 4a."
       ],
-      "ruling": "yes - RG_PU 100 ohm, PD kept direct, RGATE_PD as a 0 ohm footprint; recheck switching loss, SOA, heat budget and short-circuit response; no PWM on HC2 outputs until measured on the bench",
-      "answered": "2026-11-01",
+      "ruling": "covered by Q-0049: short EMC-only gate slew within the MOSFET SOA",
+      "answered": "2026-11-03",
       "package": "T-0070",
       "door": "one-way"
     },
@@ -1552,13 +1552,13 @@
         "report": "docs/reviews/2026-10-30-validate-pdm-4ch.md",
         "finding": "V6"
       },
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0048",
       "why_big": [
         "found while fixing (T-0068): Ruling Q-0038 asks for 2.2 k + 2.4 k 1206 basic parts; JLCPCB has no basic/preferred 1206 2.2 k or 2.4 k (basic 1206 values include 1 k, 2 k, 4.7 k, 10 k). Any substitute departs from the ruling."
       ],
-      "ruling": "yes - two 1206 resistors in series (2.2 k + 2.4 k, basic parts) for R3/R4/R7/R8",
-      "answered": "2026-11-01",
+      "ruling": "(a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8",
+      "answered": "2026-11-03",
       "package": "T-0068",
       "door": "one-way"
     },
@@ -1775,13 +1775,13 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H1"
       },
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0053",
       "why_big": [
         "found while fixing (T-0072): The ruled 68 k breaker (Q-0042, applied and merged in T-0072) gives IOC ~17.5 A (15.2-19.7 A over tolerances); decision 19 [proposed] plans a ~21 A load on HC2, which this breaker trips. Decision 19 is the owner's (policy item 2)."
       ],
-      "ruling": "option (c) - RIWRN 68k (IOC about 17.5 A) plus README/label requirement for an external breaker <=15-18 A per output plus a firmware soft fuse; update the ARCHITECTURE HC2 budget; measure the bilge pump start current before ordering",
-      "answered": "2026-11-01",
+      "ruling": "no - drop the 21 A option; decision 19 is withdrawn by the owner (2026-11-03); the breaker stays as in decision 39",
+      "answered": "2026-11-03",
       "package": "T-0072",
       "fixed_by": "T-0072",
       "merged": "901c6f45f1f6be300049fd0588cf8340258c96ea",
@@ -1811,13 +1811,13 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H2"
       },
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0049",
       "why_big": [
         "found while fixing (T-0070): No R1/C1 pair meets 20 A into 1000 uF within the BSC030N08NS5 SOA: 600 W peak / 0.45 J over 1.5 ms vs SOA ~45 W at 1 ms (30 V); Zth gives dTj ~100 K above case (125 K with a 15 A load); slow turn-on into a short would also leave SOA before the 80 A trip. Fix needs a maximum load capacitance or a different MOSFET/pre-charge path (decision 19, proposed)."
       ],
-      "ruling": "yes - gate slew control per TPS4811-Q1 section 8.3.2.1 (R1 in PU path, C1 + 10 ohm at gate, PD direct; start about 100k/3.9 nF for ~20 A into 1000 uF); this supersedes the plain RG_PU 100 ohm of Q-0001 (covers EMC E2 too); check MOSFET SOA, heat budget and fast short-circuit response",
-      "answered": "2026-11-01",
+      "ruling": "(1) maximum load capacitance: rate HC2 for about 50-100 uF load input capacitance, confirmed by the prototype measurement (Q-0045); fit only a short gate slew for EMC (within the MOSFET SOA at that capacitance); README: HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights, while DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on the 4-channel board; split grouped LED lights if the prototype shows short-circuit trips",
+      "answered": "2026-11-03",
       "package": "T-0070",
       "door": "one-way"
     },
@@ -2012,13 +2012,13 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "Q1"
       },
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0051",
       "why_big": [
         "found while fixing (T-0070): The ruled sizing target (20 A into 1000 uF) is outside the MOSFET SOA; the prototype load measurement is recorded in STATUS."
       ],
-      "ruling": "loads not known yet - size the HC2 gate slew control for about 20 A into 1000 uF and measure the real loads on the prototype",
-      "answered": "2026-11-01",
+      "ruling": "typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and electronics go on the 4-channel board; see Q-0049",
+      "answered": "2026-11-03",
       "package": "T-0070",
       "door": "one-way"
     },
@@ -2578,11 +2578,13 @@
         "finding": "V1"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0052",
       "why_big": [
         "CRITICAL"
-      ]
+      ],
+      "ruling": "yes",
+      "answered": "2026-11-03"
     }
   ],
   "board_size_start": {
