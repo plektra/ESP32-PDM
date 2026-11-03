@@ -6,7 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (4)
+## Open (5)
 
 ## Q-0050 · MAJOR · pdm-hc2 · finding
 
@@ -47,6 +47,17 @@ lines are read; other edits are lost.
 - **Summary:** Which HC2 loads have more than about 50 uF input capacitance (LED searchlight/work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.
 - **Proposed:** Covered by the T-0054 question.
 - **Why it needs you:** found while fixing (T-0070): The ruled sizing target (20 A into 1000 uF) is outside the MOSFET SOA; the prototype load measurement is recorded in STATUS.
+
+**Answer:** 
+
+---
+
+## Q-0052 · CRITICAL · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-11-03-validate-pdm-4ch.md` V1 (can sheet, U5 CA-IS3050G symbol (lib/ESP32-PDM.kicad_sym), design-notes §8.5); task T-0076
+- **Summary:** U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work.
+- **Proposed:** Swap the pin numbers of TXD and RXD in the ESP32-PDM:CA-IS3050G symbol (TXD = 3, RXD = 2), update symbols on both boards, re-run ERC and netlist, correct the Pinout row in design-notes §8.5.
+- **Why it needs you:** CRITICAL
 
 **Answer:** 
 

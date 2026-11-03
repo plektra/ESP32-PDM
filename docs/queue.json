@@ -1,7 +1,7 @@
 {
   "next": {
-    "T": 76,
-    "Q": 52
+    "T": 77,
+    "Q": 53
   },
   "tasks": [
     {
@@ -2488,7 +2488,7 @@
       "id": "T-0074",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-01",
       "depends_on": [
         "T-0064",
@@ -2500,13 +2500,24 @@
         "T-0072",
         "T-0073"
       ],
-      "verify": true
+      "verify": true,
+      "since": "5cee70e79c0eb435c02244fc367a6b1ef0a0d161",
+      "started": "2026-11-03T08:32:33",
+      "ran_model": "sonnet",
+      "session": "0a351f62-d009-4789-b880-801875d8bd04",
+      "cost_usd": 1.1883,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": "3 part-facts lookups (0.58 USD)",
+      "summary": "0 decided by agents, 1 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-validate-pdm-4ch.md"
     },
     {
       "id": "T-0075",
       "role": "validator",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-01",
       "depends_on": [
         "T-0064",
@@ -2519,7 +2530,42 @@
         "T-0072",
         "T-0073"
       ],
-      "verify": true
+      "verify": true,
+      "since": "5cee70e79c0eb435c02244fc367a6b1ef0a0d161",
+      "started": "2026-11-03T08:32:33",
+      "ran_model": "sonnet",
+      "session": "3efe5097-f343-4d6f-89fe-0e42f18bf408"
+    },
+    {
+      "id": "T-0076",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "V1",
+        "kind": "finding",
+        "severity": "CRITICAL",
+        "board": "pdm-4ch",
+        "location": "can sheet, U5 CA-IS3050G symbol (lib/ESP32-PDM.kicad_sym), design-notes §8.5",
+        "summary": "U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work.",
+        "fix": "Swap the pin numbers of TXD and RXD in the ESP32-PDM:CA-IS3050G symbol (TXD = 3, RXD = 2), update symbols on both boards, re-run ERC and netlist, correct the Pinout row in design-notes §8.5.",
+        "door": "two-way",
+        "reason": "Symbol edit, one git commit, no PCB and no order yet; the orchestrator treats CRITICAL as one-way regardless.",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-validate-pdm-4ch.md",
+        "finding": "V1"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0052",
+      "why_big": [
+        "CRITICAL"
+      ]
     }
   ],
   "board_size_start": {
