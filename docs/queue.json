@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 86,
+    "T": 88,
     "Q": 54
   },
   "tasks": [
@@ -1906,8 +1906,10 @@
         "report": "docs/reviews/2026-11-01-validate-pdm-hc2.md",
         "finding": "H5"
       },
-      "state": "parked",
-      "note": "re-approved 2026-11-03: tools/heat_budget.py is editable in a sync package (decision 71)"
+      "state": "done",
+      "note": "closed 2026-11-03: applied in T-0082 (heat_budget.py HC-2xBSC030 0.0117), verified in T-0084; the fixer had not listed it as done",
+      "fixed_by": "T-0082",
+      "merged": "24bf9f3b"
     },
     {
       "id": "T-0058",
@@ -2836,6 +2838,22 @@
       "summary": "5 synced, 12 left for /system, merged 78c1506a",
       "interrupted": null,
       "report": "docs/reviews/2026-11-03-fix-sync-T-0085.md"
+    },
+    {
+      "id": "T-0086",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-03",
+      "depends_on": []
+    },
+    {
+      "id": "T-0087",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-03",
+      "depends_on": []
     }
   ],
   "board_size_start": {
