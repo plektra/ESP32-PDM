@@ -162,7 +162,10 @@ Findings that drove the design:
 - A metal base plate was rejected: risk of bridging DC negative to a steel hull, and cost.
 - Above ~8 A per channel: the high-current board (§4a). Very large loads (hydraulic backup pump, ~100 A)
   stay on their own contactor/breaker outside the PDM.
-- At high total current the shared supply path dominates: 36 A through 4 mΩ is 5 W. Keep the battery
+- At high total current the shared supply path dominates: 36 A through 4 mΩ is 5 W. Since T-0121 pdm-4ch adds the
+  reverse-battery blocker Q30 (IPT007N06N, ≤ 0.75 mΩ at 25 °C, ≈ 1.05–1.1 mΩ hot) to this path (§8.6); the tool's
+  default `--r-path` of 4 mΩ already covers 2 mΩ terminal + copper plus Q30, and `--r-path 0.00505` changes 4 × 4 A by
+  +1 K only. Keep the battery
   terminal + VS copper ≤ 2 mΩ and rate the input terminal for ≈ 40 A; output terminals ≥ 10 A.
 
 Layout rules from the budget: switches spread out and away from the ESP32; large VS copper on both
@@ -600,6 +603,13 @@ most marine electronics, this device relies on that system-level protection.
   ground diode does not change that. There the battery fuse has to clear. The loads see reverse voltage in every case.
   The panel LEDs on J5 are protected by D55 in the SW_SUPPLY feed (§5, T-0049): with a reversed battery only the
   Schottky leakage (≤ 0.2 mA) reaches them.
+  **Limit (T-0121, EMC E16, owner ruling Q-0054):** the paragraph above covers the BTT6050 switches only. C31
+  (C487384, 100 µF/63 V polarised aluminium electrolytic on VS, added in T-0064 after this analysis) has no reverse
+  rating in its datasheet. Without a blocker it would be reverse-biased by the full battery voltage, limited only by
+  the cable and battery fuse, and could overheat and vent. **Since T-0121 the reverse-battery blocker Q30/U30 (§8.6)
+  sits in front of everything on VS**: with a reversed battery of up to 30 V (D30 stand-off) VS stays unpowered, so
+  C31, the BTT6050s, the panel interface and the loads see no reverse voltage, with no time limit. The BTT6050 limits
+  above apply again only if Q30 has failed short. Check the polarity before connecting anyway.
 - Reverse battery (`pdm-hc2`, T-0072/T-0055, Q-0044, decision 40): the survival statement above does **not** apply to
   HC2. A reversed battery puts the full battery voltage negative on TPS48110A-Q1 VS/CS+/CS−/ISCP (abs max −1 V to
   GND, SLUSEE5E §6.1); D30 SMCJ30CA is bidirectional and does not conduct below ≈ 33 V, so nothing limits the current
@@ -618,6 +628,10 @@ Root sheet, the same on both boards (controller part):
 | FL30 | ferrite / CMC position, **DNP** | VBAT_IN–VS | decided at the pre-compliance scan (decision 28) |
 | JP30 | copper bridge (net tie, no part) | VBAT_IN–VS | keeps VS connected while FL30 is not fitted; cut only when FL30 is fitted |
 | C31 | 100 µF/63 V Al electrolytic, Ymin VKMD1001J101MV (C487384, extended) | VS–GND | bulk at J10 |
+
+**pdm-4ch since T-0121 (§8.6):** FL30/JP30 now link VBAT_IN to the new net `VBAT_FL`, and the reverse-battery blocker
+Q30 (source VBAT_FL, drain VS) feeds VS. D30 and C30 stay on VBAT_IN at J10; C31 and everything else on VS sit behind
+Q30. pdm-hc2 is unchanged (FL30/JP30 still VBAT_IN–VS, decision 40).
 
 HC2 only (`hc_channel`, ×2): C106/C206, the same 100 µF/63 V at each channel's VS, so HC2 has 3 × 100 µF.
 4-ch only (`channel`, ×4): C104–C404, 2.2 µF/100 V X7R 1206 C170101 (the part of C1/C30) at each BTT6050 VS tab, next to
@@ -1046,6 +1060,113 @@ power-up on the prototype.
 - U5 −0.71 USD/board; R70, R71, R72 ≈ +0.005 USD; C70 and FL1 are DNP. Net ≈ −0.70 USD/board.
 - No new unique fitted part: C25744 and C17168 are already fitted elsewhere, and C528763 replaces C2878225.
 - FL1 (C20624726) becomes one extra extended part only if the scan asks for it.
+
+### 8.6 Reverse-battery blocker Q30/U30 on VS (`pdm-4ch`, T-0121, owner ruling Q-0054, 2026-11-03)
+
+Finding EMC E16 (`docs/reviews/2026-11-03-emc-system.md`): C31 is a polarised electrolytic with no reverse rating and
+nothing in front of it. The owner ruled (Q-0054): add a reverse-blocking element on VS in front of the bulk capacitors
+on pdm-4ch in this revision, sized for the 40–50 A path and checked with the heat budget at 40 °C. pdm-hc2 keeps
+decision 40 (keyed J10, warning). J10 is still to be keyed on pdm-4ch too (decision 34, `/system mechanical`).
+
+**Circuit (root sheet of pdm-4ch only).** J10.1 → `VBAT_IN` (D30, C30) → FL30 (DNP) / JP30 → new net `VBAT_FL` →
+Q30 source; Q30 drain → `VS` (C31, C104–C404, U11–U14, F1, F4, R60). U30 LM74500-Q1: SOURCE (pin 5) and EN (pin 1) on
+VBAT_FL, GATE (pin 6) → Q30 gate, VCAP (pin 4) → C32 → VBAT_FL, GND (pin 2) → GND, pins 3/7/8 N.C.
+
+| Ref | Part | Facts |
+|---|---|---|
+| Q30 | Infineon IPT007N06N, PG-HSOF-8-1 (TOLL), C122552, extended, 3.55 USD @1, stock 4707 (2026-11-03) | `docs/part-facts/C122552.md`: VDS 60 V, VGS ±20 V, RDS(on) max 0.75 mΩ (10 V, 25 °C), ≈ 1.00 mΩ at 100 °C and ≈ 1.25 mΩ at 150 °C (max curve), Tj 175 °C, RthJC 0.4 K/W max, RthJA 40 K/W (6 cm² 70 µm Cu) / 62 K/W (minimal pad), body diode IS 300 A / ISM 1200 A, Ciss 21.3 nF max. Pin 1 G, pins 2–8 S, tab D = KiCad `Infineon_PG-HSOF-8-1` pads 1 G, 2 S, 3 D |
+| U30 | TI LM74500-Q1 (LM74500QDDFRQ1), SOT-23-THIN-8 (DDF), C5219210, extended, 1.82 USD @1, stock 2923 | `docs/part-facts/C5219210.md` (SNOSDB7): SOURCE ±65 V abs max (±60 V recommended), GATE–SOURCE abs max 15 V, gate drive VCAP−SOURCE 10.3/11.6/13.0 V on, 13.9 V max; **no reverse-current blocking** (FET fully on both ways); EN tied to SOURCE = always on; IQ 80/130 µA; Tj −40…150 °C; footprint KiCad `TSOT-23-8` (0.65 mm pitch, 2.9 × 1.6 mm body) |
+| C32 | 1 µF/50 V X5R 0603, Samsung CL10A105KB8NNN, C15849 (basic, already on the BOM) | `docs/part-facts/C15849.md`; VCAP capacitor |
+
+Why this topology:
+- **P-FET rejected.** The best 60 V P-FETs at JLCPCB are 3.5–4.7 mΩ at 25 °C (≈ 6–7 mΩ hot): ≈ 3.5 W at 24 A and
+  ≈ 10 W at 40 A in one package.
+- **Ideal-diode controller rejected.** It blocks VS → VBAT_IN, so a positive PROFET output surge (OUT → body diode →
+  VS) could no longer reach D30, and VS would need its own TVS (a change of invariant 4).
+- **LM74500-Q1 + N-FET.** It is not an ideal diode: it keeps Q30 fully on in both directions and turns it off only when
+  the input is reversed or too low. Requirements of the ruling:
+  - (a) Invariant 1: U30 is powered from VBAT_FL with EN tied to SOURCE: no ESP32, no 3.3 V, no firmware. The panel
+    supply (F4 on VS) works as before.
+  - (b) Invariant 3: Q30 VDS 60 V and U30 SOURCE 65 V abs max are above the 48.4 V D30 clamp. In reverse, Q30 blocks
+    VDS = VS − VBAT_FL ≤ 48.4 V (D30 clamps VBAT_IN). Q30's gate never sees the battery directly. U30 drives it only from VCAP (≤ 13.9 V
+    above SOURCE, abs max 15 V) or ties it to SOURCE (reversed or off). The ±20 V VGS rating is therefore never
+    reached and no zener is needed (U30 datasheet: zener only for a FET with VGS rating < 15 V).
+  - (c) Invariant 4: with the battery connected, Q30 is enhanced and conducts drain → source, so OUT → PROFET body diode
+    → VS → Q30 → VBAT_IN → D30 stays as before (≤ 1.25 mΩ more, ID pulse 1200 A). No TVS on VS, no new invariant
+    wording.
+  - (d) Turn-on: when the battery is connected, C31 + C104–C404 (≈ 109 µF nominal) charge through Q30's body diode
+    (IS 300 A, ISM 1200 A; ≈ 3.3 mC at 30 V, ≈ 3 mJ in the diode) before U30 enhances the gate. Q30 therefore
+    turns on with VDS below about 1 V and never works in its linear region at battery voltage. That is the same
+    inrush as before T-0121, now with the diode in series. SOA (≈ 10 A for 1 ms at 30 V) is not touched.
+- **C32 sizing.** U30 wants C(VCAP) ≥ 10 × Ciss = 10 × 21.3 nF = 213 nF (datasheet §9.3.1.2.3; recommended minimum
+  0.1 µF). C32 is 1 µF/50 V. At 12–14 V of bias it keeps at least 0.21 µF unless it loses more than 79 %; the bias
+  curve is not in the facts file, but an 0603 50 V X5R part usually keeps far more. Gate-on time ≈ 75 µs + C32 × 6.5 V
+  / I_CP = 22 ms typ (300 µA), ≤ 40 ms at the 162 µA minimum, to the 6.5 V UVLO. Until then the load current flows in
+  the body diode. Assuming ≈ 1 V body-diode drop (VSD at that current is not in the facts file), a panel-switched
+  24 A load gives ≈ 24 W for < 0.1 s, i.e. ≈ 10 K rise with RthJC 0.4 K/W. Harmless.
+- **CIN.** U30 asks for ≥ 22 nF at SOURCE. C30 (2.2 µF/100 V) sits on the same node through the JP30 copper bridge. If
+  FL30 is ever fitted instead of JP30, C30 is behind the ferrite. Then check whether U30 needs its own 22 nF–100 nF at
+  SOURCE.
+
+**Heat at 40 °C (decision 9, `tools/heat_budget.py`, run 2026-11-03).** Q30's hot RDS(on) is added to the shared path
+(`--r-path 0.00505` = the 4 mΩ default + 1.05 mΩ), `--p-other 2.3`:
+
+| Case | Before (r_path 4 mΩ) | After (5.05 mΩ) |
+|---|---|---|
+| 4 × BTT6050 at 4 A (16 A) | inside 45.4 °C, Tj 101 °C | inside 45.5 °C, Tj 102 °C (4.5 A: 125 °C marginal, as before) |
+| 2 × BTT6010 at 8 A + 2 × BTT6050 at 4 A (24 A) | P_tot 9.61 W, inside 45.8 °C, Tj 90/102 °C | P_tot 10.22 W, inside 46.1 °C, Tj 90/102 °C |
+| 4 × BTT6010 at 8 A (32 A) | P_tot 10.81 W, inside 46.5 °C, Tj 91 °C | P_tot 11.90 W, inside 47.1 °C, Tj 91 °C |
+
+The 4 A (BTT6050) and ≈ 8 A (BTT6010) channel ratings stand. Q30's own junction, with RDS(on) taken linearly from the max curve
+(0.75 mΩ at 25 °C, 1.00 at 100 °C, 1.25 at 150 °C) and solved with the enclosure air from the tool:
+
+| Input current | Enclosure air | Q30 loss | Q30 Tj, 6 cm² 2 oz drain copper (40 K/W) | minimal pad (62 K/W) |
+|---|---|---|---|---|
+| 16 A (4 × 4 A) | 45.5 °C | 0.22 W | 54 °C | 59 °C |
+| 24 A (mix) | 46.1 °C | 0.51 W | 67 °C | 79 °C |
+| 40 A (input terminal rating; air from 4 × 10 A) | 51.2 °C | 1.78 W | **122 °C** (Tj max 175 °C) | 200 °C – not allowed |
+
+So the 40 A case needs Q30's drain tab on at least 6 cm² of 2 oz copper. The drain is VS, which already has large
+copper on both layers (decision 9 layout rules), so this costs no extra area. It is recorded as a PCB rule. U30 loses
+microwatts (80–130 µA).
+
+**Reverse battery now.** A reversed battery puts VBAT_IN negative. U30 ties GATE to SOURCE, Q30 is off and its body
+diode is reverse-biased. VS stays near 0 V. Up to 30 V (D30 VRWM) only leakage flows (Q30 IDSS ≤ 1 µA at 25 °C,
+D30, C30 is a non-polar MLCC; U30's reverse SOURCE current is not in the facts file). That holds with no time limit.
+From ≈ 33 V (D30 VBR) D30 conducts and the battery fuse has to clear, as before. U30 is rated to −65 V and Q30 to 60 V,
+above the 48.4 V clamp. Assumption: the loads return to the same negative bus as J10.2 (whole battery reversed). If
+only the two J10 leads are swapped while the loads return elsewhere, the case has not been analysed. Keyed J10
+(decision 34) and checking the polarity remain the first protection.
+
+**Failure modes (safety: the panel supply F4 for navigation lights and bilge forced run hangs on VS).**
+- **Q30 fails short** (drain–source): no reverse protection, exactly as before T-0121. C31 can vent with a reversed
+  battery and the BTT6050 limits (28 V, < 2 min, RL ≥ 12 Ω) apply. Normal operation is unaffected, so this fault is
+  not visible in use.
+- **Q30 fails open**, or the JP30/Q30 copper is interrupted: the board is dead, panel switches included. Navigation
+  lights and the bilge forced-run switch on the panel stop working. The float-switch circuit stays independent of
+  the PDM (invariant 8), so the bilge pump still runs on its float.
+- **U30 fails (no gate drive, e.g. C32 open or U30 dead):** Q30 conducts only through its body diode (≈ 1 V). At 16 A
+  that is ≈ 16 W, at 24 A ≈ 24 W, far above what the package can shed on the PCB. Q30 heats until it fails, usually
+  short (→ first case), possibly open (→ second case). VS sits ≈ 1 V low. R60/VBAT_SENSE measures VS, not VBAT_IN, so the firmware
+  cannot see the drop directly. See the suggestion in the T-0121 report.
+- **U30 fails with GATE shorted to SOURCE:** same as "U30 fails".
+- **U30 or C32 short to GND:** U30 SOURCE pin to GND = battery short behind JP30, cleared by the battery fuse. C32 sits
+  between VCAP and SOURCE, not to GND.
+
+A competent person reviews this reverse-battery circuit and the failure modes above before installation, because the
+navigation lights and the bilge forced run (panel switches) depend on Q30 conducting.
+
+**PCB rules (T-0121).** Q30 sits in the 40 A path between J10 and the VS copper. Use VBAT_FL copper (source pins 2–8) and
+VS copper (drain tab) as wide as the existing VS copper, on both layers with stitching vias. Use ≥ 6 cm² of 2 oz
+copper on the drain tab (VS) for RthJA ≤ 40 K/W. Keep U30 next to Q30 with short SOURCE and GATE traces (U30 §11.1). Keep C32 at
+U30 but away from Q30's hot tab. Keep the VS loop from the four switches through Q30 to D30 short and wide (invariant 4
+path). Before ordering, check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30) and `TSOT-23-8` (U30) against the
+JLCPCB footprints of C122552 and C5219210. The U30 land pattern in the datasheet: 1.05 × 0.45 mm pads, 2.6 mm column pitch.
+
+**Cost.** Q30 3.55 + U30 1.82 + C32 0.01 ≈ 5.4 USD per board at 1 pc, plus two extended loading fees (≈ 3 USD each per
+order). Alternative checked: 2 × BSC014N06NS (C113391, 1.45 mΩ max each, 1.52 USD, `docs/part-facts/C113391.md`) in
+parallel (≈ 1.1 mΩ hot, 3.03 USD) would also work, but it is two parts and more copper area for the same unique-part count; a
+single one gives ≈ 4.3 W at 40 A and is too hot.
 
 ## 9. Open items
 

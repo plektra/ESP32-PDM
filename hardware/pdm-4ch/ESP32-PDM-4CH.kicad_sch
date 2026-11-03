@@ -4171,6 +4171,433 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "ESP32-PDM:IPT007N06N"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "Q"
+				(at 5.08 1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "IPT007N06N"
+				(at 5.08 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Package_TO_SOT_SMD:Infineon_PG-HSOF-8-1"
+				(at 0 -7.62 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://www.infineon.com/dgdl/Infineon-IPT007N06N-DS-v02_01-EN.pdf"
+				(at 0 -10.16 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "N-MOSFET 60 V 0.75 mOhm, PG-HSOF-8-1 TOLL (pin 1 G, pins 2-8 S, tab D; KiCad pads 1 G, 2 S, 3 D)"
+				(at 0 -12.7 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "LCSC" "C122552"
+				(at 0 -15.24 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "IPT007N06N_0_1"
+				(polyline
+					(pts
+						(xy -2.54 0)
+						(xy -1.27 0)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 2.54)
+						(xy -1.27 -2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.508 2.54)
+						(xy -0.508 -2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.508 1.905)
+						(xy 2.54 1.905)
+						(xy 2.54 2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.508 -1.905)
+						(xy 2.54 -1.905)
+						(xy 2.54 -2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.508 0)
+						(xy 2.54 0)
+						(xy 2.54 -1.905)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.508 0)
+						(xy 0.508 0.508)
+						(xy 0.508 -0.508)
+						(xy -0.508 0)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+			)
+			(symbol "IPT007N06N_1_1"
+				(pin passive line
+					(at 2.54 5.08 270)
+					(length 2.54)
+					(name "D"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "G"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 2.54 -5.08 90)
+					(length 2.54)
+					(name "S"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
+		(symbol "ESP32-PDM:LM74500-Q1"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at -7.62 10.16 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "LM74500-Q1"
+				(at 0 -12.7 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Package_TO_SOT_SMD:TSOT-23-8"
+				(at 0 -15.24 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://www.ti.com/lit/ds/symlink/lm74500-q1.pdf"
+				(at 0 -17.78 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Reverse polarity protection controller for an external N-MOSFET, no reverse-current blocking, 65 V, SOT-23-THIN-8 (DDF)"
+				(at 0 -20.32 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "LCSC" "C5219210"
+				(at 0 -22.86 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "LM74500-Q1_0_1"
+				(rectangle
+					(start -7.62 7.62)
+					(end 7.62 -7.62)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "LM74500-Q1_1_1"
+				(pin passive line
+					(at -10.16 2.54 0)
+					(length 2.54)
+					(name "SOURCE"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -10.16 -2.54 0)
+					(length 2.54)
+					(name "EN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "GATE"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 10.16 -2.54 180)
+					(length 2.54)
+					(name "VCAP"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -10.16 90)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin no_connect line hide
+					(at -2.54 10.16 270)
+					(length 2.54)
+					(name "NC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin no_connect line hide
+					(at 0 10.16 270)
+					(length 2.54)
+					(name "NC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin no_connect line hide
+					(at 2.54 10.16 270)
+					(length 2.54)
+					(name "NC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 	)
 	(junction
 		(at 82.55 121.92)
@@ -10277,73 +10704,6 @@
 		(uuid "f0648405-a99e-4074-b09b-9d34e1d00866")
 	)
 	(symbol
-		(lib_id "power:VS")
-		(at 237.49 147.32 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board no)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "29d6c914-3f12-4757-9b68-eb90999dfdf7")
-		(property "Reference" "#PWR0902"
-			(at 240.03 146.05 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "VS"
-			(at 240.03 148.59 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" ""
-			(at 237.49 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 237.49 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 237.49 147.32 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "6200b4eb-c546-4000-876e-3da881d22634")
-		)
-		(instances
-			(project "ESP32-PDM-4CH"
-				(path "/d0898527-243c-48e9-a217-df57be741056"
-					(reference "#PWR0902")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:NetTie_2")
 		(at 241.3 157.48 0)
 		(unit 1)
@@ -10425,7 +10785,7 @@
 	)
 	(symbol
 		(lib_id "power:VS")
-		(at 238.76 157.48 0)
+		(at 223.52 170.18 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom no)
@@ -10434,7 +10794,7 @@
 		(fields_autoplaced yes)
 		(uuid "192bd1cb-f09e-49bd-8764-4dbf130b0baf")
 		(property "Reference" "#PWR0903"
-			(at 241.3 156.21 0)
+			(at 226.06 168.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10443,7 +10803,7 @@
 			)
 		)
 		(property "Value" "VS"
-			(at 241.3 158.75 0)
+			(at 226.06 171.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10452,7 +10812,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 238.76 157.48 0)
+			(at 223.52 170.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10461,7 +10821,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 238.76 157.48 0)
+			(at 223.52 170.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10470,7 +10830,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 238.76 157.48 0)
+			(at 223.52 170.18 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10774,6 +11134,455 @@
 			(project "ESP32-PDM-4CH"
 				(path "/d0898527-243c-48e9-a217-df57be741056"
 					(reference "#PWR0906")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "ESP32-PDM:LM74500-Q1")
+		(at 195.58 175.26 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "18334e49-27f7-43dc-9bfe-f8d178e20bb3")
+		(property "Reference" "U30"
+			(at 198.12 173.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "LM74500-Q1"
+			(at 198.12 176.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:TSOT-23-8"
+			(at 195.58 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/lm74500-q1.pdf"
+			(at 195.58 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Reverse-battery controller for Q30 (EN tied to SOURCE: always on, no MCU)"
+			(at 195.58 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C5219210"
+			(at 195.58 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "LM74500QDDFRQ1"
+			(at 195.58 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "0809f948-e378-4ce5-a35d-02ceecea7684")
+		)
+		(pin "2"
+			(uuid "7515e7c5-1efc-43df-a646-3352f49d95ba")
+		)
+		(pin "3"
+			(uuid "c6636194-54ce-443b-8b66-c5959122c00a")
+		)
+		(pin "4"
+			(uuid "706ccaeb-3bd4-4556-a196-064159be7b36")
+		)
+		(pin "5"
+			(uuid "acb0728b-8b3a-4622-8928-5eeb1cc7df7c")
+		)
+		(pin "6"
+			(uuid "3893023f-087a-4bbc-8d39-360cdd9bc300")
+		)
+		(pin "7"
+			(uuid "a4a59b56-f8f1-45dc-9e56-f05bf2b5c784")
+		)
+		(pin "8"
+			(uuid "571f4465-73bd-4306-a565-52567faa89a9")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "U30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "ESP32-PDM:IPT007N06N")
+		(at 220.98 175.26 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "60c2e1af-68c1-425f-8cfb-f4c729a38db2")
+		(property "Reference" "Q30"
+			(at 223.52 173.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "IPT007N06N"
+			(at 223.52 176.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:Infineon_PG-HSOF-8-1"
+			(at 220.98 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.infineon.com/dgdl/Infineon-IPT007N06N-DS-v02_01-EN.pdf"
+			(at 220.98 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Reverse-battery blocker VBAT_FL -> VS, fully on in both directions"
+			(at 220.98 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C122552"
+			(at 220.98 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f968ed4f-287a-454b-b794-da8ca24b1237")
+		)
+		(pin "2"
+			(uuid "d8ff74ab-3fb9-43e4-aaaa-0a37ff3abd08")
+		)
+		(pin "3"
+			(uuid "f06ef729-65f6-4033-8e53-eb6a000fb66f")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "Q30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 208.28 186.69 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6b27a442-6122-4443-a0d9-727f91183342")
+		(property "Reference" "C32"
+			(at 210.82 185.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "1uF/50V"
+			(at 210.82 187.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
+			(at 208.28 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 208.28 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "U30 VCAP (>= 10 x Ciss of Q30)"
+			(at 208.28 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C15849"
+			(at 208.28 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f35cc28e-001f-4e9b-9163-3249c56ea5d3")
+		)
+		(pin "2"
+			(uuid "bc249864-9bc1-4117-9fe8-5241fbb20f3f")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "C32")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 185.42 172.72)
+			(xy 185.42 177.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f979a757-7a6d-4d7d-95ae-8d49996b824f")
+	)
+	(label "VBAT_FL"
+		(at 185.42 172.72 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "a9cb955e-585f-4cf6-9304-ca138bd4310f")
+	)
+	(wire
+		(pts
+			(xy 205.74 172.72)
+			(xy 210.82 172.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d1885e9d-1618-49b4-8d50-0e82c899ae58")
+	)
+	(wire
+		(pts
+			(xy 210.82 172.72)
+			(xy 210.82 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f65d2834-58be-43ec-ac22-92beff0e953f")
+	)
+	(wire
+		(pts
+			(xy 210.82 175.26)
+			(xy 215.9 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "88473da2-816c-4c3d-8fd8-7d67f5d9988e")
+	)
+	(wire
+		(pts
+			(xy 205.74 177.8)
+			(xy 208.28 177.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bc21a0d1-5814-4d3d-b84c-f4f0fcb8b965")
+	)
+	(wire
+		(pts
+			(xy 208.28 177.8)
+			(xy 208.28 182.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e29557d0-3f36-4ee6-ad4a-635fbc860f35")
+	)
+	(label "VBAT_FL"
+		(at 208.28 190.5 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "919607db-2e6e-4d40-90cc-501e6b2d7172")
+	)
+	(label "VBAT_FL"
+		(at 223.52 180.34 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "ed3291ba-bac7-4600-a290-b71a5f1898b7")
+	)
+	(label "VBAT_FL"
+		(at 237.49 147.32 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "3df1a0a0-b8f7-4f14-84d7-9531fcefa557")
+	)
+	(label "VBAT_FL"
+		(at 238.76 157.48 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "0df2c5c3-4b6b-4add-8bfd-c9948c32964e")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 195.58 185.42 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4aeaaece-26ba-49a6-8137-f4e9f2564a46")
+		(property "Reference" "#PWR0907"
+			(at 195.58 191.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 195.58 190.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 195.58 185.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 195.58 185.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 195.58 185.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2895dad2-6538-441f-8195-ef5472258016")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "#PWR0907")
 					(unit 1)
 				)
 			)

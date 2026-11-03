@@ -44,9 +44,12 @@ per order, so order mixed builds together to pay it once.
 - **12 V systems, engine cranking:** the panel-switch path switches an output off when the switch voltage drops below
   about 8 V (about 8.5 V at the battery). While the engine cranks, panel-switched outputs such as navigation lights can
   therefore go off for a moment. 24 V systems are not affected.
-- **Reverse battery (`pdm-4ch`):** the output switches survive a reversed battery of at most 28 V for less than 2
-  minutes, with each load at least 12 Ω (BTT6050 datasheet). Heavier loads rely on the battery fuse to clear. The
-  loads see reverse voltage. A series diode in the switch supply protects the panel LEDs.
+- **Reverse battery (`pdm-4ch`):** a reverse-blocking MOSFET in the supply input (Q30 with controller U30) keeps
+  a reversed battery of up to 30 V away from the rest of the board, with no time limit: the bulk capacitor, the
+  output switches, the panel switches and the loads see no reverse voltage. Above about 33 V the input surge diode
+  conducts and the battery fuse must clear. If that MOSFET has failed short, the old limits apply: only the output
+  switches survive (at most 28 V, under 2 minutes, each load at least 12 Ω), and the bulk capacitor C31 is not rated
+  for reverse voltage and can overheat and vent. So check the polarity before connecting.
 - **`pdm-hc2` external breaker (required):** each HC2 output must have its own external breaker or fuse that trips at
   **at most 15–18 A** (within minutes), in addition to the wire protection above. The built-in breaker trips at about
   17.5 A (≈ 15–20 A over part tolerances) only after 146 ms; between the 15 A rating and that level the board relies on
