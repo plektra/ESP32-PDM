@@ -2915,7 +2915,7 @@
 		)
 		(uuid "b4e3f745-48f8-4dff-aafc-c9992b79b7dd")
 	)
-	(label "GATE"
+	(label "PD"
 		(at 165.1 95.25 0)
 		(effects
 			(font
@@ -3926,7 +3926,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "10"
+		(property "Value" "10k"
 			(at 241.3 39.37 0)
 			(effects
 				(font
@@ -3953,7 +3953,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Gate resistor (turn-on slew); PD drives the gate directly"
+		(property "Description" "R1 gate slew, PU to gate (TPS4811-Q1 8.3.2.1, Fig. 8-6; T-0106)"
 			(at 238.76 38.1 0)
 			(effects
 				(font
@@ -3962,7 +3962,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C25077"
+		(property "LCSC" "C25744"
 			(at 238.76 38.1 0)
 			(effects
 				(font
@@ -8071,5 +8071,375 @@
 				)
 			)
 		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 264.16 93.98 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "534064d0-f1f0-4666-b727-da38c5bdfce6")
+		(property "Reference" "R115"
+			(at 266.7 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10"
+			(at 266.7 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 264.16 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 264.16 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "R2 in series with C1 at the gate (TPS4811-Q1 Fig. 8-6; T-0106)"
+			(at 264.16 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C25077"
+			(at 264.16 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "261c4c28-1d6a-421e-a5c5-2b3129d42166")
+		)
+		(pin "2"
+			(uuid "00581b51-2603-4e69-9f70-9cfe9be6d1e7")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056/89e8ebb1-8e09-4839-a127-ad98eab209df"
+					(reference "R115")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/58ebb912-156e-47fc-8539-6cd8829218d1"
+					(reference "R215")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "GATE"
+		(at 264.16 90.17 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "0d92a11b-74c7-4302-928d-80bc9c78e32f")
+	)
+	(label "GSLEW"
+		(at 264.16 97.79 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f56de617-a48f-4276-a2c3-7275f484175b")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 264.16 105.41 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9ad01db9-f182-46a7-ab5c-d5bdc9109bb4")
+		(property "Reference" "C114"
+			(at 266.7 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "1nF/2kV"
+			(at 266.7 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
+			(at 264.16 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 264.16 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "C1 gate slew to GND (TPS4811-Q1 8.3.2.1; sees VS+12 V); T-0106"
+			(at 264.16 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C9196"
+			(at 264.16 105.41 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2ae5b2d1-52d7-49f4-ae33-5da7c6e83ebd")
+		)
+		(pin "2"
+			(uuid "63d3c348-d3ab-4d95-bba9-250f53bb2c34")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056/89e8ebb1-8e09-4839-a127-ad98eab209df"
+					(reference "C114")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/58ebb912-156e-47fc-8539-6cd8829218d1"
+					(reference "C214")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "GSLEW"
+		(at 264.16 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "df2fd697-409b-450a-929e-2ff8c190b72c")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 264.16 109.22 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "9ef334ac-d6b1-491f-8a31-c90a3d093c00")
+		(property "Reference" "#PWR0992"
+			(at 264.16 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 264.16 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 264.16 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 264.16 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 264.16 109.22 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "902edbf1-f103-428e-b5f6-6fd362ba9028")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056/89e8ebb1-8e09-4839-a127-ad98eab209df"
+					(reference "#PWR0992")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/58ebb912-156e-47fc-8539-6cd8829218d1"
+					(reference "#PWR0993")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 276.86 93.98 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d84b1137-c7fe-44a5-8ccf-387a8c77cb6b")
+		(property "Reference" "R116"
+			(at 279.4 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0"
+			(at 279.4 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 276.86 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 276.86 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "RGATE_PD, PD direct to the gate (0 ohm footprint, decision 25; T-0106)"
+			(at 276.86 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C17168"
+			(at 276.86 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "29b82791-a6ce-4571-84d9-6b88cc303800")
+		)
+		(pin "2"
+			(uuid "7abd110a-b2d5-454f-bfec-7a4352e4675b")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056/89e8ebb1-8e09-4839-a127-ad98eab209df"
+					(reference "R116")
+					(unit 1)
+				)
+				(path "/d0898527-243c-48e9-a217-df57be741056/58ebb912-156e-47fc-8539-6cd8829218d1"
+					(reference "R216")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "PD"
+		(at 276.86 90.17 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "ce28b41b-b767-4778-b046-988076fced4b")
+	)
+	(label "GATE"
+		(at 276.86 97.79 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "a97c3937-4fdd-4868-99cc-3d390a330020")
 	)
 )
