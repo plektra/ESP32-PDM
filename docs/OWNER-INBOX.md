@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** Covered by the T-0054 question.
 - **Why it needs you:** found while fixing (T-0070): Superseded by Q-0043 (do not fit RG_PU 100 ohm); waits on the T-0054 answer. The no-PWM rule is recorded in STATUS and design-notes 4a.
 
-**Answer:** 
+**Answer:** covered by Q-0049: short EMC-only gate slew within the MOSFET SOA
 
 ---
 
@@ -26,7 +26,7 @@ lines are read; other edits are lost.
 - **Proposed:** For R3/R4/R7/R8: (a) 2 k + 2 k 1206 basic (C17944, 4.0 k total: 6.4 -> 7.5 mA at 30 V, 0.11 W per part = 45 %, total panel load +0.13 W at 30 V, two parts per line, no new fee), or (b) 2.2 k + 2.4 k 1206 extended (two new loading fees per order), or (c) keep 4.7 k 1206 (77 % at 30 V)?
 - **Why it needs you:** found while fixing (T-0068): Ruling Q-0038 asks for 2.2 k + 2.4 k 1206 basic parts; JLCPCB has no basic/preferred 1206 2.2 k or 2.4 k (basic 1206 values include 1 k, 2 k, 4.7 k, 10 k). Any substitute departs from the ruling.
 
-**Answer:** 
+**Answer:** (a) 2 k + 2 k 1206 basic (C17944) in series for R3/R4/R7/R8
 
 ---
 
@@ -48,7 +48,7 @@ lines are read; other edits are lost.
 - **Proposed:** HC2 gate slew control: (1) set a maximum load capacitance (about 50-100 uF at ~20 A with the BSC030N08NS5) and use only a short EMC slew, (2) fit a linear-mode-rated MOSFET on the input side (decision 19), or (3) move to TPS48111-Q1 with a pre-charge FET + resistor?
 - **Why it needs you:** found while fixing (T-0070): No R1/C1 pair meets 20 A into 1000 uF within the BSC030N08NS5 SOA: 600 W peak / 0.45 J over 1.5 ms vs SOA ~45 W at 1 ms (30 V); Zth gives dTj ~100 K above case (125 K with a 15 A load); slow turn-on into a short would also leave SOA before the 80 A trip. Fix needs a maximum load capacitance or a different MOSFET/pre-charge path (decision 19, proposed).
 
-**Answer:** 
+**Answer:** (1) maximum load capacitance: rate HC2 for about 50-100 uF load input capacitance, confirmed by the prototype measurement (Q-0045); fit only a short gate slew for EMC (within the MOSFET SOA at that capacitance); README: HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights, while DC-DC converters (e.g. 24->12 V for a car radio), radios and other electronics go on the 4-channel board; split grouped LED lights if the prototype shows short-circuit trips
 
 ---
 
@@ -59,7 +59,7 @@ lines are read; other edits are lost.
 - **Proposed:** Covered by the T-0054 question.
 - **Why it needs you:** found while fixing (T-0070): The ruled sizing target (20 A into 1000 uF) is outside the MOSFET SOA; the prototype load measurement is recorded in STATUS.
 
-**Answer:** 
+**Answer:** typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and electronics go on the 4-channel board; see Q-0049
 
 ---
 
