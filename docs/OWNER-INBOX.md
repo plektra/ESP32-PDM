@@ -8,10 +8,11 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Applied by agents (39)
+## Applied by agents (40)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0076 · pdm-4ch · U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work. → T-0078 (`d42065e2`)
 - T-0062 · pdm-hc2 · Should the HC2 hardware breaker sit near the continuous rating (about 17.5 A) or stay at 25 A with a documented external breaker requirement? Is an OUT voltage divider (spare IO4/IO5) wanted for float-run detection, or are SW3/SW4 enough? → T-0072 (`901c6f45`)
 - T-0060 · pdm-hc2 · IO3 strapping pin is held low by the IMON2 network; harmless while EFUSE_STRAP_JTAG_SEL is not burnt (same as V11 on pdm-4ch). → T-0073 (`1939dfbc`)
 - T-0059 · pdm-hc2 · First switch-on after power-up waits about 76-100 ms for the bootstrap (Eq. 1), also on the hardware switch path; overcurrent/short retry is about 3.8 min, reset by toggling INP. → T-0070 (`9d0b6d53`)
@@ -117,4 +118,4 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0044 (pdm-hc2): Reversed battery puts about -12...-30 V on TPS48110 VS/CS+/CS-/ISCP (abs max -1 V to GND); D30 SMCJ30CA is bidirectional and HC2 has no reverse protection; design-notes section 8 survival claim does not apply to HC2. → **keyed/polarised J10 plus README and label warning, and correct design-notes section 8 (reversal survival does not apply to HC2); full reverse-polarity protection deferred to a later HC2 revision (keep it on the list)** (done)
 - Q-0051 (pdm-hc2): Which HC2 loads have more than about 50 uF input capacitance (LED work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target. → **typical HC2 loads are bilge pumps and wipers (not capacitive) and possibly grouped 100 W LED work lights (a few hundred uF in total); DC-DC converters for 12 V car radios, radios and electronics go on the 4-channel board; see Q-0049** (parked)
 - Q-0046 (pdm-hc2): Should the HC2 hardware breaker sit near the continuous rating (about 17.5 A) or stay at 25 A with a documented external breaker requirement? Is an OUT voltage divider (spare IO4/IO5) wanted for float-run detection, or are SW3/SW4 enough? → **breaker level as ruled in Q-0042 (RIWRN 68k, about 17.5 A, plus external breaker and firmware soft fuse); add an OUT voltage divider on spare IO4/IO5 for float-run detection - pin-map change via /system** (done)
-- Q-0052 (pdm-4ch): U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work. → **yes** (parked)
+- Q-0052 (pdm-4ch): U5 pins 2 and 3 are swapped: datasheet (CA-IS305x v1.10 p. 5 Fig. 6-1/Table 6-1) has pin 2 = RXD, pin 3 = TXD; symbol and netlist have 2 = TXD on IO17 and 3 = RXD on IO18, so ESP32 TX drives the isolator's RXD output and CAN cannot work. → **yes** (done)

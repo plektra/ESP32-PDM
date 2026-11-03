@@ -2578,14 +2578,16 @@
         "finding": "V1"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0052",
       "why_big": [
         "CRITICAL"
       ],
       "ruling": "yes",
       "answered": "2026-11-03",
-      "package": "T-0078"
+      "package": "T-0078",
+      "fixed_by": "T-0078",
+      "merged": "d42065e2620df708ae0e5ada60f09d3d2f25f7e7"
     },
     {
       "id": "T-0077",
@@ -2612,7 +2614,7 @@
       "id": "T-0078",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "U5 CA-IS3050G: TXD/RXD pin numbers 2/3 swapped (both boards)",
       "brief": "Owner ruling (Q-0052), verbatim: \"yes\" – to the fix: \"Swap the pin numbers of TXD and RXD in the ESP32-PDM:CA-IS3050G symbol (TXD = 3, RXD = 2), update symbols on both boards, re-run ERC and netlist, correct the Pinout row in design-notes §8.5.\" Source: docs/reviews/2026-11-03-validate-pdm-4ch.md C1.\n\nCheck first: run `python3 tools/part_facts.py C528763 \"SOIC8-WB pinout pins 2 and 3\"`. This returns the cached docs/part-facts/C528763.md, which should give 1 VCC1, 2 RXD, 3 TXD, 4 GND1, 5 GND2, 6 CANL, 7 CANH, 8 VCC2 (v1.10 p. 5 Fig. 6-1/Table 6-1; the CA-IS3052G is the part with 2 = TXD, p. 6 Table 6-2). Also confirm that LCSC C528763 is the CA-IS3050G and not the 3052G (part-facts header and the JLCPCB listing). STOP AND ASK (one-way door) if the facts say pin 2 = TXD for the CA-IS3050G, or if C528763 turns out to be a CA-IS3052G. In that case the current wiring is correct for the fitted part, and the owner decides.\n\nSteps, in order:\n1. Record the baseline: ERC and kicadxml netlist for pdm-4ch and pdm-hc2 (`tools/sch_query.py <board> ref U5` and `erc`).\n2. lib/ESP32-PDM.kicad_sym, symbol CA-IS3050G: change pin number 2 -> 3 on the pin named TXD and 3 -> 2 on the pin named RXD. Keep names, electrical types and positions, so the TXD pin stays at the /IO17 wire end and the RXD pin at the /IO18 wire end.\n3. Copy the updated symbol into the lib_symbols cache of hardware/pdm-4ch/can.kicad_sch and hardware/pdm-hc2/can.kicad_sch (tools/ksch.py), with the same text on both sheets.\n4. Re-run ERC and the netlist on both boards. Expected: no new errors or warnings (a lib_symbol_mismatch on U5 must not appear). The only netlist change on each board is U5 pin numbers: /IO17 (U1.21, R70.2) -> U5.3 TXD and /IO18 (U1.22) -> U5.2 RXD. U5 pins 1, 4–8 and all other nets stay the same. Declared refs: U5.\n5. docs/design-notes.md §8.5: correct the Pinout row to \"1 VCC1, 2 RXD, 3 TXD, 4 GND1, 5 GND2, 6 CANL, 7 CANH, 8 VCC2 (Table 6-1; CA-IS3052G has 2/3 swapped, Table 6-2)\". Add a dated line to the Symbol bullet saying that T-0076 corrected the pin 2/3 numbers and that R70 stays on TXD (/IO17, now U5.3).\n6. Update both hardware/*/STATUS.md (CA-IS3050G entry: pins 2 RXD / 3 TXD). Run tools/fix_check.py --scope shared --refs U5.\n\nDo not: change ARCHITECTURE.md (the pin map IO17 TX / IO18 RX is unchanged), move R70, re-route the IO17/IO18 nets instead of renumbering, or add parts. No heat-budget, cost or LEN effect. Any change beyond U5's pin numbers (new part, pin-map change, change to decision 29) is out of scope: stop and ask.",
@@ -2620,7 +2622,29 @@
         "T-0076"
       ],
       "plan": "T-0077",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-03T09:16:37",
+      "ran_model": "opus",
+      "session": "e9fab1cd-67bf-4242-8dbe-b30651e75cb3",
+      "cost_usd": 0.5082,
+      "attempts": 1,
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "1 fixed, 0 blocked, merged d42065e2; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-shared-T-0078.md"
     },
     {
       "id": "T-0079",
@@ -2666,7 +2690,7 @@
       "unique": 61
     },
     "pdm-hc2": {
-      "parts": 206,
+      "parts": 212,
       "dnp": 11,
       "unique": 70
     }
