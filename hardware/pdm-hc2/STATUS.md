@@ -71,10 +71,7 @@ J4 stays 4-pole with the shield open (Q-0012). ERC unchanged (5 `lib_symbol_mism
 **Blocked (owner, one-way):** the PTC check failed. 1812L050/60GR is rated I_max 40 A, but a hard short behind F1/F3/F4
 can draw ≈ 188 A (30 V / 0.16 Ω). F2 therefore stays SMD0805B050TF. Question in the T-0065 report.
 
-**Waiting for the owner:** decision 19 **[proposed]** (21 A MOSFET option, halogen inrush) now conflicts with the
-≈ 17.5 A breaker of decision 39: a 21 A searchlight trips it. Owner question from T-0072: per-build RIWRN for that
-output, or drop the 21 A option. Before that:, which depends on the
-searchlight choice (decision 16, open). Decision 21 **[proposed]** (SW_SUPPLY sense on IO12).
+**Waiting for the owner:** decision 21 **[proposed]** (SW_SUPPLY sense on IO12).
 
 ## Next
 
@@ -84,9 +81,7 @@ searchlight choice (decision 16, open). Decision 21 **[proposed]** (SW_SUPPLY se
    Symbols from Library* (keep Q3–Q6 on the BC817 symbol with value MMBT5551), ERC.
 2. `/validate pdm-hc2 deep` (part facts of TPS48110A-Q1, BSC030N08NS5, the equations) and `/emc pdm-hc2`.
 3. Verify the custom footprint `Texas_DGX0019A_VSSOP-19_3x5.1mm_P0.5mm` against the JLCPCB footprint (C17556513).
-4. Searchlight: if it stays ~21 A, check NTMFS5C612NL (SO-8FL) against the TDSON-8-1 footprint and rerun the heat
-   budget; if halogen, decide the short-circuit setting after a MOSFET SOA check.
-5. PCB: Kelvin sense on the 1 mΩ shunt, MMBT3904 between the MOSFETs, TH1 next to the MOSFETs, ≥ 25 A output
+4. PCB: Kelvin sense on the 1 mΩ shunt, MMBT3904 between the MOSFETs, TH1 next to the MOSFETs, ≥ 25 A output
    terminals, ≈ 50 A input.
    T-0064 rules (design-notes §8.1/§8.2):
    - **D103/D203 next to the J11 terminal, GND return a short, wide path straight to J10.2** (not via the logic

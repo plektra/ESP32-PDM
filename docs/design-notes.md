@@ -17,7 +17,7 @@ Values marked *estimate* are engineering estimates, not measurements.
   - **4-channel** board, PROFET+24V per channel, fitted per build: BTT6050 (≈ 4 A) or BTT6010 (≈ 8 A).
   - **High-current** board `pdm-hc2`: smart high-side controller TPS48110A-Q1 + back-to-back MOSFETs
     (BSC030N08NS5), ≈ 15 A continuous per channel, built-in breaker ≈ 17.5 A (bilge pumps 12 A, work lights,
-    wipers; searchlight see §4a, decision 19).
+    wipers).
 - Installed in an enclosed location, in a vented 3D-printed enclosure. Two mounting styles:
   DIN rail (PCB perpendicular to the rail, 1–2 module widths) and flat (wall/ceiling).
 - Engine-room ambient up to 40 °C.
@@ -192,11 +192,6 @@ protection comes from the required external breaker (≤ 15–18 A) and the firm
 (140–160 °C at the MMBT3904) is a backstop, not a continuous protection.
 
 Notes and open points:
-- **Searchlight 21 A** needs lower-RDS(on) MOSFETs (e.g. onsemi NTMFS5C612NL C348543, ≈ 1.5–2 mΩ; check
-  that its SO-8FL land fits the TDSON-8-1 footprint) → estimated Tj ≈ 90–100 °C at 21 A.
-- **Halogen inrush** (≈ 10–15× for tens of ms): the 80 A fast trip would stop a cold 500 W lamp. Options: an
-  LED searchlight, or ISCP disabled (R_ISCP position fitted as 0 Ω to CS−) after verifying MOSFET pulse SOA and
-  short-circuit energy with the 146 ms timer.
 - Terminals for ≥ 25 A per output and ≈ 50 A battery input; 2 oz copper; footprint
   `Texas_DGX0019A` drawn from TI's land-pattern example (verify against JLCPCB before ordering).
 - **Timing the user sees (T-0059, 2026-11-02; TPS4811-Q1 SLUSEE5E p. 8, 18, 23):**
@@ -807,7 +802,7 @@ power-up on the prototype.
 - [x] Verify the PG-TDSO-14 footprint against the package drawing and the JLCPCB/EasyEDA footprint (§8.4, T-0066)
 - [ ] Per-output fuse strategy (on board vs. in the installation)
 - [x] Standard population: all four BTT6050 (Q-0032, T-0040); heavy loads go on HC2. BTT6010 only where > 4 A, mixed builds ordered together (§3, pdm-4ch STATUS/README)
-- [ ] High-current board: MOSFET option for 21 A, halogen inrush decision, terminals (§4a)
+- [ ] High-current board: terminals (§4a)
 - [ ] Bilge pumps (Vega: SEAFLO 01 Series 3500 GPH, 24 V model SFBP2-G3500-01: 8.0 A rated, 12.5 A max
       draw per the product page; current rises with pumping head; start-up and jammed-impeller current not
       given). BTT6010 at 8 A → Tj ≈ 86 °C, at 10 A ≈ 123 °C, at ≥ 11 A thermal shutdown: a pump working

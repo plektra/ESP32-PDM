@@ -33,8 +33,7 @@ inbox, and merge.
 ## Waiting on the owner
 
 - Decisions 19 and 21 **[proposed]**; decision 20 (fault/alert handling) open until `/system firmware`.
-- Decision 16 (searchlight heating) open: revisit with cost in mind; halogen vs LED.
-- Measurements on Vega: searchlight glass diameter and thickness; bilge pump locations and feeds.
+- Measurements on Vega: bilge pump locations and feeds.
 
 ## Backlog (not now)
 

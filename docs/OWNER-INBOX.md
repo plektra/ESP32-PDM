@@ -34,10 +34,10 @@ lines are read; other edits are lost.
 
 - **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` H1 (hc_channel x2: R113/R213 RIWRN 47k, C105/C205 CTMR, Q13/Q23 OT sensor; ARCHITECTURE HC2 budget); task T-0053
 - **Summary:** Hardware breaker at about 24-26 A (146 ms) and OT trip at 140-160 C at the sensor leave about 18-24 A unprotected in hardware; heat budget gives Tj 137-143 C at 20 A and 169 C at 22 A against MOSFET Tj max 150 C, so only firmware protects when the ESP32 runs.
-- **Proposed:** HC2 breaker is now ~17.5 A. For the ~21 A searchlight of decision 19: set a per-build RIWRN for that output (e.g. 47 k ~25 A, only together with the lower-RDS(on) MOSFETs of decision 19 and an external breaker sized for it), or drop the 21 A option from decision 19?
-- **Why it needs you:** found while fixing (T-0072): The ruled 68 k breaker (Q-0042, applied and merged in T-0072) gives IOC ~17.5 A (15.2-19.7 A over tolerances); decision 19 [proposed] plans a ~21 A searchlight on HC2, which this breaker trips. Decision 19 is the owner's (policy item 2).
+- **Proposed:** HC2 breaker is now ~17.5 A. For the ~21 A load option of decision 19: set a per-build RIWRN for that output (e.g. 47 k ~25 A, only together with the lower-RDS(on) MOSFETs of decision 19 and an external breaker sized for it), or drop the 21 A option from decision 19?
+- **Why it needs you:** found while fixing (T-0072): The ruled 68 k breaker (Q-0042, applied and merged in T-0072) gives IOC ~17.5 A (15.2-19.7 A over tolerances); decision 19 [proposed] plans a ~21 A load on HC2, which this breaker trips. Decision 19 is the owner's (policy item 2).
 
-**Answer:** 
+**Answer:** no - drop the 21 A option; decision 19 is withdrawn by the owner (2026-11-03); the breaker stays as in decision 39
 
 ---
 
@@ -55,7 +55,7 @@ lines are read; other edits are lost.
 ## Q-0051 · INFO · pdm-hc2 · question
 
 - **From:** `docs/reviews/2026-11-01-validate-pdm-hc2.md` Q1 (hc_channel x2 (H2)); task T-0061
-- **Summary:** Which HC2 loads have more than about 50 uF input capacitance (LED searchlight/work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.
+- **Summary:** Which HC2 loads have more than about 50 uF input capacitance (LED work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.
 - **Proposed:** Covered by the T-0054 question.
 - **Why it needs you:** found while fixing (T-0070): The ruled sizing target (20 A into 1000 uF) is outside the MOSFET SOA; the prototype load measurement is recorded in STATUS.
 
@@ -70,7 +70,7 @@ lines are read; other edits are lost.
 - **Proposed:** Swap the pin numbers of TXD and RXD in the ESP32-PDM:CA-IS3050G symbol (TXD = 3, RXD = 2), update symbols on both boards, re-run ERC and netlist, correct the Pinout row in design-notes §8.5.
 - **Why it needs you:** CRITICAL
 
-**Answer:** 
+**Answer:** yes
 
 ---
 

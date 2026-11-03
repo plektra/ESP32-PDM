@@ -3339,7 +3339,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "RISCP: short-circuit threshold ~80 A. For halogen lamps: DNP and fit R3x as 0R (ISCP to CS-, fast trip off)"
+		(property "Description" "RISCP: short-circuit threshold ~80 A."
 			(at 73.66 38.1 0)
 			(effects
 				(font
@@ -6320,7 +6320,7 @@
 			)
 		)
 	)
-	(text "High-current channel: TPS48110A-Q1 + back-to-back BSC030N08NS5 (blocks back-feed, e.g. when a bilge float\nswitch powers the pump while the channel is off). TI TPS4811-Q1 datasheet SLUSEE5E equations:\nRIWRN = 11.9 x RSET / (RSNS x IOC): 47k -> 25 A.  RISCP = ISC x RSNS / 15.6 uA - 464: 4.7k -> 80 A.\nCTMR = 82 uA x tOC / 1.2: 10 uF -> 146 ms; retry 22.7e6 x CTMR = 227 s.  IMON gain = 0.9 x RIMON / RSET = 108.\nUVLO 1.18 V x 1.139M / 139k = 9.7 V; OV 1.18 V x 1.139M / 39k = 34.5 V.\nHalogen loads (inrush ~10-15x): consider ISCP disabled (R103 = 0R to CS- position) - verify MOSFET SOA first."
+	(text "High-current channel: TPS48110A-Q1 + back-to-back BSC030N08NS5 (blocks back-feed, e.g. when a bilge float\nswitch powers the pump while the channel is off). TI TPS4811-Q1 datasheet SLUSEE5E equations:\nRIWRN = 11.9 x RSET / (RSNS x IOC): 47k -> 25 A.  RISCP = ISC x RSNS / 15.6 uA - 464: 4.7k -> 80 A.\nCTMR = 82 uA x tOC / 1.2: 10 uF -> 146 ms; retry 22.7e6 x CTMR = 227 s.  IMON gain = 0.9 x RIMON / RSET = 108.\nUVLO 1.18 V x 1.139M / 139k = 9.7 V; OV 1.18 V x 1.139M / 39k = 34.5 V."
 		(exclude_from_sim no)
 		(at 25.4 15.24 0)
 		(effects

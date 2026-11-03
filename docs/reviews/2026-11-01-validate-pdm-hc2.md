@@ -93,8 +93,8 @@ above the MOSFET's Tj max.**
 - **Why it matters.**
   - design-notes §4a says that "continuous protection comes from the temperature sensor and the firmware soft fuse". The
     sensor does not protect in this band, so only the firmware soft fuse does.
-  - Invariant 1 exists precisely for the case where the ESP32 is not running. On the HC2 the outputs are bilge forced-run
-    and the searchlight, which are safety-relevant (decision 15, CLAUDE.md §7).
+  - Invariant 1 exists precisely for the case where the ESP32 is not running. On the HC2 the outputs include bilge forced-run,
+    which is safety-relevant (decision 15, CLAUDE.md §7).
   - The installation fuse does not close the gap either: a wire fuse sized near 15–20 A carries 20–24 A for minutes.
 - **Fix (owner):**
   - (a) Lower IOC towards the continuous rating, e.g. RIWRN 68 kΩ (E12) → IOC ≈ 17.5 A, Tj ≈ 110 °C steady. The 146 ms timer
@@ -121,10 +121,9 @@ channel then stays off for 3.8 min.**
   - The damped peak current is ≈ 90–100 A, reached after ≈ 25 µs. That is above the threshold for longer than tSC.
   - From about 50 µF upwards the trip is likely.
 
-  LED searchlights and work lights with drivers, VHF/radio sets and inverters commonly have 100 µF to several mF at their
+  LED work lights with drivers, VHF/radio sets and inverters commonly have 100 µF to several mF at their
   input (`UNVERIFIED` per load).
 - **Not already covered.**
-  - design-notes §4a and decision 19 cover only halogen inrush.
   - EMC E2 asks for RG_PU 100–220 Ω for EMC. That slows the edges to a few µs, but it does not limit the inrush of a
     capacitive load over the needed 0.1–1 ms.
 - **Fix (owner):** TI §8.3.2.1, gate slew-rate control.
@@ -209,7 +208,7 @@ channel then stays off for 3.8 min.**
 
 ### Questions
 
-- **Q1 (for H2):** Which loads with input capacitance above ≈ 50 µF go on HC2 outputs? Examples: LED searchlight or work-light
+- **Q1 (for H2):** Which loads with input capacitance above ≈ 50 µF go on HC2 outputs? Examples: LED work-light
   drivers, radios, an inverter. This sets whether gate slew control is needed and what inrush target to use.
 - **Q2 (for H1/H6):** Should the hardware breaker sit near the continuous rating (≈ 17.5 A), or stay at 25 A with a
   documented requirement for an external breaker? And is an OUT voltage divider wanted for float-run detection, or are the
@@ -427,7 +426,7 @@ channel then stays off for 3.8 min.**
     "severity": "INFO",
     "board": "pdm-hc2",
     "location": "hc_channel x2 (H2)",
-    "summary": "Which HC2 loads have more than about 50 uF input capacitance (LED searchlight/work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.",
+    "summary": "Which HC2 loads have more than about 50 uF input capacitance (LED work-light drivers, radios, inverter)? Sets whether gate slew control is needed and its inrush target.",
     "fix": "Owner lists the intended HC2 loads and their input capacitance or inrush.",
     "class": "big",
     "reason": "Only the owner knows the loads.",
