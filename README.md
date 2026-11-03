@@ -58,6 +58,11 @@ per order, so order mixed builds together to pay it once.
 - **`pdm-hc2` timing:** after power is connected, the first switch-on of each output (also from a panel switch)
   takes about 0.1 s. After an overcurrent or short-circuit trip the output stays off for about 4 minutes and then
   tries again. HC2 outputs are on/off only (no dimming/PWM).
+- **`pdm-hc2` loads:** HC2 is for motor loads (bilge pumps, wipers) and grouped LED work lights. Each HC2 output is
+  rated for at most **about 50 µF of load input capacitance** (to be confirmed on the prototype). A larger capacitive
+  load can trip the short-circuit protection at switch-on, and the output then stays off for about 4 minutes. Put
+  DC-DC converters (e.g. 24→12 V for a car radio), radios and other electronics on `pdm-4ch`. If a group of LED
+  work lights trips at switch-on, split it over several outputs.
 - **USB-C is a service port only.** Connect only a battery-powered laptop, or use a USB isolator. The
   board's GND is the boat's battery negative. A laptop on a shore-powered charger can tie its protective
   earth to battery negative through the USB cable, which can cause ground-loop currents, galvanic

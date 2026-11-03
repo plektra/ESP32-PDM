@@ -1,6 +1,6 @@
 # pdm-hc2 status
 
-Updated: 2026-11-03 (T-0105)
+Updated: 2026-11-03 (T-0106)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
@@ -71,17 +71,25 @@ netlist checked. Details, part facts and the bilge-output failure mode: design-n
 identical); custom `LMR51610.kicad_mod` removed from `lib/`. ERC 0 errors, warnings 6 → 5 (U3 mismatch cleared);
 netlist: only U3's footprint changed. The PG-TDSO-14 paste fix in the same package affects only pdm-4ch. Details: design-notes §8.4.
 
-**2026-11-02 (T-0070, unattended): gate slew control blocked (one-way, owner).** The BSC030N08NS5 SOA (Diagram 3,
-30 V, single pulse, Tc 25 °C: ≈ 1.5 A at 1 ms, ≈ 0.4 A at 10 ms) and Zth (Diagram 4) do not allow the ruled
-20 A ramp into 1000 µF: 600 W peak, 0.45 J in the input MOSFET over 1.5 ms, ΔTj ≈ 100 K above case (≈ 125 K with a
-15 A load attached); even 100 µF at 20 A is above the 100 µs SOA line. No R1/C1 pair meets both targets, so R104/R204
-stay 10 Ω PU→gate and no slew parts were added. The owner chooses: a maximum load capacitance, or a linear-mode
-MOSFET / pre-charge path (decision 19). Numbers: `docs/reviews/2026-11-02-fix-pdm-hc2-T-0070.md`. T-0059 done: the
-bootstrap delay (≈ 76–100 ms) and the 3.8 min retry are in design-notes §4a and the README.
+**2026-11-03 (T-0106: T-0054/T-0006/T-0061/T-0053, Q-0049–Q-0051/Q-0053, decision 72, unattended, `hc_channel` ×2):**
+gate slew fitted per TPS4811-Q1 §8.3.2.1 (decision 25 topology): R104/R204 = R1 10 Ω → **10 k** (C25744); new
+R115/R215 10 Ω (C25077) + C114/C214 **1 nF/2 kV 1206** (C9196) from GATE to GND; PD now on its own net through the
+0 Ω RGATE_PD R116/R216 (C17168) to GATE. All parts already on the BOM: +6 parts, +0 unique. Output ramp ≈ 0.5–0.75 V/µs
+(≈ 40–57 µs for 30 V, was ≈ 400–800 V/µs). **Rating: ≤ ≈ 50 µF load input capacitance per output** (68 µF and 100 µF
+fail the SOA from a hot start; 100 µF also trips ISCP): 50 µF + 15 A → ≤ 53 A peak (ISCP ≥ 71 A), SOA margin 1.76
+idle / 1.03 hot (Tj 90 °C after 15 A), Tj ≈ 124 °C (Zth). Turn-on into a zero-impedance short is inside SOA from an
+idle board (≤ 63 °C, margin 1.18) but not right after running at 15 A (0.69–0.89; no R1/C1 fixes that corner – open
+point, prototype test). Turn-off and the fast trip unchanged (PD direct). Eq. 4 OK. Heat budget unchanged (2 × 15 A →
+Tj 90 °C). README: HC2 load guidance and the 50 µF limit. T-0053: no change (R113/R213 68 k, decision 39); decision 19
+and the 21 A option are withdrawn. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those refs and U11/U12
+pin 14 (new net PD). Details: design-notes §4a.3, `docs/reviews/2026-11-03-fix-pdm-hc2-T-0106.md`. **For the PCB:**
+C114/C214 and R115/R215 at the MOSFET gates, C1 GND return to U11/U12 GND; R116/R216 close to U11/U12 pin 14.
 
-**Rules until bench-measured:** no PWM on HC2 outputs (Q-0001). Prototype test: measure the real load input
-capacitance and inrush of every intended HC2 load (Q-0045), and check whether an INP toggle cuts the 3.8 min
-auto-retry short.
+**Rules until bench-measured:** no PWM on HC2 outputs (Q-0001). Prototype tests: measure the real load input
+capacitance and inrush of every intended HC2 load, including grouped LED work lights (Q-0045), and confirm the ≈ 50 µF
+rating (no ISCP trip at switch-on); split LED groups that trip; measure the output ramp (≈ 0.5–0.75 V/µs expected);
+switch a hot channel (after 15 A) on into a short and check Q11/Q21 survive (T-0106 open point); check whether an INP
+toggle cuts the 3.8 min auto-retry short.
 
 **2026-11-02 (T-0067, Q-0023/Q-0039/Q-0004, rulings Q-0012/Q-0031, unattended, shared `can`, same on both boards):**
 U5 ISO1044 → **Chipanalog CA-IS3050G** (C528763, SOIC-8-WB `Package_SO:SOIC-8_7.5x5.85mm_P1.27mm`, new symbol
@@ -100,8 +108,8 @@ F4 feeds the panel switches (bilge forced run, navigation lights): a competent p
 
 ## Next
 
-0. Gate slew control (T-0054/T-0006, Q-0043/Q-0001): waiting for the owner's answer to the T-0070 SOA question;
-   then set R104/R204 (R1), C1 + 10 Ω and a 0 Ω RGATE_PD footprint, recheck SOA, heat budget, short-circuit response.
+0. Gate slew done (T-0106, 50 µF rating). Open: turn-on into a short straight after running at 15 A is outside the
+   calculated SOA (bounding model) – prototype test above; `/validate pdm-hc2 deep` rechecks the §4a.3 method.
 1. Open in KiCad: tidy the label-wired `hc_channel` sheet and the parts the panel-cable script placed, *Update
    Symbols from Library* (keep Q3–Q6 on the BC817 symbol with value MMBT5551), ERC.
 2. `/validate pdm-hc2 deep` (part facts of TPS48110A-Q1, BSC030N08NS5, the equations) and `/emc pdm-hc2`.

@@ -190,13 +190,15 @@ Per channel (source: TI TPS4811-Q1 datasheet SLUSEE5E):
 | RIMON | 12 kΩ | gain 0.9 × RIMON / RSET = 108 → 25 A = 2.7 V; 10 kΩ + BAT54S clamp + 1 nF to the ADC |
 | UVLO/OV divider | 1 MΩ / 100 kΩ / 39 kΩ | UVLO ≈ 9.7 V, OV cut-off ≈ 34.5 V |
 | CBST | 1 µF / 50 V | > Qg(total) / 1 V = 152 nF |
-| RG | 10 Ω | PU → gate (turn-on slew); PD drives the gate directly |
+| R1 (RG_PU) | 10 kΩ (C25744) | PU → gate, gate slew (§4a.3, T-0106) |
+| C1 + R2 | 1 nF/2 kV 1206 (C9196) + 10 Ω (C25077) | gate → GND, sets the output ramp ≈ 0.7 V/µs (§4a.3) |
+| RGATE_PD | 0 Ω (C17168) | PD → gate directly (footprint for a later turn-off resistor, decision 25) |
 | MMBT3904 | – | temperature sensor between the MOSFETs (overtemperature → FLT_T, auto-retry 512 ms) |
 | SS510B | 100 V 5 A | freewheel diode for motor loads |
 
 Heat (`tools/heat_budget.py --channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002`, estimate,
 40 °C, vented; RDS(on) path 11.7 mΩ at 150 °C per BSC030N08NS5 Diagram 9, T-0057):
-2 × 12.5 A → Tj ≈ 71 °C; 2 × 15 A → 88 °C; 2 × 20 A → 143 °C (too hot). **Continuous rating ≈ 15 A per
+2 × 12.5 A → Tj ≈ 73 °C; 2 × 15 A → 90 °C; 2 × 20 A → 145 °C (too hot; rerun 2026-11-03 with the 2.2 W `--p-other` default, T-0106). **Continuous rating ≈ 15 A per
 channel.** The hardware breaker (≈ 17.5 A / 146 ms, §4a.2) allows short motor starts; between 15 A and the breaker,
 protection comes from the required external breaker (≤ 15–18 A) and the firmware soft fuse. The temperature sensor
 (140–160 °C at the MMBT3904) is a backstop, not a continuous protection.
@@ -209,9 +211,8 @@ Notes and open points:
     I(charge pump) = 1 µF × 7.6 V / 100 µA ≈ **76 ms** (typ); with the minimum 80 µA charge-pump current ≈ 95 ms,
     and with CBST tolerance up to ≈ 100 ms. This applies to the hardware panel-switch path too (the controller,
     not the MCU, waits). Later switchings are immediate while VS stays up.
-  - *Turn-on edge:* unchanged for now (RG 10 Ω, no slew control, sub-µs). Gate slew control (Q-0043) is on hold:
-    the SOA check in the T-0070 report shows that 20 A into 1000 µF is outside the BSC030N08NS5 SOA (one-way
-    question to the owner). The ramp time will be recorded here once the slew values are settled.
+  - *Turn-on edge (T-0106, §4a.3):* ≈ 50 µs gate delay, then the output ramps at ≈ 0.5–0.75 V/µs (≈ 40–57 µs
+    for 0–30 V); not noticeable to the user.
   - *Overcurrent/short-circuit retry:* Eq. 9 tRETRY = 22.7 × 10⁶ × CTMR = 22.7 × 10⁶ × 10 µF ≈ 227 s ≈
     **3.8 min** in auto-retry mode. The datasheet names toggling INP or EN/UVLO (or VS below POR) as the reset for
     latch-off mode (p. 24); that an INP toggle also cuts the auto-retry wait short is **not stated** in the
@@ -310,6 +311,78 @@ controller sheet parts are unchanged; only the HC2 root pin use differs (pin map
   which may destroy that ESP32 pin, but the fault current is then limited by the pin and the PDM-leg breaker, not by
   the float circuit, which stays wired to the battery and works without the PDM. A float-driven run is now seen as
   "OUT high while the channel is off". A competent person reviews the bilge wiring before installation.
+
+### 4a.3 Gate slew and maximum load capacitance (T-0106: T-0054, T-0006, T-0061, T-0053; Q-0049–Q-0051, Q-0053; decisions 25, 72; 2026-11-03)
+
+**Circuit** (TPS4811-Q1 SLUSEE5E §8.3.2.1, Fig. 8-6; part facts C17556513), per channel:
+R104/R204 = R1 10 kΩ (C25744) PU → GATE; R115/R215 10 Ω (C25077) + C114/C214 1 nF (C9196) from GATE to GND;
+PD → R116/R216 0 Ω (C17168) → GATE (PD direct, decision 25). All four parts were already on the BOM (+6 parts,
++0 unique). C1 returns to GND (the ground symbol of Fig. 8-6; on SRC it would not slow the source-follower ramp). C1
+sees VS + V(BST–SRC) ≈ 41 V in normal use and ≈ 60 V with VS at the ≈ 48 V clamp, so it is the 1 nF/2 kV X7R 1206
+C9196 (§8.3), not the 50 V C1523.
+
+**Ramp.** The FET source follows the gate: dVOUT/dt = (V(BST–SRC) − VGS) / (R1 × C1), Eq. 3 form 0.63 × 12 V /
+(10 k × 1 nF) = 0.76 V/µs; nominal (11.7 V, VGS ≈ 4.6 V) ≈ 0.66 V/µs; range 0.53–0.77 V/µs (V(BST–SRC) 11–12.3 V,
+p. 8; C1 ±10 %). 0 → 30 V in **≈ 40–57 µs**. Before that the gate charges R1 × (C1 + Ciss of both FETs ≈ 9.5 nF,
+Diagram 11) to ≈ 4.5 V in ≈ 50 µs. Before T-0106 the edge was estimated at 400–800 V/µs (EMC report 2026-10-30, E2);
+it is now of the order of the PROFET channels (0.8 V/µs).
+
+**Inrush and fast trip (a).** I = CLOAD × dV/dt: 50 µF → ≤ 38 A, plus a 15 A resistive load → **≤ 53 A worst case**
+against the lowest ISCP threshold ≈ 71 A (RISCP 4.7 k, I(ISCP) 13.7 µA min, Eq. 11): ≥ 25 % margin. 68 µF → 66 A
+(no margin); 100 µF → 88 A (trips).
+
+**Eq. 4 (e).** CBST > Qg(total) + 10 × C1 = 2 × 76 nC + 10 nC = 162 nC ≪ 1 µF (C103/C203; holds with X5R DC-bias loss).
+
+**SOA method (b, c).** Q11/Q21 (input side) carries VS − VOUT. BSC030N08NS5 SOA Diagram 3, 30 V, Tc 25 °C, single
+pulse, re-digitised in T-0106 (part facts C501507, ±10 %): 1 µs 400 A, 10 µs 190 A, 100 µs 16.6 A, 1 ms 1.56 A (lines
+∝ VDS⁻², the thermal-instability region). The power profile is computed in 0.05 µs steps and compared as an
+equivalent rectangle at peak power (t_eq = E / Ppeak) with the SOA at 30 V for the whole pulse (conservative: VDS
+falls during the ramp), log-log interpolated and derated linearly to zero at 150 °C: k = (150 − Tstart) / 125.
+Start temperatures from `tools/heat_budget.py` (2 × 15 A, 40 °C): idle board 47 °C (k 0.82); hot start right after
+running at 15 A, Tj 90 °C (k 0.48). Zth j-c max (Diagram 4) superposition gives Tj as a cross-check. Short at
+turn-on: zero-impedance short, 30 V across Q11, current from transfer Diagram 7 (envelope of the 25/150 °C curves),
+gate R1 × (C1 + 9 nF) from 0 V, until ISCP plus tSC 5 µs (p. 10). Script: `docs/reviews/2026-11-03-fix-pdm-hc2-T-0106.md`.
+
+Results for 10 k / 1 nF (worst case V(BST–SRC) 12.3 V, C1 −10 %); margin = allowed / actual peak power:
+
+| Case | Ipeak | E in Q11 | Ppeak | t_eq | margin idle (k 0.82) | margin hot (k 0.48) | Tj hot (Zth) |
+|---|---|---|---|---|---|---|---|
+| 50 µF + 15 A, turn-on | 53 A | 25 mJ | 1.18 kW | 22 µs | 1.76 | **1.03** | 124 °C |
+| 68 µF + 15 A | 66 A | 34 mJ | 1.56 kW | 22 µs | 1.34 | 0.78 ✗ | 135 °C |
+| 100 µF + 15 A | 88 A (trips) | 48 mJ | 2.2 kW | 22 µs | 0.93 ✗ | 0.54 ✗ | 154 °C |
+| Turn-on into a short, ISC 71 A | 111 A | 26 mJ | 3.3 kW | 8 µs | 1.52 | 0.89 ✗ | – |
+| Turn-on into a short, ISC 91 A | 139 A | 36 mJ | 4.2 kW | 9 µs | **1.18** | 0.69 ✗ | – |
+
+Other pairs (sweep R1 1–47 k × C1 1–47 nF): slower ramps (10 k/2.2 nF, 2.2 k/10 nF, 4.7 k/4.7 nF ≈ 0.34 V/µs) put
+more energy into Q11 (the resistive load share grows) and fail the hot 50 µF case (0.88–0.89); a larger C1 with a
+smaller R1 fails the short case even from idle (the current climbs further during tSC); no pair passes 100 µF even
+from idle. T-0070's 100 k / 3.9 nF fails all cases with this MOSFET.
+
+**Rating: at most ≈ 50 µF load input capacitance per HC2 output** (30 V, with up to 15 A resistive load in
+parallel; decision 72 range 50–100 µF, lower end). The prototype measures the real loads (Q-0045) and confirms it.
+
+**Turn-on into a short** passes from an idle board (start ≤ 63 °C at the worst-case 91 A threshold, margin 1.18),
+but not straight after the channel ran at 15 A (0.69–0.89). No R1/C1 in the sweep passes that corner. It is a bounding
+model: the old 10 Ω hard turn-on would, in the same model, drive > 400 A (ID,pulse) through Q11 because the gate is
+fully open within a microsecond; real shorts have wiring inductance that limits di/dt and VDS. Prototype test (STATUS).
+
+**Turn-off (f)** unchanged: PD direct through R116/R216 0 Ω, tSC 4–5 µs, 4 A PD sink; C1 discharges through R2
+10 Ω (≈ 12 nC). A short while the output is on (gate fully on) is cleared as before. While on, the gate sits at
+SRC + 12 V through R1 (C1 has no DC load); a fast VS step of ΔV lowers VGS by C1 / (C1 + Cgs) ≈ 10 % of ΔV.
+Heat budget unchanged (2 × 15 A → Tj 90 °C, 40 °C).
+
+**Failure mode (bilge forced run and other safety-relevant HC2 outputs):**
+- The slew does not delay the fast trip of a short while the output is on (PD direct, tSC unchanged).
+- A load with more than ≈ 50 µF input capacitance can trip the fast short-circuit protection at switch-on. The output
+  then stays off for ≈ 3.8 min and retries, also on the hardware forced-run path. The float switch stays independent
+  (invariant 8). Measure every intended load on the prototype; split LED work-light groups that trip.
+- Switching a channel that just carried 15 A on into a short is outside the calculated SOA. If Q11/Q21 then fails
+  short, the output cannot be switched off any more (the output-side MOSFET's body diode conducts), and only the
+  required external breaker (≤ 15–18 A, decision 39) clears a fault – as for any MOSFET failure.
+- A competent person reviews the bilge outputs before installation.
+
+**T-0053 (Q-0053):** no change. R113/R213 stay 68 k C36871 (decision 39, T-0072). Decision 19 and the ≈ 21 A load
+option are withdrawn by the owner (2026-11-03).
 
 ## 5. Physical switch inputs and long leads
 
