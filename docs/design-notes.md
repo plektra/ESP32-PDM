@@ -620,7 +620,11 @@ Root sheet, the same on both boards (controller part):
 | C31 | 100 µF/63 V Al electrolytic, Ymin VKMD1001J101MV (C487384, extended) | VS–GND | bulk at J10 |
 
 HC2 only (`hc_channel`, ×2): C106/C206, the same 100 µF/63 V at each channel's VS, so HC2 has 3 × 100 µF.
-4-ch only (`channel`, ×4): C104–C404, the same 1 µF/100 V at each BTT6050 VS tab, next to C103 (100 nF).
+4-ch only (`channel`, ×4): C104–C404, 2.2 µF/100 V X7R 1206 C170101 (the part of C1/C30) at each BTT6050 VS tab, next to
+C103 (100 nF). Was 1 µF C13832 until T-0120; owner rulings Q-0063/Q-0064 amend decision 26 to "≥ 1 µF/100 V (2.2 µF
+C170101)" and supersede auto decision 44. Same footprint, so placement and the 100 V rating above the 48.4 V clamp are
+unchanged. DC bias at 24–29 V leaves an estimated ≈ 1–1.5 µF (not checked against a Samsung curve), still ≥ the former
+nominal 1 µF. pdm-4ch now carries no C13832, so its loading fee is gone; revisit if runs grow past about 12 boards (ruling).
 
 Part facts:
 - Ymin VKM series datasheet (catalogue pp. 178–180): −55…+105 °C, tan δ 0.14 at 63 V (120 Hz), life
@@ -629,7 +633,9 @@ Part facts:
   ≈ 1.9 Ω; it is lower at 100 kHz, but the datasheet gives no figure. Body dimensions (B = C = 8.3, A = 3.4, H = 0.9,
   E = 3.1 mm) are the standard 8 × 10 size of KiCad `CP_Elec_8x10`. Check that footprint against the JLCPCB/EasyEDA
   footprint before ordering.
-- Samsung CL31B105KCHNNNE: part-numbering code 31 = 1206, B = X7R, 105 = 1 µF, K = ±10 %, C = 100 V (Samsung MLCC
+- Samsung CL31B225KCHSNNE (C170101, now C1, C30, C104–C404): X7R, 100 V, 2.2 µF ±10 %, 1206, soft termination
+  (`docs/part-facts/C170101.md`, Samsung MLCC catalogue p. 4 and p. 45).
+- Former part, no longer on either board: Samsung CL31B105KCHNNNE: part-numbering code 31 = 1206, B = X7R, 105 = 1 µF, K = ±10 %, C = 100 V (Samsung MLCC
   catalogue, "Part Numbering System"). The capacitance drops under DC bias at 24–29 V, but this was not checked
   against a curve. JLCPCB has no soft-termination 1 µF/100 V part in stock.
 - No basic or preferred SMD electrolytic ≥ 63 V and no basic or preferred 1–2.2 µF/100 V MLCC exist at JLCPCB
@@ -659,7 +665,8 @@ is a copper link that must be as wide as the VS copper on both layers. It is lis
 conducts. If FL30 is ever fitted, 4-ch output surges (OUT → PROFET body diode → VS) reach D30 only through FL30.
 In that case reconsider fitting the output TVS footprints D103–D403.
 
-Cost per board at 10 units (part prices at 1–49 pcs): 4-ch C31 0.22 + C30 0.065 + 4 × C104 0.26 = 0.54 USD;
+Cost per board at 10 units (part prices at 1–49 pcs, T-0064 figures; since T-0107/T-0120 C30 and C104–C404 are C170101 at
+0.1185 USD (1+, JLCPCB 2026-11-03), so 4-ch C30 + 4 × C104 ≈ 0.59 USD, but no C13832 fee): 4-ch C31 0.22 + C30 0.065 + 4 × C104 0.26 = 0.54 USD;
 HC2 C31 0.22 + C30 0.065 + 2 × C106 0.44 + 2 × SMAJ33CA 0.057 = 0.78 USD. On top of that comes the extended-part
 loading fee (about 3 USD per unique part per order, check the quote) for C487384 and C13832, i.e. ≈ 0.6 USD per
 board at 10 units. The bulk capacitor alone is 0.22 + 0.30 ≈ 0.52 USD per board, at the ~0.5 USD limit of the
