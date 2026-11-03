@@ -1,7 +1,7 @@
 {
   "next": {
-    "T": 90,
-    "Q": 55
+    "T": 103,
+    "Q": 60
   },
   "tasks": [
     {
@@ -2843,12 +2843,19 @@
       "id": "T-0086",
       "role": "cost-controller",
       "scope": "system",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [],
       "started": "2026-11-03T11:12:59",
       "ran_model": "sonnet",
-      "session": "0f4fc164-2f2a-4446-9bdf-37b52051cd6c"
+      "session": "0f4fc164-2f2a-4446-9bdf-37b52051cd6c",
+      "cost_usd": 1.0341,
+      "attempts": 1,
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "8 decided by agents, 5 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-cost-system.md"
     },
     {
       "id": "T-0087",
@@ -2926,6 +2933,379 @@
       },
       "door": "two-way",
       "state": "parked"
+    },
+    {
+      "id": "T-0090",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "C1",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "system",
+        "location": "C18 (C107198) and R103/R203/R303/R403 (C17975): extended parts where basic parts fit",
+        "summary": "Two avoidable extended-part types: 4.7 nF/1 kV USB-shield capacitor and the 680 ohm 1206 RIS, 3.07 USD per order and design each",
+        "fix": "C18 -> 1 nF/2 kV C9196 (basic, already used); RIS -> two 1 kOhm 1206 C4410 in parallel (see L5, L7)",
+        "door": "two-way",
+        "reason": "agent decisions 46 and 52 (auto), component values, no must-stay function touched",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": -0.31
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "C1"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0091",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "C3",
+        "kind": "finding",
+        "severity": "INFO",
+        "board": "system",
+        "location": "U11/U12 TPS48110AQDGXRQ1 (pdm-hc2), L1 SWPA6045S8R2MT",
+        "summary": "TPS48110A stock is 989 and L1 1231, both single-source or thin; nothing is below 500",
+        "fix": "Re-check stock on the day of the order; L1 alternates are on file (decision 49)",
+        "door": "two-way",
+        "reason": "documentation, no design change",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "C3"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0092",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L1",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "ordering",
+        "summary": "30 instead of 10 boards per order saves 6.38 USD (4-ch) / 7.12 USD (HC2) per board; 10 instead of 5 saves 9.46 / 9.93 USD",
+        "fix": "Owner sets the order quantity per board",
+        "door": "one-way",
+        "reason": "policy item 1: an order is money",
+        "touches": [
+          "money"
+        ],
+        "cost_delta_usd": -6.38
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "L1"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0055",
+      "why_big": [
+        "reviewer: one-way door (policy item 1: an order is money)",
+        "touches money"
+      ]
+    },
+    {
+      "id": "T-0093",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L2",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "PCB panel",
+        "summary": "One panel for both designs saves 62.9 USD per order (3.15 USD per board at 10 + 10)",
+        "fix": "Panelise pdm-4ch and pdm-hc2 at the PCB phase if the JLCPCB multi-design surcharge does not cancel the saving (decision 33)",
+        "door": "one-way",
+        "reason": "policy item 1: it shapes an order; already conditional in confirmed decision 33",
+        "touches": [
+          "money",
+          "decision:33"
+        ],
+        "cost_delta_usd": -3.15
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "L2"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0056",
+      "why_big": [
+        "reviewer: one-way door (policy item 1: it shapes an order; already conditional in confirmed decision 33)",
+        "touches money",
+        "changes your decision 33"
+      ]
+    },
+    {
+      "id": "T-0094",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L3",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "J4, J5, J10, J11 assembly process",
+        "summary": "Hand-soldering the four through-hole connectors removes 4 extended fees and the THT labour: 16.2 USD per order and design (1.62 USD per board at 10)",
+        "fix": "Leave J4/J5/J10/J11 out of the PCBA order, buy and solder them by hand",
+        "door": "one-way",
+        "reason": "policy item 1 and 4: the owner buys parts and does the soldering of high-current terminals",
+        "touches": [
+          "money",
+          "owner-fact",
+          "connector"
+        ],
+        "cost_delta_usd": -1.62
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "L3"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0057",
+      "why_big": [
+        "reviewer: one-way door (policy item 1 and 4: the owner buys parts and does the soldering of high-current terminals)",
+        "touches money",
+        "touches owner-fact"
+      ]
+    },
+    {
+      "id": "T-0095",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L4",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "J3 USB-C and its protection",
+        "summary": "USB-C as service pads on later runs saves 3 extended fees and parts: 1.20 USD per board at 10",
+        "fix": "Make J3, F2, C18, R13, D4-D6, FB1 DNP or pads for a pogo jig on a later run",
+        "door": "one-way",
+        "reason": "policy item 2: contradicts confirmed decision 31 (USB-C stays fitted on the prototype run)",
+        "touches": [
+          "decision:31",
+          "connector"
+        ],
+        "cost_delta_usd": -1.2
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "L4"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0058",
+      "why_big": [
+        "reviewer: one-way door (policy item 2: contradicts confirmed decision 31 (USB-C stays fitted on the prototype run))",
+        "changes your decision 31"
+      ]
+    },
+    {
+      "id": "T-0096",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L5",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "C18 on both boards",
+        "summary": "4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic): 0.31 USD per board at 10, RC corner 34 Hz to 160 Hz",
+        "fix": "Change the value and LCSC code of C18 on both boards (shared sheet), then run the part-facts check on C9196",
+        "door": "two-way",
+        "reason": "component value on a shared sheet, decision 46 is auto",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": -0.31
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "L5"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0097",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L6",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "ordering, JLCPCB account",
+        "summary": "A monthly JLCPCB assembly coupon may waive the 8.18 USD setup per order (conditions for 2 oz and Economic PCBA unverified)",
+        "fix": "Owner checks the coupon centre and the cart at order time",
+        "door": "one-way",
+        "reason": "policy items 1 and 4: money, facts only the owner has",
+        "touches": [
+          "money",
+          "owner-fact"
+        ],
+        "cost_delta_usd": -0.82
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "L6"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0059",
+      "why_big": [
+        "reviewer: one-way door (policy items 1 and 4: money, facts only the owner has)",
+        "touches money",
+        "touches owner-fact"
+      ]
+    },
+    {
+      "id": "T-0098",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L7",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "location": "R103/R203/R303/R403 RIS",
+        "summary": "RIS 680 ohm 1206 C17975 (extended) replaced by two 1 kohm 1206 C4410 (basic) in parallel: 0.26 USD per board at 10, sense scale 0.33 V/A",
+        "fix": "Replace each RIS by two C4410 in parallel; firmware scale constant becomes 500 ohm; check C4410 power rating with part-facts",
+        "door": "two-way",
+        "reason": "component change, current measurement accuracy beyond alarm needs is tradable; decision 52 is auto",
+        "touches": [
+          "firmware"
+        ],
+        "cost_delta_usd": -0.26
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "L7"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0099",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "L8",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "C30, C104-C404 (4-ch), C30, C102, C202 (HC2)",
+        "summary": "Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards",
+        "fix": "Only if the first run stays at 5 boards: swap the five or three capacitors to 2.2 uF/100 V C170101",
+        "door": "two-way",
+        "reason": "component value, no must-stay function touched",
+        "touches": [
+          "shared-sheet",
+          "new-extended-part"
+        ],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "L8"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0100",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "Q1",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "summary": "Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)?",
+        "default": "Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)",
+        "door": "two-way",
+        "reason": "a sensible default exists; only the cost figure changes",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "Q1"
+      },
+      "door": "two-way",
+      "state": "done",
+      "ruling": "assumed: Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)"
+    },
+    {
+      "id": "T-0101",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "Q2",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "summary": "What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists?",
+        "default": "Keep the estimate of 15 / 20 / 38 USD per order",
+        "door": "two-way",
+        "reason": "default keeps the estimate; refined at the PCB phase",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "Q2"
+      },
+      "door": "two-way",
+      "state": "done",
+      "ruling": "assumed: Keep the estimate of 15 / 20 / 38 USD per order"
+    },
+    {
+      "id": "T-0102",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-03",
+      "finding": {
+        "id": "Q3",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "system",
+        "summary": "Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)?",
+        "default": "No: plain Economic PCBA with all parts assembled by JLCPCB",
+        "door": "two-way",
+        "reason": "a sensible default exists; both stay possible at order time",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-03-cost-system.md",
+        "finding": "Q3"
+      },
+      "door": "two-way",
+      "state": "done",
+      "ruling": "assumed: No: plain Economic PCBA with all parts assembled by JLCPCB"
     }
   ],
   "board_size_start": {

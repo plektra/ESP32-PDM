@@ -6,7 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (1)
+## Open (6)
 
 ## Q-0054 · MAJOR · system · finding
 
@@ -19,10 +19,73 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (1) – two-way doors
+## Q-0055 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` L1 (ordering); task T-0092
+- **Summary:** 30 instead of 10 boards per order saves 6.38 USD (4-ch) / 7.12 USD (HC2) per board; 10 instead of 5 saves 9.46 / 9.93 USD
+- **Proposed:** Owner sets the order quantity per board
+- **Why it needs you:** reviewer: one-way door (policy item 1: an order is money); touches money
+
+**Answer:** 
+
+---
+
+## Q-0056 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` L2 (PCB panel); task T-0093
+- **Summary:** One panel for both designs saves 62.9 USD per order (3.15 USD per board at 10 + 10)
+- **Proposed:** Panelise pdm-4ch and pdm-hc2 at the PCB phase if the JLCPCB multi-design surcharge does not cancel the saving (decision 33)
+- **Why it needs you:** reviewer: one-way door (policy item 1: it shapes an order; already conditional in confirmed decision 33); touches money; changes your decision 33
+
+**Answer:** 
+
+---
+
+## Q-0057 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` L3 (J4, J5, J10, J11 assembly process); task T-0094
+- **Summary:** Hand-soldering the four through-hole connectors removes 4 extended fees and the THT labour: 16.2 USD per order and design (1.62 USD per board at 10)
+- **Proposed:** Leave J4/J5/J10/J11 out of the PCBA order, buy and solder them by hand
+- **Why it needs you:** reviewer: one-way door (policy item 1 and 4: the owner buys parts and does the soldering of high-current terminals); touches money; touches owner-fact
+
+**Answer:** 
+
+---
+
+## Q-0058 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` L4 (J3 USB-C and its protection); task T-0095
+- **Summary:** USB-C as service pads on later runs saves 3 extended fees and parts: 1.20 USD per board at 10
+- **Proposed:** Make J3, F2, C18, R13, D4-D6, FB1 DNP or pads for a pogo jig on a later run
+- **Why it needs you:** reviewer: one-way door (policy item 2: contradicts confirmed decision 31 (USB-C stays fitted on the prototype run)); changes your decision 31
+
+**Answer:** 
+
+---
+
+## Q-0059 · INFO · system · lever
+
+- **From:** `docs/reviews/2026-11-03-cost-system.md` L6 (ordering, JLCPCB account); task T-0097
+- **Summary:** A monthly JLCPCB assembly coupon may waive the 8.18 USD setup per order (conditions for 2 oz and Economic PCBA unverified)
+- **Proposed:** Owner checks the coupon centre and the cart at order time
+- **Why it needs you:** reviewer: one-way door (policy items 1 and 4: money, facts only the owner has); touches money; touches owner-fact
+
+**Answer:** 
+
+---
+
+## Decided by agents (9) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0102 · INFO · system · Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → assumed No: plain Economic PCBA with all parts assembled by JLCPCB
+- T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
+- T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
+- T-0099 · INFO · system · Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → Only if the first run stays at 5 boards: swap the five or three capacitors to 2.2 uF/100 V C170101
+- T-0098 · INFO · pdm-4ch · RIS 680 ohm 1206 C17975 (extended) replaced by two 1 kohm 1206 C4410 (basic) in parallel: 0.26 USD per board at 10, sense scale 0.33 V/A → Replace each RIS by two C4410 in parallel; firmware scale constant becomes 500 ohm; check C4410 power rating with part-facts
+- T-0096 · INFO · system · 4.7 nF/1 kV C107198 (extended) to 1 nF/2 kV C9196 (basic): 0.31 USD per board at 10, RC corner 34 Hz to 160 Hz → Change the value and LCSC code of C18 on both boards (shared sheet), then run the part-facts check on C9196
+- T-0091 · INFO · system · TPS48110A stock is 989 and L1 1231, both single-source or thin; nothing is below 500 → Re-check stock on the day of the order; L1 alternates are on file (decision 49)
+- T-0090 · MINOR · system · Two avoidable extended-part types: 4.7 nF/1 kV USB-shield capacitor and the 680 ohm 1206 RIS, 3.07 USD per order and design each → C18 -> 1 nF/2 kV C9196 (basic, already used); RIS -> two 1 kOhm 1206 C4410 in parallel (see L5, L7)
 - T-0089 · MINOR · system · The cable practice that the immunity design assumes (screened panel cable with drain at the PDM end, bundled battery pair away from VHF coax, load returns to the battery negative bus, diode at inductive loads, PWM limits, N2K drop length) is not in the README. → Add the Installation guidance section of this report to the README; text only.
 
 ## Applied by agents (41)
