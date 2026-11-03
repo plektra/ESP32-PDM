@@ -136,7 +136,7 @@ interface (`analog_sw`, values after T-0068) adds ≈ 1.6 W (≈ 1.7 W with the 
 | Switch loads R3+R45 … R8+R48, 2 k + 2 k at SWIN ≈ 29.6 V (behind D55; T-0105, was 4.7 k: 0.19 W / 0.75 W) | 0.22 W (0.11 W per part) | 0.88 W |
 | R34–R37 10 k + D20–D23 + R38–R41 (node ≈ 3.2 V, ≈ 2.6 mA) | 0.08 W | 0.31 W |
 | LED sinks Q3–Q6 + R50–R53 + R19… (5 mA, (29.6 − 2 − 2.33) V across Q) | 0.14 W | 0.55 W |
-| D55 (≈ 60 mA × ≈ 0.4 V) and F4 (≈ 60 mA² × 1.4 Ω) | – | 0.03 W |
+| D55 (≈ 60 mA × ≈ 0.4 V) and F4 + R56 (≈ 60 mA² × 1.2 Ω, T-0118) | – | 0.03 W |
 
 Total **p_other ≈ 2.2 W** (the validator's estimate was 2.1 W); **≈ 2.3 W since T-0105** (2 k + 2 k loads, +0.13 W):
 `--p-other 2.3` gives 4 × BTT6050 at 4 A → enclosure air 45.4 °C, Tj ≈ 101 °C – the 4 A rating stands (run 2026-11-03).
@@ -404,7 +404,7 @@ Panel connector J5 (decision 17), 10 poles:
 | Pin | Signal | At the connector |
 |---|---|---|
 | 1–4 | SWIN1–4: switch from SW_SUPPLY | SMAJ30CA, 2 × 2 k load, 10 k + divider (above) |
-| 5 | SW_SUPPLY = VS via PTC F4 (1812L050/60GR, same part as F1) and Schottky D55 (DSK16) | SMAJ30CA + 100 nF/100 V |
+| 5 | SW_SUPPLY = VS via PTC F4 (mSMD050-60V C70113, same part as F1) + 0.2 Ω R56 (T-0118, decision 81) and Schottky D55 (DSK16) | SMAJ30CA + 100 nF/100 V |
 | 6–9 | LED_K1–4: panel LED cathode (anode to SW_SUPPLY) | SMAJ30CA, 100 Ω, 1 nF at the collector |
 | 10 | GND (cable drain / spare) | – |
 
@@ -769,12 +769,77 @@ At 0.150 Ω the margin is zero, so the choice would be **0.20 Ω** (E24) → I_p
   interrupted. For F4 this is the same as a tripped F4 (panel switches disabled, bus control keeps working, decision 17),
   but it does not reset. A brief arc across an opening film at 30 V / ≈ 80 A cannot be excluded from the datasheets.
 
+**PTC + series resistor fitted (T-0118, Q-0060, decision 81, 2026-11-03).** The owner accepted FOJAN FRM252WJR200TK
+C7420022 (0.2 Ω ± 5 %, 2 W at 70 °C, alloy 2512) on its 5 s / 5 × P (10 W, ≈ 50 J) overload rating, without a published
+ms pulse rating; the pulse-energy question above is settled by that ruling. Part facts: `docs/part-facts/C70113.md`,
+`C7420022.md` (both rechecked: 60 V / I_max 100 A / I_hold 0.50 A / 1812; 0.2 Ω / 2 W / 2512 / 5 s overload; both in stock
+at JLCPCB on 2026-11-03, 70 k and 53 k).
+
+| Ref | Was | Now | Footprint | Net |
+|---|---|---|---|---|
+| F1, F3, F4 | 1812L050/60GR C19078719 | mSMD050-60V C70113 | `Fuse:Fuse_1812_4532Metric` (unchanged) | as before on the supply side |
+| F2 | SMD0805B050TF C269104 | mSMD050-60V C70113 | `Fuse_0805_2012Metric` → `Fuse_1812_4532Metric` | unchanged, no series resistor |
+| R54 (new, `power-usb`) | – | 200m C7420022 | `Resistor_SMD:R_2512_6332Metric` | F1.2 → R54 → D1.2/D2.2 (new net F1-Pad2) |
+| R55 (new, `can`) | – | 200m C7420022 | same | F3.1 → R55 → D10.2/FB2.2 (new net F3-Pad1) |
+| R56 (new, `analog_sw`) | – | 200m C7420022 | same | F4.2 → R56 → D55 anode (new net F4-Pad2) |
+
+Each PTC moved 7.62 mm towards its supply and the resistor sits in its old place (F3: the wire to J4.2 now runs at
+x = 167.64). Prospective current for a hard short right behind the resistor: 30 V / (0.150 + 0.20 Ω) ≈ **86 A** < I_max
+100 A (cable not counted). Series resistance in normal use: R1max 1.0 + 0.2 = **1.2 Ω** (was 1.4 Ω with 1812L050/60GR).
+
+Checks with the new parts (R1max 1.0 Ω + 0.2 Ω):
+- **(a) F4 / switch path (§3, T-0042):** panel current ≤ ≈ 60 mA (§5, the 30 V figure; less at 10.5 V). F4 + R56 drop
+  1.2 Ω × 60 mA = 72 mV at SWIN, ≈ 23 mV at IN (× 0.32); the old F4 alone was 1.4 Ω → 84 mV / 27 mV, so the change
+  *lowers* the drop by ≈ 4 mV at IN. Even if the whole 23 mV is taken off the thinnest case (battery 10.5 V via D55, 3V3
+  down, ≈ 2.05 V), IN stays ≈ **2.03 V ≥ VIN(H) 2.0 V. Pass.** The prototype measurement T-0042 still decides.
+- **(b) F3 / L78M05 headroom:** NET-S minimum 9 V − D11 ≈ 0.4 V − (F3 + R55) 1.2 Ω × 77 mA = 92 mV − FB2 0.30 Ω × 77 mA
+  = 23 mV ≈ **8.48 V** against 7 V (5 V + 2 V dropout): ≈ 1.5 V headroom. **Pass** (the "< 0.05 V" for F3/FB2 above
+  was optimistic even with the old part: 1.4 Ω gave 0.11 V).
+- **(c) F1 / buck input:** ≈ 0.18 A at 10.5 V: 1.2 Ω × 0.18 A = **0.22 V** (was 0.25 V); at I_hold 0.5 A 0.60 V. With
+  D2 (≤ 0.70 V) the LMR51610 still sees ≥ 9.5 V at a 10.5 V battery, far above its 4 V minimum. R54 loss 6.5 mW,
+  50 mW at I_hold (2 W part). **Pass.**
+- **(d) USB-only (VBUS 4.75 V, 0.40 A peak, §8.3 FB1 row):** VBUS − F2 − FB1 (0.30 Ω, 0.12 V) − D3 (DSK16: ≈ 0.49 V typ
+  at 0.4 A read from Fig. 3, 0.70 V max at 1 A is the only limit). LMR51610 VIN: recommended ≥ 4 V, UVLO rising ≤ 4 V,
+  falling 3.40–3.56 V (C22427220 facts, §6.5).
+
+  | F2 | F2 drop at 0.40 A | VIN, D3 typ | VIN, D3 0.70 V | Self-consistent at constant power (1.83 W), D3 typ / 0.70 V |
+  |---|---|---|---|---|
+  | SMD0805B050TF (R1max 0.85 Ω) | 0.34 V | 3.80 V | 3.59 V | 3.69 V / 3.44 V |
+  | mSMD050-60V (R1max 1.0 Ω) | 0.40 V | 3.74 V | 3.53 V | 3.60 V / 3.34 V |
+
+  At the 0.40 A peak neither part reaches the 4 V recommended minimum, so USB-only power **did not reach it before
+  either**; the new part costs 60 mV (≈ 90 mV at constant power). The pass/fail result is the same in every corner:
+  with typical D3 both stay above the falling UVLO (3.56 V max), with D3 at its 0.70 V limit both can drop below it at
+  the peak. At start-up (≈ 50 mA) VIN is ≈ 4.3 V with D3 ≈ 0.4 V for both parts (D3 below 0.1 A is UNVERIFIED), 65 mV vs 58 mV of PTC + FB1 drop. The ruling's stop condition is therefore not met
+  and F2 was swapped. USB stays a service port (README).
+
+Heat budget: no output changes; the new losses are mW (R54 6.5 mW, R55 1.2 mW, R56 ≤ 0.7 mW at 10.5–30 V), so
+`tools/heat_budget.py` was not rerun (decision 9 covers output changes).
+
+Cost: +3 × C7420022 per board (≈ 0.028 USD each), F1–F4 +0.016 USD each against 1812L050/60GR (F2 +0.064 against the
+0805 part). Unique extended parts +C70113 +C7420022 −C19078719 −C269104 = **±0** (fix_check: 61 / 69 unique, +0).
+
+Pre-order: check the KiCad `Fuse_1812_4532Metric` pads (1.125 × 3.4 mm, pitch 4.275 mm) against the JLCPCB footprint of
+C70113 (datasheet land 1.78 × 3.2 mm, gap 3.2 mm) and `R_2512_6332Metric` against the JLCPCB footprint of C7420022
+(datasheet land a 4.0, b 2.1, L 4.1 mm, letters per the p. 4 drawing). C70113 is up to 1.8 mm high.
+
+**Mandatory prototype test (decision 81):** a hard short at J5.5 (behind F4/R56), and behind F1 (at D1/D2) and F3
+(at D10/FB2), from a 30 V battery-like supply (low source impedance, short heavy leads). Scope the current; afterwards
+inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Must pass before installation.
+
+Failure mode (safety): an overstressed series resistor fails **open**. For F4/R56 that is a permanently tripped panel
+supply: all panel switches of that board (bilge forced run, navigation lights) and the panel LEDs stop working, bus
+control over NMEA 2000 keeps working (decision 17), but unlike a tripped PTC it does not reset. For F1/R54 the board
+loses its battery supply (USB still powers the controller); for F3/R55 the CAN transceiver side loses power. A brief arc
+across an opening element at 30 V / ≈ 80 A cannot be excluded from the datasheets, which is why the 30 V short test is
+mandatory. **A competent person must review F1–F4 and R54–R56 before installation.**
+
 **L3 swaps (T-0026, Q-0019).**
 
 | Ref | Old | New | Check | Result |
 |---|---|---|---|---|
 | FB1, FB2 | BLM18AG601SN1D 0603 | Sunlord GZ2012D601TF 0805, C1017 (basic) | Sunlord GZ catalogue (rev. 2024-06-19) p. 3: 600 Ω ± 25 % at 100 MHz, DCR ≤ 0.30 Ω, I_r 500 mA. FB1 carries VBUS only when the board runs from USB: buck input ≈ 3.3 V × 0.47 A / (0.85 × 4.6 V) ≈ 0.40 A peak < 500 mA; drop ≤ 0.12 V. FB2 carries the CAN-side current (≤ 77 mA). | adopted |
-| F2 | SMD0805B050TF | 1812L050/60GR | depends on the PTC I_max check above | **not adopted** |
+| F2 | SMD0805B050TF | 1812L050/60GR | depends on the PTC I_max check above | **not adopted**; F2 became mSMD050-60V C70113 in T-0118 (below) |
 | D4–D6 | DOWO PESD0402V05 (polymer, clamp 40 V at 8 kV contact, trigger 450 V, 0.05 pF; DOWO datasheet p. 2) | hongjiacheng H5VL10B, DFN1006-2L, C7420372 (preferred) | H5VL10B Rev 2.0: V_RWM 5 V, V_BR 5.6–8 V at 1 mA, V_C ≤ 8 V at 1 A and ≤ 10 V at 5 A (8/20 µs), C_J 15 pF typ / 18 pF max (0 V, 1 MHz), IEC 61000-4-2 ±25 kV contact/air, I_R ≤ 0.1 µA. 18 pF max is inside the ≤ 15–20 pF budget for a USB full-speed line. The clamp is far lower than the polymer part's 40 V and the ESD rating higher, so protection is stronger. D4 on VBUS: V_RWM 5.0 V against VBUS 5.25 V max (USB 2.0); V_BR min 5.6 V, so leakage stays small. | adopted, footprint `Diode_SMD:D_SOD-882` (1.0 × 0.6 mm, 0.65 mm pitch = DFN1006-2) |
 | U6 | TPS7B91050 SOT-23-5 | ST L78M05ABDT-TR, DPAK, C58069 (basic) | see below | adopted, footprint `Package_TO_SOT_SMD:TO-252-2` |
 

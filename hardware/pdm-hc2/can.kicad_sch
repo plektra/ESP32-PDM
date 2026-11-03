@@ -2631,17 +2631,6 @@
 	)
 	(wire
 		(pts
-			(xy 162.56 96.52)
-			(xy 180.34 96.52)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3909b3d3-88e4-46d2-b435-11e2b0881eee")
-	)
-	(wire
-		(pts
 			(xy 180.34 93.98)
 			(xy 180.34 88.9)
 		)
@@ -2730,17 +2719,6 @@
 	)
 	(wire
 		(pts
-			(xy 162.56 49.53)
-			(xy 162.56 96.52)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "739cd23a-f62b-44a3-bb30-5d3431a5196a")
-	)
-	(wire
-		(pts
 			(xy 132.08 74.93)
 			(xy 132.08 73.66)
 		)
@@ -2771,17 +2749,6 @@
 			(type default)
 		)
 		(uuid "8b8b8246-6830-45e2-9edb-bbd30401f6a5")
-	)
-	(wire
-		(pts
-			(xy 160.02 49.53)
-			(xy 162.56 49.53)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9713a707-edec-4255-aa78-9b1a1b972ac1")
 	)
 	(wire
 		(pts
@@ -3314,7 +3281,7 @@
 	)
 	(symbol
 		(lib_id "Device:Polyfuse")
-		(at 156.21 49.53 90)
+		(at 163.83 49.53 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3323,15 +3290,15 @@
 		(fields_autoplaced yes)
 		(uuid "75f7f205-fe66-45d6-ac0e-49094a099a9e")
 		(property "Reference" "F3"
-			(at 156.21 43.18 90)
+			(at 163.83 43.18 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Value" "1812L050/60GR"
-			(at 156.21 45.72 90)
+		(property "Value" "mSMD050-60V"
+			(at 163.83 45.72 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3339,7 +3306,7 @@
 			)
 		)
 		(property "Footprint" "Fuse:Fuse_1812_4532Metric"
-			(at 161.29 48.26 0)
+			(at 168.91 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3349,7 +3316,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 156.21 49.53 0)
+			(at 163.83 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3358,7 +3325,7 @@
 			)
 		)
 		(property "Description" "Resettable fuse, polymeric positive temperature coefficient"
-			(at 156.21 49.53 0)
+			(at 163.83 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3366,8 +3333,8 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C19078719"
-			(at 156.21 49.53 0)
+		(property "LCSC" "C70113"
+			(at 163.83 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5371,6 +5338,107 @@
 			(project ""
 				(path "/d0898527-243c-48e9-a217-df57be741056/4abda9db-3578-40b6-8ca1-53f040286d67"
 					(reference "#PWR0991")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 167.64 49.53)
+			(xy 167.64 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "83ea1038-a165-4017-b752-c013061943f5")
+	)
+	(wire
+		(pts
+			(xy 167.64 96.52)
+			(xy 180.34 96.52)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "83482fac-986e-472c-9cc6-bf9f4d9407c6")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 156.21 49.53 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d362a2f8-0292-4886-a8d1-fd7f777b807e")
+		(property "Reference" "R55"
+			(at 158.75 48.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "200m"
+			(at 158.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_2512_6332Metric"
+			(at 156.21 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 156.21 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "0.2 ohm 2 W alloy 2512, FOJAN FRM252WJR200TK (PTC series resistor, T-0118)"
+			(at 156.21 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C7420022"
+			(at 156.21 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "3a059bf4-f020-4b72-91d2-6eee61fed51d")
+		)
+		(pin "2"
+			(uuid "e0085271-d083-497b-8ceb-00a4afca1489")
+		)
+		(instances
+			(project "ESP32-PDM-HC2"
+				(path "/d0898527-243c-48e9-a217-df57be741056/4abda9db-3578-40b6-8ca1-53f040286d67"
+					(reference "R55")
 					(unit 1)
 				)
 			)
