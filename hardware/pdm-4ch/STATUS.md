@@ -1,11 +1,14 @@
 # pdm-4ch status
 
-Updated: 2026-11-03 (T-0105)
+Updated: 2026-11-03 (T-0107)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-03 (T-0107: T-0098, T-0099, unattended, shared – cost levers L7/L8):** RIS is now two 1 kΩ 1206 0.25 W in parallel = 500 Ω per channel: R103 ‖ R107, R203 ‖ R207, R303 ‖ R307, R403 ‖ R407 (C4410, basic). The extended 680 Ω C17975 is no longer used. IS at full load is ≤ 1.63 V (BTT6050 4.5 A, kILIS min) and ≤ 1.27 V (BTT6010 9 A), below the 2.9 V ADC range and the 3.3 V clamp. **Firmware scale constant: RIS 500 Ω (≈ 0.33 V/A for the BTT6050).** C30 (root, battery input J10, same on both boards) is now 2.2 µF/100 V X7R 1206 C170101 (the part already used as C1; decision 26 allows 1–2.2 µF at J10). C104–C404 are unchanged: 1 µF C13832, because confirmed decision 26 names them (that is an owner question). The C18 swap (T-0096) is blocked too: confirmed decision 31 names 4.7 nF, so it goes to the owner. ERC 0 errors, 5 warnings (unchanged). The netlist differs only in the refs above. +4 parts, +0 unique. Extended types 19 → 18 (−C17975). Details: design-notes §6.1 and §8.1, `docs/reviews/2026-11-03-fix-shared-T-0107.md`.
+
 
 **2026-11-03 (T-0105: T-0046, Q-0048/decision 74, unattended, shared `analog_sw` – same on both boards):** the switch
 loads R3/R4/R7/R8 (4.7 k) are now two 2 k 1206 in series each: R3+R45, R4+R46, R7+R47, R8+R48 (C17944, basic, 4.0 k):
@@ -143,10 +146,16 @@ R71/R72 go between D9 and U5 (D9 at J4).
   before FL1 is ever fitted (design-notes §8.5).
 - T-0051 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IS2 network
   (design-notes §2).
+- T-0107: C30 uses C170101 2.2 µF instead of C13832 1 µF, which saves a loading fee only on short runs. pdm-4ch still carries C13832 for C104–C404, so this swap saves nothing here. For runs of **9+ pdm-4ch boards** C13832 is cheaper again at these places (cost report L8). RIS is now 2 × C4410 per channel.
 - T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
   positions.
 
 ## For /system
+
+- T-0107 (sync): the ARCHITECTURE root row still says "C30 1 µF/100 V". It is now 2.2 µF/100 V C170101 (decision 26 range 1–2.2 µF).
+- T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
+- T-0107 owner questions (one-way): (1) C104–C404 1 µF → 2.2 µF C170101 would remove the last C13832 on pdm-4ch, but confirmed decision 26 names 1 µF at each VS tab. Default: keep 1 µF. (2) C18 4.7 nF/1 kV → 1 nF/2 kV C9196 (basic, cost lever L5) contradicts confirmed decision 31 (1 MΩ ‖ 4.7 nF). Default: keep 4.7 nF until the owner rules.
+- T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.
 
 - T-0105 (sync): `tools/heat_budget.py --p-other` default 2.2 → 2.3 W (design-notes §4; result unchanged, Tj ≈ 101 °C).
 

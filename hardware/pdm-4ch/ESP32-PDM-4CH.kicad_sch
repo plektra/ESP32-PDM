@@ -10050,7 +10050,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1uF/100V"
+		(property "Value" "2.2uF/100V"
 			(at 259.08 135.89 0)
 			(effects
 				(font
@@ -10077,7 +10077,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "1 uF 100 V X7R 1206"
+		(property "Description" "2.2 uF 100 V X7R 1206"
 			(at 256.54 134.62 0)
 			(effects
 				(font
@@ -10086,7 +10086,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C13832"
+		(property "LCSC" "C170101"
 			(at 256.54 134.62 0)
 			(effects
 				(font
@@ -10095,7 +10095,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "Samsung CL31B105KCHNNNE"
+		(property "MPN" "Samsung CL31B225KCHSNNE"
 			(at 256.54 134.62 0)
 			(effects
 				(font

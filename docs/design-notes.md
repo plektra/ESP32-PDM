@@ -41,8 +41,8 @@ ratio 22/242 = 1/11. The ESP32-S3 ADC is calibrated only for 0–2900 mV at 12 d
 Table 5-6), so full scale is 2.9 V × 11 ≈ **31.9 V, about 32 V** (not 33 V). 30 V still reads (2.73 V at the pin).
 
 IO3 strapping pin (T-0051, T-0060): IO3 selects the JTAG source only when eFuse `EFUSE_STRAP_JTAG_SEL` is burnt. On
-both boards IO3 is held low by the channel-2 current-sense network – pdm-4ch: IS2 via R204 10 k + RIS R203 680 Ω
-(≈ 10.7 k to GND); pdm-hc2: IMON2 via R212 10 k + R211 12 k (22 k to GND). With the eFuse unburnt (default) this is
+both boards IO3 is held low by the channel-2 current-sense network – pdm-4ch: IS2 via R204 10 k + RIS R203 ‖ R207 (2 × 1 kΩ = 500 Ω)
+(≈ 10.5 k to GND); pdm-hc2: IMON2 via R212 10 k + R211 12 k (22 k to GND). With the eFuse unburnt (default) this is
 harmless. **Firmware and production rule: never burn `EFUSE_STRAP_JTAG_SEL`.** JTAG stays on the built-in USB-Serial/JTAG.
 
 Variant ID (`MOD_ID`, IO1): 10 kΩ pull-up R29, variant resistor R42 to GND. 4-channel = 10 kΩ (1.65 V).
@@ -61,7 +61,7 @@ tab = VS; JLCPCB uses the same footprint for all three). Each channel is populat
 | (not used) | BTT6030-1ERA (C534863) | 31 mΩ | 6 A | ≈ 5 A | 2200 | 60 A | 2.72 $ |
 
 \* heat budget, 40 °C, vented, 2 oz; BTT6030 is dominated by BTT6010 (+0.47 $ for ~60 % more current).
-RIS 680 Ω suits all parts (≈ 2.0 V at 4.5 A for BTT6050, ≈ 1.4 V at 8 A for BTT6010); the firmware
+RIS 500 Ω (2 × 1 kΩ, T-0107; see §6.1) suits all parts (≈ 1.5 V at 4.5 A for BTT6050, ≈ 1.0 V at 8 A for BTT6010); the firmware
 stores kILIS per channel. Values below are for the BTT6050 unless noted.
 
 Source: Infineon BTT6050-1ERA datasheet Rev 1.00 (2019-03-09).
@@ -71,7 +71,7 @@ Source: Infineon BTT6050-1ERA datasheet Rev 1.00 (2019-03-09).
 | RDS(on) | 50 mΩ typ | 24 V-system part, VS max 48 V, load dump rated 65 V with RGND |
 | Nominal load current | 4.5 A (TA = 85 °C) | |
 | Current limit | 38–56 A, internal | **not adjustable**: wiring must be fused (see §8) |
-| Current sense | IIS = IL / kILIS, kILIS ≈ 1500 (±25 % at 0.5 A) | RIS 680 Ω → ~0.45 V/A, 4.5 A ≈ 2.0 V |
+| Current sense | IIS = IL / kILIS, kILIS ≈ 1500 (±25 % at 0.5 A) | RIS 500 Ω → ~0.33 V/A, 4.5 A ≈ 1.5 V |
 | IS fault current | 6–40 mA | clamped by BAT54S to 3V3/GND behind RSENSE 10 kΩ |
 | Logic thresholds | VIN(L) ≤ 0.8 V, VIN(H) ≥ 2 V (to device GND) | |
 | Cooling tab | **VS** | shared VS copper area works as the common heatsink |
@@ -229,7 +229,7 @@ orchestrator adds no unique part.
 |---|---|---|---|
 | C107/C207 | 1 nF 0402 C1523, fitted | DIODE–GND, across MMBT3904 | 9.6.1 (p. 40): "a small 1000pF bypass capacitor **must** be placed in parallel with the MMBT3904". I(DIODE) 10/160 µA into the BJT (r_e ≈ 2.6 kΩ at 10 µA) → τ ≈ 3 µs, negligible for a thermal sensor |
 | R114/R214 | RVS 100 Ω 0402 C25076, fitted | VS → VS_CTRL (U11/U12 pin 20) | Table 9-3: 100 Ω. I(Q) 613/700 µA typ/max (p. 8, GND-pin current; no separate IVS row, the charge pump current 80–126 µA is drawn from VS inside I(Q) – stated test condition EN = 2 V, so assumed) → drop **61/70 mV**, < 0.3 V. Even at a 6 V crank dip VS pin ≈ 5.9 V ≫ V(VS_PORR) 3.2 V max. The gate-drive peak (PU 3.75 A) comes from CBST, not VS. P = 49 µW |
-| C102/C202 | CVS 1 µF/100 V X7R 1206 C13832 (was 100 nF/100 V C28233, now moved from VS to VS_CTRL), fitted | VS_CTRL–GND | Table 9-3: 0.1–10 µF. τ = 100 Ω × 1 µF = 100 µs (f_c 1.6 kHz), so the pin's 60 V/µs dV/dt limit cannot be reached through RVS. Part already on the BOM (C30). DC bias at 24–30 V leaves ≈ 0.5–0.7 µF, still inside the range |
+| C102/C202 | CVS 2.2 µF/100 V X7R 1206 C170101 (T-0107, cost lever L8; was 1 µF C13832, before that 100 nF C28233 on VS), fitted | VS_CTRL–GND | Table 9-3 (p. 39): RVS 100 Ω, CVS 0.1–10 µF; no upper limit stated (facts file C17556513, §9.5). τ = 100 Ω × 2.2 µF = 220 µs (f_c 0.72 kHz; DC bias at 24–30 V leaves ≈ 1–1.5 µF, τ ≈ 0.1–0.15 ms), so the pin's 60 V/µs dV/dt limit cannot be reached through RVS. The DC drop (61/70 mV) does not depend on CVS. At power-up VS_CTRL follows VS with ≈ 0.2 ms delay, short against the EN/UVLO and CTMR times; on a fast VS dip the larger CVS holds VS_CTRL up longer (the purpose of Table 9-3's filter). Part already on the BOM (C1, C30), so pdm-hc2 no longer needs C13832 |
 | C108/C208 | X cap 1 nF 0402 C1523, fitted | CS+ (CSP) – CS− (SNS) | CS+ is fed through RSET 100 Ω, CS− sits on the shunt: differential τ = 100 Ω × 1 nF = **0.1 µs** = 2.5 % of tSC 4 µs typ (5 µs max) and ≪ tOC 146 ms. Voltage across it ≤ 0.3 V (abs. max CS+–CS−) |
 | C109/C209, C110/C210 | Y caps 100 pF/100 V C0G 0603 C296717, **DNP** | CS+–GND, CS−–GND | Timing passes (100 Ω × 100 pF = 10 ns), but they are **not matched in effect**: CS− has no series impedance (on the shunt), so C110 does nothing and C109 alone turns common-mode VS noise into a differential error of C_Y/(C_X+C_Y) ≈ 9 %. Fig. 9-18 uses them only with FB1/FB2 in both lines. DC offset from the caps is zero (ceramic, no DC current; V(OS_SET) ±200 µV unchanged). Fit them only together with balanced ferrites, at the pre-compliance scan (Q-0012) |
 | C111/C211 | 1 nF 0402 C1523, fitted | EN/UVLO–GND | Table 9-3 CEN 1–1000 nF. Divider 1 MΩ/100 kΩ/39 kΩ; see the time table below |
@@ -511,11 +511,11 @@ this section.
 IIS(FAULT) = 6 / 15 / 40 mA (min/typ/max) into RIS. An unconnected output floats up in OFF and also reads as
 open load in OFF (VOUT > VS − VOL(OFF), p. 27, 30).
 
-| IIS(FAULT) | P in RIS 680 Ω (I²R) | 0603 (0.1 W) | 1206 (0.25 W) |
-|---|---|---|---|
-| 6 mA | 24 mW | ok | ok |
-| 15 mA | 153 mW | **over** | ok (61 %) |
-| 40 mA | 1.09 W | **over** | **over** |
+| IIS(FAULT) | P in RIS 680 Ω (I²R) | 0603 (0.1 W) | 1206 (0.25 W) | RIS 500 Ω = 2 × 1 kΩ 1206 (T-0107): total / per part (of 0.25 W) |
+|---|---|---|---|---|
+| 6 mA | 24 mW | ok | ok | 18 mW / 9 mW – ok |
+| 15 mA | 153 mW | **over** | ok (61 %) | 113 mW / 56 mW – ok (23 %) |
+| 40 mA | 1.09 W | **over** | **over** | 0.80 W / 0.40 W – **over** (160 %) |
 
 Hardware: R103/R203/R303/R403 are now 680 Ω **1206**, 0.25 W, 1 %, C17975 (UNI-ROYAL 1206W4F6800T5E). No *basic* 1206
 680 Ω exists at JLCPCB (all 25 parts are extended), so the cheapest extended one was taken; the 0603 C23228 is no
@@ -523,6 +523,26 @@ longer used on the board. The value is unchanged, so the sense scaling (≈ 0.45
 typical fault current continuously. The 40 mA maximum (1.09 W) is **not** covered by hardware – by ruling that case is
 covered by the firmware rule above (IS is clamped at ≈ 3.3 V by D102, but the current still flows through RIS until DEN
 is dropped). A 2 W part was not fitted (not asked for). If the owner wants the 40 mA case covered in hardware, RIS would need a rating of about 1.5–2 W (a larger, costlier part): open point.
+
+**Update T-0107 (2026-11-03, cost lever L7, auto):** each RIS is now **two 1 kΩ 1206 0.25 W 1 % in parallel = 500 Ω**
+(R103 ‖ R107, R203 ‖ R207, R303 ‖ R307, R403 ‖ R407; UNI-ROYAL 1206W4F1001T5E, C4410, **basic**; facts file
+`docs/part-facts/C4410.md`: 1/4 W up to 70 °C, derated to 0 at 155 °C, 200 V working). This removes the extended C17975
+(no basic 1206 680 Ω exists). Decision 36 (RIS 1206 ≥ 0.25 W) is met by each part; together they carry 0.5 W.
+Full-load IS (kILIS from Table 9 p. 30 of each datasheet, facts files C534868/C534858; worst case = minimum kILIS):
+
+| Part, load | kILIS typ (min) | IIS typ (max) | VIS at 500 Ω typ (max) |
+|---|---|---|---|
+| BTT6050, 4.5 A | 1500 (1380, −8 % at 4 A) | 3.0 mA (3.26 mA) | 1.50 V (1.63 V) |
+| BTT6010, 8 A | 3900 (3549, −9 % at 10 A) | 2.05 mA (2.25 mA) | 1.03 V (1.13 V) |
+| BTT6010, 9 A IL(NOM) | 3900 (3549) | 2.31 mA (2.54 mA) | 1.15 V (1.27 V) |
+
+All stay below the ADC's calibrated 2.9 V (12 dB) and the 3.3 V clamp D102, and far below the IS compliance limit
+VS − 3.5 V (VIS(RANGE), P_7.5.6). Resolution at small currents falls by about a quarter (0.45 → 0.33 V/A); this is
+still more than the alarms need (cost report L7). The full-scale reading that triggers rule 2 below is now reached at
+a sense current of ≈ 5.8 mA (2.9 V / 500 Ω) instead of 4.3 mA – still below the IIS(FAULT) minimum of 6 mA, so every
+fault current still reads full scale.
+**Firmware scale constant: RIS = 500 Ω, IL = VIS / 500 Ω × kILIS (≈ 0.33 V/A for the BTT6050 at kILIS 1500,
+≈ 0.128 V/A for the BTT6010 at kILIS 3900).**
 
 **OUT pull-down, DNP (R106/R206/R306/R406, auto):** 47 kΩ 0603 (C25819, basic), OUT to GND, **not fitted**. Value from
 BTT6050 datasheet §7.3.3.2 (p. 27) and the application BOM Table 11 (p. 47): "RPD can be used to pull VOUT to 0 V;
@@ -536,7 +556,9 @@ load (the output is held at 0 V), open-load in ON is unaffected.
 
 **Failure mode (RIS and DEN):** a lost or stuck-high DEN with a faulted channel only overheats RIS (one 1206
 resistor, ≈ 1 W at the 40 mA maximum, a few seconds to hot) – it cannot switch an output on or off, so no output
-fails to a hazardous state; a failed-open RIS reads as zero current (a fault would not be reported). These are not
+fails to a hazardous state; a failed-open RIS reads as zero current (a fault would not be reported). With RIS as two parallel 1 kΩ (T-0107), one
+part failing open doubles the reading (1 kΩ: a false high current or full-scale fault report, the safe direction);
+only both open reads zero; one part failing short (rare for thick-film) reads zero as before. These are not
 safety outputs on their own, but the sense path is used for the bilge-pump jam detection, so a competent person
 reviews this before installation.
 
@@ -592,7 +614,7 @@ Root sheet, the same on both boards (controller part):
 | Ref | Part | Net | Purpose |
 |---|---|---|---|
 | D30 | SMCJ30CA (C19077607, preferred) | VBAT_IN–GND | surge clamp at the terminal (unchanged part, now on the terminal side of FL30) |
-| C30 | 1 µF/100 V X7R 1206, Samsung CL31B105KCHNNNE (C13832, extended) | VBAT_IN–GND | HF return at the terminals |
+| C30 | 2.2 µF/100 V X7R 1206, Samsung CL31B225KCHSNNE (C170101, extended, the same part as C1; was 1 µF C13832 until T-0107 – decision 26 allows 1–2.2 µF at J10) | VBAT_IN–GND | HF return at the terminals |
 | FL30 | ferrite / CMC position, **DNP** | VBAT_IN–VS | decided at the pre-compliance scan (decision 28) |
 | JP30 | copper bridge (net tie, no part) | VBAT_IN–VS | keeps VS connected while FL30 is not fitted; cut only when FL30 is fitted |
 | C31 | 100 µF/63 V Al electrolytic, Ymin VKMD1001J101MV (C487384, extended) | VS–GND | bulk at J10 |

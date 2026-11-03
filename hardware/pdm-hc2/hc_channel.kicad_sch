@@ -3518,7 +3518,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "1uF/100V"
+		(property "Value" "2.2uF/100V"
 			(at 111.76 39.37 0)
 			(effects
 				(font
@@ -3545,7 +3545,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "CVS 1 uF 100 V X7R 1206 (TPS4811-Q1 Table 9-3)"
+		(property "Description" "CVS 2.2 uF 100 V X7R 1206 (TPS4811-Q1 Table 9-3: 0.1-10 uF)"
 			(at 109.22 38.1 0)
 			(effects
 				(font
@@ -3554,7 +3554,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C13832"
+		(property "LCSC" "C170101"
 			(at 109.22 38.1 0)
 			(effects
 				(font
@@ -3563,7 +3563,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "Samsung CL31B105KCHNNNE"
+		(property "MPN" "Samsung CL31B225KCHSNNE"
 			(at 109.22 38.1 0)
 			(effects
 				(font
