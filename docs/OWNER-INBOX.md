@@ -8,6 +8,12 @@ lines are read; other edits are lost.
 
 No open questions.
 
+## Decided by agents (1) – two-way doors
+
+Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
+
+- T-0057 · MINOR · pdm-hc2 · RDS(on) at 150 C is 11.2 mOhm in the tool; BSC030N08NS5 Diagram 9 max (5.35 mOhm) gives 2 x 5.35 + 1 = 11.7 mOhm; 15 A rises from 87 to 88 C, 20 A from 137 to 143 C; rating stands. → Set (0.0070, 0.0117) with the datasheet reference in a comment.
+
 ## Applied by agents (40)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
@@ -53,7 +59,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0007 · system · Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → T-0064 (`dbc672cd`)
 - T-0005 · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → T-0071 (`80bb3bd1`)
 
-## Deferred (14)
+## Deferred (13)
 
 - T-0016 · system · Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined. → until system-mechanical: Q-0010: GND pole(s) at J10 rated like the VS input are chosen with the terminal blocks in /system mechanical; wide GND copper to J10.2 is a PCB-phase rule
 - T-0020 · system · LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first. → until prototype: Q-0013: swap to LMR51610YF only if the pre-compliance scan of the first prototypes shows PFM noise; check price and stock then
@@ -68,7 +74,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0036 · system · Is a combined 1:1 panel of pdm-4ch + pdm-hc2 acceptable (L2)? → until pcb: Q-0028: combined 1:1 panel, decided at the PCB phase after checking the multi-design surcharge
 - T-0037 · system · Is a fitted USB-C service connector required, or are pads/DNP plus OTA enough (L4)? → until order: Q-0029: USB-C fitted on the prototype run; reconsider DNP/pogo pads plus OTA for later runs
 - T-0038 · system · Pluggable or fixed screw terminals (L5)? → until system-mechanical: Q-0030: terminal type for J4/J5/J10/J11 decided in /system mechanical with the J10 pole sizing (leaning pluggable J4/J5, fixed J10/J11)
-- T-0057 · pdm-hc2 · RDS(on) at 150 C is 11.2 mOhm in the tool; BSC030N08NS5 Diagram 9 max (5.35 mOhm) gives 2 x 5.35 + 1 = 11.7 mOhm; 15 A rises from 87 to 88 C, 20 A from 137 to 143 C; rating stands. → until owner: fix is in tools/heat_budget.py (HC-2xBSC030 RDS(on) 0.0070/0.0117 with the datasheet reference), which no package gate allows a board-fixer to change; needs an owner or /system edit. Until then P7/P9 use a scratch copy with 11.7 mOhm
 
 ## Answered (47)
 
