@@ -2912,7 +2912,7 @@
         "finding": "E16"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0054",
       "why_big": [
         "reviewer: one-way door (Policy item 3: weakens a stated safety behaviour (a part that can burn); the keyed connector is the owner's mechanical choice (decision 34).)",
@@ -2920,7 +2920,9 @@
       ],
       "ruling": "Add reverse blocking now, this revision: a reverse-blocking element (P-FET or ideal-diode controller) on VS in front of the bulk capacitors on pdm-4ch, sized for the 40-50 A path and checked with the heat budget at 40 C. Until it is in, limit the README/design-notes claim to the BTT6050 and warn that C31 is not reverse-rated. Still key J10 (decision 34).",
       "answered": "2026-11-03",
-      "package": "T-0121"
+      "package": "T-0121",
+      "fixed_by": "T-0121",
+      "merged": "f1f3f88b15fda18f2045ae5f58be5081424f1656"
     },
     {
       "id": "T-0089",
@@ -4026,7 +4028,7 @@
       "id": "T-0121",
       "role": "board-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "pdm-4ch reverse-battery blocking on VS in front of the bulk capacitor",
       "brief": "Owner ruling Q-0054 (verbatim): \"Add reverse blocking now, this revision: a reverse-blocking element (P-FET or ideal-diode controller) on VS in front of the bulk capacitors on pdm-4ch, sized for the 40-50 A path and checked with the heat budget at 40 C. Until it is in, limit the README/design-notes claim to the BTT6050 and warn that C31 is not reverse-rated. Still key J10 (decision 34).\" Finding: EMC E16 in docs/reviews/2026-11-03-emc-system.md. pdm-4ch only: HC2 keeps decision 40, and C106/C206 are not in scope. Steps in order. (1) Interim text first, so it stands even if a later step stops: README line 47 and design-notes section 8 (T-0050 paragraph). The reversal survival applies to the BTT6050 switches only; C31 (C487384, polarised electrolytic) is not reverse-rated and can overheat and vent. (2) Topology. Put the element between the VBAT_IN/JP30-FL30 side and VS, as a new intermediate net. D30 and C30 stay on VBAT_IN at J10. Everything on VS (C31, C104-C404, U11-U14, F1, F4, R60) sits behind it. Requirements: (a) It works without the ESP32 and without 3.3 V (invariant 1; the panel switch supply F4 hangs on VS). (b) Invariant 3: Vds >= 60 V for the 48.4 V D30 clamp, and Vgs protected (zener) where the gate sees the battery. (c) Invariant 4: positive PROFET output surges must still reach D30 (OUT -> body diode -> VS -> D30). A P-FET fully on with its gate to GND conducts both ways and keeps this path. An ideal-diode controller that blocks VS -> VBAT_IN breaks it. (d) Keep the turn-on into C31 + C104-C404 inside the FET's SOA. (3) Part. Prefer JLCPCB basic/preferred, then a part already on a BOM, else one extended part; the ruling requires the function. Check every limit with tools/part_facts.py: Vds, Vgs max, Rds(on) at the hot Tj, Id, SOA, RthJA/case and the package drawing for the footprint. Check stock. (4) Heat at 40 C. tools/heat_budget.py with the blocker's hot Rds(on) added to --r-path (or its I^2R loss added to --p-other). Cases: the standard 4 x BTT6050 at 4 A, the --mix BTT6010 case, and the blocker's own Tj at the 40 A input-terminal current. The 4 A (BTT6050) and about 8 A (BTT6010) channel ratings must stand. (5) ERC and netlist. tools/fix_check.py --scope pdm-4ch --refs with every new or changed ref (the parts on the old VS-JP30 node move to the new net). (6) Documents. README and design-notes section 8: the new reverse-battery behaviour (up to the voltage the part allows), and still check the polarity. Failure-mode note: a short-failed blocker means no reverse protection, as today; an open-failed blocker means a dead board, panel switches included (nav lights, bilge forced run; the float circuit stays independent, invariant 8). Remind the owner that a competent person reviews it before installation. pdm-4ch STATUS 'For /system': the ARCHITECTURE root row must mention the pdm-4ch blocker (sync sweep); J10 keyed/polarised on pdm-4ch too (decision 34, /system mechanical); the supply-path budget figure if it changes. PCB rules: copper width for 40 A and heat sinking. STOP and ask (one-way) if: (i) no available part meets 40 A at 40 C inside the heat budget, or the BTT6050 4 A / BTT6010 about 8 A rating would fall; (ii) the chosen topology needs a TVS on VS or other new wording of invariant 4 (no invariant edits); (iii) the path breaks the ARCHITECTURE budget 'shared supply path <= 2 mOhm' and the heat budget does not show that it is harmless; (iv) a part's facts cannot be verified. In each stop case keep step (1) and report the candidate parts.",
@@ -4034,7 +4036,39 @@
         "T-0088"
       ],
       "plan": "T-0117",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-03T22:43:38",
+      "ran_model": "opus",
+      "session": "0b26707c-cd05-4b00-8ab8-b9ff16c0df50",
+      "cost_usd": 4.4379,
+      "attempts": 1,
+      "refs": [
+        "#PWR0902",
+        "#PWR0903",
+        "#PWR0907",
+        "C32",
+        "FL30",
+        "JP30",
+        "Q30",
+        "U30"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 3,
+          "dnp": 0,
+          "unique": 2
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": "4 part-facts lookups (1.31 USD)",
+      "summary": "1 fixed, 0 blocked, merged f1f3f88b; pdm-4ch +3 parts (+0 DNP), +2 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-pdm-4ch-T-0121.md"
     },
     {
       "id": "T-0122",
@@ -4123,9 +4157,9 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 207,
+      "parts": 210,
       "dnp": 15,
-      "unique": 59
+      "unique": 61
     },
     "pdm-hc2": {
       "parts": 225,
