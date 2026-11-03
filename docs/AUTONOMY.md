@@ -125,10 +125,17 @@ agents without the owner:
    - netlist on both boards: every part or connection that changed is in the agent's declared `refs`;
    - every new or changed part has an `LCSC` code or is DNP;
    - the shared sheets are identical on both boards (apart from the project name).
-4. **Merge** into `auto/pilot`; the items are `done` and listed under "Applied by agents" in the inbox.
+4. **Merge** into `auto/pilot`. The orchestrator first merges the newest `auto/pilot` into the agent's worktree
+   (outside the lock); a conflict only in Markdown docs (design notes, `STATUS.md`) goes back to the agent to
+   resolve, any other conflict re-queues the package to be rebuilt on the new base (up to 3 attempts). The items are `done` and listed under "Applied by agents" in the inbox.
    `orchestrate.py undo <item>` reverts the whole package and turns its items into questions.
 5. **Re-check:** after a board's packages, a validator reviews it again; its findings go through the door rules, and
    the next planning round picks up what it approves (`run --rounds`, default 2 per run).
+
+**Self-repair.** A problem the agent can fix itself never fails the task at once: a missing or malformed block,
+a report at the wrong path or a failed gate is sent back to the agent's own session with the exact problem (up to
+2 repairs, same worktree, while budget is left). Only then is the task `failed`; its report is kept as
+`…-rejected.md` and a notification goes out at once. Usage limits and cut-off agents pause and resume as before.
 
 **Restraint (against over-engineering).**
 - Board-fixers make the smallest change that meets each item: a value change before a new part, a part already on
@@ -147,6 +154,8 @@ it small and short:
   15 lookups per agent attempt; the cost counts toward the task and the run budget).
 - `tools/sch_query.py <board> parts|ref|net|erc` – a sheet's parts, a part's connections or a net in one call.
 - `tools/fix_check.py --scope … --refs …` – the merge gates, run by the board-fixer before it hands in.
+- `tools/report_check.py` – the orchestrator's check of the report's block (finding, plan or fix), run by every
+  agent before it hands in; a report with nothing to report still ends with an empty block.
 - `run --fixer-model sonnet` runs board-fixers on Sonnet (default Opus); the roadmap's "Done" table shows model and
   cost per package for comparison.
 
