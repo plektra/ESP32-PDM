@@ -600,6 +600,46 @@ Failure mode if I_max is exceeded: the PPTC can be damaged (cracking, arcing, ch
 the datasheet warns of arcing or fire beyond the maximum ratings. A competent person must review the F1/F3/F4 protection
 before installation.
 
+**PTC + series resistor (T-0104, Q-0047, decision 73, 2026-11-03): PTC check passed, resistor pulse check NOT passed,
+nothing changed, back to the owner.** Part facts: `docs/part-facts/C70113.md`, `C427396.md`, `C269104.md`, `C25334.md`,
+`C2960770.md`, `C327006.md`, `C7420022.md`, `C19633830.md`.
+
+| PTC | V_max / I_max | I_hold 25 / 40 / 60 °C | I_trip 25 °C | R_min / R1max | Trip | Body | JLCPCB (2026-11-03) |
+|---|---|---|---|---|---|---|---|
+| TECHFUSE mSMD050-60V C70113 | 60 V / **100 A** (p. 1) | 0.50 / 0.45 / 0.35 A (p. 2, mSMD050 row) | 1.00 A | 0.150 / **1.000 Ω** | ≤ 0.15 s at 8 A | 4.37–4.73 × 3.07–3.41 × ≤ 1.8 mm | extended, 0.088 USD, stock 70 k |
+| JDT ASMD1812-050-60V C427396 | 60 V / **100 A** (p. 2/7) | 0.50 / 0.45 / 0.35 A (p. 4/7, -050 row) | 1.00 A | 0.150 / 1.400 Ω | ≤ 0.15 s at 8 A | same | extended, 0.0725 USD, stock 14.8 k |
+| (present F2) Brightking SMD0805B050TF C269104 | **6 V** / 100 A | 0.50 (23 °C) / 0.40 / 0.33 A | 1.00 A | 0.150 / 0.850 Ω | ≤ 0.10 s at 8 A | 0805 | extended, 0.024 USD |
+
+Both 1812 parts pass the I_max ≥ 100 A at ≥ 30 V test and fit the present `Fuse_1812_4532Metric` body (same body as
+1812L050/60GR). Both datasheets recommend 1.78 × 3.2 mm pads with a 3.2 mm gap (pitch ≈ 4.98 mm); the KiCad footprint
+has 1.125 × 3.4 mm pads at 4.275 mm pitch (gap ≈ 3.15 mm). This must be checked against the JLCPCB footprint before
+ordering. Preferred part when the swap is made: **C70113**. Its R1max is 1.0 Ω instead of 1.4 Ω, which matters on F2
+(USB VBUS ≈ 0.40 A peak: 0.40 V instead of 0.56 V worst-case drop, against 0.34 V for the present 0805 part). It costs
++0.016 USD per position. The trip curves of both parts are plotted only up to ≈ 10 A (≈ 0.01–0.02 s), so no datasheet
+gives a trip time at the fault current.
+
+Series resistor sizing (ruling formula, cable and terminals not counted): R_s ≥ 30 V / 100 A − 0.150 Ω = 0.150 Ω.
+At 0.150 Ω the margin is zero, so the choice would be **0.20 Ω** (E24) → I_pk = 30 / 0.35 = 86 A, or 0.22 Ω → 81 A.
+- Continuous: F1 (buck input ≈ 0.18 A at 10.5 V) 6.5 mW / 36 mV; at I_hold 0.5 A 50 mW / 0.10 V. F3 ≤ 77 mA: 1.2 mW / 15 mV.
+  F4 ≈ 55 mA: 0.6 mW / 11 mV.
+- SWIN margin (§3): 11 mV at SWIN is ≈ 3.5 mV at IN (× 0.32). The thinnest case (battery 10.5 V via D55, ≈ 2.05 V) stays
+  ≥ 2.0 V. **Pass.**
+- Pulse energy: the PTC I²t is not published. Bound: the adiabatic I²t to trip can only fall as the current rises, so it is at
+  most the tabulated maximum point, 8² × 0.15 = **9.6 A²s**. From the typical curve (≈ 10 A in 0.01–0.02 s) it is ≈ 1–2 A²s.
+  Energy in 0.20 Ω: E ≤ 9.6 × 0.20 ≈ **1.9 J** (typ. 0.2–0.4 J), delivered at a peak of 86² × 0.20 ≈ **1.5 kW** for
+  ≈ 9.6 / 86² ≈ 1.3 ms (typ. 0.15–0.3 ms).
+- Resistor ratings: **no cheap candidate publishes a 0.1–10 ms pulse rating.** UNI-ROYAL 1206W4F100LT5E C25334 (the only
+  basic part in range, 0.1 Ω 1/4 W thick film): only a 5 s short-time overload at 2.5 × RCWV (≈ 1.6 W). FOJAN FRL2512FR220TS
+  C2960770 (1 W thick film): 5 s at 6.25 W. Yageo RL1206FR-7W0R22L C327006: 5 s at 5 × P. Alloy shunts FOJAN FRM252WJR200TK
+  C7420022 (0.2 Ω 2 W, 0.028 USD) and UNI-ROYAL LR123WF200LT4E C19633830 (0.2 Ω 3 W): 5 s at 10–12 W (50–60 J), ΔR ≤ 0.5 %.
+  A 5 s test at 10 W does not cover a 1.5 kW pulse lasting about 1 ms: the heat has no time to spread out of the film or element,
+  so the energy ratio (1.9 J against 50 J) proves nothing. Rough thermal estimate for a thick-film 2512 (alumina diffusion
+  depth √(α·t) ≈ 0.1 mm in 1.3 ms, own estimate, not a rating): several hundred kelvin at the 1.9 J bound. So it is not shown to pass.
+  The ruling says to return to the owner in that case (T-0104 report).
+- Failure mode if a series resistor is overstressed: thick-film and alloy chip resistors fail open, so the feed is
+  interrupted. For F4 this is the same as a tripped F4 (panel switches disabled, bus control keeps working, decision 17),
+  but it does not reset. A brief arc across an opening film at 30 V / ≈ 80 A cannot be excluded from the datasheets.
+
 **L3 swaps (T-0026, Q-0019).**
 
 | Ref | Old | New | Check | Result |
