@@ -546,7 +546,7 @@
         "report": "docs/reviews/2026-10-30-emc-system.md",
         "finding": "E14"
       },
-      "state": "parked",
+      "state": "done",
       "question": "Q-0060",
       "why_big": [
         "found while fixing (T-0104): Ruling Q-0047 step 'check the resistor's pulse energy against the PTC trip time; if no basic/cheap part passes, return to the owner' failed: PTCs C70113 and C427396 pass (60 V / Imax 100 A, Ihold 0.5 A, 1812), series R 0.20 ohm gives 86 A <= 100 A and SWIN stays >= 2.0 V, but the energy until trip (<= 9.6 A2s x 0.2 ohm = 1.9 J at ~1.5 kW peak, ~1.3 ms; PTC curves stop at 10 A) cannot be checked: no basic/cheap 0.1-0.22 ohm resistor (C25334 basic, C2960770, C327006, alloy C7420022, C19633830) publishes a ms pulse rating, only 5 s overload tests. Nothing changed; F2 swap (T-0026) not done. F4 feeds the panel switches (bilge forced run, nav lights): competent-person review before installation."
@@ -554,7 +554,9 @@
       "ruling": "Option (1): series 0.2 ohm 2 W alloy 2512 FOJAN FRM252WJR200TK C7420022 for F1/F3/F4, accepted on its 5 s/50 J overload rating; a hard-short test at 30 V on the prototype is mandatory before installation. F1-F4 become C70113.",
       "answered": "2026-11-03",
       "door": "one-way",
-      "package": "T-0118"
+      "package": "T-0118",
+      "fixed_by": "T-0118",
+      "merged": "3b24acd65e4f184d2649e5b6a199f3baef888c0f"
     },
     {
       "id": "T-0019",
@@ -3886,7 +3888,7 @@
       "id": "T-0118",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "title": "PTC interrupt rating: C70113 on F1-F4 plus 0.2 ohm series resistor on F1/F3/F4",
       "brief": "Owner ruling Q-0060 (verbatim): \"Option (1): series 0.2 ohm 2 W alloy 2512 FOJAN FRM252WJR200TK C7420022 for F1/F3/F4, accepted on its 5 s/50 J overload rating; a hard-short test at 30 V on the prototype is mandatory before installation. F1-F4 become C70113.\" This amends decision 73. The pulse-energy question of T-0104 is settled by the ruling, so do not re-open it. Make the edits identically on both boards (power-usb F1/F2, can F3, analog_sw F4). Steps in order. (1) Part facts. Read the cached docs/part-facts/C70113.md and C7420022.md through tools/part_facts.py: value, rating, package and footprint. C70113 must be 60 V, I_max 100 A, I_hold 0.5 A, 1812. C7420022 must be 0.2 ohm, 2 W, 2512, with the 5 s overload rating. Pick the matching KiCad footprints (Fuse_1812_4532Metric; Resistor_SMD:R_2512_6332Metric or the size the drawing gives). (2) F1, F3 and F4: change the value and LCSC to mSMD050-60V C70113. The footprint stays Fuse_1812_4532Metric. (3) Add one C7420022 in series with each of F1, F3 and F4, on the protected side of the PTC, as a new net between the PTC and its present load net: F1.2 - R - D1.2/D2.2; F3.1 - R - D10.2/FB2.2; F4.2 - R - D55.2. Use the same new refs on both boards (next free R numbers). (4) F2: change to C70113, and the footprint from Fuse_0805_2012Metric to Fuse_1812_4532Metric. F2 gets no series resistor; the ruling names F1/F3/F4 only. (5) Checks with the new parts (C70113 R1max 1.0 ohm, + 0.2 ohm). (a) F4 path: margin at IN at SWIN 10.5 V and at the 10.5 V battery case with D55 (design-notes section 3, prototype test T-0042). It must stay >= 2.0 V (T-0104 estimated about 2.05 V). (b) F3: L78M05 input headroom from NET-S at the minimum bus voltage. (c) F1: buck input drop. (d) USB-only operation: VBUS 4.75 V minus F2 (0.40 V at R1max), FB1 and D3, against the LMR51610 4 V minimum, compared with the present F2. Write all results into design-notes section 8.3. (6) ERC and netlist on both boards. tools/fix_check.py --scope shared --refs with every changed ref. Unique extended parts: +C70113 +C7420022 -C19078719 -C269104. (7) Documents. Both STATUS files: replace the 'Blocked (owner, one-way): PTC interrupt rating' paragraph and the matching pre-order and 'For /system' lines with the result. Add the mandatory prototype test to both test lists: a hard short at J5.5, and behind F1 and F3, from a 30 V battery-like supply; scope the current and inspect the resistor and PTC afterwards; pass before installation. Pre-order: check the KiCad 1812 pads against the JLCPCB footprint of C70113 (datasheet pads 1.78 x 3.2 mm) and the 2512 footprint against C7420022. Failure-mode note in design-notes section 8.3: an overstressed series resistor fails open; for F4 that is a permanently tripped panel supply (bus control keeps working). F4 feeds the panel switches (bilge forced run, navigation lights): remind the owner that a competent person reviews F1-F4 before installation. Heat budget: no output changes and the losses are mW; say so, no run needed. STOP and ask (one-way) if: C70113 or C7420022 fails its part-facts check or is not stocked (using C427396 or another resistor would be a different ruling); or check (a) falls below 2.0 V (panel switch path, safety); or check (d) shows that USB-only power no longer reaches the buck minimum where it did before (in that case do all the other steps and leave F2 unchanged).",
@@ -3894,7 +3896,38 @@
         "T-0018"
       ],
       "plan": "T-0117",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-03T22:33:37",
+      "ran_model": "opus",
+      "session": "a7120754-34ee-489d-b0bb-6460c07ca9cd",
+      "cost_usd": 1.8098,
+      "attempts": 1,
+      "refs": [
+        "F1",
+        "F2",
+        "F3",
+        "F4",
+        "R54",
+        "R55",
+        "R56"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 3,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 3,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-03",
+      "note": null,
+      "summary": "1 fixed, 0 blocked, merged 3b24acd6; pdm-4ch +3 parts (+0 DNP), +0 unique, pdm-hc2 +3 parts (+0 DNP), +0 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-03-fix-shared-T-0118.md"
     },
     {
       "id": "T-0119",
@@ -4019,12 +4052,12 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 204,
+      "parts": 207,
       "dnp": 15,
       "unique": 61
     },
     "pdm-hc2": {
-      "parts": 222,
+      "parts": 225,
       "dnp": 11,
       "unique": 69
     }

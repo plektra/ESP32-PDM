@@ -15,7 +15,7 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (47)
+## Applied by agents (48)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
@@ -54,6 +54,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0022 · system · Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458 → T-0065 (`e5fedd96`)
 - T-0021 · system · 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn → T-0073 (`1939dfbc`)
 - T-0019 · system · Is IEC 60945 (marine) compliance a goal or only good practice, is a pre-compliance scan planned, and may the N2K shield stay unconnected at the node (4-pole J4)? This sets how far E3-E7 must go. → T-0067 (`5ffcfb6f`)
+- T-0018 · system · Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet. → T-0118 (`3b24acd6`)
 - T-0017 · pdm-4ch · SMCJ30CA clamps at 48.4 V at 31 A, the BTT6050 absolute maximum is 48 V, but VS(LD) is 65 V (ISO 7637-1), so short clamp excursions are covered; recorded only. → T-0064 (`dbc672cd`)
 - T-0015 · system · 1 nF collector capacitors and the 2.2 uF buck input capacitor are probably 50 V parts against a 48.4 V TVS clamp; TI advises twice VIN for CIN. → T-0065 (`e5fedd96`)
 - T-0014 · system · USB shield is tied to battery negative (shore PE loop via a laptop) and the ESD diode is listed with a 40 V clamp against 3.6 V ESP32 pins (unverified). → T-0065 (`e5fedd96`)
@@ -104,7 +105,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0008 (system): USB shield is tied to battery negative (shore PE loop via a laptop) and the ESD diode is listed with a 40 V clamp against 3.6 V ESP32 pins (unverified). → **yes, all three - README service rule (battery-powered laptop or USB isolator), verify the ESD diode TLP/clamp data before ordering, shield-to-GND RC footprints (1 Mohm || 4.7 nF) with a 0 ohm option** (done)
 - Q-0009 (system): 1 nF collector capacitors and the 2.2 uF buck input capacitor are probably 50 V parts against a 48.4 V TVS clamp; TI advises twice VIN for CIN. → **yes, basic-first - 100 V where a basic part exists, otherwise >=63 V; the stock check decides** (done)
 - Q-0010 (system): Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined. → **yes - GND pole(s) rated like the VS input, decided in /system mechanical; wide GND copper to J10.2** (deferred)
-- Q-0060 (system): Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet. → **Option (1): series 0.2 ohm 2 W alloy 2512 FOJAN FRM252WJR200TK C7420022 for F1/F3/F4, accepted on its 5 s/50 J overload rating; a hard-short test at 30 V on the prototype is mandatory before installation. F1-F4 become C70113.** (parked)
+- Q-0060 (system): Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet. → **Option (1): series 0.2 ohm 2 W alloy 2512 FOJAN FRM252WJR200TK C7420022 for F1/F3/F4, accepted on its 5 s/50 J overload rating; a hard-short test at 30 V on the prototype is mandatory before installation. F1-F4 become C70113.** (done)
 - Q-0012 (system): Is IEC 60945 (marine) compliance a goal or only good practice, is a pre-compliance scan planned, and may the N2K shield stay unconnected at the node (4-pole J4)? This sets how far E3-E7 must go. → **IEC 60945 as a design target, no certification; one pre-compliance scan on the first prototypes decides the DNP footprints; the N2K shield stays unconnected at the node (4-pole J4)** (done)
 - Q-0013 (system): LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first. → **swap to LMR51610YF only if the pre-compliance scan shows PFM noise (see Q-0005); check price and stock then** (deferred)
 - Q-0014 (system): 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn → **yes - add the listed basic/preferred LCSC codes after checking each against value and footprint; J5/J10/J11 in /system mechanical** (done)
