@@ -11713,4 +11713,115 @@
 		)
 		(uuid 938611ea-0ac2-4f76-a16b-bd6b5ae4a2ea)
 	)
+	(symbol
+		(lib_id "Device:D_TVS")
+		(at 231.14 175.26 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6ea7638f-0f82-40f9-8363-d3b7fcea9797")
+		(property "Reference" "D31"
+			(at 233.68 173.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SMDJ40CA"
+			(at 233.68 176.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Diode_SMD:D_SMC"
+			(at 231.14 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 231.14 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Bidirectional TVS across Q30 (VS to VBAT_FL)"
+			(at 231.14 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C42371557"
+			(at 231.14 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "73e3cdd0-dede-4b96-959f-9861e8a2e11d")
+		)
+		(pin "2"
+			(uuid "8abb5172-cc98-41e7-84c4-8ac5570e661f")
+		)
+		(instances
+			(project "ESP32-PDM-4CH"
+				(path "/d0898527-243c-48e9-a217-df57be741056"
+					(reference "D31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 231.14 171.45)
+			(xy 231.14 170.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "834a3151-7973-44d1-acbf-cfb22725a68b")
+	)
+	(wire
+		(pts
+			(xy 231.14 170.18)
+			(xy 223.52 170.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dcf1e589-494c-4207-bed4-5b2ba830f875")
+	)
+	(label "VBAT_FL"
+		(at 231.14 179.07 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "5fa5a9cd-1616-436e-9db9-92e81dee0b50")
+	)
 )
