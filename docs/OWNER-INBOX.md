@@ -6,18 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (1)
-
-## Q-0067 · MINOR · pdm-4ch · finding
-
-- **From:** `docs/reviews/2026-11-03-emc-system-2.md` E18 (root sheet: Q30 IPT007N06N / D30 SMCJ30CA, design-notes 8.6 (b)); task T-0129
-- **Summary:** A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V.
-- **Proposed:** A TVS across Q30 stops the over-voltage, but while D30 holds the input negative, VS and C31 can go below 0 V for the rest of the spike. With the 40 V parts this happens only if the spike drives more than about 20 A and lasts over about 150 us; whether such spikes occur on a real bus is unverified. Which do you want? A: SMDJ40CA C42371557 (preferred, 0.22 USD, no fee; VDS 59.4 V, VS -4.0 V at 31 A, 0.6 V margin; recommended). B: 5.0SMDJ40CA C5439931 (extended, 0.32 USD + about 3 USD fee per order; VDS 55.3 V, same VS). C: SMCJ30CA C19077607 (on the BOM; VDS 48.4 V, but VS -15.1 V at 31 A and -8.0 V at 12 A). D: 8.0SMDJ43CA C1977580 (5.49 USD + fee, stock 20, listing only; about 57.3 V, VS -0.6 V). Or something else.
-- **Why it needs you:** found while fixing (T-0137): Stop (iii) of the brief. Every part that keeps Q30 VDS below 60 V at the 31 A bounding current with an adequate pulse rating lets VS go negative at that current, and C31 has no reverse rating (decision 82). VDS / VS at 31 A, worst tolerances: SMCJ30CA 48.4 V / -15.1 V; SMCJ33CA 54.6 V / -11.7 V; SMDJ40CA 59.4 V / -4.0 V; 5.0SMDJ40CA 55.3 V / -4.0 V. SMCJ36CA 60.8 V, SMCJ40CA 69.6 V and SMCJ43CA 76.5 V fail VDS. VS reaches 0 V after 109-170 us at 31 A and stays negative until the pulse ends. At the textbook ISO 7637-2 pulse 1 (12-15 A, 1-2 ms, secondary sources) the 40 V parts keep VS at +2 V or above (timed simulation +4.8 V or above). No schematic change.
-
-**Answer:** A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.
-
----
+No open questions.
 
 ## Decided by agents (4) – two-way doors
 
@@ -113,7 +102,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0114 · pdm-hc2 · C13832 removal costs 0.162 USD per board against a 3.07 USD fee per order, so it pays only up to about 19 boards per order → until order: Depends on the order quantity. For orders above about 20 pdm-hc2 boards, revert C30/C102/C202 to C13832 1 uF/100 V (inside decision 26 and TPS4811 Table 9-3). Re-price with tier prices at order time, since STATUS says 15+ and cost-system-2 says about 19 at 1+ prices. C30 is on the shared root sheet: weigh this against keeping both boards identical. No change for the planned 5-30 boards.
 - T-0127 · pdm-4ch · C170101 instead of C13832 saves the loading fee only below about 14 boards per order; above that C13832 is cheaper → until order: The item only asks to revisit C13832 vs C170101 at order time, once the run size is known. The first run is 5 boards (decision 33), below the break-even of about 14 boards, so nothing changes now. Decision 84 says revisit past about 12 boards; reprice at a run of 12 or more.
 
-## Answered (58)
+## Answered (59)
 
 - Q-0050 (pdm-hc2): MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → **covered by Q-0049: short EMC-only gate slew within the MOSFET SOA** (done)
 - Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (done)
@@ -173,3 +162,4 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0063 (system): Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → **yes: pdm-4ch C104-C404 become 2.2 uF/100 V C170101 (same 1206 footprint); amend decision 26 to '>= 1 uF/100 V (2.2 uF C170101)'. Revisit if runs grow past about 12 boards.** (done)
 - Q-0065 (system): Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → **Not all by JLCPCB: Economic PCBA without J4, J5, J10, J11; the owner hand-solders those four (ruling Q-0057). The owner checks the monthly assembly coupon at order time (ruling Q-0059).** (deferred)
 - Q-0064 (pdm-4ch): May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → **yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).** (done)
+- Q-0067 (pdm-4ch): A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → **A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.** (parked)

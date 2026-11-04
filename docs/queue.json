@@ -4276,14 +4276,13 @@
         "finding": "E18"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0067",
       "why_big": [
         "found while fixing (T-0137): Stop (iii) of the brief. Every part that keeps Q30 VDS below 60 V at the 31 A bounding current with an adequate pulse rating lets VS go negative at that current, and C31 has no reverse rating (decision 82). VDS / VS at 31 A, worst tolerances: SMCJ30CA 48.4 V / -15.1 V; SMCJ33CA 54.6 V / -11.7 V; SMDJ40CA 59.4 V / -4.0 V; 5.0SMDJ40CA 55.3 V / -4.0 V. SMCJ36CA 60.8 V, SMCJ40CA 69.6 V and SMCJ43CA 76.5 V fail VDS. VS reaches 0 V after 109-170 us at 31 A and stays negative until the pulse ends. At the textbook ISO 7637-2 pulse 1 (12-15 A, 1-2 ms, secondary sources) the 40 V parts keep VS at +2 V or above (timed simulation +4.8 V or above). No schematic change."
       ],
-      "ruling": "Fit a TVS across Q30 (drain VS to source VBAT_FL) on the first order. Choose it so that Q30 VDS stays below 60 V at the pulse current while the TVS takes the energy of a negative transient with VS charged (80-115 mJ, check at the real maximum input of 32 A = 4 x BTT6010 at 8 A); it must not conduct for a steady reversed battery (<= 28 V) or in normal operation. Basic/preferred part if one fits. Correct design-notes 8.6 (b) and adjust the 8.6 (c) wording (the TVS is across Q30, not from VS to GND; the OUT->VS->Q30->D30 surge path stays). Back to the owner if no part keeps VDS below 60 V.",
-      "answered": "2026-11-04",
-      "package": "T-0137"
+      "ruling": "A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.",
+      "answered": "2026-11-04"
     },
     {
       "id": "T-0130",
