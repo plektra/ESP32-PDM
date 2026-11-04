@@ -4276,12 +4276,13 @@
         "finding": "E18"
       },
       "door": "one-way",
-      "state": "blocked-owner",
-      "package": "T-0132",
+      "state": "parked",
       "question": "Q-0066",
       "why_big": [
         "found while fixing (T-0132): Energy check of the brief's stop condition: EAS 1100 mJ is only rated at Tj(start) 25 C (no EAS(Tj), no repetitive rating); at the 40 A input rating Q30 starts at Tj ~122 C, where IPT007N06N Diagram 13 leaves only ~1-2x margin for the 80-115 mJ / 1.3-1.9 mC a negative transient with VS charged puts into Q30, depending on C31 ESR, which is not bounded. Safety question for the panel supply on VS (Q30 short: no reverse protection; open: board and panel switches dead)."
-      ]
+      ],
+      "ruling": "Fit a TVS across Q30 (drain VS to source VBAT_FL) on the first order. Choose it so that Q30 VDS stays below 60 V at the pulse current while the TVS takes the energy of a negative transient with VS charged (80-115 mJ, check at the real maximum input of 32 A = 4 x BTT6010 at 8 A); it must not conduct for a steady reversed battery (<= 28 V) or in normal operation. Basic/preferred part if one fits. Correct design-notes 8.6 (b) and adjust the 8.6 (c) wording (the TVS is across Q30, not from VS to GND; the OUT->VS->Q30->D30 surge path stays). Back to the owner if no part keeps VDS below 60 V.",
+      "answered": "2026-11-04"
     },
     {
       "id": "T-0130",
