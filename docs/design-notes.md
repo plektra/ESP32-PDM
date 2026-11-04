@@ -124,7 +124,7 @@ P_total · R_box, junction rise P_channel · RthJA, solved together.
 
 Assumptions (*estimates* until a prototype is measured): vented enclosure with the PCB vertical
 (chimney airflow), R_box 0.6 K/W (4-ch) / 0.9 K/W (2-ch, 1 module width), RthJA 40 K/W per switch
-with 2 oz copper (50 K/W with 1 oz), 2.2 W `--p-other` default (ESP32/regulators/LEDs 0.6 W plus the panel interface, see below), RDS(on) at datasheet max
+with 2 oz copper (50 K/W with 1 oz), 2.3 W `--p-other` default (ESP32/regulators/LEDs 0.6 W plus the panel interface, see below), RDS(on) at datasheet max
 rising linearly to 150 °C.
 
 **`--p-other` with the panel interface (T-0047, 2026-11-02).** The 0.6 W default covers the ESP32, regulators and status
@@ -140,10 +140,10 @@ interface (`analog_sw`, values after T-0068) adds ≈ 1.6 W (≈ 1.7 W with the 
 
 Total **p_other ≈ 2.2 W** (the validator's estimate was 2.1 W); **≈ 2.3 W since T-0105** (2 k + 2 k loads, +0.13 W):
 `--p-other 2.3` gives 4 × BTT6050 at 4 A → enclosure air 45.4 °C, Tj ≈ 101 °C – the 4 A rating stands (run 2026-11-03).
-The tool default is still 2.2 W (a `shared` package may not edit `tools/`; the 0.1 W does not change the result). `tools/heat_budget.py --p-other 2.1` and `--p-other 2.2`
+The tool default is 2.3 W since T-0141. The table plus the 0.6 W base sums to 2.37 W; `--p-other 2.37` gives the same Tj ≈ 101 °C (run 2026-11-04). `tools/heat_budget.py --p-other 2.1` and `--p-other 2.2`
 both give 4 × BTT6050 at 4 A → enclosure air 45.2–45.3 °C, **Tj ≈ 101 °C** (100 °C with 0.6 W): the 4 A rating stands.
-Use `--p-other 2.2` for 24 V installations with a busy panel. Since T-0085 (2026-11-03) this is the tool's default
-(was 0.6 W); give `--p-other 0.6` for the controller alone.
+The default covers 24 V installations with a busy panel (0.6 W until T-0085, 2.2 W until T-0141); give
+`--p-other 0.6` for the controller alone.
 
 | Variant | Switch | Ambient | Copper | Continuous per channel (Tj ≤ ~110 °C) |
 |---|---|---|---|---|
@@ -201,7 +201,7 @@ Per channel (source: TI TPS4811-Q1 datasheet SLUSEE5E):
 
 Heat (`tools/heat_budget.py --channels 2 --part HC-2xBSC030 --rth-ja 20 --r-box 0.9 --r-path 0.002`, estimate,
 40 °C, vented; RDS(on) path 11.7 mΩ at 150 °C per BSC030N08NS5 Diagram 9, T-0057):
-2 × 12.5 A → Tj ≈ 73 °C; 2 × 15 A → 90 °C; 2 × 20 A → 145 °C (too hot; rerun 2026-11-03 with the 2.2 W `--p-other` default, T-0106). **Continuous rating ≈ 15 A per
+2 × 12.5 A → Tj ≈ 73 °C; 2 × 15 A → 90 °C; 2 × 20 A → 145 °C (too hot; rerun 2026-11-03 with the then 2.2 W `--p-other` default, T-0106; the same Tj with 2.3 W, run 2026-11-04). **Continuous rating ≈ 15 A per
 channel.** The hardware breaker (≈ 17.5 A / 146 ms, §4a.2) allows short motor starts; between 15 A and the breaker,
 protection comes from the required external breaker (≤ 15–18 A) and the firmware soft fuse. The temperature sensor
 (140–160 °C at the MMBT3904) is a backstop, not a continuous protection.

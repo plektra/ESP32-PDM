@@ -1,11 +1,13 @@
 # pdm-hc2 status
 
-Updated: 2026-11-03 (T-0119)
+Updated: 2026-11-04 (T-0141)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
+
+**2026-11-04 (T-0141: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row updated (C30 2.2 µF C170101; the blocker Q30 is pdm-4ch only, HC2 unchanged, decision 40). `tools/heat_budget.py --p-other` default 2.2 → 2.3 W: 2 × 15 A still Tj ≈ 90 °C with the HC2 arguments of §4a. No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0141.md`.
 
 **2026-11-03 (T-0119: T-0096/T-0090, owner Q-0061/Q-0062, decision 83, unattended, shared – `power-usb`, same on both boards):** USB shield capacitor C18 is now 1 nF/2 kV X7R 1206 C9196 (basic, already on the BOM) instead of 4.7 nF/1 kV C107198 (extended). Footprint, R13 1 MΩ and R14 0 Ω DNP unchanged. Shield RC 1 MΩ ‖ 1 nF, corner ≈ 160 Hz (was 34 Hz). ERC 0 errors, 5 warnings (unchanged); netlist differs only in C18 value/LCSC. 225 parts (+0), 68 unique (−1). Details: design-notes §8.3, `docs/reviews/2026-11-03-fix-shared-T-0119.md`.
 
@@ -184,8 +186,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
   positions.
 
 ## For /system
-
-- T-0107 (sync): the ARCHITECTURE root row still says "C30 1 µF/100 V". It is now 2.2 µF/100 V C170101 (decision 26 range 1–2.2 µF).
 
 - T-0072/T-0055: **J10 keyed/polarised** (decision 40) – choose it in `/system mechanical` (J10 not chosen yet); the
   board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).
