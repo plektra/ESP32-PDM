@@ -4384,7 +4384,7 @@
       "id": "T-0134",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [
         "T-0132"
@@ -4392,13 +4392,16 @@
       "verify": true,
       "since": "916e5cda788e5614fa16d5c89ceb0c47698e3f62",
       "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
-      "recheck": "cost"
+      "recheck": "cost",
+      "finished": "2026-11-04",
+      "summary": "skipped: no part changed in T-0132",
+      "cost_usd": 0.0
     },
     {
       "id": "T-0135",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-03",
       "depends_on": [
         "T-0132"
@@ -4406,7 +4409,10 @@
       "verify": true,
       "since": "916e5cda788e5614fa16d5c89ceb0c47698e3f62",
       "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
-      "recheck": "emc"
+      "recheck": "emc",
+      "finished": "2026-11-04",
+      "summary": "skipped: no connector, filter or protection part changed (refs: none)",
+      "cost_usd": 0.0
     }
   ],
   "board_size_start": {
