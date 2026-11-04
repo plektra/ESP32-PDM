@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-04 (T-0141)
+Updated: 2026-11-04 (decision 93)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-04 (decision 93, /system, shared `analog_sw` + root sheet, same on both boards):** SW_SUPPLY sense added: R49 10 k 1206 → SW_SENSE, R57 4.7 k, D24 BZT52C3V3, C21 470 nF, R58 10 k (root sheet) → IO12 as a digital input. It replaces the decision 21 divider, which could not work on IO12 (design-notes §5). +5 parts, +0 unique. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those parts and U1 pad 16. Needs the KiCad tidy of the new parts' labels.
 
 **2026-11-04 (T-0141: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row (C30 2.2 µF C170101, blocker Q30/U30/C32 on pdm-4ch only) and supply-path budget updated; `tools/heat_budget.py --p-other` default 2.2 → 2.3 W (4 × 4 A Tj ≈ 101 °C, unchanged). No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0141.md`.
 
@@ -108,7 +110,7 @@ hard-short prototype test below is mandatory before installation. An overstresse
 supply permanently off, bus control keeps working). F4 feeds the panel switches (bilge forced run, navigation lights):
 a competent person reviews F1–F4 and R54–R56 before installation.
 
-**Waiting for the owner:** decision 21 **[proposed]** (sense SW_SUPPLY on IO12 so a tripped F4 can be reported); which TVS goes across Q30, given that VS goes negative at the 31 A bound (T-0129, report T-0137).
+**Waiting for a run:** the owner ruled SMDJ40CA C42371557 across Q30 (Q-0067, T-0129). The next `tools/orchestrate.py run` applies it; the T-0137 entry above is superseded once it has.
 
 ## Next
 
@@ -188,6 +190,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
+- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 - T-0121 (`/system mechanical`): J10 keyed/polarised on pdm-4ch too (decision 34; owner ruling Q-0054 "Still key J10").
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
 - T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.

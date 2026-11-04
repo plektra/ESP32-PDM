@@ -1,11 +1,15 @@
 # pdm-hc2 status
 
-Updated: 2026-11-04 (T-0141)
+Updated: 2026-11-04 (decisions 93, 94)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
+
+**2026-11-04 (decision 93, /system, shared `analog_sw` + root sheet, same on both boards):** SW_SUPPLY sense added: R49 10 k 1206 → SW_SENSE, R57 4.7 k, D24 BZT52C3V3, C21 470 nF, R58 10 k (root sheet) → IO12 as a digital input. It replaces the decision 21 divider, which could not work on IO12 (design-notes §5). +5 parts, +0 unique. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those parts and U1 pad 16. Needs the KiCad tidy of the new parts' labels.
+
+**2026-11-04 (decision 94, /system):** plan on one LED work light per HC2 output; about 50 µF per output, confirmed on the prototype; several lights on one output only for low-capacitance loads or a group shown to switch on cleanly. README and design-notes §4a.3 updated. No schematic change.
 
 **2026-11-04 (T-0141: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row updated (C30 2.2 µF C170101; the blocker Q30 is pdm-4ch only, HC2 unchanged, decision 40). `tools/heat_budget.py --p-other` default 2.2 → 2.3 W: 2 × 15 A still Tj ≈ 90 °C with the HC2 arguments of §4a. No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0141.md`.
 
@@ -122,8 +126,6 @@ hard-short prototype test below is mandatory before installation. An overstresse
 supply permanently off, bus control keeps working). F4 feeds the panel switches (bilge forced run, navigation lights):
 a competent person reviews F1–F4 and R54–R56 before installation.
 
-**Waiting for the owner:** decision 21 **[proposed]** (SW_SUPPLY sense on IO12).
-
 ## Next
 
 0. Gate slew done (T-0106, 50 µF rating). Open: turn-on into a short straight after running at 15 A is outside the
@@ -192,7 +194,8 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the
   15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,
   full scale ≈ 31.9 V) and reports "OUT high while off" as a float-driven run.
-- **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list).
+- **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list). Pre-charge path (TPS48111-Q1) if the prototype shows real loads exceed about 50 µF (decision 94).
+- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 
 - T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended
   parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).

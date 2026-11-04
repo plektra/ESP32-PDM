@@ -1,6 +1,6 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-10-30.
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-04.
 
 ## Boards
 
@@ -13,9 +13,8 @@ Firmware: not started.
 
 ## Order of work
 
-Steps 1–3 ran unattended (reviews done, 46 rulings answered). Next: `python3 tools/orchestrate.py run` applies the
-approved changes unattended (decision 24, `docs/AUTONOMY.md`); then read `git log --stat main..auto/pilot` and the
-inbox, and merge.
+Steps 1–3 are done, including the fix rounds. Next: `python3 tools/orchestrate.py run` fits the Q30 TVS the owner ruled
+(Q-0067); then read `git log --stat main..auto/pilot` and the inbox, and merge. After that, step 4.
 
 1. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.
@@ -32,8 +31,10 @@ inbox, and merge.
 
 ## Waiting on the owner
 
-- Decisions 19 and 21 **[proposed]**; decision 20 (fault/alert handling) open until `/system firmware`.
-- Measurements on Vega: bilge pump locations and feeds.
+- No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
+- Input current for J10 and the supply copper, needed for step 4: ARCHITECTURE says ≈ 40 A (4-ch) / ≈ 50 A (HC2); the real
+  maximums are 32 A (4 × BTT6010 at 8 A) and 36 A (2 × the 18 A external breaker).
+- Measurements: bilge pump locations and feeds.
 
 ## Backlog (not now)
 

@@ -387,6 +387,14 @@ Heat budget unchanged (2 × 15 A → Tj 90 °C, 40 °C).
 **T-0053 (Q-0053):** no change. R113/R213 stay 68 k C36871 (decision 39, T-0072). Decision 19 and the ≈ 21 A load
 option are withdrawn by the owner (2026-11-03).
 
+**Use of the rating (decision 94, amends decision 72; 2026-11-04).** Plan on one LED work light per output. Several lights on
+one output are allowed only for loads with little capacitance, such as plain LED strips without their own driver (expected, not
+measured), or once the prototype shows that group switches on cleanly from warm. A strip with its own driver, dimmer or
+controller box counts as a capacitive load. Allowing a few hundred µF would take a pre-charge path: TPS48111-Q1 (pin 11 = G,
+N.C on the TPS48110; part facts C17556513) plus a pre-charge MOSFET and resistor on each channel, with gate slew, short-circuit timing
+(tSC 1.2 µs instead of 4 µs) and SOA rechecked and a new validator round. Cost and TPS48111-Q1 stock are not checked. Not done now;
+it is the planned fix for the next HC2 revision if the prototype shows real loads need it.
+
 ## 5. Physical switch inputs and long leads
 
 Per input (sheet `analog_sw`): SMAJ30CA at the connector → 4.0 kΩ load, two 2 kΩ 1206 in series (R3+R45, R4+R46,
@@ -466,8 +474,8 @@ Panel connector J5 (decision 17), 10 poles:
     go off below ≈ 8.5 V at the battery during cranking (was ≈ 8 V); 24 V systems are not affected. At a 10.5 V battery the
     turn-on is still guaranteed by the datasheet but thinly, and staying on with the 3.3 V rail down is not
     guaranteed (§3: prototype measurement, RIN 4.7 k fallback).
-  - D55 open: all panel switches and LEDs of the board dead, the same symptom as a tripped F4. The proposed SW_SUPPLY
-    sense (decision 21) sits on the J5.5 side and would catch it too.
+  - D55 open: all panel switches and LEDs of the board dead, the same symptom as a tripped F4. The SW_SUPPLY
+    sense (decision 93) sits on the J5.5 side and catches it too.
   - D55 shorted: back to the old behaviour (the panel works; the LEDs are unprotected against reversal).
   - A hard short in the panel cable drives the F4 fault current through D55 until F4 trips (≤ 0.15 s at 8 A). Whether
     D55 survives the highest fault currents (IFSM 25 A for 8.3 ms) is UNVERIFIED. A diode that fails open gives the
@@ -475,11 +483,22 @@ Panel connector J5 (decision 17), 10 poles:
   - A competent person must review this before installation.
 - **Failure mode (safety):** a short in the panel cable (or at a panel switch) trips F4; all panel
   switches of that board then do nothing until the short is cleared, while NMEA 2000 control keeps
-  working, but the panel LEDs go dark too. As drawn the firmware **cannot** tell a tripped F4 from "all
-  switches off"; a sense line (SW_SUPPLY → 100 k/10 k divider → spare GPIO IO12, two basic resistors) would
-  let it alert (decision 21, proposed). Outputs that must
+  working, but the panel LEDs go dark too. The firmware sees this on SW_SENSE (below) and can alert. Outputs that must
   keep working from the panel (bilge forced run, navigation lights) need a competent person's review; an
   installer can also feed the switches from a separate fused supply (the inputs accept any 10.5–30 V).
+- **SW_SUPPLY sense (decision 93, replaces decision 21):** R49 10 k 1206 (C17902) from SW_SUPPLY to SW_SENSE; R57 4.7 k
+  (C25900), D24 BZT52C3V3 (C19077396) and C21 470 nF (C47339) to GND; R58 10 k (C25744) to IO12, read as a digital input.
+  It is the switch input network, so no new unique part. The 100 k/10 k divider of decision 21 was dropped: IO12 is ADC2,
+  which invariant 10 rules out, every ADC1 pin is taken on pdm-4ch, and as a digital input the divider gives 2.18 V at 24 V
+  against VIH 2.475 V (0.75 × VDD; ESP32-S3 datasheet p. 65, GPIO12 = ADC2_CH1 p. 24).
+  - Reads high from about 2.475 V × 14.7 / 4.7 ≈ 7.7 V on SW_SUPPLY. At 30 V: 2.6 mA, 68 mW in R49 (≈ 0.2 W at the 48 V clamp).
+    Adds ≈ 0.08 W to p_other; `heat_budget.py --p-other 2.4` still gives 4 × 4 A Tj ≈ 101 °C.
+  - Reads low on: F4 tripped, D55 open, a short at J5.5 or a battery below about 8.5 V. So the firmware alerts only while
+    VBAT_SENSE shows a healthy battery (cranking on a 12 V system must not raise a false alarm).
+  - It cannot see a fault on one switch line, only the shared supply.
+  - **Failure mode:** R49 open or D24/C21 shorted gives a false alert and nothing else; the panel path does not pass through
+    this network, so invariant 1 holds. This is an alert, not a safety function. The panel-switched outputs (bilge forced run,
+    navigation lights) still need a competent person's review before installation.
 - Panel LED behaviour (decision 20, open): LED on = output on, blinking = fault; alerts to Signal K where
   they can be acknowledged and muted. Details in `/system firmware`.
 - Outputs: run each load's return with its feed; if outputs are PWM-dimmed, use a low frequency
