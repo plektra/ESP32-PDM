@@ -53,9 +53,9 @@ flowchart LR
   T0123["T-0123 · pdm-hc2<br/>re-check after its packages"]:::done
   T0124["T-0124 · system<br/>re-check after its packages"]:::done
   T0125["T-0125 · system<br/>re-check after its packages"]:::done
-  T0133["T-0133 · pdm-4ch<br/>re-check after its packages"]:::ready
-  T0134["T-0134 · system<br/>re-check after its packages"]:::ready
-  T0135["T-0135 · system<br/>re-check after its packages"]:::ready
+  T0133["T-0133 · pdm-4ch<br/>re-check after its packages"]:::done
+  T0134["T-0134 · system<br/>re-check after its packages"]:::done
+  T0135["T-0135 · system<br/>re-check after its packages"]:::done
   T0065 --> T0066
   T0065 --> T0067
   T0065 --> T0068
