@@ -67,7 +67,7 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 | 4-ch, BTT6050 per channel | 4 A at 2 oz copper (3.5 A provisional in 1 module width) | `tools/heat_budget.py` |
 | 4-ch, BTT6010 per channel | ≈ 8 A | `tools/heat_budget.py --mix` |
 | HC2 per channel | ≈ 15 A continuous; breaker ~17.5 A / 146 ms (RIWRN 68 k, ≈ 15–20 A over tolerances); fast trip 80 A; external breaker ≤ 15–18 A per output plus firmware soft fuse (decision 39); load input capacitance ≤ ≈ 50 µF per output (decisions 77, 94) | `tools/heat_budget.py --part HC-2xBSC030`, TPS4811-Q1 equations |
-| Shared supply path | ≤ 2 mΩ (terminal + VS copper), plus on pdm-4ch the blocker Q30 (≤ 0.75 mΩ at 25 °C, ≈ 1.1 mΩ hot); input terminal ≈ 40 A (4-ch) / ≈ 50 A (HC2) | design-notes §4, §8.6 |
+| Shared supply path | ≤ 2 mΩ (terminal + VS copper), plus on pdm-4ch the blocker Q30 (≤ 0.75 mΩ at 25 °C, ≈ 1.1 mΩ hot); board input limit 32 A (4-ch) / 36 A (HC2), decision 95 | design-notes §4, §8.6 |
 | Controller power | ≈ 0.47 A at 3.3 V peak (ESP32 radio); panel LEDs no longer on 3.3 V; F1 500 mA hold | design-notes |
 | Panel switch supply | ≈ 63 mA (4 × 7.5 mA switch load + 4 × 2.6 mA divider + 2.6 mA SW_SENSE + 4 × 5 mA LEDs at 30 V); F4 500 mA hold; MMBT5551 ≈ 0.13 W each at 30 V | decisions 17, 74, 93 |
 

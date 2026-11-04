@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-04 (decision 93)
+Updated: 2026-11-04 (decisions 93, 95)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-04 (decision 95, /system, no schematic change):** board input limits are 32 A (`pdm-4ch`) and 36 A (`pdm-hc2`) instead of ≈ 40 / 50 A; they set J10, its GND pole and the supply copper in `/system mechanical`. Q30 is about 86 °C at 32 A with the 6 cm² copper rule kept; the cheaper AGM601LL still fails at about 179 °C. Older entries that say 40 A are history.
 
 **2026-11-04 (decision 93, /system, shared `analog_sw` + root sheet, same on both boards):** SW_SUPPLY sense added: R49 10 k 1206 → SW_SENSE, R57 4.7 k, D24 BZT52C3V3, C21 470 nF, R58 10 k (root sheet) → IO12 as a digital input. It replaces the decision 21 divider, which could not work on IO12 (design-notes §5). +5 parts, +0 unique. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those parts and U1 pad 16. Needs the KiCad tidy of the new parts' labels.
 
@@ -129,14 +131,14 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    - **VS copper from the four switches to D30 wide** (both layers, 2 oz): it is the output surge path
      (OUT → PROFET body diode → VS → D30), decision 27.
    - JP30 is the VBAT_IN–VS link: draw it as a copper bridge as wide as the VS copper (the placeholder footprint
-     `NetTie-2_SMD_Pad2.0mm` is far too small for 40 A). FL30 has no footprint yet; decide at pre-compliance.
+     `NetTie-2_SMD_Pad2.0mm` is far too small for 32 A). FL30 has no footprint yet; decide at pre-compliance.
    - D30 and C30 directly at the J10 terminals; C31 close to J10; C104–C404 at each VS tab.
    - MLCCs on VS/VBAT_IN (C30, C104–C404): away from the terminal screws and board edges and not across a bending
      line (a cracked MLCC shorts the battery input).
    - D103–D403 (DNP) next to J11, GND return straight to J10.2.
-   - T-0121 (design-notes §8.6): Q30 in the 40 A path between JP30 and VS. VBAT_FL and VS copper as wide as the VS
-     copper, both layers. **≥ 6 cm² 2 oz copper on Q30's drain tab (VS)**, otherwise Q30 runs too hot at 40 A (minimal pad:
-     Tj ≈ 200 °C). U30 next to Q30 with short SOURCE/GATE traces. C32 at U30, away from Q30's tab. The surge loop
+   - T-0121 (design-notes §8.6): Q30 in the 32 A path between JP30 and VS. VBAT_FL and VS copper as wide as the VS
+     copper, both layers. **≥ 6 cm² 2 oz copper on Q30's drain tab (VS)**: Tj ≈ 86 °C at 32 A (minimal pad:
+     ≈ 116 °C). U30 next to Q30 with short SOURCE/GATE traces. C32 at U30, away from Q30's tab. The surge loop
      switches → VS → Q30 → D30 short and wide.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from

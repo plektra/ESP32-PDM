@@ -166,7 +166,7 @@ Findings that drove the design:
   reverse-battery blocker Q30 (IPT007N06N, ≤ 0.75 mΩ at 25 °C, ≈ 1.05–1.1 mΩ hot) to this path (§8.6); the tool's
   default `--r-path` of 4 mΩ already covers 2 mΩ terminal + copper plus Q30, and `--r-path 0.00505` changes 4 × 4 A by
   +1 K only. Keep the battery
-  terminal + VS copper ≤ 2 mΩ and rate the input terminal for ≈ 40 A; output terminals ≥ 10 A.
+  terminal + VS copper ≤ 2 mΩ and rate the input terminal for 32 A (decision 95); output terminals ≥ 10 A.
 
 Layout rules from the budget: switches spread out and away from the ESP32; large VS copper on both
 layers around the cooling tabs, stitched with vias; 2 oz copper; vents at bottom and top; continuous
@@ -207,7 +207,7 @@ protection comes from the required external breaker (≤ 15–18 A) and the firm
 (140–160 °C at the MMBT3904) is a backstop, not a continuous protection.
 
 Notes and open points:
-- Terminals for ≥ 25 A per output and ≈ 50 A battery input; 2 oz copper; footprint
+- Terminals for ≥ 25 A per output (to be settled in `/system mechanical`) and 36 A battery input (decision 95); 2 oz copper; footprint
   `Texas_DGX0019A` drawn from TI's land-pattern example (verify against JLCPCB before ordering).
 - **Timing the user sees (T-0059, 2026-11-02; TPS4811-Q1 SLUSEE5E p. 8, 18, 23):**
   - *First switch-on after power-up* waits for the bootstrap capacitor: Eq. 1 TDRV_EN = CBST × V(BST_UVLOR) /
@@ -1143,9 +1143,10 @@ The 4 A (BTT6050) and ≈ 8 A (BTT6010) channel ratings stand. Q30's own junctio
 |---|---|---|---|---|
 | 16 A (4 × 4 A) | 45.5 °C | 0.22 W | 54 °C | 59 °C |
 | 24 A (mix) | 46.1 °C | 0.51 W | 67 °C | 79 °C |
-| 40 A (input terminal rating; air from 4 × 10 A) | 51.2 °C | 1.78 W | **122 °C** (Tj max 175 °C) | 200 °C – not allowed |
+| **32 A (board input limit, decision 95; air from 4 × 8 A)** | 47.2 °C | 0.98 W | **86 °C** | 116 °C |
+| 40 A (old input terminal basis, kept for comparison; air from 4 × 10 A) | 51.2 °C | 1.78 W | 122 °C (Tj max 175 °C) | 200 °C – not allowed |
 
-So the 40 A case needs Q30's drain tab on at least 6 cm² of 2 oz copper. The drain is VS, which already has large
+The 32 A limit would survive a smaller pad, but the ≥ 6 cm² of 2 oz copper on Q30's drain tab stays as the rule. The drain is VS, which already has large
 copper on both layers (decision 9 layout rules), so this costs no extra area. It is recorded as a PCB rule. U30 loses
 microwatts (80–130 µA).
 
@@ -1175,7 +1176,7 @@ only the two J10 leads are swapped while the loads return elsewhere, the case ha
 A competent person reviews this reverse-battery circuit and the failure modes above before installation, because the
 navigation lights and the bilge forced run (panel switches) depend on Q30 conducting.
 
-**PCB rules (T-0121).** Q30 sits in the 40 A path between J10 and the VS copper. Use VBAT_FL copper (source pins 2–8) and
+**PCB rules (T-0121).** Q30 sits in the 32 A path between J10 and the VS copper. Use VBAT_FL copper (source pins 2–8) and
 VS copper (drain tab) as wide as the existing VS copper, on both layers with stitching vias. Use ≥ 6 cm² of 2 oz
 copper on the drain tab (VS) for RthJA ≤ 40 K/W. Keep U30 next to Q30 with short SOURCE and GATE traces (U30 §11.1). Keep C32 at
 U30 but away from Q30's hot tab. Keep the VS loop from the four switches through Q30 to D30 short and wide (invariant 4
@@ -1203,6 +1204,7 @@ pulsed body-diode current. Q30 junction solved as above with the max curve (encl
 Even the typical 1.25 mΩ held at its 25 °C value would give 2.0 W and ≈ 132 °C at 40 A, which is above 125 °C. Making
 it pass would need RthJA ≈ 17 K/W (more copper or a second FET, neither in the item). The channel ratings would have
 held: 4 × 4 A Tj 102 °C (4.5 A now OVER), mix 91/103 °C, 4 × 8 A 93 °C. **Lever dropped. Q30 stays IPT007N06N C122552.**
+Rechecked at the 32 A limit of decision 95 (same method, air 48.4 °C): AGM601LL ≈ 179 °C at 40 K/W, above its 175 °C Tj max and with the 150 °C curve point extrapolated, so the lever stays dropped.
 
 ## 9. Open items
 

@@ -32,8 +32,6 @@ Steps 1–3 are done, including the fix rounds. Next: `python3 tools/orchestrate
 ## Waiting on the owner
 
 - No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
-- Input current for J10 and the supply copper, needed for step 4: ARCHITECTURE says ≈ 40 A (4-ch) / ≈ 50 A (HC2); the real
-  maximums are 32 A (4 × BTT6010 at 8 A) and 36 A (2 × the 18 A external breaker).
 - Measurements: bilge pump locations and feeds.
 
 ## Backlog (not now)

@@ -1,11 +1,13 @@
 # pdm-hc2 status
 
-Updated: 2026-11-04 (decisions 93, 94)
+Updated: 2026-11-04 (decisions 93, 94, 95)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
+
+**2026-11-04 (decision 95, /system, no schematic change):** board input limits are 32 A (`pdm-4ch`) and 36 A (`pdm-hc2`) instead of ≈ 40 / 50 A; they set J10, its GND pole and the supply copper in `/system mechanical`. Output terminals are still open.
 
 **2026-11-04 (decision 93, /system, shared `analog_sw` + root sheet, same on both boards):** SW_SUPPLY sense added: R49 10 k 1206 → SW_SENSE, R57 4.7 k, D24 BZT52C3V3, C21 470 nF, R58 10 k (root sheet) → IO12 as a digital input. It replaces the decision 21 divider, which could not work on IO12 (design-notes §5). +5 parts, +0 unique. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those parts and U1 pad 16. Needs the KiCad tidy of the new parts' labels.
 
@@ -135,11 +137,11 @@ a competent person reviews F1–F4 and R54–R56 before installation.
 2. `/validate pdm-hc2 deep` (part facts of TPS48110A-Q1, BSC030N08NS5, the equations) and `/emc pdm-hc2`.
 3. Verify the custom footprint `Texas_DGX0019A_VSSOP-19_3x5.1mm_P0.5mm` against the JLCPCB footprint (C17556513).
 4. PCB: Kelvin sense on the 1 mΩ shunt, MMBT3904 between the MOSFETs, TH1 next to the MOSFETs, ≥ 25 A output
-   terminals, ≈ 50 A input.
+   terminals (to be settled in `/system mechanical`), 36 A input (decision 95).
    T-0064 rules (design-notes §8.1/§8.2):
    - **D103/D203 next to the J11 terminal, GND return a short, wide path straight to J10.2** (not via the logic
      ground); decision 27.
-   - JP30 (VBAT_IN–VS) as a copper bridge as wide as the VS copper for ≈ 50 A (the placeholder footprint
+   - JP30 (VBAT_IN–VS) as a copper bridge as wide as the VS copper for 36 A (the placeholder footprint
      `NetTie-2_SMD_Pad2.0mm` is far too small); FL30 has no footprint yet, decided at pre-compliance.
    - D30, C30 at the J10 terminals; C31 near J10; C106/C206 at each channel's VS next to RSNS/Q11.
    - C30 (MLCC on the battery input) away from the terminal screws, board edges and bending lines.

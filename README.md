@@ -58,6 +58,8 @@ per order, so order mixed builds together to pay it once.
 - **`pdm-hc2` reverse battery destroys the board:** a reversed battery connection destroys both HC2 output controllers
   (TPS48110A-Q1, rated −1 V). There is no reverse-polarity protection on this revision. Use the keyed/polarised
   battery connector J10 only as marked, check polarity before connecting; the board label carries this warning.
+- **Board input limits:** at most **32 A** continuous through J10 on `pdm-4ch` and **36 A** on `pdm-hc2`, whatever the
+  outputs could draw together. Size the battery feed, and its fuse, so that these limits are not exceeded.
 - **`pdm-hc2` timing:** after power is connected, the first switch-on of each output (also from a panel switch)
   takes about 0.1 s. After an overcurrent or short-circuit trip the output stays off for about 4 minutes and then
   tries again. HC2 outputs are on/off only (no dimming/PWM).
