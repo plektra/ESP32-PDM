@@ -17,10 +17,11 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (54)
+## Applied by agents (55)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0129 · pdm-4ch · A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → T-0143 (`9cda47c8`)
 - T-0126 · pdm-4ch · Q30 is the most expensive new part (3.06 USD at 10 boards); AGM601LL C5464765 (TOLL-8L, 60 V, 1.25 mΩ, 0.85 USD) would save about 2.2 USD per board if the heat budget still passes → T-0132 (`605f3305`)
 - T-0115 · pdm-4ch · May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → T-0120 (`70cdd9cf`)
 - T-0099 · system · Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → T-0120 (`70cdd9cf`)
@@ -162,4 +163,4 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0063 (system): Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → **yes: pdm-4ch C104-C404 become 2.2 uF/100 V C170101 (same 1206 footprint); amend decision 26 to '>= 1 uF/100 V (2.2 uF C170101)'. Revisit if runs grow past about 12 boards.** (done)
 - Q-0065 (system): Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → **Not all by JLCPCB: Economic PCBA without J4, J5, J10, J11; the owner hand-solders those four (ruling Q-0057). The owner checks the monthly assembly coupon at order time (ruling Q-0059).** (deferred)
 - Q-0064 (pdm-4ch): May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → **yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).** (done)
-- Q-0067 (pdm-4ch): A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → **A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.** (parked)
+- Q-0067 (pdm-4ch): A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → **A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.** (done)

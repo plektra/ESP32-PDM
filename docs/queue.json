@@ -4276,14 +4276,16 @@
         "finding": "E18"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0067",
       "why_big": [
         "found while fixing (T-0137): Stop (iii) of the brief. Every part that keeps Q30 VDS below 60 V at the 31 A bounding current with an adequate pulse rating lets VS go negative at that current, and C31 has no reverse rating (decision 82). VDS / VS at 31 A, worst tolerances: SMCJ30CA 48.4 V / -15.1 V; SMCJ33CA 54.6 V / -11.7 V; SMDJ40CA 59.4 V / -4.0 V; 5.0SMDJ40CA 55.3 V / -4.0 V. SMCJ36CA 60.8 V, SMCJ40CA 69.6 V and SMCJ43CA 76.5 V fail VDS. VS reaches 0 V after 109-170 us at 31 A and stays negative until the pulse ends. At the textbook ISO 7637-2 pulse 1 (12-15 A, 1-2 ms, secondary sources) the 40 V parts keep VS at +2 V or above (timed simulation +4.8 V or above). No schematic change."
       ],
       "ruling": "A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.",
       "answered": "2026-11-04",
-      "package": "T-0143"
+      "package": "T-0143",
+      "fixed_by": "T-0143",
+      "merged": "9cda47c80f02713b5260cd3ab9abd944b0171ad4"
     },
     {
       "id": "T-0130",
@@ -4600,7 +4602,7 @@
       "id": "T-0143",
       "role": "board-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-04",
       "title": "Fit SMDJ40CA across Q30, record the residual risk and the prototype check",
       "brief": "Owner's ruling Q-0067, verbatim: \"A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.\"\n\nThe owner has chosen the part: do not search again or compare candidates. Background and all figures: docs/reviews/2026-11-04-fix-pdm-4ch-T-0137.md (points 2 and 3), docs/reviews/2026-11-04-plan-system-T-0142.md, docs/part-facts/C42371557.md. This supersedes stop (iii) of the T-0136 brief, which the ruling has answered.\n\nIn order:\n\n1. Part check. Run python3 tools/part_facts.py C42371557 (cached) and confirm: bidirectional, VRWM 40 V, VBR 44.4-49.1 V, VC 64.5 V at 46.5 A, IR 2 uA, SMC/DO-214AB. Confirm the current JLCPCB status and stock (preferred, 10271 on 2026-11-04). Re-derive the figures once, 25 C worst tolerances: VDS = 49.1 V + 0.331 ohm x I gives 59.4 V at 31 A and 59.7 V at the 32 A of decision 92; VS floor = 44.4 V - (36.8 V + 0.374 ohm x I) gives -4.0 V at 31 A and 0 V at about 20.3 A.\n\n2. Schematic: add one TVS with tools/ksch.py on the pdm-4ch root sheet: D31 (free; check again), value SMDJ40CA, LCSC C42371557, footprint Diode_SMD:D_SMC as D30, bidirectional symbol as D30, between net VS (Q30 pin 3, drain) and net /VBAT_FL (Q30 pin 2, source). No other connection changes. Run ERC and compare the netlist before and after with tools/sch_query.py pdm-4ch ref D31. Declared refs: D31 only. No shared sheet changes: this part of the root sheet exists only on pdm-4ch, and the controller part stays identical.\n\n3. Heat: the TVS dissipates nothing in steady state, so the budget should not change. Confirm at 40 C with tools/heat_budget.py using the existing --r-path 0.00505 and the --mix case, as CLAUDE.md requires. Do not change its inputs.\n\n4. design-notes 8.6, in this order:\n(a) Part table: add D31 SMDJ40CA with its facts. Cost: +0.22 USD per board, one more unique preferred part, no loading fee.\n(b) Correct 8.6 (b): 'VDS <= 48.4 V' holds only for a steady reversal with VS discharged. For a negative transient with VS charged, D31 clamps VDS.\n(c) Correct 8.6 (c): the TVS is across Q30, not from VS to GND. The OUT->VS->Q30->D30 surge path stays and invariant 4 is unchanged.\n(d) Add a residual-risk paragraph (safety, the owner's explicit acceptance, ruling Q-0067). State all of the following, because the ruling's short figures depend on them: C31 is briefly reverse-biased during such a spike and its datasheet gives no reverse rating (docs/part-facts/C487384.md), behaviour under -4 V is unverified. VS stays >= 0 V up to about 20.3 A and reaches about -4.0 V at 31 A (-2.4 V with the 0.75 ohm load); at 31 A VS crosses 0 V after about 170 us and stays negative until the spike ends (about 830 us of a 1 ms pulse). The 59.4 V figure is at 25 C and at a source short-circuit current of at most 31 A: with the TVS at 47 C VDS is about 60.4 V, slightly above Q30's 60 V 25 C minimum (Q30's own rating rises, about 63 V at 125 C), so Q30 may then take a small share in avalanche; a source tuned to 31 A at the D30 clamp stays under 60 V with SMDJ40CA only for Us >= about 334 V. Pulse rating margin about x5.3 at 25 C for a 31 A, 1 ms pulse, multiply by 0.6 for a TVS at 75 C. Textbook ISO 7637-2 pulse 1 (12-15 A, secondary sources): VDS 53.1-54.1 V, VS +2 V or above. Whether such spikes occur on a real bus is unverified (T-0130). All figures use the straight chord from VBR max to VC at Ipp, because the maker gives no VC at lower currents. Do not write that VS goes negative only at 31 A.\n(e) List the other VS branches at -4 V: D2 blocks U3 and C1, D55 blocks the panel supply, D1 does not conduct, C103-C403 and C104-C404 are non-polar; U11-U14 and R60 as in T-0137. Check these against the netlist while writing.\n(f) 'Reverse battery now': steady reversal <= 28 V: D31 does not conduct; leakage gives VS at most about -0.48 V into the R60 divider (upper bound, IR is specified at 40 V and 25 C only). Keep 'no time limit' only if this still holds. With VS charged at the moment of reversal, D31 conducts once until VS is at about VBR - 28 V (+16 to +21 V); VDS at most about 57 V. Above D30 VBR (about 33 V) D30 conducts and the battery fuse clears, as before.\n(g) Failure modes: D31 short bypasses Q30 (no reverse protection, not visible in use, same as 'Q30 fails short'); D31 open returns to Q30 avalanche (T-0132 figures). The TVS's own failure mode is not in its datasheet: say so. Keep the competent-person review reminder: F4 feeds navigation lights and bilge forced run.\n(h) PCB rule: D31 directly across the Q30 drain tab and source pins, short and wide.\n\n5. README: T-0137 found its reverse-battery text still true (it describes a reversed battery, not spikes). Change it only if your wording in 4(f) makes it untrue.\n\n6. hardware/pdm-4ch/STATUS.md: add the result at the top. Remove the 'Waiting for a run' line and mark the T-0137 entry as superseded. Add to the Prototype test list: 'T-0129 / Q-0067 - negative pulse on J10 with VS charged and the source short-circuit current within 31 A: scope Q30 VDS and VS (also VBAT_IN); expect VDS about 60 V or less and VS no lower than about -4 V; inspect C31 afterwards.' Add to the Pre-order checklist: check KiCad D_SMC against the JLCPCB footprint of C42371557 (hongjiacheng suggested land: pads 3.03 x 3.82 mm, gap at most 3.84 mm) and recheck its stock. Add the PCB rule to the layout list. Add to 'For /system': the ARCHITECTURE root row should name the TVS across Q30 (do not edit docs/ARCHITECTURE.md, it is out of this scope).\n\nChecks: python3 tools/fix_check.py --scope pdm-4ch --refs D31; ERC no worse than before (pdm-4ch 0 errors, 5 warnings); parts +1, unique +1 on pdm-4ch, +0 on pdm-hc2.\n\nDo not add the owner's ruling as a decision row: the planner has drafted it. The part is the owner's choice, so no auto decision is needed for it. Add nothing else: no second TVS, no series element, no change to C31, Q30 or D30, no extra footprint.\n\nNot a stop: the 60.4 V warm figure and the 31 A source assumption. Both are already known, reported to the owner in this plan, and only need recording under 4(d).\n\nStop and ask (one-way door), with your numbers: (i) the part facts or your re-derivation differ from the ruling, so that VDS at 31 A and 25 C is at or above 60 V or VS falls clearly below about -4 V. (ii) C42371557 is no longer available, no longer preferred, or does not fit D_SMC without a new footprint decision: do not swap to another part. (iii) A part other than C31 turns out to be harmed by VS at about -4 V, because the ruling accepts the risk for C31 only. (iv) D31 conducts in normal operation or for a steady reversed battery <= 28 V. (v) The fix would need a change to an invariant or to the OUT->VS->Q30->D30 surge path.",
@@ -4609,23 +4611,31 @@
       ],
       "plan": "T-0142",
       "depends_on": [],
-      "started": "2026-11-04T23:00:17",
+      "started": "2026-11-04T23:39:40",
       "ran_model": "opus",
       "session": "cf23fd98-b84b-4cde-a04a-7a7536ec602b",
-      "cost_usd": 0.3112,
-      "attempts": 1,
-      "resume": {
-        "session": "cf23fd98-b84b-4cde-a04a-7a7536ec602b",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0143",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0143-_c0tezgd",
-        "report": "docs/reviews/2026-11-04-fix-pdm-4ch-T-0143.md",
-        "head": "05e613afc3a5502dbcb628411234630fcd1a6442",
-        "reason": "a usage limit"
-      },
+      "cost_usd": 1.9396,
+      "attempts": 2,
       "finished": "2026-11-04",
-      "note": "no report written (api_error): You've hit your 5-hour limit · resets 11:30pm (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "note": null,
+      "summary": "1 fixed, 0 blocked, merged 9cda47c8; pdm-4ch +1 parts (+0 DNP), +1 unique",
+      "interrupted": null,
+      "refs": [
+        "D31"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 1,
+          "dnp": 0,
+          "unique": 1
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "report": "docs/reviews/2026-11-04-fix-pdm-4ch-T-0143.md"
     },
     {
       "id": "T-0144",
@@ -4682,12 +4692,12 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 210,
+      "parts": 216,
       "dnp": 15,
-      "unique": 61
+      "unique": 62
     },
     "pdm-hc2": {
-      "parts": 225,
+      "parts": 230,
       "dnp": 11,
       "unique": 68
     }
