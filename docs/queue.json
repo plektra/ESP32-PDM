@@ -4641,19 +4641,22 @@
       "id": "T-0144",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-04",
       "depends_on": [
         "T-0143"
       ],
       "verify": true,
-      "since": "e5ea51408e53fc1a7d98cc536507d8a9ea5ea755"
+      "since": "e5ea51408e53fc1a7d98cc536507d8a9ea5ea755",
+      "started": "2026-11-04T23:44:52",
+      "ran_model": "sonnet",
+      "session": "3418aa37-ce4c-4e00-9742-8d1b3324cd9d"
     },
     {
       "id": "T-0145",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-04",
       "depends_on": [
         "T-0143"
@@ -4661,13 +4664,16 @@
       "verify": true,
       "since": "e5ea51408e53fc1a7d98cc536507d8a9ea5ea755",
       "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
-      "recheck": "cost"
+      "recheck": "cost",
+      "started": "2026-11-04T23:44:52",
+      "ran_model": "sonnet",
+      "session": "6dde0b28-bff0-4188-8cff-beed42c5324c"
     },
     {
       "id": "T-0146",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-04",
       "depends_on": [
         "T-0143"
@@ -4675,7 +4681,17 @@
       "verify": true,
       "since": "e5ea51408e53fc1a7d98cc536507d8a9ea5ea755",
       "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
-      "recheck": "emc"
+      "recheck": "emc",
+      "started": "2026-11-04T23:44:52",
+      "ran_model": "sonnet",
+      "session": "9c8407a0-cfda-4705-a656-501a1cca0066",
+      "cost_usd": 0.1595,
+      "attempts": 1,
+      "finished": "2026-11-04",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-04-emc-system.md"
     }
   ],
   "board_size_start": {
