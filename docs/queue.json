@@ -4641,7 +4641,7 @@
       "id": "T-0144",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-04",
       "depends_on": [
         "T-0143"
@@ -4650,7 +4650,14 @@
       "since": "e5ea51408e53fc1a7d98cc536507d8a9ea5ea755",
       "started": "2026-11-04T23:44:52",
       "ran_model": "sonnet",
-      "session": "3418aa37-ce4c-4e00-9742-8d1b3324cd9d"
+      "session": "3418aa37-ce4c-4e00-9742-8d1b3324cd9d",
+      "cost_usd": 0.2075,
+      "attempts": 1,
+      "finished": "2026-11-04",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-04-validate-pdm-4ch-3.md"
     },
     {
       "id": "T-0145",
