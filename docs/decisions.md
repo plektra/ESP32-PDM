@@ -97,3 +97,4 @@ free number (`/handoff` adds them).
 | 88 | 2026-11-03 | pdm-4ch | reverse-battery blocker: LM74500-Q1 (C5219210, no reverse-current blocking, EN tied to SOURCE) driving N-FET IPT007N06N (C122552, 60 V, 0.75 mOhm) between new net VBAT_FL (behind FL30/JP30) and VS; keeps the OUT->VS->D30 surge path (invariant 4), no TVS on VS (design-notes 8.6) (T-0121) | auto |
 | 89 | 2026-11-03 | pdm-4ch | U30 VCAP capacitor C32 1 uF/50 V 0603 C15849 (>= 10 x Ciss 21.3 nF = 213 nF, LM74500 datasheet 9.3.1.2.3) (T-0121) | auto |
 | 90 | 2026-11-03 | pdm-4ch | PCB rule: >= 6 cm2 2 oz copper on Q30 drain tab (VS) - Q30 Tj 122 C at 40 A, 200 C on a minimal pad (T-0121) | auto |
+| 91 | 2026-11-04 | pdm-4ch | Q30 cost lever L1 dropped: AGM601LL C5464765 is 1.6 mOhm max (1.25 typ), RthJA 50 K/W without copper area; Q30 has no stable Tj below 175 C at 40 A (IPT007N06N 124 C by the same method). Q30 stays IPT007N06N C122552 (design-notes 8.6 Cost) (T-0132) | auto |

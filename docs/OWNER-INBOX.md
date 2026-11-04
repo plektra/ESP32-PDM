@@ -6,23 +6,33 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-No open questions.
+## Open (1)
 
-## Decided by agents (6) – two-way doors
+## Q-0066 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-11-03-emc-system-2.md` E18 (root sheet: Q30 IPT007N06N / D30 SMCJ30CA, design-notes 8.6 (b)); task T-0129
+- **Summary:** A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V.
+- **Proposed:** A negative transient on VBAT_IN with VS charged avalanches Q30 (about 77 V otherwise, 60 V part). At 16-24 A the rating margin is >= 2-7x, but at the 40 A input rating (Q30 hot) it is only about 1-2x by the datasheet's IAS-tAV curve. Accept documenting this as an assumption (T-0130: such transients do not occur) with no hardware change, or should the hot case be covered (e.g. limit the rating, bound C31 ESR by measurement, or add protection on VS, which changes the 'no TVS on VS' wording of 8.6 (c))?
+- **Why it needs you:** found while fixing (T-0132): Energy check of the brief's stop condition: EAS 1100 mJ is only rated at Tj(start) 25 C (no EAS(Tj), no repetitive rating); at the 40 A input rating Q30 starts at Tj ~122 C, where IPT007N06N Diagram 13 leaves only ~1-2x margin for the 80-115 mJ / 1.3-1.9 mC a negative transient with VS charged puts into Q30, depending on C31 ESR, which is not bounded. Safety question for the panel supply on VS (Q30 short: no reverse protection; open: board and panel switches dead).
+
+**Answer:** 
+
+---
+
+## Decided by agents (4) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
-- T-0129 · MINOR · pdm-4ch · A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → Correct the 8.6 (b) statement: Q30 avalanches, EAS 1100 mJ covers the roughly 45 mJ stored in the VS capacitors; no part change.
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
-- T-0126 · INFO · pdm-4ch · Q30 is the most expensive new part (3.06 USD at 10 boards); AGM601LL C5464765 (TOLL-8L, 60 V, 1.25 mΩ, 0.85 USD) would save about 2.2 USD per board if the heat budget still passes → check TOLL-8L pinout against Infineon_PG-HSOF-8-1, rerun tools/heat_budget.py with Q30 at 1.25 mΩ, swap if it passes
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (53)
+## Applied by agents (54)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0126 · pdm-4ch · Q30 is the most expensive new part (3.06 USD at 10 boards); AGM601LL C5464765 (TOLL-8L, 60 V, 1.25 mΩ, 0.85 USD) would save about 2.2 USD per board if the heat budget still passes → T-0132 (`605f3305`)
 - T-0115 · pdm-4ch · May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → T-0120 (`70cdd9cf`)
 - T-0099 · system · Using C170101 for the 1 uF/100 V places removes the C13832 fee; pays only for runs of fewer than 9 (4-ch) or 15 (HC2) boards → T-0120 (`70cdd9cf`)
 - T-0098 · pdm-4ch · RIS 680 ohm 1206 C17975 (extended) replaced by two 1 kohm 1206 C4410 (basic) in parallel: 0.26 USD per board at 10, sense scale 0.33 V/A → T-0107 (`d6c2bb6e`)
