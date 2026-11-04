@@ -1,11 +1,13 @@
 # pdm-hc2 status
 
-Updated: 2026-11-04 (decisions 93, 94, 95)
+Updated: 2026-11-04 (T-0147; decisions 93, 94, 95)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
 apply. Shared `analog_sw` sheet and controller pin map updated on 2026-10-30 (same as `pdm-4ch`): SW_SUPPLY on J5.5,
 MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
+
+**2026-11-04 (T-0147: "For /system" sweep, unattended, documents only):** the T-0064 and T-0065 cost entries left this list: C13832 and C107198 are no longer on this board, and the record stays in design-notes §8.1 and §8.3. No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0147.md`.
 
 **2026-11-04 (decision 95, /system, no schematic change):** board input limits are 32 A (`pdm-4ch`) and 36 A (`pdm-hc2`) instead of ≈ 40 / 50 A; they set J10, its GND pole and the supply copper in `/system mechanical`. Output terminals are still open.
 
@@ -201,13 +203,11 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 - T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended
   parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).
-- T-0065 unique extended parts: −PESD0402V05, −TPS7B91; +C170101 (2.2 µF/100 V); +C107198 (4.7 nF/1 kV) removed again in T-0119.
 
 - **Bilge output fusing (T-0064 failure mode, needs README/installation rule):** D103/D203 sit outside the
   back-to-back MOSFETs. If a TVS fails short, a float-switch run feeds the short through the PDM output wire. The
   float circuit stays independent (invariant 8) only if the PDM leg has its own fuse, between J11 and the junction
   with the float circuit, that opens before the float fuse. Add this to the README next to the external breaker of
   decision 39; a competent person reviews the bilge wiring before installation.
-- T-0064 added two unique extended parts (C487384, C13832); see pdm-4ch STATUS.
 
 - Module width: probably 2 module widths because of the terminals; confirm with the enclosure.

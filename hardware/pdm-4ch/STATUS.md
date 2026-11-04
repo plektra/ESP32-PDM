@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-04 (T-0143; decisions 93, 95)
+Updated: 2026-11-04 (T-0147; T-0143; decisions 93, 95)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-04 (T-0147: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row names D31 SMDJ40CA C42371557 across Q30 (VS to `VBAT_FL`, decisions 92, 96). The T-0064 and T-0065 cost entries left this list: C13832 and C107198 are on neither board, C1 is C170101, and the record stays in design-notes §8.1 and §8.3. No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0147.md`.
 
 **2026-11-04 (T-0143: T-0129, owner ruling Q-0067, unattended, `pdm-4ch` root sheet only):** **D31 SMDJ40CA C42371557** (preferred, 0.22 USD, no loading fee; `Diode_SMD:D_SMC`, bidirectional, as D30) fitted across Q30, VS to VBAT_FL, so a negative transient with VS charged no longer avalanches Q30. **Residual risk accepted by the owner:** VDS 59.4 V at 31 A (25 °C, source short-circuit current ≤ 31 A; about 60.4 V with the TVS at 47 °C); VS ≥ 0 V up to about 20.3 A, down to about −4.0 V at 31 A, so C31, which has no reverse rating, is briefly reverse-biased. Unverified whether such spikes occur (T-0130); prototype check added below. Steady reversal ≤ 28 V: D31 does not conduct. ERC 0 errors, 5 warnings (unchanged); netlist differs only in D31. 216 parts (+1), 62 unique (+1). Heat unchanged at 40 °C. Details and failure modes: design-notes §8.6. **A competent person reviews this circuit before installation** (F4 feeds navigation lights and bilge forced run). Needs the KiCad tidy of D31. Report: `docs/reviews/2026-11-04-fix-pdm-4ch-T-0143.md`.
 
@@ -195,7 +197,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
-- T-0143: the ARCHITECTURE root row should name the TVS across Q30 (D31 SMDJ40CA C42371557, VS to VBAT_FL).
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 - T-0121 (`/system mechanical`): J10 keyed/polarised on pdm-4ch too (decision 34; owner ruling Q-0054 "Still key J10").
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
@@ -208,9 +209,5 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 - T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended
   parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).
-- T-0065 unique extended parts: −PESD0402V05, −TPS7B91; +C170101 (2.2 µF/100 V); +C107198 (4.7 nF/1 kV) removed again in T-0119.
-
-- T-0064 added two unique extended parts (C487384 bulk 100 µF/63 V, C13832 1 µF/100 V); no basic/preferred part
-  exists. If T-0065/decision 30 needs a 100 V ceramic for C1, reuse C13832 to avoid a third fee.
 
 - Terminal blocks: J5 is still a 2×5 pin header; ~20 poles in 1 module width (power 2, outputs 4, panel 10, CAN 4–5).
