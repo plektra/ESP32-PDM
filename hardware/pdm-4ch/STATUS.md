@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-04 (T-0137)
+Updated: 2026-11-04 (T-0141)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-04 (T-0141: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row (C30 2.2 µF C170101, blocker Q30/U30/C32 on pdm-4ch only) and supply-path budget updated; `tools/heat_budget.py --p-other` default 2.2 → 2.3 W (4 × 4 A Tj ≈ 101 °C, unchanged). No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0141.md`.
 
 **2026-11-04 (T-0137: T-0129, owner ruling Q-0066, unattended, no schematic change):** the TVS across Q30 is **not fitted yet; back with the owner**. Stop (iii) of the brief applies: every part that keeps Q30 VDS below 60 V at the 31 A bounding current with an adequate pulse rating also lets VS fall below 0 V at that current. Example: SMDJ40CA C42371557 (preferred, same SMC package), VDS 59.4 V at 31 A, VS +3.1 V at the 12 A textbook pulse but −4.0 V at 31 A. C31 has no reverse rating (decision 82). SMCJ30CA already on the BOM is the worst for this: −15.1 V at 31 A and still −8.0 V at 12 A. §8.6 (b) and (c) stay unchanged until the owner chooses. Numbers per candidate and the question: `docs/reviews/2026-11-04-fix-pdm-4ch-T-0137.md`. Facts added for seven TVS parts in `docs/part-facts/`.
 
@@ -186,19 +188,9 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
-- T-0121 (sync): the ARCHITECTURE root row should mention the pdm-4ch reverse-battery blocker: VBAT_IN → FL30/JP30 →
-  `VBAT_FL` → Q30 IPT007N06N (U30 LM74500-Q1, C32) → VS, on pdm-4ch only (HC2 unchanged, decision 40).
 - T-0121 (`/system mechanical`): J10 keyed/polarised on pdm-4ch too (decision 34; owner ruling Q-0054 "Still key J10").
-- T-0121 (sync): supply-path budget. ARCHITECTURE says "shared supply path ≤ 2 mΩ". On pdm-4ch, Q30 adds
-  ≤ 0.75 mΩ (25 °C) / ≈ 1.05–1.1 mΩ hot. Suggested wording: "terminal + VS copper ≤ 2 mΩ, plus the pdm-4ch blocker Q30
-  ≤ 1.1 mΩ hot". The heat budget shows this is harmless (design-notes §8.6: 4 × 4 A Tj +1 K; `--r-path` default 4 mΩ already
-  covers it).
-
-- T-0107 (sync): the ARCHITECTURE root row still says "C30 1 µF/100 V". It is now 2.2 µF/100 V C170101 (decision 26 range 1–2.2 µF).
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
 - T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.
-
-- T-0105 (sync): `tools/heat_budget.py --p-other` default 2.2 → 2.3 W (design-notes §4; result unchanged, Tj ≈ 101 °C).
 
 - T-0069: firmware requirements for DEN (design-notes §6.1) belong in the `/system firmware` list. T-0069 swapped one
   unique extended part (−/+): C23228 (basic) is replaced by C17975 (extended, 1206 680 Ω); C25819 (basic) is added.

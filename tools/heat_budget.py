@@ -59,9 +59,10 @@ def main():
     ap.add_argument('--ambient', type=float, default=40.0, help='air around the enclosure [C]')
     ap.add_argument('--r-box', type=float, default=0.6, help='enclosure air rise per watt [K/W]')
     ap.add_argument('--rth-ja', type=float, default=40.0, help='switch junction to enclosure air [K/W] (2 oz ~40, 1 oz ~50)')
-    # 2.2 W: ESP32/regulators/status LEDs 0.6 W + panel interface (analog_sw) 1.6 W at VS 30 V, all four panel
-    # switches closed and LEDs lit (docs/design-notes.md §4, T-0047; HC2 ≈ 1.9 W, §4a.2). Was 0.6 W (T-0085).
-    ap.add_argument('--p-other', type=float, default=2.2,
+    # 2.3 W: ESP32/regulators/status LEDs 0.6 W + panel interface (analog_sw) 1.7 W at VS 30 V, all four panel
+    # switches closed and LEDs lit (docs/design-notes.md §4, T-0047, T-0105; HC2 ≈ 1.9 W, §4a.2).
+    # Was 0.6 W until T-0085, 2.2 W until T-0141.
+    ap.add_argument('--p-other', type=float, default=2.3,
                     help='ESP32, regulators, LEDs and panel interface at 30 V, worst case [W] (design-notes §4)')
     ap.add_argument('--r-path', type=float, default=0.004, help='shared supply path resistance [ohm]')
     ap.add_argument('--tj-max', type=float, default=125.0)
