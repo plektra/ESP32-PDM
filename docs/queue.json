@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 141,
-    "Q": 67
+    "Q": 68
   },
   "tasks": [
     {
@@ -4264,7 +4264,7 @@
         "board": "pdm-4ch",
         "location": "root sheet: Q30 IPT007N06N / D30 SMCJ30CA, design-notes 8.6 (b)",
         "summary": "A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V.",
-        "fix": "A negative transient on VBAT_IN with VS charged avalanches Q30 (about 77 V otherwise, 60 V part). At 16-24 A the rating margin is >= 2-7x, but at the 40 A input rating (Q30 hot) it is only about 1-2x by the datasheet's IAS-tAV curve. Accept documenting this as an assumption (T-0130: such transients do not occur) with no hardware change, or should the hot case be covered (e.g. limit the rating, bound C31 ESR by measurement, or add protection on VS, which changes the 'no TVS on VS' wording of 8.6 (c))?",
+        "fix": "A TVS across Q30 stops the over-voltage, but while D30 holds the input negative, VS and C31 can go below 0 V for the rest of the spike. With the 40 V parts this happens only if the spike drives more than about 20 A and lasts over about 150 us; whether such spikes occur on a real bus is unverified. Which do you want? A: SMDJ40CA C42371557 (preferred, 0.22 USD, no fee; VDS 59.4 V, VS -4.0 V at 31 A, 0.6 V margin; recommended). B: 5.0SMDJ40CA C5439931 (extended, 0.32 USD + about 3 USD fee per order; VDS 55.3 V, same VS). C: SMCJ30CA C19077607 (on the BOM; VDS 48.4 V, but VS -15.1 V at 31 A and -8.0 V at 12 A). D: 8.0SMDJ43CA C1977580 (5.49 USD + fee, stock 20, listing only; about 57.3 V, VS -0.6 V). Or something else.",
         "door": "two-way",
         "reason": "Documentation only; no part or decision changes (policy: two-way, documentation).",
         "touches": [],
@@ -4276,10 +4276,10 @@
         "finding": "E18"
       },
       "door": "one-way",
-      "state": "parked",
-      "question": "Q-0066",
+      "state": "blocked-owner",
+      "question": "Q-0067",
       "why_big": [
-        "found while fixing (T-0132): Energy check of the brief's stop condition: EAS 1100 mJ is only rated at Tj(start) 25 C (no EAS(Tj), no repetitive rating); at the 40 A input rating Q30 starts at Tj ~122 C, where IPT007N06N Diagram 13 leaves only ~1-2x margin for the 80-115 mJ / 1.3-1.9 mC a negative transient with VS charged puts into Q30, depending on C31 ESR, which is not bounded. Safety question for the panel supply on VS (Q30 short: no reverse protection; open: board and panel switches dead)."
+        "found while fixing (T-0137): Stop (iii) of the brief. Every part that keeps Q30 VDS below 60 V at the 31 A bounding current with an adequate pulse rating lets VS go negative at that current, and C31 has no reverse rating (decision 82). VDS / VS at 31 A, worst tolerances: SMCJ30CA 48.4 V / -15.1 V; SMCJ33CA 54.6 V / -11.7 V; SMDJ40CA 59.4 V / -4.0 V; 5.0SMDJ40CA 55.3 V / -4.0 V. SMCJ36CA 60.8 V, SMCJ40CA 69.6 V and SMCJ43CA 76.5 V fail VDS. VS reaches 0 V after 109-170 us at 31 A and stays negative until the pulse ends. At the textbook ISO 7637-2 pulse 1 (12-15 A, 1-2 ms, secondary sources) the 40 V parts keep VS at +2 V or above (timed simulation +4.8 V or above). No schematic change."
       ],
       "ruling": "Fit a TVS across Q30 (drain VS to source VBAT_FL) on the first order. Choose it so that Q30 VDS stays below 60 V at the pulse current while the TVS takes the energy of a negative transient with VS charged (80-115 mJ, check at the real maximum input of 32 A = 4 x BTT6010 at 8 A); it must not conduct for a steady reversed battery (<= 28 V) or in normal operation. Basic/preferred part if one fits. Correct design-notes 8.6 (b) and adjust the 8.6 (c) wording (the TVS is across Q30, not from VS to GND; the OUT->VS->Q30->D30 surge path stays). Back to the owner if no part keeps VDS below 60 V.",
       "answered": "2026-11-04",
@@ -4451,7 +4451,7 @@
       "id": "T-0137",
       "role": "board-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-04",
       "title": "TVS across Q30 for negative transients with VS charged",
       "brief": "Owner's ruling Q-0066, verbatim: \"Fit a TVS across Q30 (drain VS to source VBAT_FL) on the first order. Choose it so that Q30 VDS stays below 60 V at the pulse current while the TVS takes the energy of a negative transient with VS charged (80-115 mJ, check at the real maximum input of 32 A = 4 x BTT6010 at 8 A); it must not conduct for a steady reversed battery (<= 28 V) or in normal operation. Basic/preferred part if one fits. Correct design-notes 8.6 (b) and adjust the 8.6 (c) wording (the TVS is across Q30, not from VS to GND; the OUT->VS->Q30->D30 surge path stays). Back to the owner if no part keeps VDS below 60 V.\"\n\nBackground: docs/reviews/2026-11-03-emc-system-2.md E18, docs/reviews/2026-11-03-fix-pdm-4ch-T-0132.md, design-notes 8.6, docs/part-facts/C122552.md. The plan report docs/reviews/2026-11-04-plan-system-T-0136.md explains points 1-3 below with tables; its TVS figures are family values from memory, not checked, so verify them.\n\nIn order:\n\n1. Part facts first, with tools/part_facts.py. Read SMCJ30CA C19077607 (already on the BOM as D30, no new unique part; the first candidate): VRWM, VBR min/max, VC at Ipp, IR at 28 V, peak pulse power against pulse duration, JLCPCB basic/preferred status. If point 2 or 3 needs a higher clamp, look up the same-family SMCJ36CA, SMCJ40CA and SMCJ43CA with the pcbparts tools or part_facts.py and read their facts. Prefer a basic/preferred part if one fits, as the ruling says. Use a bidirectional CA part: a unidirectional TVS would conduct forward next to Q30's body diode at power-up, and the ruling says no conduction in normal operation. Do not add a second TVS, a series element, or any other extra part or footprint.\n\n2. Pulse current basis. It is not the 32 A load. The TVS current ends in VBAT_IN, so it cannot exceed what the transient source pulls from that node; if it tried to, VBAT_IN would rise and D30 would stop conducting. D30 only holds -48.4 V up to its Ipp, so that model implies a source of at most about 31 A (verify in the D30 facts). Check this reasoning, and if you accept it, use D30's Ipp as the bounding current and state it as an assumption in the design notes. Also give VDS at the textbook ISO 7637-2 pulse 1 source current if you can source that figure, marked as such, and give the T-0132 stiff-clamp figure (VBAT_IN fixed at -48.4 V, current limited only by C31 ESR, 30-300 mOhm) next to it for comparison. C31's ESR has no lower limit in its facts file.\n\n3. Checks for each candidate: (a) VDS below 60 V at the bounding current, using VBR max plus the slope from VC at Ipp, with a margin stated. (b) VRWM at least 28 V, with IR at 28 V: confirm the leakage into VS during a steady reversed battery is harmless (R60 divider about 242 k), and keep the claim of no time limit in 8.6 'Reverse battery now' only if that holds; also update that paragraph for what happens above D30 VBR and with VS charged at the moment of reversal, where the TVS conducts once. (c) Normal operation: no conduction with Q30 on (VDS near 0) or at power-up. (d) Energy: recompute, because the 80-115 mJ was for Q30 avalanching at 60-66 V; a lower clamp takes more from the capacitors, E = C x (VS + 48.4 - Vc) x Vc with C = 109.2 uF and VS = 29 V gives about 150-164 mJ for Vc 39-50 V. Add the energy fed to the loads for the rest of the pulse at the 32 A case (load about 0.75 ohm in total, current falling with VS, bounded by source current x Vc x pulse length) and compare with the part's pulse rating at that duration. (e) VS at the end of the pulse = V(TVS) - V(D30), worst tolerances, at the bounding current and at lower currents. Choose the part that meets (a)-(d) with VS least negative, preferring the part already on the BOM when it also meets (e).\n\n4. Schematic: add one TVS with tools/ksch.py on the pdm-4ch root sheet, next free ref (D31 is free; D30 is the highest D3x), between Q30 drain net VS and source net VBAT_FL, with an LCSC code. No net changes other than the new part's connections. Run ERC and compare the netlist before and after; declare refs: only the new TVS. Change no shared sheet, because this part of the root sheet exists only on pdm-4ch and the controller part stays identical.\n\n5. Heat: the TVS dissipates nothing in steady state, so the heat budget is unchanged. Run tools/heat_budget.py at 40 C with the existing --r-path 0.00505 and --mix case to confirm, as CLAUDE.md requires. Do not change its inputs.\n\n6. Docs, within the package's scope: design-notes 8.6 (b): replace 'VDS <= 48.4 V' with the true statement (steady reversal with VS discharged against a negative transient with VS charged, which the TVS now clamps), with the pulse-current assumption and the T-0130 note that such transients on a real bus are unverified. 8.6 (c): the TVS is across Q30, not from VS to GND; the OUT->VS->Q30->D30 surge path stays; invariant 4 wording unchanged. Add the part to the 8.6 parts table and Cost. Failure modes: TVS short (bypasses Q30: no reverse protection, not visible in use, same as 'Q30 fails short'); TVS open (back to Q30 avalanche, the T-0132 hot-start margin). Keep the competent-person review reminder (F4 feeds navigation lights and bilge forced run). PCB rule: TVS directly across Q30 drain tab and source pins, short and wide. README: change only if its reverse-battery text is no longer true. pdm-4ch STATUS.md: replace the 'T-0129 blocked for the owner' state with the result, add the PCB rule, and add a footprint/JLCPCB pre-order line only if the part is new. Add to the T-0121 sync note for the ARCHITECTURE root row that the blocker now includes this TVS; do not edit docs/ARCHITECTURE.md (not in this scope).\n\nRecord the part choice as an auto decision. Do not add the owner's ruling as a decision row: the planner has drafted it.\n\nStop and ask (one-way door), with your numbers: (i) no part keeps Q30 VDS below 60 V at the bounding current (the ruling says back to the owner). (ii) The bounding current in step 2 does not hold up and the stiff-clamp case has to be met, and no part meets it. (iii) Every part that meets (a)-(d) lets VS fall below 0 V at the bounding current, or at a transient source you take as realistic: negative VS on C31 and the VS parts goes against the purpose of decision 82 (C31 has no reverse rating), and the ruling did not cover it, so give the owner the VS figure and pulse length per candidate and let the owner choose. (iv) No candidate has an adequate pulse rating for the recomputed energy. (v) The fix would need a change to an invariant or to the OUT->VS->Q30->D30 surge path. Do not add parts, change Q30 or D30, or limit the input rating to get around a stop.",
@@ -4459,7 +4459,30 @@
         "T-0129"
       ],
       "plan": "T-0136",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-04T21:03:28",
+      "ran_model": "opus",
+      "session": "018aa34f-0d8d-476d-8197-9207fbab2793",
+      "cost_usd": 4.1229,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-04",
+      "note": "7 part-facts lookups (1.62 USD)",
+      "summary": "0 fixed, 1 blocked, merged 3bf52fa6; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-04-fix-pdm-4ch-T-0137.md"
     },
     {
       "id": "T-0138",
