@@ -4608,7 +4608,24 @@
         "T-0129"
       ],
       "plan": "T-0142",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-04T23:00:17",
+      "ran_model": "opus",
+      "session": "cf23fd98-b84b-4cde-a04a-7a7536ec602b",
+      "cost_usd": 0.3112,
+      "attempts": 1,
+      "resume": {
+        "session": "cf23fd98-b84b-4cde-a04a-7a7536ec602b",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0143",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0143-_c0tezgd",
+        "report": "docs/reviews/2026-11-04-fix-pdm-4ch-T-0143.md",
+        "head": "05e613afc3a5502dbcb628411234630fcd1a6442",
+        "reason": "a usage limit"
+      },
+      "finished": "2026-11-04",
+      "note": "no report written (api_error): You've hit your 5-hour limit · resets 11:30pm (Europe/Helsinki)",
+      "summary": "paused, API unavailable, resumes where it stopped",
+      "interrupted": null
     },
     {
       "id": "T-0144",
