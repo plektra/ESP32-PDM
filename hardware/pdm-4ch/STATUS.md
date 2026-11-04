@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-03 (T-0121)
+Updated: 2026-11-04 (T-0132)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-04 (T-0132: T-0126 cost lever L1, T-0129/EMC E18, unattended, documents only):** AGM601LL (C5464765) as a cheaper Q30 **fails** the heat check and was not fitted: its 1.25 mΩ is typical, 1.6 mΩ max (≈ 2.9 mΩ at 150 °C); with RthJA 40–50 K/W Q30 has no stable Tj below 175 °C at 40 A (IPT007N06N: 124 °C by the same method). Q30 stays IPT007N06N C122552; no schematic change, no refs. Details: design-notes §8.6 Cost. T-0129 (the §8.6 (b) "VDS ≤ 48.4 V" correction) is **blocked for the owner**: in a negative transient with VS charged, Q30 avalanches at about 60–63 V and absorbs about 80–115 mJ. EAS 1100 mJ is for Tj(start) 25 °C only. At the 40 A hot case (Tj ≈ 122 °C) the IAS–tAV curve (Diagram 13) leaves only ≈ 1–2× margin, depending on C31 ESR, which is not bounded. §8.6 (b) is unchanged until the owner rules. Report: `docs/reviews/2026-11-03-fix-pdm-4ch-T-0132.md`.
 
 **2026-11-03 (T-0121: T-0088/EMC E16, owner ruling Q-0054, unattended, `pdm-4ch` root sheet only):** reverse-battery blocker on VS in front of the bulk capacitors. New net `VBAT_FL` between FL30/JP30 and **Q30 IPT007N06N** (C122552, 60 V, 0.75 mΩ max, TOLL; source VBAT_FL, drain VS), driven by **U30 TI LM74500-Q1** (C5219210, SOT-23-THIN-8; SOURCE+EN on VBAT_FL = always on without MCU, GATE → Q30) with **C32** 1 µF/50 V (C15849, basic, on the BOM) at VCAP. D30/C30 stay on VBAT_IN at J10; C31, C104–C404, U11–U14, F1, F4, R60 sit behind Q30. The LM74500 does not block reverse current: Q30 is fully on both ways, so OUT → body diode → VS → D30 (invariant 4) is kept, no TVS on VS. Reverse battery up to 30 V: VS stays unpowered, no time limit. Heat at 40 °C (`--r-path 0.00505`): 4 × 4 A Tj 101 → 102 °C, mix 8 A/4 A unchanged (90/102 °C), Q30 itself 1.8 W / Tj 122 °C at 40 A with ≥ 6 cm² 2 oz drain copper. New symbols `ESP32-PDM:IPT007N06N` and `ESP32-PDM:LM74500-Q1` in `lib/`. ERC 0 errors, 5 warnings (unchanged); netlist differs only in Q30/U30/C32 and FL30.1/JP30.1 (now VBAT_FL). 210 parts (+3), 61 unique (+2 extended). README and design-notes §8/§8.1/§8.6 updated, failure-mode note in §8.6: **a competent person reviews the blocker before installation** (panel switches for navigation lights and bilge forced run depend on Q30). Report: `docs/reviews/2026-11-03-fix-pdm-4ch-T-0121.md`.
 

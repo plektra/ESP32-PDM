@@ -1168,6 +1168,23 @@ order). Alternative checked: 2 × BSC014N06NS (C113391, 1.45 mΩ max each, 1.52 
 parallel (≈ 1.1 mΩ hot, 3.03 USD) would also work, but it is two parts and more copper area for the same unique-part count; a
 single one gives ≈ 4.3 W at 40 A and is too hot.
 
+**Cheaper Q30 checked and dropped (T-0126, cost lever L1, 2026-11-04).** AGM-Semi AGM601LL (C5464765, TOLL, 0.85 USD,
+`docs/part-facts/C5464765.md`, datasheet VER2.65): 60 V, VGS ±20 V, EAS 1225 mJ, Tj 175 °C, pin 1 G / 2–8 S / tab D.
+The 1.25 mΩ in the cost report is **typical**; the maximum is **1.6 mΩ** (10 V, 30 A, 25 °C), and Fig. 6 gives ×1.47 at
+100 °C and ×1.80 at 150 °C (≈ 2.9 mΩ at 150 °C, max). RthJA 50 K/W has no stated copper area, there is no Ciss max and no
+pulsed body-diode current. Q30 junction solved as above with the max curve (enclosure air 45.7 / 46.6 / 52.5 °C, from
+`tools/heat_budget.py --p-other 2.3 --r-path 0.0069` = 4 mΩ + 2.9 mΩ hot):
+
+| Input current | IPT007N06N max curve, 40 K/W (check of the method) | AGM601LL max curve, 40 K/W | AGM601LL max curve, 50 K/W |
+|---|---|---|---|
+| 16 A | 54 °C | 66 °C | 72 °C |
+| 24 A | 67 °C | 101 °C | 121 °C |
+| 40 A | 124 °C | no solution below 175 °C (thermal runaway) | no solution |
+
+Even the typical 1.25 mΩ held at its 25 °C value would give 2.0 W and ≈ 132 °C at 40 A, which is above 125 °C. Making
+it pass would need RthJA ≈ 17 K/W (more copper or a second FET, neither in the item). The channel ratings would have
+held: 4 × 4 A Tj 102 °C (4.5 A now OVER), mix 91/103 °C, 4 × 8 A 93 °C. **Lever dropped. Q30 stays IPT007N06N C122552.**
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
