@@ -1,11 +1,13 @@
 # pdm-4ch status
 
-Updated: 2026-11-04 (decisions 93, 95)
+Updated: 2026-11-04 (T-0143; decisions 93, 95)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
 2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
 channel-4 drive moved to IO11.
+
+**2026-11-04 (T-0143: T-0129, owner ruling Q-0067, unattended, `pdm-4ch` root sheet only):** **D31 SMDJ40CA C42371557** (preferred, 0.22 USD, no loading fee; `Diode_SMD:D_SMC`, bidirectional, as D30) fitted across Q30, VS to VBAT_FL, so a negative transient with VS charged no longer avalanches Q30. **Residual risk accepted by the owner:** VDS 59.4 V at 31 A (25 °C, source short-circuit current ≤ 31 A; about 60.4 V with the TVS at 47 °C); VS ≥ 0 V up to about 20.3 A, down to about −4.0 V at 31 A, so C31, which has no reverse rating, is briefly reverse-biased. Unverified whether such spikes occur (T-0130); prototype check added below. Steady reversal ≤ 28 V: D31 does not conduct. ERC 0 errors, 5 warnings (unchanged); netlist differs only in D31. 216 parts (+1), 62 unique (+1). Heat unchanged at 40 °C. Details and failure modes: design-notes §8.6. **A competent person reviews this circuit before installation** (F4 feeds navigation lights and bilge forced run). Needs the KiCad tidy of D31. Report: `docs/reviews/2026-11-04-fix-pdm-4ch-T-0143.md`.
 
 **2026-11-04 (decision 95, /system, no schematic change):** board input limits are 32 A (`pdm-4ch`) and 36 A (`pdm-hc2`) instead of ≈ 40 / 50 A; they set J10, its GND pole and the supply copper in `/system mechanical`. Q30 is about 86 °C at 32 A with the 6 cm² copper rule kept; the cheaper AGM601LL still fails at about 179 °C. Older entries that say 40 A are history.
 
@@ -13,7 +15,7 @@ channel-4 drive moved to IO11.
 
 **2026-11-04 (T-0141: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row (C30 2.2 µF C170101, blocker Q30/U30/C32 on pdm-4ch only) and supply-path budget updated; `tools/heat_budget.py --p-other` default 2.2 → 2.3 W (4 × 4 A Tj ≈ 101 °C, unchanged). No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0141.md`.
 
-**2026-11-04 (T-0137: T-0129, owner ruling Q-0066, unattended, no schematic change):** the TVS across Q30 is **not fitted yet; back with the owner**. Stop (iii) of the brief applies: every part that keeps Q30 VDS below 60 V at the 31 A bounding current with an adequate pulse rating also lets VS fall below 0 V at that current. Example: SMDJ40CA C42371557 (preferred, same SMC package), VDS 59.4 V at 31 A, VS +3.1 V at the 12 A textbook pulse but −4.0 V at 31 A. C31 has no reverse rating (decision 82). SMCJ30CA already on the BOM is the worst for this: −15.1 V at 31 A and still −8.0 V at 12 A. §8.6 (b) and (c) stay unchanged until the owner chooses. Numbers per candidate and the question: `docs/reviews/2026-11-04-fix-pdm-4ch-T-0137.md`. Facts added for seven TVS parts in `docs/part-facts/`.
+**2026-11-04 (T-0137, superseded by T-0143 above: T-0129, owner ruling Q-0066, unattended, no schematic change):** the TVS across Q30 is **not fitted yet; back with the owner**. Stop (iii) of the brief applies: every part that keeps Q30 VDS below 60 V at the 31 A bounding current with an adequate pulse rating also lets VS fall below 0 V at that current. Example: SMDJ40CA C42371557 (preferred, same SMC package), VDS 59.4 V at 31 A, VS +3.1 V at the 12 A textbook pulse but −4.0 V at 31 A. C31 has no reverse rating (decision 82). SMCJ30CA already on the BOM is the worst for this: −15.1 V at 31 A and still −8.0 V at 12 A. §8.6 (b) and (c) stay unchanged until the owner chooses. Numbers per candidate and the question: `docs/reviews/2026-11-04-fix-pdm-4ch-T-0137.md`. Facts added for seven TVS parts in `docs/part-facts/`.
 
 **2026-11-04 (T-0132: T-0126 cost lever L1, T-0129/EMC E18, unattended, documents only):** AGM601LL (C5464765) as a cheaper Q30 **fails** the heat check and was not fitted: its 1.25 mΩ is typical, 1.6 mΩ max (≈ 2.9 mΩ at 150 °C); with RthJA 40–50 K/W Q30 has no stable Tj below 175 °C at 40 A (IPT007N06N: 124 °C by the same method). Q30 stays IPT007N06N C122552; no schematic change, no refs. Details: design-notes §8.6 Cost. T-0129 (the §8.6 (b) "VDS ≤ 48.4 V" correction) is **blocked for the owner**: in a negative transient with VS charged, Q30 avalanches at about 60–63 V and absorbs about 80–115 mJ. EAS 1100 mJ is for Tj(start) 25 °C only. At the 40 A hot case (Tj ≈ 122 °C) the IAS–tAV curve (Diagram 13) leaves only ≈ 1–2× margin, depending on C31 ESR, which is not bounded. §8.6 (b) is unchanged until the owner rules. Report: `docs/reviews/2026-11-03-fix-pdm-4ch-T-0132.md`.
 
@@ -112,8 +114,6 @@ hard-short prototype test below is mandatory before installation. An overstresse
 supply permanently off, bus control keeps working). F4 feeds the panel switches (bilge forced run, navigation lights):
 a competent person reviews F1–F4 and R54–R56 before installation.
 
-**Waiting for a run:** the owner ruled SMDJ40CA C42371557 across Q30 (Q-0067, T-0129). The next `tools/orchestrate.py run` applies it; the T-0137 entry above is superseded once it has.
-
 ## Next
 
 1. Open in KiCad: tidy what the scripts placed (labels, part positions; the new parts in `analog_sw` and the
@@ -140,6 +140,7 @@ a competent person reviews F1–F4 and R54–R56 before installation.
      copper, both layers. **≥ 6 cm² 2 oz copper on Q30's drain tab (VS)**: Tj ≈ 86 °C at 32 A (minimal pad:
      ≈ 116 °C). U30 next to Q30 with short SOURCE/GATE traces. C32 at U30, away from Q30's tab. The surge loop
      switches → VS → Q30 → D30 short and wide.
+   - T-0143 (design-notes §8.6): D31 directly across the Q30 drain tab and source pins, short and wide.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
    board edges and screws.
@@ -162,6 +163,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
   SWIN = 10.5 V with the channel on, once with the 3.3 V rail removed and once with it present. Repeat at a 10.5 V battery
   with D55's drop (SWIN ≈ 9.8–10.1 V). Pass: ≥ 2.0 V (VIN(H) min). If short, the planned fix is **RIN R101/R201/R301/R401 →
   4.7 kΩ**. The divider on the shared sheet stays an owner decision. Calculation in design-notes §3.
+- T-0129 / Q-0067 - negative pulse on J10 with VS charged and the source short-circuit current within 31 A: scope Q30 VDS and VS (also VBAT_IN); expect VDS about 60 V or less and VS no lower than about -4 V; inspect C31 afterwards.
 - T-0012: check the hardware switch path with a bouncing contact (no output chatter, τ ≈ 1.5 ms). Measure the ON/OFF
   switch voltage (≈ 8 V at the switch, ≈ 8.5 V at the battery).
 
@@ -187,11 +189,13 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0121: check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30, pads 1 G / 2 S / 3 D) and `TSOT-23-8` (U30; TI DDF land
   1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C122552 and C5219210. Recheck stock (C122552
   4707, C5219210 2923 on 2026-11-03).
+- T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
 - T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
   positions.
 
 ## For /system
 
+- T-0143: the ARCHITECTURE root row should name the TVS across Q30 (D31 SMDJ40CA C42371557, VS to VBAT_FL).
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 - T-0121 (`/system mechanical`): J10 keyed/polarised on pdm-4ch too (decision 34; owner ruling Q-0054 "Still key J10").
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
