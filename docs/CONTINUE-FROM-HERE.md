@@ -21,7 +21,7 @@ Steps 1–3 are done, including the fix rounds. Step 4 is in progress: mounting 
    and propose levers.
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
-4. **`/system mechanical`** – still open: DIN carrier and printed enclosure design, sample connector check. PCB can start once the samples pass.
+4. **`/system mechanical`** – still open: DIN carrier and printed enclosure design. PCB layout can start; no connector samples (decision 99).
 5. **`/board pdm-4ch pcb`**, then **`/board pdm-hc2 pcb`**.
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
@@ -31,7 +31,6 @@ Steps 1–3 are done, including the fix rounds. Step 4 is in progress: mounting 
 ## Waiting on the owner
 
 - No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
-- Buy one sample of each connector set (decision 98) and check them before layout.
 - Measurements: bilge pump locations and feeds.
 
 ## Backlog (not now)

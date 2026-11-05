@@ -614,9 +614,14 @@ right-angle sockets, wired on the bench and pushed in from the board edge.
 pad 1, y toward the mating face. Row lengths: 4-ch J10 38.1 + J11 21.9 = 60.0 mm; HC2 J10 38.1 + J11 30.5 = 68.6 mm; J5 39.0 + J4
 16.1 = 55.1 mm. Hence about 65 mm and 75 mm board depth with gaps. The J10 body reaches 34 mm in from the edge, the HC2 J11 body 29 mm,
 so those parts take most of one end of the HC2 board. J5 stays a Conn_02x05 symbol; its pins 1–10 run in a single row. The J10 plug
-adds about 39 mm past the board edge plus the cable bend, and it is 27.8 mm thick. **Not proven by the drawings, so checked on one
-sample of each set before layout:** that plugs cannot go in reversed, whether a 4-pole J4 plug can enter the 10-pole J5 socket (label
-them), and that plugs fit the 36 mm pitch. Pad 3.2 mm for the J10 pins (three per pole). Hand-soldering J10 into 2 oz copper needs a
+adds about 39 mm past the board edge plus the cable bend, and it is 27.8 mm thick. **No samples (decision 99).** Footprint data for all five
+sockets from JLCPCB (2026-11-05) agrees on pitch, rows and pole grouping. Hole sizes differ slightly and the footprints follow the maker
+drawings: C6394053 1.8 mm in both; C577772 1.5 (JLCPCB 1.6); C441238 1.6 (1.8); C26895 and C7245 1.4 (1.5 and 1.26). The
+JLCPCB data for C6394053 and C577772 lists no flange holes; they are on the maker drawings. **Not proven by the drawings, so checked
+when the first-order connectors arrive, before first power-up:** that plugs cannot go in reversed (the plug profile is asymmetric, but
+its locking screws are symmetric), whether a 4-pole J4 plug can enter the 10-pole J5 socket, and the fit at the 36 mm pitch. A wrong
+pitch only changes rail spacing, not the board. If a plug can go in reversed, HC2 relies on polarity marking until a later revision;
+pdm-4ch still has Q30. Pad 3.2 mm for the J10 pins (three per pole). Hand-soldering J10 into 2 oz copper needs a
 powerful iron; a cold joint at 32–36 A overheats. The flange holes are non-plated, so the header screws touch no copper. Stock when
 chosen: C6394053 39, C6394029 50, C577772 40, C577752 63. Enough for the first 5 + 5; the Phoenix 10.16 mm set (C6790556) is the
 fallback at a higher price, not footprint-compatible.
@@ -1302,7 +1307,7 @@ Rechecked at the 32 A limit of decision 95 (same method, air 48.4 °C): AGM601LL
 - [x] Battery-voltage measurement (IO10) and NTC near the switches (IO9) (decision 18)
 - [ ] Failure modes and alert handling: LED blink codes, Signal K alerts with acknowledge/mute (decision 20)
 - [x] Mounting and connectors (§7, decisions 97, 98)
-- [ ] DIN carrier and printed enclosure design, connector sample check (§7)
+- [ ] DIN carrier and printed enclosure design, connector check on arrival (§7, decision 99)
 - [x] Verify the PG-TDSO-14 footprint against the package drawing and the JLCPCB/EasyEDA footprint (§8.4, T-0066)
 - [ ] Per-output fuse strategy (on board vs. in the installation)
 - [x] Standard population: all four BTT6050 (Q-0032, T-0040); heavy loads go on HC2. BTT6010 only where > 4 A, mixed builds ordered together (§3, pdm-4ch STATUS/README)
