@@ -593,14 +593,30 @@ reviews this before installation.
 
 ## 7. Mechanics and connectors
 
-- DIN: PCB perpendicular to the rail, ~85 × 55 mm, target **1 module width** (17.5 mm). Terminal rows
-  run front-to-back along the top and bottom edges, so the pole count is set by depth, not width.
-  Provisional rating 3.5 A per BTT6050 channel in 1 module width until a prototype is measured.
-- Pluggable terminal blocks on the top and bottom edges. A 4-channel board needs ~20 poles
-  (power 2, outputs 4, panel 9, CAN 4–5): ≈ 10–13 poles per edge at 3.81 mm pitch. Exact parts are
-  chosen at the PCB stage.
-- Flat mounting: same PCB and housing with a flat-mount foot instead of the DIN clip.
-- Enclosure material: ASA (PETG softens at ~80 °C).
+Decision 97 (amends decision 10). The board mounts two ways on the same four non-plated M3 holes H1–H4:
+
+- **DIN rail, no enclosure of its own:** bare board on a plastic carrier, PCB edge-on to the rail, ~85 × 55 mm, in an enclosure the
+  installer provides. One enclosure can hold several units. The carrier and its screws never reach board copper, because the
+  rail may be bonded to the hull (invariant 6).
+- **3D-printed enclosure instead of the rail:** vented ASA (PETG softens at ~80 °C), also for flat mounting on a wall or ceiling.
+
+**Rail pitch.** A terminal's height runs across the rail, so its drawing height plus pin length below the board plus 1 mm sets the
+pitch. KF135T-10.16 (C475108): 29.5 + 4.3 + 1 = 34.8 mm. KF7620-7.62 (C475104): 21.5 + 4.9 + 1 = 27.4 mm. DB128V-5.08 (C2915639):
+14 + 3.5 + 1 = 18.5 mm. So about 36 mm per unit with the 10.16 mm block, and the old 1-module target (about 14.5 mm inside) could
+not hold even the smallest of these.
+
+**Screw access (accepted, edge-on).** On these blocks the screw faces away from the PCB, so J10/J11 screws face the neighbouring
+unit. Wire a unit before fitting its neighbour, or unclip it to reach the screws, and leave enough cable slack for that. Face-on
+mounting (screws to the front, about 60 mm per unit) was the alternative; the owner chose rail density.
+
+**Heat in a shared enclosure.** Every board gives off about 9 W at full load, all into the same air, so the rating is the air inside
+the box (`heat_budget.py --r-box 0 --ambient T`, estimates): 4-ch at 4 A Tj 107 °C at 50 °C air, 114 °C (marginal) at 55 °C, 127 °C
+(over) at 65 °C; at 3 A 96 °C at 65 °C and 102 °C at 70 °C. HC2 at 15 A: 99 °C at 55 °C, 111 °C (marginal) at 65 °C. A closed
+300 × 200 × 120 mm plastic box rises roughly 0.75 K/W (rule of thumb), so three boards at full load in a 40 °C space give about
+60 °C: derate or vent. Board spacing and the tall blocks affect the assumed RthJA; measure on the prototype.
+
+**Bare board rules (README).** The enclosure must keep out drips and loose metal, because an open board has unfused battery copper.
+Conformal coating is an option to consider for marine air.
 
 ## 8. Protection and limitations
 

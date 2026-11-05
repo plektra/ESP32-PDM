@@ -58,6 +58,11 @@ per order, so order mixed builds together to pay it once.
 - **`pdm-hc2` reverse battery destroys the board:** a reversed battery connection destroys both HC2 output controllers
   (TPS48110A-Q1, rated −1 V). There is no reverse-polarity protection on this revision. Use the keyed/polarised
   battery connector J10 only as marked, check polarity before connecting; the board label carries this warning.
+- **Mounting:** two ways, on the same four M3 holes. On a DIN rail the bare board goes on a plastic carrier, edge-on, about 36 mm
+  of rail per unit, inside an enclosure you provide; it must keep out drips and loose metal, and carrier and screws must never
+  touch board copper. Terminal screws face the next unit, so wire each unit before fitting its neighbour and leave cable slack.
+  Alternatively use a vented 3D-printed enclosure, also for flat mounting. Each board gives off about 9 W at full load: in a
+  shared enclosure keep the air inside at or below 50 °C for the full rating (estimate until measured), or derate.
 - **Board input limits:** at most **32 A** continuous through J10 on `pdm-4ch` and **36 A** on `pdm-hc2`, whatever the
   outputs could draw together. Size the battery feed, and its fuse, so that these limits are not exceeded.
 - **`pdm-hc2` timing:** after power is connected, the first switch-on of each output (also from a panel switch)

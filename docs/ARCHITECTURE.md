@@ -59,12 +59,16 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 9. No 3.3 V (or other logic rail) leaves the board on a cable; panel switches and LEDs run from the fused switch supply (decision 17).
 10. Analog measurements the firmware relies on (MOD_ID, current sense, VBAT_SENSE, NTC) use ADC1 pins (IO1–IO10); ADC2 is shared with Wi-Fi.
 
+## Mechanics
+
+Same four non-plated M3 holes (H1–H4) for every mounting (decision 97). DIN rail: bare board on a plastic carrier, PCB edge-on to the rail, about 36 mm of rail per unit, in an enclosure the installer provides. Alternative: a 3D-printed vented ASA enclosure, also for flat mounting. Nothing conductive from carrier, screws or enclosure reaches board copper (invariant 6).
+
 ## Budgets [estimate until measured]
 
 | Budget | Figure | Source |
 |---|---|---|
-| Ambient | 40 °C engine room (enclosure air +2…10 °C) | decision 9 |
-| 4-ch, BTT6050 per channel | 4 A at 2 oz copper (3.5 A provisional in 1 module width) | `tools/heat_budget.py` |
+| Ambient | 40 °C engine room (own printed enclosure: air +2…10 °C). Shared enclosure: full rating up to 50 °C air inside the box, BTT6050 at 3 A up to about 65–70 °C; each board gives off about 9 W at full load | decisions 9, 97 |
+| 4-ch, BTT6050 per channel | 4 A at 2 oz copper | `tools/heat_budget.py` |
 | 4-ch, BTT6010 per channel | ≈ 8 A | `tools/heat_budget.py --mix` |
 | HC2 per channel | ≈ 15 A continuous; breaker ~17.5 A / 146 ms (RIWRN 68 k, ≈ 15–20 A over tolerances); fast trip 80 A; external breaker ≤ 15–18 A per output plus firmware soft fuse (decision 39); load input capacitance ≤ ≈ 50 µF per output (decisions 77, 94) | `tools/heat_budget.py --part HC-2xBSC030`, TPS4811-Q1 equations |
 | Shared supply path | ≤ 2 mΩ (terminal + VS copper), plus on pdm-4ch the blocker Q30 (≤ 0.75 mΩ at 25 °C, ≈ 1.1 mΩ hot); board input limit 32 A (4-ch) / 36 A (HC2), decision 95 | design-notes §4, §8.6 |

@@ -11,6 +11,8 @@ MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
 
 **2026-11-04 (decision 95, /system, no schematic change):** board input limits are 32 A (`pdm-4ch`) and 36 A (`pdm-hc2`) instead of ≈ 40 / 50 A; they set J10, its GND pole and the supply copper in `/system mechanical`. Output terminals are still open.
 
+**2026-11-05 (decision 97, /system mechanical, root sheet, same on both boards):** the board mounts on a plastic DIN carrier (edge-on, about 36 mm per unit, enclosure by the installer) or in a printed enclosure. H1/H2 had no footprint: H1–H4 are now four `MountingHole_3.2mm_M3` non-plated holes. ERC 0 errors, 5 warnings (unchanged); netlist adds H3/H4 and footprints only. **For the PCB:** holes at the corners with copper keep-out, no copper reachable by carrier or screws (invariant 6), and J10 height sets the pitch.
+
 **2026-11-04 (decision 93, /system, shared `analog_sw` + root sheet, same on both boards):** SW_SUPPLY sense added: R49 10 k 1206 → SW_SENSE, R57 4.7 k, D24 BZT52C3V3, C21 470 nF, R58 10 k (root sheet) → IO12 as a digital input. It replaces the decision 21 divider, which could not work on IO12 (design-notes §5). +5 parts, +0 unique. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those parts and U1 pad 16. Needs the KiCad tidy of the new parts' labels.
 
 **2026-11-04 (decision 94, /system):** plan on one LED work light per HC2 output; about 50 µF per output, confirmed on the prototype; several lights on one output only for low-capacitance loads or a group shown to switch on cleanly. README and design-notes §4a.3 updated. No schematic change.
@@ -210,4 +212,4 @@ R71/R72 go between D9 and U5 (D9 at J4).
   with the float circuit, that opens before the float fuse. Add this to the README next to the external breaker of
   decision 39; a competent person reviews the bilge wiring before installation.
 
-- Module width: probably 2 module widths because of the terminals; confirm with the enclosure.
+- Mounting settled in decision 97 (about 36 mm per unit on the rail with the tallest J10 block).

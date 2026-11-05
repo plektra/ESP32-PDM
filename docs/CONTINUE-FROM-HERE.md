@@ -1,6 +1,6 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-04.
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-05.
 
 ## Boards
 
@@ -22,7 +22,7 @@ Steps 1–3 are done, including the fix rounds. Next: `python3 tools/orchestrate
    and propose levers.
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
-4. **`/system mechanical`** – terminal blocks and pole count (panel connector J5 = 10 poles), DIN (1 module width) and flat-mount enclosure, vents.
+4. **`/system mechanical`** – in progress. Mounting settled (decision 97); still open: terminal blocks and J10 keying (J5 = 10 poles), carrier and printed enclosure design.
 5. **`/board pdm-4ch pcb`**, then **`/board pdm-hc2 pcb`**.
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
