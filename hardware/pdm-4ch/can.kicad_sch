@@ -3999,7 +3999,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "WJ15EDGVC-3.81-04P"
+		(property "Value" "WJ15EDGRC-3.81-04P"
 			(at 187.96 99.0599 0)
 			(effects
 				(font
@@ -4008,7 +4008,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_Phoenix_MC:PhoenixContact_MCV_1,5_4-G-3.81_1x04_P3.81mm_Vertical"
+		(property "Footprint" "ESP32-PDM:Kangnex_WJ15EDGRC-3.81-04P"
 			(at 185.42 96.52 0)
 			(effects
 				(font
@@ -4026,7 +4026,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" "N2K: GND_CAN, NET-S, CANH, CANL"
 			(at 185.42 96.52 0)
 			(effects
 				(font
@@ -4035,7 +4035,25 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C8410"
+		(property "LCSC" "C7245"
+			(at 185.42 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC_Plug" "C7244"
+			(at 185.42 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Assembly" "hand-soldered by the owner, not in the PCBA order (decision 85)"
 			(at 185.42 96.52 0)
 			(effects
 				(font

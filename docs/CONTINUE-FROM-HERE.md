@@ -13,16 +13,15 @@ Firmware: not started.
 
 ## Order of work
 
-Steps 1–3 are done, including the fix rounds. Next: `python3 tools/orchestrate.py run` fits the Q30 TVS the owner ruled
-(Q-0067); then read `git log --stat main..auto/pilot` and the inbox, and merge. After that, step 4.
+Steps 1–3 are done, including the fix rounds. Step 4 is in progress: mounting and connectors are decided (decisions 97, 98).
 
 1. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.
-2. **`/cost system deep`** – price both BOMs (parts, JLCPCB extended-part fees, 2 oz copper, through-hole terminals)
+2. **`/cost system deep`** – price both BOMs (parts, JLCPCB extended-part fees, 2 oz copper; connectors are hand-soldered keyed sockets, decisions 85, 98, not yet priced in the report)
    and propose levers.
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
-4. **`/system mechanical`** – in progress. Mounting settled (decision 97); still open: terminal blocks and J10 keying (J5 = 10 poles), carrier and printed enclosure design.
+4. **`/system mechanical`** – still open: DIN carrier and printed enclosure design, sample connector check. PCB can start once the samples pass.
 5. **`/board pdm-4ch pcb`**, then **`/board pdm-hc2 pcb`**.
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
@@ -32,6 +31,7 @@ Steps 1–3 are done, including the fix rounds. Next: `python3 tools/orchestrate
 ## Waiting on the owner
 
 - No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
+- Buy one sample of each connector set (decision 98) and check them before layout.
 - Measurements: bilge pump locations and feeds.
 
 ## Backlog (not now)

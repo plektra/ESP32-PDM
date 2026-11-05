@@ -7978,7 +7978,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "POWER"
+		(property "Value" "KF2EDGSRAM-10.16-2P"
 			(at 287.02 133.35 0)
 			(effects
 				(font
@@ -7987,7 +7987,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "ESP32-PDM:Kefa_KF2EDGSRAM-10.16-2P"
 			(at 284.48 132.08 0)
 			(effects
 				(font
@@ -8005,7 +8005,34 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Battery input VS / GND (terminal block TBD)"
+		(property "Description" "Battery input VBAT_IN / GND, keyed locking plug (decision 98)"
+			(at 284.48 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C6394053"
+			(at 284.48 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC_Plug" "C6394029"
+			(at 284.48 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Assembly" "hand-soldered by the owner, not in the PCBA order (decision 85)"
 			(at 284.48 132.08 0)
 			(effects
 				(font
@@ -8328,7 +8355,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "OUTPUTS"
+		(property "Value" "KF2EDGSRM-7.62-2P"
 			(at 287.02 46.99 0)
 			(effects
 				(font
@@ -8337,7 +8364,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "ESP32-PDM:Kefa_KF2EDGSRM-7.62-2P"
 			(at 284.48 45.72 0)
 			(effects
 				(font
@@ -8355,7 +8382,34 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Outputs OUT1-OUT2, >= 25 A each (terminal TBD)"
+		(property "Description" "Outputs OUT1-OUT2, keyed locking plug (decision 98)"
+			(at 284.48 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C577772"
+			(at 284.48 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC_Plug" "C577752"
+			(at 284.48 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Assembly" "hand-soldered by the owner, not in the PCBA order (decision 85)"
 			(at 284.48 45.72 0)
 			(effects
 				(font

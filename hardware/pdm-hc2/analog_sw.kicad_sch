@@ -4355,7 +4355,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_02x05_Top_Bottom"
+		(property "Value" "WJ15EDGRC-3.81-10P"
 			(at 66.04 35.56 0)
 			(effects
 				(font
@@ -4364,7 +4364,7 @@
 				(hide yes)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical"
+		(property "Footprint" "ESP32-PDM:Kangnex_WJ15EDGRC-3.81-10P"
 			(at 64.77 44.45 0)
 			(effects
 				(font
@@ -4382,7 +4382,34 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Generic connector, double row, 02x05, top/bottom pin numbering scheme (row 1: 1...pins_per_row, row2: pins_per_row+1 ... num_pins), script generated (kicad-library-utils/schlib/autogen/connector/)"
+		(property "Description" "Panel cable (decision 17), pins 1-10 in a single row"
+			(at 64.77 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C26895"
+			(at 64.77 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC_Plug" "C26865"
+			(at 64.77 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Assembly" "hand-soldered by the owner, not in the PCBA order (decision 85)"
 			(at 64.77 44.45 0)
 			(effects
 				(font

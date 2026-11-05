@@ -207,7 +207,7 @@ protection comes from the required external breaker (≤ 15–18 A) and the firm
 (140–160 °C at the MMBT3904) is a backstop, not a continuous protection.
 
 Notes and open points:
-- Terminals for ≥ 25 A per output (to be settled in `/system mechanical`) and 36 A battery input (decision 95); 2 oz copper; footprint
+- Keyed plugs: J11 30 A UL / 32 A IEC, J10 for the 36 A battery input (decisions 95, 98); 2 oz copper; footprint
   `Texas_DGX0019A` drawn from TI's land-pattern example (verify against JLCPCB before ordering).
 - **Timing the user sees (T-0059, 2026-11-02; TPS4811-Q1 SLUSEE5E p. 8, 18, 23):**
   - *First switch-on after power-up* waits for the bootstrap capacitor: Eq. 1 TDRV_EN = CBST × V(BST_UVLOR) /
@@ -595,19 +595,31 @@ reviews this before installation.
 
 Decision 97 (amends decision 10). The board mounts two ways on the same four non-plated M3 holes H1–H4:
 
-- **DIN rail, no enclosure of its own:** bare board on a plastic carrier, PCB edge-on to the rail, ~85 × 55 mm, in an enclosure the
+- **DIN rail, no enclosure of its own:** bare board on a plastic carrier, PCB edge-on to the rail, about 65 mm (4-ch) / 75 mm (HC2) deep and up to 100 mm long (decision 98), in an enclosure the
   installer provides. One enclosure can hold several units. The carrier and its screws never reach board copper, because the
   rail may be bonded to the hull (invariant 6).
 - **3D-printed enclosure instead of the rail:** vented ASA (PETG softens at ~80 °C), also for flat mounting on a wall or ceiling.
 
-**Rail pitch.** A terminal's height runs across the rail, so its drawing height plus pin length below the board plus 1 mm sets the
+**Rail pitch (the 36 mm is unverified until the sample check).** A terminal's height runs across the rail, so its drawing height plus pin length below the board plus 1 mm sets the
 pitch. KF135T-10.16 (C475108): 29.5 + 4.3 + 1 = 34.8 mm. KF7620-7.62 (C475104): 21.5 + 4.9 + 1 = 27.4 mm. DB128V-5.08 (C2915639):
-14 + 3.5 + 1 = 18.5 mm. So about 36 mm per unit with the 10.16 mm block, and the old 1-module target (about 14.5 mm inside) could
+14 + 3.5 + 1 = 18.5 mm. Those fixed blocks set the first figure of about 36 mm per unit. Decision 98's J10 socket C6394053 is 13.4 + 4 + 1 = 18.4 mm, and its 27.8 mm plug
+at worst 27.8 + 4 + 1 = 32.8 mm, so 36 mm stays conservative; how the plug sits against the board is not on the drawing. The old 1-module target (about 14.5 mm inside) could
 not hold even the smallest of these.
 
-**Screw access (accepted, edge-on).** On these blocks the screw faces away from the PCB, so J10/J11 screws face the neighbouring
-unit. Wire a unit before fitting its neighbour, or unclip it to reach the screws, and leave enough cable slack for that. Face-on
-mounting (screws to the front, about 60 mm per unit) was the alternative; the owner chose rail density.
+**Screw access (solved by decision 98).** On fixed screw blocks the screw faces away from the PCB, so edge-on it would face the
+neighbouring unit. Face-on mounting (about 60 mm per unit) was the alternative; the owner chose rail density and keyed plugs on
+right-angle sockets, wired on the bench and pushed in from the board edge.
+
+**Connectors (decision 98, drawings C6394053, C577772, C577767, C441238, C26895).** Footprints in `lib/ESP32-PDM.pretty`, origin at
+pad 1, y toward the mating face. Row lengths: 4-ch J10 38.1 + J11 21.9 = 60.0 mm; HC2 J10 38.1 + J11 30.5 = 68.6 mm; J5 39.0 + J4
+16.1 = 55.1 mm. Hence about 65 mm and 75 mm board depth with gaps. The J10 body reaches 34 mm in from the edge, the HC2 J11 body 29 mm,
+so those parts take most of one end of the HC2 board. J5 stays a Conn_02x05 symbol; its pins 1–10 run in a single row. The J10 plug
+adds about 39 mm past the board edge plus the cable bend, and it is 27.8 mm thick. **Not proven by the drawings, so checked on one
+sample of each set before layout:** that plugs cannot go in reversed, whether a 4-pole J4 plug can enter the 10-pole J5 socket (label
+them), and that plugs fit the 36 mm pitch. Pad 3.2 mm for the J10 pins (three per pole). Hand-soldering J10 into 2 oz copper needs a
+powerful iron; a cold joint at 32–36 A overheats. The flange holes are non-plated, so the header screws touch no copper. Stock when
+chosen: C6394053 39, C6394029 50, C577772 40, C577752 63. Enough for the first 5 + 5; the Phoenix 10.16 mm set (C6790556) is the
+fallback at a higher price, not footprint-compatible.
 
 **Heat in a shared enclosure.** Every board gives off about 9 W at full load, all into the same air, so the rating is the air inside
 the box (`heat_budget.py --r-box 0 --ambient T`, estimates): 4-ch at 4 A Tj 107 °C at 50 °C air, 114 °C (marginal) at 55 °C, 127 °C
@@ -649,7 +661,7 @@ most marine electronics, this device relies on that system-level protection.
   HC2. A reversed battery puts the full battery voltage negative on TPS48110A-Q1 VS/CS+/CS−/ISCP (abs max −1 V to
   GND, SLUSEE5E §6.1); D30 SMCJ30CA is bidirectional and does not conduct below ≈ 33 V, so nothing limits the current
   and both controllers are likely destroyed (mechanism `UNVERIFIED`). The back-to-back MOSFETs still block the loads
-  and the buck is protected by D2. Mitigation for this revision: keyed/polarised J10 (chosen in `/system mechanical`)
+  and the buck is protected by D2. Mitigation for this revision: keyed J10 plug (decision 98, one-way fit checked on a sample)
   plus a README and label warning. Full reverse-polarity protection is deferred to a later HC2 revision.
 
 ### 8.1 Battery input J10: TVS, capacitors, ferrite position (decision 26, T-0064, 2026-11-01)
@@ -917,7 +929,7 @@ L78M05ABDT (ST DS0425 Rev 24):
 - Heat: (16 − 0.4 − 5) V × 45 mA ≈ 0.48 W normal traffic (same as the TPS7B91 plus 0.07 W from I_d). R_θJA 100 K/W (DPAK,
   Table 2) gives +48 K, so ≈ 98 °C at 50 °C enclosure air (T_J max 125 °C). Copper under the tab lowers that.
 - **DPAK area:** body ≈ 6.6 × 6.1 mm plus leads, footprint ≈ 10.4 × 6.7 mm, against ≈ 3 × 3 mm for SOT-23-5. This is for
-  `/system mechanical` (1-module DIN width).
+  `/system mechanical` (decisions 97, 98: no module width limit; board size set at layout).
 
 **USB service port (T-0014, Q-0008).**
 - README: USB-C is a service port only (battery-powered laptop or USB isolator).
@@ -1101,7 +1113,7 @@ power-up on the prototype.
 Finding EMC E16 (`docs/reviews/2026-11-03-emc-system.md`): C31 is a polarised electrolytic with no reverse rating and
 nothing in front of it. The owner ruled (Q-0054): add a reverse-blocking element on VS in front of the bulk capacitors
 on pdm-4ch in this revision, sized for the 40–50 A path and checked with the heat budget at 40 °C. pdm-hc2 keeps
-decision 40 (keyed J10, warning). J10 is still to be keyed on pdm-4ch too (decision 34, `/system mechanical`).
+decision 40 (keyed J10, warning). J10 on pdm-4ch is keyed too (decision 98, one-way fit checked on a sample).
 
 **Circuit (root sheet of pdm-4ch only).** J10.1 → `VBAT_IN` (D30, C30) → FL30 (DNP) / JP30 → new net `VBAT_FL` →
 Q30 source; Q30 drain → `VS` (C31, C104–C404, U11–U14, F1, F4, R60). U30 LM74500-Q1: SOURCE (pin 5) and EN (pin 1) on
@@ -1289,11 +1301,12 @@ Rechecked at the 32 A limit of decision 95 (same method, air 48.4 °C): AGM601LL
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
 - [x] Battery-voltage measurement (IO10) and NTC near the switches (IO9) (decision 18)
 - [ ] Failure modes and alert handling: LED blink codes, Signal K alerts with acknowledge/mute (decision 20)
-- [ ] Terminal blocks and enclosure layout for DIN / flat mounting (§7)
+- [x] Mounting and connectors (§7, decisions 97, 98)
+- [ ] DIN carrier and printed enclosure design, connector sample check (§7)
 - [x] Verify the PG-TDSO-14 footprint against the package drawing and the JLCPCB/EasyEDA footprint (§8.4, T-0066)
 - [ ] Per-output fuse strategy (on board vs. in the installation)
 - [x] Standard population: all four BTT6050 (Q-0032, T-0040); heavy loads go on HC2. BTT6010 only where > 4 A, mixed builds ordered together (§3, pdm-4ch STATUS/README)
-- [ ] High-current board: terminals (§4a)
+- [x] High-current board: connectors (§7, decision 98)
 - [ ] Bilge pumps (Vega: SEAFLO 01 Series 3500 GPH, 24 V model SFBP2-G3500-01: 8.0 A rated, 12.5 A max
       draw per the product page; current rises with pumping head; start-up and jammed-impeller current not
       given). BTT6010 at 8 A → Tj ≈ 86 °C, at 10 A ≈ 123 °C, at ≥ 11 A thermal shutdown: a pump working

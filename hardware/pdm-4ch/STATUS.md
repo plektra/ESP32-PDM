@@ -1,6 +1,6 @@
 # pdm-4ch status
 
-Updated: 2026-11-04 (T-0147; T-0143; decisions 93, 95)
+Updated: 2026-11-05 (decisions 97, 98)
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
@@ -8,6 +8,8 @@ after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector
 channel-4 drive moved to IO11.
 
 **2026-11-04 (T-0147: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row names D31 SMDJ40CA C42371557 across Q30 (VS to `VBAT_FL`, decisions 92, 96). The T-0064 and T-0065 cost entries left this list: C13832 and C107198 are on neither board, C1 is C170101, and the record stays in design-notes §8.1 and §8.3. No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0147.md`.
+
+**2026-11-05 (decision 98, /system mechanical, same on both boards except J11):** all four connectors are keyed plugs on right-angle sockets: J10 C6394053 + C6394029, J11 C441238 + C440882, J5 C26895 + C26865, J4 C7245 + C7244. Five new footprints in `lib/ESP32-PDM.pretty` drawn from the maker drawings. Fields only: no net changed; pads match pins; ERC 0 errors, 5 warnings (unchanged). **For the PCB:** mating faces at the board edge; board depth about 65 mm; J10 reaches 34 mm in from the edge; TVSs at the socket pins (invariant 4); keep the J10/J11 rows on one edge, J5/J4 on the other.
 
 **2026-11-05 (decision 97, /system mechanical, root sheet, same on both boards):** the board mounts on a plastic DIN carrier (edge-on, about 36 mm per unit, enclosure by the installer) or in a printed enclosure. H1/H2 had no footprint: H1–H4 are now four `MountingHole_3.2mm_M3` non-plated holes. ERC 0 errors, 5 warnings (unchanged); netlist adds H3/H4 and footprints only. **For the PCB:** holes at the corners with copper keep-out, no copper reachable by carrier or screws (invariant 6), and J10 height sets the pitch.
 
@@ -126,9 +128,9 @@ a competent person reviews F1–F4 and R54–R56 before installation.
 2. After `/emc pdm-4ch` and `/validate pdm-4ch deep`: fix findings.
 3. ~~Verify `Infineon_PG-TDSO-14_ThermalVias` against the JLCPCB footprint~~ done (T-0066). At the first order, check the
    CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°).
-4. Remaining part checks from the BOM audit: Kangnex WJ15EDGVC CAN connector on the Phoenix MCV footprint; PESD2CAN
+4. Remaining part checks from the BOM audit: PESD2CAN
    pin 3 = common; Molex 39301080 = 5569-08A2 (if still used).
-5. PCB layout after the terminal blocks and enclosure are decided (`/system mechanical`): 2 oz, VS copper on both
+5. PCB layout after the connector sample check (decision 98): 2 oz, VS copper on both
    layers around the cooling tabs, switches spread out and away from the ESP32; TH1 next to the hottest switch;
    J5 TVSs at the connector.
 6. PCB rules from T-0064 (design-notes §8.1/§8.2):
@@ -136,8 +138,8 @@ a competent person reviews F1–F4 and R54–R56 before installation.
      (OUT → PROFET body diode → VS → D30), decision 27.
    - JP30 is the VBAT_IN–VS link: draw it as a copper bridge as wide as the VS copper (the placeholder footprint
      `NetTie-2_SMD_Pad2.0mm` is far too small for 32 A). FL30 has no footprint yet; decide at pre-compliance.
-   - D30 and C30 directly at the J10 terminals; C31 close to J10; C104–C404 at each VS tab.
-   - MLCCs on VS/VBAT_IN (C30, C104–C404): away from the terminal screws and board edges and not across a bending
+   - D30 and C30 directly at the J10 socket pins; C31 close to J10; C104–C404 at each VS tab.
+   - MLCCs on VS/VBAT_IN (C30, C104–C404): away from the J10 flange screws and board edges and not across a bending
      line (a cracked MLCC shorts the battery input).
    - D103–D403 (DNP) next to J11, GND return straight to J10.2.
    - T-0121 (design-notes §8.6): Q30 in the 32 A path between JP30 and VS. VBAT_FL and VS copper as wide as the VS
@@ -173,6 +175,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Pre-order checklist (T-0065)
 
+- Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. Then buy the sets for the order: stock is thin on C6394053 / C6394029. Hand-solder J10 with a powerful iron; check the joints.
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
   LMR51610YF (only if the scan asks for FPWM), plus the new C170101.
 - L1 approved alternates (datasheet-checked, same 8.2 µH / 0.056 Ω max / I_sat 3.9 A / I_rms 2.6 A / 6045 land):
@@ -194,13 +197,11 @@ R71/R72 go between D9 and U5 (D9 at J4).
   1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C122552 and C5219210. Recheck stock (C122552
   4707, C5219210 2923 on 2026-11-03).
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
-- T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
-  positions.
+- T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 
 ## For /system
 
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
-- T-0121 (`/system mechanical`): J10 keyed/polarised on pdm-4ch too (decision 34; owner ruling Q-0054 "Still key J10").
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
 - T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.
 
@@ -212,4 +213,4 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended
   parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).
 
-- Terminal blocks: J5 is still a 2×5 pin header; ~20 poles (power 2, outputs 4, panel 10, CAN 4–5); choice continues in `/system mechanical`.
+- DIN carrier and printed enclosure design: `/system mechanical`.

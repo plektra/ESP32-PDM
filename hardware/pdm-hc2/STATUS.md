@@ -1,6 +1,6 @@
 # pdm-hc2 status
 
-Updated: 2026-11-04 (T-0147; decisions 93, 94, 95)
+Updated: 2026-11-05 (decisions 97, 98)
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
@@ -10,6 +10,8 @@ MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9.
 **2026-11-04 (T-0147: "For /system" sweep, unattended, documents only):** the T-0064 and T-0065 cost entries left this list: C13832 and C107198 are no longer on this board, and the record stays in design-notes §8.1 and §8.3. No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0147.md`.
 
 **2026-11-04 (decision 95, /system, no schematic change):** board input limits are 32 A (`pdm-4ch`) and 36 A (`pdm-hc2`) instead of ≈ 40 / 50 A; they set J10, its GND pole and the supply copper in `/system mechanical`. Output terminals are still open.
+
+**2026-11-05 (decision 98, /system mechanical, same on both boards except J11):** all four connectors are keyed plugs on right-angle sockets: J10 C6394053 + C6394029, J11 locking C577772 + C577752, J5 C26895 + C26865, J4 C7245 + C7244. Five new footprints in `lib/ESP32-PDM.pretty` drawn from the maker drawings. Fields only: no net changed; pads match pins; ERC 0 errors, 5 warnings (unchanged). **For the PCB:** mating faces at the board edge; board depth about 75 mm; J10 reaches 34 mm in from the edge; TVSs at the socket pins (invariant 4); keep the J10/J11 rows on one edge, J5/J4 on the other.
 
 **2026-11-05 (decision 97, /system mechanical, root sheet, same on both boards):** the board mounts on a plastic DIN carrier (edge-on, about 36 mm per unit, enclosure by the installer) or in a printed enclosure. H1/H2 had no footprint: H1–H4 are now four `MountingHole_3.2mm_M3` non-plated holes. ERC 0 errors, 5 warnings (unchanged); netlist adds H3/H4 and footprints only. **For the PCB:** holes at the corners with copper keep-out, no copper reachable by carrier or screws (invariant 6), and J10 height sets the pitch.
 
@@ -140,15 +142,14 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    Symbols from Library* (keep Q3–Q6 on the BC817 symbol with value MMBT5551), ERC.
 2. `/validate pdm-hc2 deep` (part facts of TPS48110A-Q1, BSC030N08NS5, the equations) and `/emc pdm-hc2`.
 3. Verify the custom footprint `Texas_DGX0019A_VSSOP-19_3x5.1mm_P0.5mm` against the JLCPCB footprint (C17556513).
-4. PCB: Kelvin sense on the 1 mΩ shunt, MMBT3904 between the MOSFETs, TH1 next to the MOSFETs, ≥ 25 A output
-   terminals (to be settled in `/system mechanical`), 36 A input (decision 95).
+4. PCB: Kelvin sense on the 1 mΩ shunt, MMBT3904 between the MOSFETs, TH1 next to the MOSFETs, J10/J11 per decision 98, 36 A input (decision 95).
    T-0064 rules (design-notes §8.1/§8.2):
-   - **D103/D203 next to the J11 terminal, GND return a short, wide path straight to J10.2** (not via the logic
+   - **D103/D203 next to the J11 socket pins, GND return a short, wide path straight to J10.2** (not via the logic
      ground); decision 27.
    - JP30 (VBAT_IN–VS) as a copper bridge as wide as the VS copper for 36 A (the placeholder footprint
      `NetTie-2_SMD_Pad2.0mm` is far too small); FL30 has no footprint yet, decided at pre-compliance.
-   - D30, C30 at the J10 terminals; C31 near J10; C106/C206 at each channel's VS next to RSNS/Q11.
-   - C30 (MLCC on the battery input) away from the terminal screws, board edges and bending lines.
+   - D30, C30 at the J10 socket pins; C31 near J10; C106/C206 at each channel's VS next to RSNS/Q11.
+   - C30 (MLCC on the battery input) away from the J10/J11 flange screws, board edges and bending lines.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
    board edges and screws.
@@ -170,6 +171,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Pre-order checklist (T-0065)
 
+- Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. Then buy the sets for the order: stock is thin on C6394053 / C6394029, C577772 / C577752. Hand-solder J10 with a powerful iron; check the joints.
 - **Measure the bilge pump start current (SEAFLO SFBP2-G3500-01) before ordering** (Q-0042): it must fall below
   ≈ 15 A (lower IOC tolerance) within ≈ 120 ms, else the breaker trips the forced run. If it does not, back to the owner.
 
@@ -190,13 +192,11 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0060 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IMON2 network
   (design-notes §2).
 - T-0107: C30, C102 and C202 use C170101 2.2 µF/100 V instead of C13832 1 µF, which removes the C13832 loading fee for the 5-board first run. For runs of **15+ pdm-hc2 boards** C13832 at these places is cheaper again (cost report L8). C102/C202 must stay within TPS4811 Table 9-3 (0.1–10 µF).
-- T-0021: BOM lines without `LCSC` are now only J5, J10, J11 (no part yet, `/system mechanical`), H1/H2 and the DNP
-  positions.
+- T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 
 ## For /system
 
-- T-0072/T-0055: **J10 keyed/polarised** (decision 40) – choose it in `/system mechanical` (J10 not chosen yet); the
-  board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).
+- T-0072/T-0055: J10 is keyed (decision 98); the board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).
 - T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the
   15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,
   full scale ≈ 31.9 V) and reports "OUT high while off" as a float-driven run.
@@ -212,4 +212,4 @@ R71/R72 go between D9 and U5 (D9 at J4).
   with the float circuit, that opens before the float fuse. Add this to the README next to the external breaker of
   decision 39; a competent person reviews the bilge wiring before installation.
 
-- Mounting settled in decision 97 (about 36 mm per unit on the rail with the tallest J10 block).
+- DIN carrier and printed enclosure design: `/system mechanical`.

@@ -63,6 +63,18 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 
 Same four non-plated M3 holes (H1–H4) for every mounting (decision 97). DIN rail: bare board on a plastic carrier, PCB edge-on to the rail, about 36 mm of rail per unit, in an enclosure the installer provides. Alternative: a 3D-printed vented ASA enclosure, also for flat mounting. Nothing conductive from carrier, screws or enclosure reaches board copper (invariant 6).
 
+Connectors (decision 98): keyed plugs on right-angle sockets, hand-soldered, plugs pull away from the board edge.
+
+| Connector | Socket + plug | Rating UL / IEC | Row length | Reach from the board edge |
+|---|---|---|---|---|
+| J10, both | KF2EDGSRAM-10.16-2P C6394053 + locking C6394029 | 65 / 57 A | 38.1 mm | 34 mm |
+| J11, 4-ch | KF2EDGRC-5.08-4P C441238 + C440882 | 10 / 15 A | 21.9 mm | 8.4 mm |
+| J11, HC2 | KF2EDGSRM-7.62-2P C577772 + locking C577752 | 30 / 32 A | 30.5 mm | 29 mm |
+| J5, both | WJ15EDGRC-3.81-10P C26895 + C26865 | 8 / 7 A | 39.0 mm | 7.25 mm |
+| J4, both | WJ15EDGRC-3.81-04P C7245 + C7244 | 8 / 7 A | 16.1 mm | 7.25 mm |
+
+Board depth about 65 mm (4-ch) and 75 mm (HC2), length up to 100 mm, set at layout.
+
 ## Budgets [estimate until measured]
 
 | Budget | Figure | Source |
