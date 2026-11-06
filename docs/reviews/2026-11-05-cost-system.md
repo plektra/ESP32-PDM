@@ -180,6 +180,7 @@ The cost-controller could not write this file because of the worktree guard, so 
 - **Connector totals differ slightly from the set table.** The set table sums to 5.04 / 4.54 $ for 4-ch at 10 / 30 and 5.50 $ for HC2 at 30. The per-board table says 5.13 / 4.67 / 5.57 $. The difference is at most 0.13 $ per board and the cause was not traced; the J4 set shows one price for all quantities, which may be part of it.
 - **L2 on HC2 is about 9.4 $, not 8.5 $:** 7.75 $ platform + 1.68 $ module price.
 - **L1 and L2 depend on Q-0026.** Their platform saving exists only if JLCPCB offers Economic PCBA with 2 oz copper. If 2 oz alone forces Standard, the platform saving is zero: L1 saves nothing and L2 saves only the 1.68 $ module price difference.
+- **Update 2026-11-06, Q-0026 answered (decision 99):** the owner found on the JLCPCB quote page that Economic PCBA is not offered with 2 oz copper. Standard is therefore the only basis while the boards stay 2 oz: the Economic rows above do not apply, L1 saves nothing, and L2 saves only the module price difference. The figures and the findings block below are otherwise unchanged from 2026-11-05.
 
 <!-- findings:begin -->
 ```json
