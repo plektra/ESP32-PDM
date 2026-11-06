@@ -185,6 +185,7 @@ The cost-controller could not write this file because of the worktree guard, so 
   - First order, both designs, Standard, with connector sets: 5 + 5 about 620 $ (was 584 $); 2 of 5 about 448 $, an option the owner found on the quote page (not priced above).
   - At 5 boards, Standard, without connector sets: pdm-4ch 54.52 $ per board, pdm-hc2 56.33 $.
   - Same first order on 1 oz: 549 $ (5 + 5) or 377 $ (2 of 5). Economic on 1 oz is not confirmed; if available and U1 is hand-soldered: 398 $ or 225 $.
+- **Update 2026-11-06, 1 oz (owner, JLCPCB quote page):** Economic PCBA is offered with 1 oz copper. U1 is still flagged standard-only in the catalog, so Economic also needs U1 hand-soldered or an Economic-capable module. The owner knows of no planned HC2 load above 13 A; a move to 1 oz is not decided and needs the bilge pump measurement and a `/system` session.
 
 <!-- findings:begin -->
 ```json
