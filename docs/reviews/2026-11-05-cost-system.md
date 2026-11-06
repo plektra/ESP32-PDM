@@ -181,6 +181,10 @@ The cost-controller could not write this file because of the worktree guard, so 
 - **L2 on HC2 is about 9.4 $, not 8.5 $:** 7.75 $ platform + 1.68 $ module price.
 - **L1 and L2 depend on Q-0026.** Their platform saving exists only if JLCPCB offers Economic PCBA with 2 oz copper. If 2 oz alone forces Standard, the platform saving is zero: L1 saves nothing and L2 saves only the 1.68 $ module price difference.
 - **Update 2026-11-06, Q-0026 answered (decision 99):** the owner found on the JLCPCB quote page that Economic PCBA is not offered with 2 oz copper. Standard is therefore the only basis while the boards stay 2 oz: the Economic rows above do not apply, L1 saves nothing, and L2 saves only the module price difference. The figures and the findings block below are otherwise unchanged from 2026-11-05.
+- **Update 2026-11-06, PCB quotes for 5 pieces (owner, JLCPCB quote page, test Gerbers at 100x65 and 100x75 mm):** both sizes cost €36.43 with 2 oz and €4.72 with 1 oz, per design. At 1.1165 USD/EUR (reference rate 2026-11-06) that is 40.67 $ and 5.27 $. The 2 oz extra charge was also shown as 34.80 $ on a 50x50 mm test board, so it does not appear to scale with size in this range. These replace the 21 $ / 24 $ estimates at 5 boards; the 10 and 30 board PCB figures are still estimates. Real outlines are set at layout, so re-quote then.
+  - First order, both designs, Standard, with connector sets: 5 + 5 about 620 $ (was 584 $); 2 of 5 about 448 $, an option the owner found on the quote page (not priced above).
+  - At 5 boards, Standard, without connector sets: pdm-4ch 54.52 $ per board, pdm-hc2 56.33 $.
+  - Same first order on 1 oz: 549 $ (5 + 5) or 377 $ (2 of 5). Economic on 1 oz is not confirmed; if available and U1 is hand-soldered: 398 $ or 225 $.
 
 <!-- findings:begin -->
 ```json
