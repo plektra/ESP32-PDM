@@ -288,7 +288,7 @@ VSNS = 1190 / 68 k = 17.5 mV → **IOC ≈ 17.5 A** (nominal).
   `--p-other 1.9` 17.5 A → 113 °C, 18 A → 118 °C. All below the MOSFET Tj max 150 °C (Table 2), so the hardware
   breaker now closes the gap that the 25 A setting left (Tj 169 °C at 22 A).
 - Motor starts: a start current above IOC is passed only if it falls below IOC within ≈ 122 ms (lower end of tOC).
-  The SEAFLO SFBP2-G3500-01 start current is not published: **measure it before ordering** (HC2 pre-order checklist).
+  The SEAFLO SFBP2-G3500-01 start current is not published: **measure it on or after the first working prototype, before a board runs a pump in service** (decision 100, `docs/pump-start-current-test.md`).
   At the lower tolerance end (≈ 15.2 A) a pump drawing 12.5 A max still has ≈ 20 % margin in steady state.
 - Required outside the board (README, label): an external breaker ≤ 15–18 A per output, and a **firmware soft fuse**
   on IMON (for `/system firmware`: e.g. I²t against the 15 A rating, alarm and switch-off above it while the ESP32 runs).
