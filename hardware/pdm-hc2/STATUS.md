@@ -168,12 +168,14 @@ R71/R72 go between D9 and U5 (D9 at J4).
   impedance), short J5.5 to GND (behind F4/R56), then behind F1 (D1/D2 node) and behind F3 (D10/FB2 node). Scope the
   current; afterwards inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Pass before installation
   (design-notes §8.3).
+- **Q-0042 / decision 100 – bilge pump start current (SEAFLO SFBP2-G3500-01), mandatory before a board runs a pump in
+  service:** procedure in `docs/pump-start-current-test.md`. The start must fall below ≈ 15 A (lower IOC tolerance)
+  within ≈ 120 ms, else the breaker trips the forced run. If it does not, back to the owner.
 
 ## Pre-order checklist (T-0065)
 
 - Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. Then buy the sets for the order: stock is thin on C6394053 / C6394029, C577772 / C577752. Hand-solder J10 with a powerful iron; check the joints.
-- **Measure the bilge pump start current (SEAFLO SFBP2-G3500-01) before ordering** (Q-0042): it must fall below
-  ≈ 15 A (lower IOC tolerance) within ≈ 120 ms, else the breaker trips the forced run. If it does not, back to the owner.
+- Bilge pump start current: moved to the prototype test list (decision 100).
 
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
   LMR51610YF (only if the scan asks for FPWM), plus the new C170101.
