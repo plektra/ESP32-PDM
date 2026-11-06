@@ -187,6 +187,7 @@ The cost-controller could not write this file because of the worktree guard, so 
   - Same first order on 1 oz: 549 $ (5 + 5) or 377 $ (2 of 5). Economic on 1 oz is not confirmed; if available and U1 is hand-soldered: 398 $ or 225 $.
 - **Update 2026-11-06, 1 oz (owner, JLCPCB quote page):** Economic PCBA is offered with 1 oz copper. U1 is still flagged standard-only in the catalog, so Economic also needs U1 hand-soldered or an Economic-capable module. The owner knows of no planned HC2 load above 13 A; a move to 1 oz is not decided and needs the bilge pump measurement and a `/system` session.
 - **Update 2026-11-06, L1 and L2 closed (decision 100):** U1 stays machine-placed and the DOIT modules are dropped, so Standard PCBA applies on 1 oz as well. The Economic figures in the 1 oz update above no longer apply. Moving to 1 oz would save only the PCB difference, about 71 $ on the first order.
+- **Update 2026-11-06, comparison with SH-ESP32 (Hat Labs, read from its public KiCad files):** SH-ESP32 has 172 fitted parts and pdm-4ch 199. Shared core (ESP32, power, USB, CAN): 98 and 81. pdm-4ch adds output switching (52) and the panel interface (66); SH-ESP32 adds I²C, 1-Wire and optocouplers (46) and 26 100 nF capacitors on 3V3. The design is not oversized by count. Queue items S1–S6 and D103 come from this comparison and decision 103.
 
 <!-- findings:begin -->
 ```json
