@@ -7,7 +7,7 @@ sessions, with a decision in [decisions.md](decisions.md). Rationale and calcula
 
 | Board | Folder | Output stage | Variant ID (R42) |
 |---|---|---|---|
-| 4-channel | `hardware/pdm-4ch` | 4 × PROFET+24V (BTT6050 / BTT6010 per channel) | 10 kΩ (1.65 V) |
+| 4-channel | `hardware/pdm-4ch` | 4 × PROFET+24V BTT6050 (BTT6010 option, not on this version, decision 103) | 10 kΩ (1.65 V) |
 | High-current | `hardware/pdm-hc2` | 2 × TPS48110A-Q1 + back-to-back MOSFETs | 4.7 kΩ (1.05 V) |
 
 ## Shared sheets (contract between the boards)
@@ -17,7 +17,7 @@ them is a system change: make it on both boards in the same session (or note it 
 
 | Sheet | Contents |
 |---|---|
-| root (controller) | ESP32-S3-MINI-1-N8, native USB on IO19/IO20, boot/reset buttons, variant ID, battery input J10 + SMCJ30CA (D30) and C30 2.2 µF/100 V C170101 (decision 79, within decision 26's range) on the terminal net VBAT_IN, FL30 (DNP ferrite) bridged by JP30 copper to VS (on pdm-4ch only: to `VBAT_FL`, then the reverse-battery blocker Q30 IPT007N06N with U30 LM74500-Q1 and C32 to VS, plus TVS D31 SMDJ40CA C42371557 across Q30 from VS to `VBAT_FL`, decisions 82, 88, 89, 92, 96; HC2 unchanged, decision 40), C31 100 µF/63 V on VS (decision 41), battery-voltage divider (R60/R61/C60), NTC TH1 (R62/C61) |
+| root (controller) | ESP32-S3-MINI-1-N8, native USB on IO19/IO20, boot/reset buttons, variant ID, battery input J10 + SMCJ30CA (D30) and C30 2.2 µF/100 V C170101 (decision 79, within decision 26's range) on the terminal net VBAT_IN, FL30 (DNP ferrite) bridged by JP30 copper to VS (on pdm-4ch only: to `VBAT_FL`, then the reverse-battery blocker Q30 AGM601LL C5464765 (decision 108) with U30 LM74500-Q1 and C32 to VS, plus TVS D31 SMDJ40CA C42371557 across Q30 from VS to `VBAT_FL`, decisions 82, 88, 89, 92, 96; HC2 unchanged, decision 40), C31 100 µF/63 V on VS (decision 41), battery-voltage divider (R60/R61/C60), NTC TH1 (R62/C61), status LED D7/R59 on IO13 and power LED D8/R67 on +3V3 (decision 113), unfitted service footprint J6 with no BOM line (decisions 115, 116) |
 | `power-usb` | LMR51610 buck (4–65 V) → 3.3 V, 60 V PTC, SMAJ30CA, diode-OR with USB VBUS |
 | `can` | CA-IS3050G isolated CAN (SOIC-8-WB) with TXD pull-up R70, DNP CMC FL1 (bridged by 0 Ω R71/R72) and DNP Y-cap C70 (design-notes §8.5); L78M05ABDT 5 V from NET-S (DPAK, footprint ≈ 10.4 × 6.7 mm, decision 45, design-notes §8.3); SMAJ18CA, PESD2CAN; LEN 1 (49.3 mA worst case, measure on the first prototype) |
 | `analog_sw` | Panel connector J5 (decision 17): 4 protected switch inputs (SMAJ30CA, 2 × 2 k load, 10 k + 4.7 k/BZT52C3V3 divider, 100 nF); fused switch supply SW_SUPPLY (F4 PTC, SMAJ30CA, 100 nF); 4 constant-current LED sinks (MMBT5551 + 470 Ω, ≈ 5 mA, SMAJ30CA + 100 Ω + 1 nF per line); SW_SUPPLY sense SW_SENSE (R49 10 k, R57 4.7 k/D24 BZT52C3V3, C21 470 nF; R58 10 k on the root sheet to IO12; decision 93) |
@@ -70,7 +70,8 @@ Connectors (decision 98): keyed plugs on right-angle sockets, hand-soldered, plu
 
 | Connector | Socket + plug | Rating UL / IEC | Row length | Reach from the board edge |
 |---|---|---|---|---|
-| J10, both | KF2EDGSRAM-10.16-2P C6394053 + locking C6394029 | 65 / 57 A | 38.1 mm | 34 mm |
+| J10, 4-ch | KF2EDGSRM-7.62-2P C577772 + locking C577752 (decision 104) | 30 / 32 A | 30.5 mm | 29 mm |
+| J10, HC2 | KF2EDGSRAM-10.16-2P C6394053 + locking C6394029 | 65 / 57 A | 38.1 mm | 34 mm |
 | J11, 4-ch | KF2EDGRC-5.08-4P C441238 + C440882 | 10 / 15 A | 21.9 mm | 8.4 mm |
 | J11, HC2 | KF2EDGSRM-7.62-2P C577772 + locking C577752 | 30 / 32 A | 30.5 mm | 29 mm |
 | J5, both | WJ15EDGRC-3.81-10P C26895 + C26865 | 8 / 7 A | 39.0 mm | 7.25 mm |
@@ -84,9 +85,9 @@ Board depth about 65 mm (4-ch) and 75 mm (HC2), length up to 100 mm, set at layo
 |---|---|---|
 | Ambient | 40 °C engine room (own printed enclosure: air +2…10 °C). Shared enclosure: full rating up to 50 °C air inside the box, BTT6050 at 3 A up to about 65–70 °C; each board gives off about 9 W at full load | decisions 9, 97 |
 | 4-ch, BTT6050 per channel | 4 A at 2 oz copper | `tools/heat_budget.py` |
-| 4-ch, BTT6010 per channel | ≈ 8 A | `tools/heat_budget.py --mix` |
+| 4-ch, BTT6010 per channel (option, not on this version, decision 103) | ≈ 8 A | `tools/heat_budget.py --mix` |
 | HC2 per channel | ≈ 15 A continuous; breaker ~17.5 A / 146 ms (RIWRN 68 k, ≈ 15–20 A over tolerances); fast trip 80 A; external breaker ≤ 15–18 A per output plus firmware soft fuse (decision 39); load input capacitance ≤ ≈ 50 µF per output (decisions 77, 94) | `tools/heat_budget.py --part HC-2xBSC030`, TPS4811-Q1 equations |
-| Shared supply path | ≤ 2 mΩ (terminal + VS copper), plus on pdm-4ch the blocker Q30 (≤ 0.75 mΩ at 25 °C, ≈ 1.1 mΩ hot); board input limit 32 A (4-ch) / 36 A (HC2), decision 95 | design-notes §4, §8.6 |
+| Shared supply path | ≤ 2 mΩ (terminal + VS copper), plus on pdm-4ch the blocker Q30 AGM601LL (≤ 1.6 mΩ at 25 °C, ≈ 2.1 mΩ at its 16 A temperature); board input limit 16 A (4-ch, decision 103) / 36 A (HC2, decision 95) | design-notes §4, §8.6 |
 | Controller power | ≈ 0.47 A at 3.3 V peak (ESP32 radio); panel LEDs no longer on 3.3 V; plus ≈ 0.7 mA continuous for the power LED D8 (also in Eco and Sleep) and ≈ 0.7 mA for the status LED D7 while lit; F1 500 mA hold | design-notes §8.7 |
 | Panel switch supply | ≈ 63 mA (4 × 7.5 mA switch load + 4 × 2.6 mA divider + 2.6 mA SW_SENSE + 4 × 5 mA LEDs at 30 V); F4 500 mA hold; MMBT5551 ≈ 0.13 W each at 30 V | decisions 17, 74, 93 |
 
