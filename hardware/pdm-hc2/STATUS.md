@@ -1,6 +1,8 @@
 # pdm-hc2 status
 
-Updated: 2026-11-07 (T-0180 turn-off edge scan item)
+Updated: 2026-11-07 (T-0185 "For /system" sync sweep)
+
+**2026-11-07 (T-0185: "For /system" sweep, unattended, documents only):** the ARCHITECTURE root row now names D7/R59, D8/R67 and J6 (decisions 113, 115, 116), and the Mechanics table has its own HC2 J10 row (C6394053 + C6394029, unchanged). No schematic change. Report: `docs/reviews/2026-11-07-fix-sync-T-0185.md`.
 
 **2026-11-07 (T-0180: T-0176, unattended, documents only):** the HC2 turn-off edge (PD direct, estimated about 500 V/µs) is on the prototype test list as a pre-compliance scan trial: R116/R216 0 Ω → 10–22 Ω by hand, scope and VHF check, SOA recompute before any value is kept (decision 25 stays). R116/R216 stay 0 Ω C17168; no schematic, footprint or BOM change. Design-notes §4a.3. Report: `docs/reviews/2026-11-07-fix-pdm-hc2-T-0180.md`.
 
@@ -223,7 +225,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
   full scale ≈ 31.9 V) and reports "OUT high while off" as a float-driven run.
 - **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list). Pre-charge path (TPS48111-Q1) if the prototype shows real loads exceed about 50 µF (decision 94).
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
-- T-0160 done (T-0150–T-0152): the pin map now has IO13 = status LED and IO42, TXD0/RXD0 on unfitted J6 (pins 4–6 not connected here). For the sync sweep: the ARCHITECTURE root (controller) row does not yet name D7/R59, D8/R67 or J6.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave IO42 with a pull enabled while unused.
 
 - T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended

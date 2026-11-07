@@ -1,6 +1,8 @@
 # pdm-4ch status
 
-Updated: 2026-11-07 (T-0179 C577772 buying rule, plug marking)
+Updated: 2026-11-07 (T-0185 "For /system" sync sweep)
+
+**2026-11-07 (T-0185: "For /system" sweep, unattended, documents only):** ARCHITECTURE now names Q30 AGM601LL C5464765, D7/R59, D8/R67 and J6 in the root row, the BTT6010 option as not on this version (Boards row, budget row, decision 103), a pdm-4ch J10 row C577772 + C577752 (decision 104) and the Q30 figures with the 16 A input limit in the supply-path row. The T-0158/T-0171 done-notes left this list. No schematic change. Report: `docs/reviews/2026-11-07-fix-sync-T-0185.md`.
 
 **2026-11-07 (T-0179: T-0166, T-0168, T-0177, owner rulings Q-0068/Q-0069, unattended, documents only):** C577772 + C577752 stay (no design change); buy C577772 from any seller, marking KF2EDGSRM-7.62 (flange header); no C577767, C7422678 or other socket; the order waits if none can be bought. The J10 battery plug fits the pdm-hc2 J11 output socket: mark the battery plug and check it before power-up (pre-order checklist, README). No schematic, footprint or BOM change. Report: `docs/reviews/2026-11-07-fix-shared-T-0179.md`.
 
@@ -221,12 +223,8 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
-- Decisions 103, 104: done in T-0158 (2026-11-07): J10 is C577772 + C577752 and Q30 is AGM601LL, with a 16 A input and ≥ 2 cm² tab copper; decision 98's sample check names the new set.
-- T-0160 done (T-0150–T-0152): the pin map now has IO13 = status LED and IO35–IO37, IO42, TXD0/RXD0 on unfitted J6. For the sync sweep: the ARCHITECTURE root (controller) row does not yet name D7/R59, D8/R67 or J6.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.
-- T-0158, ARCHITECTURE rows a `pdm-4ch` package may not edit, for the sync sweep: the Boards row (BTT6010 option, not on this version, decision 103); the root row (Q30 AGM601LL C5464765); the Mechanics J10 row (pdm-4ch C577772 + C577752); the BTT6010 budget row; the supply path row (Q30 figures, 16 A limit instead of 32 A).
 - T-0158, a choice for the owner: the pdm-4ch battery plug now physically fits a pdm-hc2 J11 output socket, and the HC2 output plug fits a pdm-4ch J10, because both are the 7.62 mm set. Decision 98's keying therefore holds only within one board, not across boards in one installation. What a mis-plug does has not been analysed. Options: accept it and label the plugs; or change the set on one board at the next pdm-hc2 revision. pdm-hc2 is not changed, and its layout follows pdm-4ch bring-up (decision 102), so this does not hold up the first order.
-- T-0171 sync-sweep note: done in T-0179 (2026-11-07). The pdm-hc2 STATUS pre-order bullet for J11 now carries the same buying rule (owner ruling Q-0068/Q-0069).
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
 - T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.
