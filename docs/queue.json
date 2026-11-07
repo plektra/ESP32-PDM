@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 170,
+    "T": 175,
     "Q": 68
   },
   "tasks": [
@@ -5360,7 +5360,8 @@
         "finding": "C1"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0171"
     },
     {
       "id": "T-0167",
@@ -5385,7 +5386,8 @@
         "finding": "C2"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0171"
     },
     {
       "id": "T-0168",
@@ -5434,7 +5436,87 @@
         "finding": "V1"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0171"
+    },
+    {
+      "id": "T-0170",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-07",
+      "depends_on": [],
+      "items": [
+        "T-0166",
+        "T-0167",
+        "T-0169"
+      ],
+      "started": "2026-11-07T13:20:12",
+      "ran_model": "opus",
+      "session": "6f600ded-47e8-4314-ba3d-6ec22ed70ee1",
+      "cost_usd": 0.5458,
+      "attempts": 1,
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "1 packages, 0 deferred, 0 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-plan-system-T-0170.md"
+    },
+    {
+      "id": "T-0171",
+      "role": "board-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-07",
+      "title": "pdm-4ch J10 socket C577772: stock fallback for the order",
+      "brief": "No owner ruling; all three items are two-way. T-0166 (cost report 2026-11-07, F1) and T-0169 (validator 2026-11-07, M1) are one problem: the J10 socket C577772 (KF2EDGSRM-7.62-2P) has JLCPCB/LCSC stock 0, minimum order 18. Both fixes say: no design change now. Do not edit the schematic, the footprint, lib/ or the BOM fields. J10 stays C577772 + locking plug C577752 (decisions 98, 104). J10 is bought and hand-soldered by the owner (decision 85), so JLCPCB assembly is not blocked. Steps, in order: (1) Run `python3 tools/part_facts.py C577767 \"KF2EDGSR-7.62-2P: pad grid, pitch, row spacing, hole diameter, flange holes and their position, body outline; whether it mates and locks with the locking plug C577752 (KF2EDGSRM series); UL/IEC current; keying/polarisation\"`. Compare the result with `docs/part-facts/C577772.md` and with the existing footprint `lib/ESP32-PDM.pretty/Kefa_KF2EDGSRM-7.62-2P` (4 pads at (±3.81, ±3.81), Ø1.5 mm holes, flange holes at x = ±11.43). (2) Only if C577767 does not fit that footprint or does not take C577752, run part_facts for C7422678 (DORABO DB3ERC-7.62-2P-GN) with the same questions. (3) In the pdm-4ch STATUS 'Pre-order checklist', extend the existing decision 98 / J10 bullet. Keep the 0 / 63 stock note already there; do not change it. Add: re-check C577772 stock at order time and before buying the decision 98 sample. If it is still 0, the fallbacks in this order are (a) the same part C577772 from another seller, (b) C577767 if step 1 passed (state what passed and cite the facts file), (c) C7422678 only if it passed. Each fallback needs a footprint check before the order, with the reason. Name only parts that passed. (4) Add one line to the pdm-4ch STATUS 'For /system' list for the sync sweep: pdm-hc2 J11 uses the same C577772, so the same fallback applies when pdm-hc2 is ordered (decision 102). Do not edit pdm-hc2 files. (5) T-0167 confirms the T-0158 saving (about 4.8 $ per board at 5); fix 'none needed', so do nothing for it. (6) Add a dated STATUS entry for T-0170. Record the fallback choice as an auto decision. Checks: `git diff` shows only hardware/pdm-4ch/STATUS.md and new docs/part-facts files. No ERC or netlist is needed, since no schematic is touched; if anything does touch it, run ERC and compare the netlist, which must not change. No heat-budget run is needed (no output change). One-way door, stop and report: if no fallback other than buying C577772 elsewhere fits the existing footprint AND mates and locks with C577752 AND is rated at least 16 A AND keeps the keying against the 5.08 mm J11, then using one would need a new plug or footprint. That amends decisions 98/104. Record the finding and do not pick such a part.",
+      "items": [
+        "T-0166",
+        "T-0169",
+        "T-0167"
+      ],
+      "plan": "T-0170",
+      "depends_on": []
+    },
+    {
+      "id": "T-0172",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-07",
+      "depends_on": [
+        "T-0171"
+      ],
+      "verify": true,
+      "since": "2dfb50ad6655fa7c914a7e1cfb0642058f4e2a32"
+    },
+    {
+      "id": "T-0173",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-07",
+      "depends_on": [
+        "T-0171"
+      ],
+      "verify": true,
+      "since": "2dfb50ad6655fa7c914a7e1cfb0642058f4e2a32",
+      "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
+      "recheck": "cost"
+    },
+    {
+      "id": "T-0174",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-07",
+      "depends_on": [
+        "T-0171"
+      ],
+      "verify": true,
+      "since": "2dfb50ad6655fa7c914a7e1cfb0642058f4e2a32",
+      "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
+      "recheck": "emc"
     }
   ],
   "board_size_start": {
