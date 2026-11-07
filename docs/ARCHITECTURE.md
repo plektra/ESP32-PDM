@@ -70,11 +70,14 @@ Connectors (decision 98): keyed plugs on right-angle sockets, hand-soldered, plu
 
 | Connector | Socket + plug | Rating UL / IEC | Row length | Reach from the board edge |
 |---|---|---|---|---|
-| J10, both | KF2EDGSRAM-10.16-2P C6394053 + locking C6394029 | 65 / 57 A | 38.1 mm | 34 mm |
+| J10, 4-ch | KF2EDGSRM-7.62-2P C577772 + locking C577752 (decisions 104, 120) | 30 / 32 A | 30.5 mm | 29 mm |
+| J10, HC2 | KF2EDGSRAM-10.16-2P C6394053 + locking C6394029 | 65 / 57 A | 38.1 mm | 34 mm |
 | J11, 4-ch | KF2EDGRC-5.08-4P C441238 + C440882 | 10 / 15 A | 21.9 mm | 8.4 mm |
 | J11, HC2 | KF2EDGSRM-7.62-2P C577772 + locking C577752 | 30 / 32 A | 30.5 mm | 29 mm |
 | J5, both | WJ15EDGRC-3.81-10P C26895 + C26865 | 8 / 7 A | 39.0 mm | 7.25 mm |
 | J4, both | WJ15EDGRC-3.81-04P C7245 + C7244 | 8 / 7 A | 16.1 mm | 7.25 mm |
+
+C577772 sources: any seller, flange header KF2EDGSRM-7.62 only; no substitute socket (decision 120).
 
 Board depth about 65 mm (4-ch) and 75 mm (HC2), length up to 100 mm, set at layout.
 
