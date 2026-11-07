@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 166,
+    "T": 169,
     "Q": 68
   },
   "tasks": [
@@ -5280,7 +5280,7 @@
       "id": "T-0164",
       "role": "cost-controller",
       "scope": "system",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-07",
       "depends_on": [
         "T-0158",
@@ -5294,13 +5294,20 @@
       "recheck": "cost",
       "started": "2026-11-07T13:17:03",
       "ran_model": "sonnet",
-      "session": "0f737461-2ba6-4dad-8986-2bf7c8aab2b8"
+      "session": "0f737461-2ba6-4dad-8986-2bf7c8aab2b8",
+      "cost_usd": 0.3449,
+      "attempts": 1,
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "3 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-cost-system.md"
     },
     {
       "id": "T-0165",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-07",
       "depends_on": [
         "T-0158",
@@ -5311,7 +5318,84 @@
       "verify": true,
       "since": "619a24338297bd9b647c5a871d522114a4797235",
       "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
-      "recheck": "emc"
+      "recheck": "emc",
+      "started": "2026-11-07T13:18:23",
+      "ran_model": "sonnet",
+      "session": "72b9a240-b115-44c0-a609-d874cc61f035"
+    },
+    {
+      "id": "T-0166",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-07",
+      "finding": {
+        "id": "C1",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-4ch",
+        "location": "J10 KF2EDGSRM-7.62-2P C577772",
+        "summary": "C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code",
+        "fix": "Recheck stock before ordering and name a fallback (C577767 or C7422678, footprint check needed); no design change now",
+        "door": "two-way",
+        "reason": "a connector code is a BOM and footprint choice, undone by a commit before the order",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-07-cost-system.md",
+        "finding": "C1"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0167",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-07",
+      "finding": {
+        "id": "C2",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "location": "Q30 AGM601LL C5464765 and J10 C577772 / C577752",
+        "summary": "T-0158 saves about 4.8 $ per board at 5 (Q30 2.7 $, J10 set 2.2 $) with no new extended part; confirmed",
+        "fix": "none needed",
+        "door": "two-way",
+        "reason": "done, in git, revertible",
+        "touches": [],
+        "cost_delta_usd": -4.8
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-07-cost-system.md",
+        "finding": "C2"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0168",
+      "role": "system",
+      "scope": "pdm-4ch",
+      "created": "2026-11-07",
+      "finding": {
+        "id": "C3",
+        "kind": "question",
+        "severity": "INFO",
+        "board": "pdm-4ch",
+        "summary": "May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check?",
+        "default": "yes",
+        "door": "two-way",
+        "reason": "a sensible default exists; the connector can change before the order",
+        "touches": []
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-07-cost-system.md",
+        "finding": "C3"
+      },
+      "door": "two-way",
+      "state": "done",
+      "ruling": "assumed: yes"
     }
   ],
   "board_size_start": {

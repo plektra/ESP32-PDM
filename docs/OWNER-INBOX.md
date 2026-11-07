@@ -8,10 +8,13 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (7) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0168 · INFO · pdm-4ch · May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → assumed yes
+- T-0167 · INFO · pdm-4ch · T-0158 saves about 4.8 $ per board at 5 (Q30 2.7 $, J10 set 2.2 $) with no new extended part; confirmed → none needed
+- T-0166 · MINOR · pdm-4ch · C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → Recheck stock before ordering and name a fallback (C577767 or C7422678, footprint check needed); no design change now
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
