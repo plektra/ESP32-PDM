@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 157,
+    "T": 158,
     "Q": 68
   },
   "tasks": [
@@ -5010,6 +5010,39 @@
       "summary": "0 synced, 14 left for /system, merged 2d4d9b57",
       "interrupted": null,
       "report": "docs/reviews/2026-11-07-fix-sync-T-0156.md"
+    },
+    {
+      "id": "T-0157",
+      "role": "planner",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-07",
+      "depends_on": [],
+      "items": [
+        "T-0148",
+        "T-0149",
+        "T-0150",
+        "T-0151",
+        "T-0152",
+        "T-0153"
+      ],
+      "started": "2026-11-07T10:21:16",
+      "ran_model": "opus",
+      "session": "7870146c-4a71-4d10-b8fd-94412deefe94",
+      "cost_usd": 0.4186,
+      "attempts": 0,
+      "resume": {
+        "session": "7870146c-4a71-4d10-b8fd-94412deefe94",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0157",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0157-2qyt60qk",
+        "report": "docs/reviews/2026-11-07-plan-system-T-0157.md",
+        "head": "64e2b42d35fd8f5df355238a3aa080f6fbaa210f",
+        "reason": "an interruption"
+      },
+      "finished": "2026-11-07",
+      "note": "no report written (aborted_streaming): ",
+      "summary": "interrupted, queued again, resumes where it stopped",
+      "interrupted": true
     }
   ],
   "board_size_start": {
