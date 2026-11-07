@@ -8,10 +8,12 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (6) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0177 · MINOR · system · The pdm-4ch battery plug fits an HC2 output socket and puts battery minus on OUT2, so turning channel 2 on is a dead short through Q21/Q22 (outside the calculated SOA from hot); the README still says all connectors are keyed. → Add one README sentence and a coloured sleeve or label on the battery plug saying the two plugs are interchangeable; no part change.
+- T-0176 · MINOR · pdm-hc2 · HC2 turn-off is not slewed (PD direct, R(PD) 0.69-1.34 Ω into about 10 nF): the output steps 28 V in tens of ns, about 500 V/µs, against 0.76 V/µs at turn-on, so a switch-off can click the VHF receiver. → No change now: add 'R116/R216 0 Ω to 10-22 Ω, watch the turn-off edge and VHF click' to the pre-compliance scan and recompute the short-circuit SOA before keeping any value.
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
