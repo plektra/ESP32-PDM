@@ -1,7 +1,7 @@
 {
   "next": {
-    "T": 175,
-    "Q": 69
+    "T": 176,
+    "Q": 70
   },
   "tasks": [
     {
@@ -5416,9 +5416,13 @@
         "report": "docs/reviews/2026-11-07-cost-system.md",
         "finding": "C3"
       },
-      "door": "two-way",
-      "state": "done",
-      "ruling": "assumed: yes"
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0069",
+      "undone": "2026-11-07",
+      "why_big": [
+        "you took it back from the agents (was: assumed: yes)"
+      ]
     },
     {
       "id": "T-0169",
@@ -5565,6 +5569,14 @@
       "finished": "2026-11-07",
       "summary": "skipped: no connector, filter or protection part changed (refs: none)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0175",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-07",
+      "depends_on": []
     }
   ],
   "board_size_start": {

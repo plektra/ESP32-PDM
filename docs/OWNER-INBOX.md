@@ -6,7 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (1)
+## Open (2)
 
 ## Q-0068 · MINOR · pdm-4ch · finding
 
@@ -15,15 +15,25 @@ lines are read; other edits are lost.
 - **Proposed:** If C577772 cannot be bought from any seller in time for the order or the decision 98 sample, should J10 move to a different socket + plug set (new footprint and/or plug, keyed against the 5.08 mm J11), or should the order wait for a C577772 restock?
 - **Why it needs you:** found while fixing (T-0171): Neither named fallback passes: C577767 and C7422678 match the J10 pad grid, Ø1.5 mm holes and 30 A UL / 32 A IEC, but have no flange for the C577752 plug's ear screws and their drawings show no lock (docs/part-facts/C577767.md, C7422678.md). Using either needs a new plug or footprint, which amends decisions 98/104.
 
+**Answer:** Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.
+
+---
+
+## Q-0069 · INFO · pdm-4ch · question
+
+- **From:** `docs/reviews/2026-11-07-cost-system.md` C3 (); task T-0168
+- **Summary:** May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check?
+- **Proposed:** yes
+- **Why it needs you:** you took it back from the agents (was: assumed: yes)
+
 **Answer:** 
 
 ---
 
-## Decided by agents (5) – two-way doors
+## Decided by agents (4) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0168 · INFO · pdm-4ch · May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → assumed yes
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
