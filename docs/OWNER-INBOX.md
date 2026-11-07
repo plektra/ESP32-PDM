@@ -8,10 +8,16 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (10) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0153 · INFO · system · The buck input has capacitors but no LC filter position; SH-ESP32 uses an inductor with damping to limit conducted noise → Add a filter position between D2 and C1/U3: an inductor footprint bridged by a fitted 0 Ohm part or equivalent, DNP inductor, plus a damping option, so the decision 28 pre-compliance scan can decide. Check the current rating, PTC and R54 interaction and stability against the LMR51610 input requirements.
+- T-0152 · INFO · system · The serial console is unconnected, so a firmware crash that takes native USB down leaves no diagnostics → Bring TXD0, RXD0 and GND to unfitted test pads with no BOM line, near the layout test points of the EMC report.
+- T-0151 · INFO · system · Spare GPIOs are unconnected, so later design changes have nowhere to attach without a new PCB → Bring IO35, IO36, IO37 and IO42, with 3V3 and GND, to an unfitted pad or header footprint with no BOM line (IO13 goes to the status LED, S1). Do not use the strapping pins IO45 and IO46. Check each pin in the datasheet and against the pin map, and record the footprint for layout.
+- T-0150 · MINOR · system · The boards have no on-board LED, so a new board gives no sign of life without firmware and a panel (SH-ESP32 comparison in the cost report) → Add a 3.3 V power LED and a firmware status LED on spare IO13, both low current, using one LED line and a resistor value already on the BOM where it fits. Update the pin map (IO13). Optionally add CAN TX/RX LEDs only if a check against the CA-IS3050G and R70 shows they do not load the signals; otherwise leave them out and say so.
+- T-0149 · INFO · system · Standard PCBA charges 1.53 USD per unique line, so near-duplicate values cost about 6 USD (4-ch) and 7.65 USD (HC2) per order → C2 to C307331 (0402), C12 and C13 to C15849, R10 to C25768, HC2 R9 to C36871. C13 is the L78M05 input cap: check the X5R DC-bias curve at 29 V first and keep C28323 if it does not pass.
+- T-0148 · MINOR · pdm-4ch · Decision 103 makes the first pdm-4ch 16 A only, all BTT6050, but J10 is still the 65 A 10.16 mm set and Q30 the 0.75 mOhm IPT007N06N sized for 32 A → Downsize J10 to the 7.62 mm set C577772 + C577752 (30 A UL / 32 A IEC), which keeps keying against the 5.08 mm J11, and re-select Q30 for 16 A with a datasheet check, the heat budget at 40 C and the LM74500-Q1 gate drive. Keep invariant 4, the D31 TVS and decision 96's negative-pulse limits, or stop and report. Correct the 16 A input limit, Q30 copper rule and related figures in STATUS and design notes. J10 footprint must be verified against the drawing.
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
@@ -77,7 +83,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0006 · pdm-hc2 · MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → T-0106 (`c036d2a6`)
 - T-0005 · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → T-0071 (`80bb3bd1`)
 
-## Deferred (23)
+## Deferred (25)
 
 - T-0016 · system · Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined. → until system-mechanical: Q-0010: GND pole(s) at J10 rated like the VS input are chosen with the terminal blocks in /system mechanical; wide GND copper to J10.2 is a PCB-phase rule
 - T-0020 · system · LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first. → until prototype: Q-0013: swap to LMR51610YF only if the pre-compliance scan of the first prototypes shows PFM noise; check price and stock then
@@ -102,6 +108,8 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0113 · pdm-4ch · C30 swap to 2.2 uF C170101 adds about 0.054 USD per board on pdm-4ch with no fee saved, because C13832 stays at C104-C404 → until owner: No change now. The pdm-4ch C30 C170101 swap costs +0.054 USD per board with no fee saved only while C104-C404 keep C13832. Whether they move to C170101 is the open owner question from T-0107/T-0099 (confirmed decision 26 names 1 uF at each VS tab). C30 stays identical on both boards (shared root sheet).
 - T-0114 · pdm-hc2 · C13832 removal costs 0.162 USD per board against a 3.07 USD fee per order, so it pays only up to about 19 boards per order → until order: Depends on the order quantity. For orders above about 20 pdm-hc2 boards, revert C30/C102/C202 to C13832 1 uF/100 V (inside decision 26 and TPS4811 Table 9-3). Re-price with tier prices at order time, since STATUS says 15+ and cost-system-2 says about 19 at 1+ prices. C30 is on the shared root sheet: weigh this against keeping both boards identical. No change for the planned 5-30 boards.
 - T-0127 · pdm-4ch · C170101 instead of C13832 saves the loading fee only below about 14 boards per order; above that C13832 is cheaper → until order: The item only asks to revisit C13832 vs C170101 at order time, once the run size is known. The first run is 5 boards (decision 33), below the break-even of about 14 boards, so nothing changes now. Decision 84 says revisit past about 12 boards; reprice at a run of 12 or more.
+- T-0154 · system · SH-ESP32 uses the same 60 V PTC without a series resistor; removing R54-R56 would save one line, about 2-3 USD per order → until prototype: kept until measured
+- T-0155 · system · SH-ESP32 fits standard 100 x 68 x 50 mm waterproof enclosures; pdm-4ch at about 100 x 65 mm is close, which could replace a printed MVP enclosure → until system-mechanical: needs a heat check
 
 ## Answered (59)
 
