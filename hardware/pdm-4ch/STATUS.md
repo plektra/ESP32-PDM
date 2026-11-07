@@ -1,8 +1,10 @@
 # pdm-4ch status
 
-Updated: 2026-11-07 (decisions 99–103)
+Updated: 2026-11-07 (decisions 99–104, T-0158)
 
-**2026-11-06 (cost session, no schematic change):** `pdm-4ch` is the whole first order and the MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 218 $ with connector sets (decisions 99, 101, 102; `docs/reviews/2026-11-05-cost-system.md`). First version is 16 A only, all BTT6050 (decision 103). **Queued, not done:** T-0148 smaller J10 and re-selected Q30; T-0149 part merges; T-0150 status LEDs; T-0151 spare GPIO pads; T-0152 serial pads; T-0153 buck filter position. The current schematic still has the 65 A J10 and the 32 A Q30.
+**2026-11-06 (cost session, no schematic change):** `pdm-4ch` is the whole first order and the MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 218 $ with connector sets (decisions 99, 101, 102; `docs/reviews/2026-11-05-cost-system.md`). First version is 16 A only, all BTT6050 (decision 103). T-0148 is done (T-0158, below). **Queued, not done:** T-0149 part merges; T-0150 status LEDs; T-0151 spare GPIO pads; T-0152 serial pads; T-0153 buck filter position.
+
+**2026-11-07 (T-0158: T-0148, owner ruling, decisions 103 and 104, unattended, `pdm-4ch` root sheet only):** the board input is now 16 A. **J10** is KF2EDGSRM-7.62-2P C577772 + plug C577752 (30 A UL / 32 A IEC), footprint `ESP32-PDM:Kefa_KF2EDGSRM-7.62-2P`, pin 1 VBAT_IN, pin 2 GND; the footprint passes against the drawing and is unchanged (design-notes §7). **Q30** is AGM601LL C5464765 (60 V, VGS ±20 V, 1.6 mΩ max, TOLL, same pins, footprint unchanged, 0.85 USD instead of about 3.55 USD); the symbol stays `ESP32-PDM:IPT007N06N`. C32, U30, D31, D30, C30, FL30 and JP30 are unchanged. **Heat at 40 °C:** 4 × 4 A inside 45.8 °C, Tj 102 °C (`--r-path 0.0069`); 4.5 A OVER. Q30 at 16 A: Tj 66 °C at 40 K/W, 80 °C at 62 K/W; AGM's 50 K/W has no stated copper area, so it is not relied on. **Copper rule:** ≥ 2 cm² of 2 oz VS copper on the drain tab replaces the 6 cm² of decisions 90 and 95. Decision 96's limits and invariant 4 hold: VDS 59.4 V and VS −4.0 V at 31 A do not depend on the FET. ERC 0 errors, 5 warnings (unchanged); netlist differs only in J10 and Q30 fields; 218 parts (+0), 62 unique (+0). **C577772 stock is 0 today (minimum order 18), so the set cannot be bought until restocked.** BTT6010 stays out of this version: four at 8 A would take Q30 to about 179 °C. **A competent person reviews the battery path (J10, Q30/U30, D31) before installation.** Older entries that give 32 A or IPT007N06N are history. Details and failure modes: design-notes §7, §8.6. Report: `docs/reviews/2026-11-07-fix-pdm-4ch-T-0158.md`.
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
@@ -126,7 +128,7 @@ a competent person reviews F1–F4 and R54–R56 before installation.
 
 1. Open in KiCad: tidy what the scripts placed (labels, part positions; the new parts in `analog_sw` and the
    VBAT/NTC block at the bottom of the root sheet), run *Update Symbols from Library* (USB-C; keep Q3–Q6
-   on the BC817 symbol with value MMBT5551 – same pinout), then ERC.
+   on the BC817 symbol with value MMBT5551 – same pinout; keep Q30 on the IPT007N06N symbol with value AGM601LL – same pins), then ERC.
 2. After `/emc pdm-4ch` and `/validate pdm-4ch deep`: fix findings.
 3. ~~Verify `Infineon_PG-TDSO-14_ThermalVias` against the JLCPCB footprint~~ done (T-0066). At the first order, check the
    CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°).
@@ -139,14 +141,14 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    - **VS copper from the four switches to D30 wide** (both layers, 2 oz): it is the output surge path
      (OUT → PROFET body diode → VS → D30), decision 27.
    - JP30 is the VBAT_IN–VS link: draw it as a copper bridge as wide as the VS copper (the placeholder footprint
-     `NetTie-2_SMD_Pad2.0mm` is far too small for 32 A). FL30 has no footprint yet; decide at pre-compliance.
+     `NetTie-2_SMD_Pad2.0mm` is far too small for 16 A). FL30 has no footprint yet; decide at pre-compliance.
    - D30 and C30 directly at the J10 socket pins; C31 close to J10; C104–C404 at each VS tab.
    - MLCCs on VS/VBAT_IN (C30, C104–C404): away from the J10 flange screws and board edges and not across a bending
      line (a cracked MLCC shorts the battery input).
    - D103–D403 (DNP) next to J11, GND return straight to J10.2.
-   - T-0121 (design-notes §8.6): Q30 in the 32 A path between JP30 and VS. VBAT_FL and VS copper as wide as the VS
-     copper, both layers. **≥ 6 cm² 2 oz copper on Q30's drain tab (VS)**: Tj ≈ 86 °C at 32 A (minimal pad:
-     ≈ 116 °C). U30 next to Q30 with short SOURCE/GATE traces. C32 at U30, away from Q30's tab. The surge loop
+   - T-0121, T-0158 (design-notes §8.6): Q30 in the 16 A path between JP30 and VS. VBAT_FL and VS copper as wide as the VS
+     copper, both layers. **≥ 2 cm² 2 oz copper joined to Q30's drain tab (VS)**: Tj ≈ 66–80 °C at 16 A (40–62 K/W, Infineon's TOLL
+     figures as an analogue; AGM gives no copper area). U30 next to Q30 with short SOURCE/GATE traces. C32 at U30, away from Q30's tab. The surge loop
      switches → VS → Q30 → D30 short and wide.
    - T-0143 (design-notes §8.6): D31 directly across the Q30 drain tab and source pins, short and wide.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
@@ -177,7 +179,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Pre-order checklist (T-0065)
 
-- Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. Then buy the sets for the order: stock is thin on C6394053 / C6394029. Hand-solder J10 with a powerful iron; check the joints.
+- Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. pdm-4ch J10 is now C577772 + C577752 (decision 104), so its sample is that set; the J10/J11 pair on pdm-hc2 is unchanged. Then buy the sets for the order: C577772 / C577752 (40 / 63 on 2026-11-05, **0 / 63 on 2026-11-07, C577772 minimum order 18**) now serve both boards (pdm-4ch J10, pdm-hc2 J11); stock is thin on C6394053 / C6394029 too (HC2 J10). Hand-solder J10 with a powerful iron; check the joints.
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
   LMR51610YF (only if the scan asks for FPWM), plus the new C170101.
 - L1 approved alternates (datasheet-checked, same 8.2 µH / 0.056 Ω max / I_sat 3.9 A / I_rms 2.6 A / 6045 land):
@@ -196,14 +198,16 @@ R71/R72 go between D9 and U5 (D9 at J4).
   (design-notes §2).
 - T-0107/T-0120: C30 and C104–C404 use C170101 2.2 µF instead of C13832 1 µF. pdm-4ch no longer carries C13832, so its loading fee is gone; this pays on short runs only. Revisit the choice if runs grow past about 12 boards (owner ruling Q-0063). RIS is now 2 × C4410 per channel.
 - T-0121: check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30, pads 1 G / 2 S / 3 D) and `TSOT-23-8` (U30; TI DDF land
-  1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C122552 and C5219210. Recheck stock (C122552
-  4707, C5219210 2923 on 2026-11-03).
+  1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C5464765 and C5219210. Recheck stock (C5464765
+  2016 on 2026-11-07, C5219210 2923 on 2026-11-03).
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 
 ## For /system
 
-- Decision 103: if the planner defers T-0148, T-0150 or T-0151 to `/system`, handle them before layout. They change J10 and Q30, and the pin map. Decision 98's connector sample check should use the new J10 set.
+- Decisions 103, 104: done in T-0158 (2026-11-07): J10 is C577772 + C577752 and Q30 is AGM601LL, with a 16 A input and ≥ 2 cm² tab copper; decision 98's sample check names the new set. If the planner defers T-0150 or T-0151 to `/system`, handle them before layout, since they change the pin map.
+- T-0158, ARCHITECTURE rows a `pdm-4ch` package may not edit, for the sync sweep: the Boards row (BTT6010 option, not on this version, decision 103); the root row (Q30 AGM601LL C5464765); the Mechanics J10 row (pdm-4ch C577772 + C577752); the BTT6010 budget row; the supply path row (Q30 figures, 16 A limit instead of 32 A).
+- T-0158, a choice for the owner: the pdm-4ch battery plug now physically fits a pdm-hc2 J11 output socket, and the HC2 output plug fits a pdm-4ch J10, because both are the 7.62 mm set. Decision 98's keying therefore holds only within one board, not across boards in one installation. What a mis-plug does has not been analysed. Options: accept it and label the plugs; or change the set on one board at the next pdm-hc2 revision. pdm-hc2 is not changed, and its layout follows pdm-4ch bring-up (decision 102), so this does not hold up the first order.
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
 - T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.

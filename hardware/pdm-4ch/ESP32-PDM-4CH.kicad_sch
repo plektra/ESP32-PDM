@@ -9149,7 +9149,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "KF2EDGSRAM-10.16-2P"
+		(property "Value" "KF2EDGSRM-7.62-2P"
 			(at 287.02 133.35 0)
 			(effects
 				(font
@@ -9158,7 +9158,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ESP32-PDM:Kefa_KF2EDGSRAM-10.16-2P"
+		(property "Footprint" "ESP32-PDM:Kefa_KF2EDGSRM-7.62-2P"
 			(at 284.48 132.08 0)
 			(effects
 				(font
@@ -9176,7 +9176,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Battery input VBAT_IN / GND, keyed locking plug (decision 98)"
+		(property "Description" "Battery input VBAT_IN / GND, 16 A, keyed locking plug (decisions 98, 103, 104)"
 			(at 284.48 132.08 0)
 			(effects
 				(font
@@ -9185,7 +9185,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C6394053"
+		(property "LCSC" "C577772"
 			(at 284.48 132.08 0)
 			(effects
 				(font
@@ -9194,7 +9194,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC_Plug" "C6394029"
+		(property "LCSC_Plug" "C577752"
 			(at 284.48 132.08 0)
 			(effects
 				(font
@@ -11324,7 +11324,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "IPT007N06N"
+		(property "Value" "AGM601LL"
 			(at 223.52 176.53 0)
 			(effects
 				(font
@@ -11342,7 +11342,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.infineon.com/dgdl/Infineon-IPT007N06N-DS-v02_01-EN.pdf"
+		(property "Datasheet" "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2402221102_AGM-Semi-AGM601LL_C5464765.pdf"
 			(at 220.98 175.26 0)
 			(effects
 				(font
@@ -11360,7 +11360,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C122552"
+		(property "LCSC" "C5464765"
 			(at 220.98 175.26 0)
 			(effects
 				(font
