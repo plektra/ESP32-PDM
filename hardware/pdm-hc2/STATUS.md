@@ -1,6 +1,8 @@
 # pdm-hc2 status
 
-Updated: 2026-11-07 (decisions 99–102, 105, T-0159)
+Updated: 2026-11-07 (T-0160 status LEDs and service pads)
+
+**2026-11-07 (T-0160: T-0150, T-0151, T-0152, owner rulings 2026-11-06, unattended, shared – controller part of the root sheet, same on both boards except J6 pins 4–6):** sign-of-life LEDs and service pads. **D8 + R67** power LED +3V3 → GND; **D7 + R59** status LED IO13 → GND (high = on, off while IO13 is undriven). LEDs KT-0603R red 0603 C2286 (basic, the one new line), resistors 2.2 k C25879 (on the BOM): ≈ 0.7 mA each. D8 draws continuously, also in Eco/Sleep (decision 13), ≈ 2.3 mW from 3.3 V. **J6** unfitted `PinHeader_1x08_P2.54mm_Vertical`, DNP, no BOM line: 1 GND, 2 TXD0, 3 RXD0, **4–6 not connected** (IO35–IO37 are FLT_T1/FLT_I2/FLT_T2 here, FLT nets untouched, auto decision), 7 IO42, 8 +3V3. Pin checks: none strapping, none used in the N8 module. CAN TX/RX LEDs left out (see design-notes §8.7). Pin map and the controller power row updated in ARCHITECTURE. ERC 0 errors, 5 warnings (unchanged); netlist differs only in U1 pins 17, 38–40 and the new parts. 237 parts (+5, J6 DNP), 65 unique (+1). Design-notes §8.7. Report: `docs/reviews/2026-11-07-fix-shared-T-0160.md`.
 
 **2026-11-07 (T-0159: T-0149, owner ruling, decisions 99 and 105, unattended, shared – same on both boards):** near-duplicate BOM lines merged; values and nets unchanged. C2 → C307331 0402, C12 → C15849 0603, R9 → C36871 0402, R10 → C25768 0402. **C13 stays on C28323:** C15849 keeps only 0.10 µF at 29 V and 0.31 µF at 12 V (Samsung's simulation), below the L78M05's 0.33 µF, while C28323 keeps 0.42 µF worst case at 29 V. C14663, C52923, C31850, C23231 are gone: 64 unique (−4), 6.12 USD per order. **Layout:** C2, R9, R10 are 0402, C12 is 0603 (was 0402), C13 stays 0805. ERC 0 errors, 5 warnings (unchanged). 3.3 V setpoint tolerance unchanged (±1 %, ±100 ppm/°C). Design-notes §8.3. Report: `docs/reviews/2026-11-07-fix-shared-T-0159.md`.
 
@@ -154,6 +156,7 @@ a competent person reviews F1–F4 and R54–R56 before installation.
      `NetTie-2_SMD_Pad2.0mm` is far too small); FL30 has no footprint yet, decided at pre-compliance.
    - D30, C30 at the J10 socket pins; C31 near J10; C106/C206 at each channel's VS next to RSNS/Q11.
    - C30 (MLCC on the battery input) away from the J10/J11 flange screws, board edges and bending lines.
+   - T-0160 (design-notes §8.7): **J6** (unfitted service pads) inside the board near the EMC test points (VS, 3V3, GND, buck SW, CANH/CANL; `docs/reviews/2026-11-03-emc-system.md` item 9), not at an edge connector, short traces from U1, outside the antenna keep-out, pin 1 (GND) marked. On-board use only: no cable leaves the board (invariant 9 for 3V3; invariant 4, the lines are unprotected). **D7/D8** where they are visible with the board in its carrier.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
    board edges and screws.
@@ -199,6 +202,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
   (design-notes §2).
 - T-0107: C30, C102 and C202 use C170101 2.2 µF/100 V instead of C13832 1 µF, which removes the C13832 loading fee for the 5-board first run. For runs of **15+ pdm-hc2 boards** C13832 at these places is cheaper again (cost report L8). C102/C202 must stay within TPS4811 Table 9-3 (0.1–10 µF).
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
+- T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
 
 ## For /system
 
@@ -208,6 +212,8 @@ R71/R72 go between D9 and U5 (D9 at J4).
   full scale ≈ 31.9 V) and reports "OUT high while off" as a float-driven run.
 - **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list). Pre-charge path (TPS48111-Q1) if the prototype shows real loads exceed about 50 µF (decision 94).
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
+- T-0160 done (T-0150–T-0152): the pin map now has IO13 = status LED and IO42, TXD0/RXD0 on unfitted J6 (pins 4–6 not connected here). For the sync sweep: the ARCHITECTURE root (controller) row does not yet name D7/R59, D8/R67 or J6.
+- T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave IO42 with a pull enabled while unused.
 
 - T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended
   parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).

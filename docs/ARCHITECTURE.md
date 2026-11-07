@@ -32,13 +32,16 @@ them is a system change: make it on both boards in the same session (or note it 
 | IO9 | NTC (ADC1) | NTC (ADC1) |
 | IO10 | VBAT_SENSE (ADC1) | VBAT_SENSE (ADC1) |
 | IO12 | SW_SENSE, digital input: high = SW_SUPPLY present (decision 93) | same |
-| IO13 | spare | spare |
+| IO13 | firmware status LED D7 (R59 2.2 k to GND, high = on) | same |
 | IO14, IO15, IO16, IO21 | switch state SW1–SW4 | switch state SW1–SW4 (3–4 sense-only) |
 | IO17 / IO18 | CAN TX / RX | CAN TX / RX |
 | IO19 / IO20 | USB D− / D+ | USB D− / D+ |
 | IO33 | DEN (diagnostics enable, all channels) | spare |
-| IO34–IO37 | spare | FLT_I1, FLT_T1, FLT_I2, FLT_T2 |
+| IO34 | spare | FLT_I1 |
+| IO35–IO37 | unfitted service footprint J6 (pins 4–6) | FLT_T1, FLT_I2, FLT_T2 (J6 pins 4–6 not connected) |
 | IO38–IO41 | panel LED sinks LED1–LED4 (DIAG1–4) | panel LED sinks LED1–LED4 (DIAG1–4) |
+| IO42 | unfitted service footprint J6 (pin 7) | same |
+| TXD0 / RXD0 | serial console on unfitted J6 (pins 2 / 3; pin 1 GND, pin 8 3V3, on-board only) | same |
 
 Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through deep sleep; IO38–IO41 are not RTC GPIOs, so the panel LEDs are off in deep sleep.
 
@@ -84,7 +87,7 @@ Board depth about 65 mm (4-ch) and 75 mm (HC2), length up to 100 mm, set at layo
 | 4-ch, BTT6010 per channel | ≈ 8 A | `tools/heat_budget.py --mix` |
 | HC2 per channel | ≈ 15 A continuous; breaker ~17.5 A / 146 ms (RIWRN 68 k, ≈ 15–20 A over tolerances); fast trip 80 A; external breaker ≤ 15–18 A per output plus firmware soft fuse (decision 39); load input capacitance ≤ ≈ 50 µF per output (decisions 77, 94) | `tools/heat_budget.py --part HC-2xBSC030`, TPS4811-Q1 equations |
 | Shared supply path | ≤ 2 mΩ (terminal + VS copper), plus on pdm-4ch the blocker Q30 (≤ 0.75 mΩ at 25 °C, ≈ 1.1 mΩ hot); board input limit 32 A (4-ch) / 36 A (HC2), decision 95 | design-notes §4, §8.6 |
-| Controller power | ≈ 0.47 A at 3.3 V peak (ESP32 radio); panel LEDs no longer on 3.3 V; F1 500 mA hold | design-notes |
+| Controller power | ≈ 0.47 A at 3.3 V peak (ESP32 radio); panel LEDs no longer on 3.3 V; plus ≈ 0.7 mA continuous for the power LED D8 (also in Eco and Sleep) and ≈ 0.7 mA for the status LED D7 while lit; F1 500 mA hold | design-notes §8.7 |
 | Panel switch supply | ≈ 63 mA (4 × 7.5 mA switch load + 4 × 2.6 mA divider + 2.6 mA SW_SENSE + 4 × 5 mA LEDs at 30 V); F4 500 mA hold; MMBT5551 ≈ 0.13 W each at 30 V | decisions 17, 74, 93 |
 
 ## Open system items

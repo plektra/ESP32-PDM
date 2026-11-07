@@ -1349,6 +1349,69 @@ it pass would need RthJA ≈ 17 K/W (more copper or a second FET, neither in the
 held: 4 × 4 A Tj 102 °C (4.5 A now OVER), mix 91/103 °C, 4 × 8 A 93 °C. **Lever dropped. Q30 stays IPT007N06N C122552.**
 Rechecked at the 32 A limit of decision 95 (same method, air 48.4 °C): AGM601LL ≈ 179 °C at 40 K/W, above its 175 °C Tj max and with the 150 °C curve point extrapolated, so the lever stays dropped.
 
+### 8.7 Sign-of-life LEDs, unfitted service footprint J6 (T-0160: T-0150, T-0151, T-0152; owner rulings 2026-11-06; 2026-11-07, auto)
+
+Root sheet, controller part, the same on both boards except J6 pins 4–6 (below). Facts: ESP32-S3-MINI-1-N8
+`docs/part-facts/C2913206.md` (T-0160 section), KT-0603R `docs/part-facts/C2286.md`, CA-IS3050G `docs/part-facts/C528763.md`.
+
+**Pin checks (ESP32-S3-MINI-1 v1.7 Table 3-1; ESP32-S3 v2.2 Tables 2-1, 2-4, 2-14, 3-5).** None of the pins is a strapping
+pin, and none is used inside the N8 module: N8 has quad flash and no PSRAM, so IO33–IO37, which are the octal-SPI
+lines, are free. IO26 is used only by the N4R2 PSRAM. At reset: IO13, IO35–IO37 and IO42 are inputs with no pull;
+TXD0 (GPIO43) and RXD0 (GPIO44) have a weak pull-up, and TXD0 carries the ROM boot log. IO42 is the MTMS pad, but with the default eFuses JTAG
+runs through USB Serial/JTAG, so the pad is a plain GPIO (the T-0051 rule never to burn `EFUSE_STRAP_JTAG_SEL` stays).
+IO45/IO46 (strapping) are not used.
+
+**LEDs (T-0150).** One new BOM line: KT-0603R red 0603, C2286 (basic). The resistors are 2.2 k 0402 C25879, which is already on
+the BOM, so the change adds +4 parts and +1 unique line per board.
+- D8 + R67: power LED from +3V3 to GND. D7 + R59: status LED from IO13 (R59) to GND, so it lights while IO13 is high.
+- Current: Vf ≈ 1.85 V at 1 mA (typical curve, C2286 p. 5; nothing is plotted below 1 mA), so
+  (3.3 − 1.85) V / 2.2 kΩ ≈ 0.66 mA, or ≈ 0.7 mA if Vf is a little lower at this current. The LED is rated 25 mA at 25 °C,
+  derated to about 6–7 mA at 85 °C, so ≥ 9× margin. Dissipation is ≈ 1.2 mW in the LED and ≈ 1 mW in the resistor.
+- Brightness: the relative-intensity curve gives ≈ 0.06 at 1 mA, so ≈ 0.04 at 0.66 mA, which is about 6–12 mcd from the
+  145–300 mcd bins. This is extrapolated, not a datasheet value. It is a visible indicator indoors and dim in daylight.
+- IO13 drive: the default drive is 20 mA, and VOH ≥ 0.8 × VDD is specified into a high-impedance load. Even at the
+  2.64 V floor the LED gets ≈ 0.38 mA and still lights. With IO13 undriven (input, no pull, also during the 60 µs power-up glitch) the
+  LED is off. Firmware must not enable IO13's internal 45 k pull-up, or the LED glows faintly (≈ 35 µA).
+- **Continuous draw:** D8 draws ≈ 0.7 mA (≈ 2.3 mW from 3.3 V) whenever 3.3 V is up, also in Eco and Sleep (decision 13).
+  No GPIO can switch it off. On the battery side that is ≈ 0.1 mA at 24 V and ≈ 0.2 mA at 12 V with ideal
+  conversion; the LMR51610's light-load efficiency is not bounded here, so the real figure is higher. D7 adds ≈ 0.7 mA
+  while lit, and firmware turns it off in Sleep (IO13 is an RTC GPIO and can be held low). The controller power budget
+  in ARCHITECTURE carries both figures. Heat: ≈ 5 mW against the 2.3 W `p_other`, negligible, so no output rating changes.
+- Invariant 1: the LEDs hang on +3V3 and IO13 only and do not touch the switch-to-output path.
+- Failure modes: an LED failing short leaves ≈ 1.5 mA through its 2.2 k, which is harmless; an LED failing open is only a dark LED. No
+  safety-relevant output changed.
+
+**CAN TX/RX LEDs: left out.** An LED + 2.2 k from IO17 (TXD) to GND fails the check. While IO17 is undriven (reset,
+boot), R70 10 k and the LED path form a divider. With Vf ≈ 1.7 V at ≈ 0.13 mA (estimated below the curve), TXD sits at
+≈ 3.3 − 10 k × 0.13 mA ≈ 2.0 V, which is exactly the CA-IS3050G VIH minimum of 2 V (v1.10 §7.3). That loses R70's
+recessive margin. An LED + 2.2 k from +3V3 to TXD or to RXD (lit while dominant) would not load the lines: TXD
+recessive leaves 0 V across it, and RXD VOL is ≤ 0.4 V at 4 mA (p. 11), far above 0.7 mA. But these LEDs would light only for
+dominant bits, and at 0.7 mA a 250 kbit/s frame (≈ 0.1–0.5 ms) is not visible without a pulse stretcher, which would be a new
+circuit. The parts would buy no visible function, so they are not fitted. The suggestion stays in the T-0160 report.
+
+**J6 (T-0151, T-0152).** One unfitted footprint `Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical`, DNP,
+no LCSC code and no BOM line:
+
+| J6 pin | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| pdm-4ch | GND | TXD0 | RXD0 | IO35 | IO36 | IO37 | IO42 | +3V3 |
+| pdm-hc2 | GND | TXD0 | RXD0 | NC | NC | NC | IO42 | +3V3 |
+
+On pdm-hc2, IO35–IO37 are FLT_T1, FLT_I2 and FLT_T2 and are not spare, so pins 4–6 carry no-connect flags and the FLT nets are untouched
+(auto decision). The same footprint keeps the layout of the controller area identical. IO33 (HC2) and IO34 (4-ch) are
+spare too but are not brought out (suggestion in the report). A 3.3 V USB-serial adapter connects with GND on pin 1;
+pin 8 (3V3) is at the far end from GND, as the brief asked. A reversed adapter would still put its GND on 3V3, so mark pin 1 on the silkscreen.
+**Rules:** J6 is for on-board service only. No cable leaves the board (invariant 9 for 3V3), and the lines are not
+filtered or protected (invariant 4), so J6 must never become an external connector. A probe that shorts pin 8 to GND pulls down the 3.3 V
+rail and resets the ESP32; the panel switches still drive the outputs (invariant 1). Layout: J6 inside the board, not at an edge connector, near the EMC
+test points (VS, 3V3, GND, buck SW, CANH/CANL; `docs/reviews/2026-11-03-emc-system.md` item 9), with short traces
+from U1 pins 31–33 and 38–40, outside the antenna keep-out.
+
+**Footprint polarity (D7, D8).** KiCad `LED_0603_1608Metric`: pad 1 = cathode at x −0.79 mm, pads 0.875 × 0.95 mm. The JLCPCB
+footprint `LED-SMD_L1.6-W0.8-R-RD` of C2286: pad 2 = K at −0.75 mm, pad 1 = A at +0.75 mm, pads 0.8 × 0.8 mm. So the cathode is on
+the same side in both, only the pad numbers differ, and the electrical connection is by name. The maker's mark (green) is at the
+cathode. Check the CPL rotation of D7/D8 at the first order.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
