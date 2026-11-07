@@ -1030,6 +1030,86 @@ C15849 falls below 0.33 µF already at 12 V, before tolerance. C13 therefore kee
 
 *Layout.* New land patterns: C2, R9, R10 0402; C12 0603 (was 0402). C13 stays 0805.
 
+**Buck input filter position (T-0161, T-0153, owner ruling 2026-11-06, 2026-11-07, auto).** Shared sheet `power-usb`,
+the same on both boards. Net-(D2-K) is split: **D2.K → JP1 ‖ L2 → C1/C19/U3 VIN/EN**. D3.K (USB) stays on the U3 side
+(new net Net-(D3-K)), so the USB-only path does not pass the position and keeps its 3.74 V at 0.40 A (decision 87). C1 and
+C19 stay at U3 (decisions 30, 48). Nothing is fitted: this adds no BOM line and no cost.
+
+| Ref | Part | Net | State |
+|---|---|---|---|
+| JP1 | copper bridge, `Jumper:SolderJumper-2_P1.3mm_Bridged_Pad1.0x1.5mm` (bar 0.6 × 0.5 mm, net tie, no part) | D2.K – C1/U3 | fitted by the PCB; cut only when L2 is fitted |
+| L2 | SWPA6045S8R2MT C96963 (same as L1), 8.2 µH, `Inductor_SMD:L_Sunlord_SWPA6045S` | across JP1 | **DNP**; value set at the scan |
+| C22 | 2.2 µF/100 V X7R 1206 C170101 (same as C1) | C1/U3 node – R73 | **DNP**, damping |
+| R73 | 10 Ω 1206 C17903 (same as R44) | C22 – GND | **DNP**, damping |
+
+*Bridge: copper, not a 0 Ω part.* Part facts `docs/part-facts/C17168.md` (0402) and `C21189.md` (0603): jumper rated 1 A,
+overload 2 A (5 s test), < 50 mΩ, **no pulse, I²t or fusing figure**. A short behind the position (a cracked C1 is the
+likely one) passes through the bridge while F1 trips: up to ≈ 86 A peak and ≤ 9.6 A²s (typ. 1–2 A²s; bound and
+current from the PTC section above). At 50 mΩ that is up to ≈ 370 W and ≤ 0.48 J in a 1 × 0.5 mm part. Neither chip size
+can be shown to survive it, and a jumper that opens would act as an unrated fuse in the F1 path. That would change the
+protection, so no chip jumper is used. The bridge is a copper bar. By Onderdonk (I²t_fuse = A²[cmil] ×
+log10(1 + (1083 − T_a)/(234 + T_a))/33, T_a = 40 °C: 0.0207 × A²), the 0.6 mm bar gives **87 A²s** at 2 oz (65 cmil; the order
+is 2 oz, decisions 99 and 101) and 35 A²s at 1 oz. That is 9× (3.6×) the 9.6 A²s bound. Onderdonk ignores heat sinking into the
+pads, so the figure is conservative. Its resistance is ≈ 0.2 mΩ: at the normal ≈ 0.19 A
+(3.3 V × 0.47 A / (0.85 × 9.5 V)) and at I_hold 0.5 A the drop is < 0.1 mV. **With JP1 fitted the buck input is unchanged
+apart from that 0.2 mΩ.** Layout: the traces into and out of JP1 at least as wide as the bar (≥ 0.6 mm). If JP1 is
+cut and L2 later removed again, restore the link with a wire or a 0 Ω part, then repeat the decision 81 short test.
+
+*L2 current rating* (`docs/part-facts/C96963.md`): I_rms 2.60 A (ΔT 40 K), I_sat 3.90 A (−30 %), DCR ≤ 0.056 Ω, SRF ≥ 21 MHz.
+F1 (`C70113.md`): holds 0.50 A (0.35 A at 60 °C), trips ≥ 1 A; 1 A takes > 100 s, 2.5 A ≈ 0.3 s, 5 A ≈ 0.05–0.1 s
+(typical curve). Every current F1 can carry for longer than ≈ 0.3 s is below I_rms. In a hard short behind L2,
+L2 saturates and the current is then limited by R54 + PTC as today; the winding takes ≤ 9.6 A²s × 0.056 Ω ≈ 0.54 J
+(ΔT a few kelvin in the copper, own estimate). Drop: 0.056 Ω × 0.19 A = 11 mV, 28 mV at I_hold.
+
+*Fitted L2: LC filter* (example 8.2 µH ± 20 %; C = C1 + C19 = 2.3 µF nominal, ≈ 1.2 µF assumed at 24–29 V DC bias, the
+§8.1 estimate, not checked against a curve). Series resistance R_s = R54 0.2 Ω + PTC 0.15 (R_min) … 1.0 Ω (R1max) + DCR
+0.043–0.056 Ω = **0.39–1.26 Ω**. D2's dynamic resistance and the VS bulk are left out, which is conservative. Calculation:
+`f0 = 1/(2π√(LC))`, `R0 = √(L/C)`, |Z_out| scanned 1 kHz–10 MHz, transfer at the minimum f_sw 0.935 MHz (C22427220 facts),
+ideal parts (no ESL/ESR).
+
+| L / C | f0 | R0 | H(0.935 MHz) | peak |Z_out| undamped, R_s 0.39 / 1.26 Ω | damped C22 2.2 µF + R73 2.2 / 3.3 / 4.7 / 10 Ω, R_s 0.39 Ω |
+|---|---|---|---|---|---|
+| 6.56 µH / 1.2 µF | 56.7 kHz | 2.34 Ω | −48.6 dB | 14.2 / 4.9 Ω | 3.8 / 3.7 / 4.1 / 6.0 Ω |
+| 8.2 µH / 1.2 µF | 50.7 kHz | 2.61 Ω | −50.6 dB | 17.7 / 6.0 Ω | 4.6 / 4.3 / 4.5 / 6.6 Ω |
+| 9.84 µH / 1.2 µF | 46.3 kHz | 2.86 Ω | −52.2 dB | **21.2** / 7.1 Ω | 5.3 / 4.9 / 5.0 / **7.1** Ω |
+| 8.2 µH / 2.3 µF | 36.6 kHz | 1.89 Ω | −56.3 dB | 9.3 / 3.4 Ω | 2.8 / 2.9 / 3.4 / 4.9 Ω |
+| 9.84 µH / 2.3 µF | 33.5 kHz | 2.07 Ω | −57.8 dB | 11.2 / 4.0 Ω | 3.2 / 3.2 / 3.6 / 5.3 Ω |
+
+- **Resonance vs switching frequency:** f0 33–57 kHz is 16–28× below f_sw (0.935–1.265 MHz), so ≈ 49–58 dB at f_sw. In PFM
+  at light load (Y variant, decision 30) the burst rate can fall into the tens of kHz and excite f0. The scan looks
+  at VIN at light load.
+- **Stability (Middlebrook):** the buck's negative input resistance is |Z_in| = V²/P with P ≈ 1.83 W (0.47 A at 3.3 V, η 0.85).
+  At a 10.5 V battery U3 sees ≈ 9.5 V (§8.3 check (c)): **49 Ω**. At an ≈ 8.5 V cranking dip ≈ 7.3 V: **29 Ω**. Undamped, the
+  worst peak of 21 Ω is only 2.3× / 1.4× below that, which is too thin. **L2 is therefore fitted only together with
+  C22 + R73.** With 10 Ω the peak is ≤ 7.1 Ω (6.9× / 4.1×); with 3.3 Ω it is ≤ 4.9 Ω (10× / 5.9×). Below ≈ 6 V at the
+  battery (U3 ≈ 5 V, 14 Ω) the margin shrinks to ≈ 2–3×, and the buck is then close to its UVLO anyway.
+- **Damping values for the scan: start with R73 10 Ω (C17903) + C22 2.2 µF (C170101), both already on the BOM.** Cd/C ≈ 1
+  (same part as C1, same DC-bias loss). The optimum R_d = R0 × √((2+n)(4+3n)/(2n²(4+n))) = 1.45 R0 ≈ 2.5–4.1 Ω
+  (Erickson/Maksimović, parallel R–C damping, n = 1). If the measured ring at f0 is not damped enough, use 3.3–4.7 Ω in the
+  same 1206 footprint (no basic 3.3 Ω exists; the basic 4.7 Ω C23164 is 0603 only, searched 2026-11-07). R73 dissipation:
+  ≈ ½ C V² ≈ 0.9 mJ per 28.8 V power-up, ripple in the mW range, within 0.25 W.
+- **Overshoot at U3 VIN** (ideal step, D2 conducting one way so C1 keeps the peak, 0.19 A load, L 9.84 µH): hot-plug
+  0 → 28.8 V up to 52 V undamped, 43 V with 3.3 Ω. Surge 28.8 → 48.4 V (the D30 clamp, §8.1) up to **64 V undamped**, 59 V with
+  10 Ω and 58 V with 3.3 Ω, against VIN recommended ≤ 65 V and abs max 70 V (C22427220 facts §6.1, §6.3). Today, with JP1, U3 sees
+  ≤ 48.4 V. A real surge rises over µs to ms and C31's ESR damps it, so the ideal step is pessimistic. Still, this is a second reason
+  to fit the damping with L2. **The scan scopes U3 VIN during a hot-plug at 28.8 V whenever L2 is fitted.**
+- **LMR51610 input requirements** (C22427220 facts; TI SLUSEY1B §8.2.2.6): C_IN ≥ 2.2 µF rated about 2 × V_IN plus
+  0.1 µF at the pins. C1 (2.2 µF/100 V, decision 48) and C19 stay directly at U3 and the input loop C1/C19/U3 is unchanged.
+  C22 only adds capacitance. EN is tied to VIN on the U3 side, as before. VIN stays ≥ 4 V: the added drop is ≤ 11 mV with L2 and
+  < 0.1 mV with JP1.
+- **USB-only:** D3 feeds the U3 side directly, so the filter is not in the USB path: 3.74 V at 0.40 A typ (decision 87), unchanged.
+
+*Failure mode (F1/R54 path, safety-relevant protection).* F1, R54 and their ratings are unchanged (decision 81). The
+prospective short current behind the position is the same as today (≈ 86 A). JP1 is copper and is shown to carry the
+F1 trip I²t with margin (above). If JP1 is cut or fails open, the buck loses its battery supply exactly as when F1
+trips without resetting: the controller stays powered from USB only, the outputs keep their hardware switch path
+(invariant 1). With L2 fitted, L2 is in the fault path instead; it saturates and does not limit the fault current. The
+decision 81 hard short behind F1 is made **with JP1 fitted** (a short at C1 also puts JP1 in the path). **A competent
+person reviews F1 and R54 before installation.**
+
+*Cost:* +4 DNP parts per board, no fitted part, unique fitted parts +0 (`fix_check.py`: pdm-4ch 60, pdm-hc2 65).
+L2 land 1.7 × 5.7 mm pads, 4.5 mm pitch, body 6 × 6 × 4.5 mm max: leave room for it before C1.
+
 ### 8.4 Custom footprints: TDSO-14 paste, LMR51610 on SOT-23-6 (T-0066, Q-0036/Q-0037, 2026-11-02)
 
 **PG-TDSO-14 (`ESP32-PDM:Infineon_PG-TDSO-14_ThermalVias`, BTT6050/BTT6010).** The six 1.0 × 1.6 mm paste windows sat
