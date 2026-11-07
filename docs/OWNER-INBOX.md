@@ -6,25 +6,35 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-No open questions.
+## Open (1)
 
-## Decided by agents (8) – two-way doors
+## Q-0068 · MINOR · pdm-4ch · finding
+
+- **From:** `docs/reviews/2026-11-07-cost-system.md` C1 (J10 KF2EDGSRM-7.62-2P C577772); task T-0166
+- **Summary:** C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code
+- **Proposed:** If C577772 cannot be bought from any seller in time for the order or the decision 98 sample, should J10 move to a different socket + plug set (new footprint and/or plug, keyed against the 5.08 mm J11), or should the order wait for a C577772 restock?
+- **Why it needs you:** found while fixing (T-0171): Neither named fallback passes: C577767 and C7422678 match the J10 pad grid, Ø1.5 mm holes and 30 A UL / 32 A IEC, but have no flange for the C577752 plug's ear screws and their drawings show no lock (docs/part-facts/C577767.md, C7422678.md). Using either needs a new plug or footprint, which amends decisions 98/104.
+
+**Answer:** 
+
+---
+
+## Decided by agents (5) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0169 · MAJOR · pdm-4ch · J10 socket C577772 is out of stock at JLCPCB (stock 0, min order 18), so the battery input cannot be assembled as designed until restocked. → Re-check stock at order time; if still 0, buy the socket elsewhere (hand-soldered, decision 85) or use a part with the same drawing.
 - T-0168 · INFO · pdm-4ch · May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → assumed yes
-- T-0167 · INFO · pdm-4ch · T-0158 saves about 4.8 $ per board at 5 (Q30 2.7 $, J10 set 2.2 $) with no new extended part; confirmed → none needed
-- T-0166 · MINOR · pdm-4ch · C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → Recheck stock before ordering and name a fallback (C577767 or C7422678, footprint check needed); no design change now
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (61)
+## Applied by agents (63)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0169 · pdm-4ch · J10 socket C577772 is out of stock at JLCPCB (stock 0, min order 18), so the battery input cannot be assembled as designed until restocked. → T-0171 (`9d4e6dd8`)
+- T-0167 · pdm-4ch · T-0158 saves about 4.8 $ per board at 5 (Q30 2.7 $, J10 set 2.2 $) with no new extended part; confirmed → T-0171 (`9d4e6dd8`)
 - T-0153 · system · The buck input has capacitors but no LC filter position; SH-ESP32 uses an inductor with damping to limit conducted noise → T-0161 (`9024407b`)
 - T-0152 · system · The serial console is unconnected, so a firmware crash that takes native USB down leaves no diagnostics → T-0160 (`c01c3a6d`)
 - T-0151 · system · Spare GPIOs are unconnected, so later design changes have nowhere to attach without a new PCB → T-0160 (`c01c3a6d`)
@@ -83,8 +93,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0010 · system · No high-frequency return across the isolation barrier (CIO about 1 pF) and no CMC option, so the N2K cable can radiate logic-ground noise and ESD lifts the whole island; not measured. → T-0067 (`5ffcfb6f`)
 - T-0009 · pdm-hc2 · HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them. → T-0064 (`dbc672cd`)
 - T-0008 · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → T-0071 (`80bb3bd1`)
-- T-0007 · system · Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → T-0064 (`dbc672cd`)
-- T-0006 · pdm-hc2 · MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → T-0106 (`c036d2a6`)
 
 ## Deferred (25)
 
