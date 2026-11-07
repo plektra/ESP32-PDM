@@ -605,25 +605,37 @@ Decision 97 (amends decision 10). The board mounts two ways on the same four non
 **Rail pitch (the 36 mm is unverified until the sample check).** A terminal's height runs across the rail, so its drawing height plus pin length below the board plus 1 mm sets the
 pitch. KF135T-10.16 (C475108): 29.5 + 4.3 + 1 = 34.8 mm. KF7620-7.62 (C475104): 21.5 + 4.9 + 1 = 27.4 mm. DB128V-5.08 (C2915639):
 14 + 3.5 + 1 = 18.5 mm. Those fixed blocks set the first figure of about 36 mm per unit. Decision 98's J10 socket C6394053 is 13.4 + 4 + 1 = 18.4 mm, and its 27.8 mm plug
-at worst 27.8 + 4 + 1 = 32.8 mm, so 36 mm stays conservative; how the plug sits against the board is not on the drawing. The pdm-4ch J10 (decision 104) is C577772: socket 14.2 + 5 + 1 = 20.2 mm. Its plug C577752 has a 30.60 mm overall height on the drawing, which would be 36.6 mm if that dimension lay across the rail. The drawing does not settle which way it lies, so the sample check decides it (the same plug is on HC2 J11). The old 1-module target (about 14.5 mm inside) could
+at worst 27.8 + 4 + 1 = 32.8 mm, so 36 mm stays conservative; how the plug sits against the board is not on the drawing. The pdm-4ch prototype J10 is the fixed KF135T-10.16 again (decision 121): 34.8 mm, as above. The HC2 J11 socket C577772 is 14.2 + 5 + 1 = 20.2 mm; its plug C577752 has a 30.60 mm overall height on the drawing, which would be 36.6 mm if that dimension lay across the rail. The drawing does not settle which way it lies, so the HC2 sample check decides it. The old 1-module target (about 14.5 mm inside) could
 not hold even the smallest of these.
 
 **Screw access (solved by decision 98).** On fixed screw blocks the screw faces away from the PCB, so edge-on it would face the
 neighbouring unit. Face-on mounting (about 60 mm per unit) was the alternative; the owner chose rail density and keyed plugs on
-right-angle sockets, wired on the bench and pushed in from the board edge.
+right-angle sockets, wired on the bench and pushed in from the board edge. **The pdm-4ch prototype J10 is fixed again (decision 121):** its M4 screws face the neighbouring unit, so it is wired before the neighbour is fitted or with a unit unclipped.
 
-**Connectors (decisions 98, 104, drawings C6394053, C577772, C577767, C441238, C26895).** Footprints in `lib/ESP32-PDM.pretty`, origin at
-pad 1, y toward the mating face. Row lengths: 4-ch J10 30.5 + J11 21.9 = 52.4 mm; HC2 J10 38.1 + J11 30.5 = 68.6 mm; J5 39.0 + J4
-16.1 = 55.1 mm. Hence about 65 mm and 75 mm board depth with gaps. On pdm-4ch the J5/J4 row now sets the depth; the board size stays decision 98's until layout. The 4-ch J10 and HC2 J11 bodies reach 29 mm in from the edge, the HC2 J10 body 34 mm,
+**Connectors (decisions 98, 104, 121, drawings C6394053, C577772, C577767, C475108, C441238, C26895).** Footprints in `lib/ESP32-PDM.pretty`, origin at
+pad 1, y toward the mating face. Row lengths: 4-ch J10 20.3 (fixed KF135T, decision 121) + J11 21.9 = 42.2 mm; HC2 J10 38.1 + J11 30.5 = 68.6 mm; J5 39.0 + J4
+16.1 = 55.1 mm. Hence about 65 mm and 75 mm board depth with gaps. On pdm-4ch the J5/J4 row now sets the depth; the board size stays decision 98's until layout. The 4-ch J10 body (fixed KF135T) reaches 18.6 mm in from the edge, the HC2 J11 body 29 mm, the HC2 J10 body 34 mm,
 so the HC2 parts take most of one end of that board. J5 stays a Conn_02x05 symbol; its pins 1–10 run in a single row. The HC2 J10 plug
 adds about 39 mm past the board edge plus the cable bend, and it is 27.8 mm thick. **Not proven by the drawings, so checked on one
 sample of each set before layout:** that plugs cannot go in reversed, whether a 4-pole J4 plug can enter the 10-pole J5 socket (label
-them), and that plugs fit the 36 mm pitch. Pad 3.2 mm for the HC2 J10 pins (three per pole); 2.8 mm pads, drill 1.5 mm for the 7.62 mm set (two per pole). Hand-soldering J10 into 2 oz copper needs a
+them), and that plugs and the fixed 4-ch J10 fit the 36 mm pitch. Pad 3.2 mm for the HC2 J10 pins (three per pole); 2.8 mm pads, drill 1.5 mm for the 7.62 mm set on HC2 J11 (two per pole); 3.6 mm pads, drill 2.3 mm for the 4-ch J10 KF135T (two per pole). Hand-soldering J10 into 2 oz copper needs a
 powerful iron; a cold joint at the full input current (16 A on 4-ch, 36 A on HC2) overheats. The flange holes are non-plated, so the header screws touch no copper. Stock when
-chosen (2026-11-05): C6394053 39, C6394029 50, C577772 40, C577752 63. **Stock on 2026-11-07: C577772 0 (minimum order 18), C577752 63, and the set now serves both boards (pdm-4ch J10, pdm-hc2 J11).** The Phoenix 10.16 mm set (C6790556) is the
+chosen (2026-11-05): C6394053 39, C6394029 50, C577772 40, C577752 63. **Stock on 2026-11-07: C577772 0 (minimum order 18), C577752 63, the set served both boards until decision 121; it is now on pdm-hc2 J11 only.** The Phoenix 10.16 mm set (C6790556) is the
 fallback at a higher price, not footprint-compatible.
 
-**pdm-4ch J10, 7.62 mm set (decisions 103, 104, T-0158, 2026-11-07).** Footprint `Kefa_KF2EDGSRM-7.62-2P` checked against the C577772 drawing (KF2EDGSRM-7.62 rev. A, 2023-05-12, rendered and read; `docs/part-facts/C577772.md`): **pass, footprint unchanged, so HC2 J11 is unaffected.**
+**pdm-4ch J10, fixed terminal for the prototype (decision 121, 2026-11-07).** Footprint `Kefa_KF135T-10.16-2P` drawn from the Kefa drawing KF135T-10.16 rev. A, 2021-03-16 (rendered and read; `docs/part-facts/C475108.md`):
+
+| Drawing | Value | Footprint (origin pad 1) |
+|---|---|---|
+| Column / row spacing | 10.16 ± 0.03 mm both | pads x 0 / 10.16, y 0 / 10.16 |
+| PCB hole | Ø2.30 +0.10/0, pin 1.20 × 1.60 mm (2.0 mm diagonal) | drill 2.3, pad 3.6 mm (0.65 mm ring for 2 oz hand-soldering) |
+| First row to rear edge | 2.10 mm | body edge y −2.10 |
+| Outer pin to body side | 5.08 mm | x −5.08 … 15.24 |
+| Body width / depth / height | P × 10.16 = 20.32 / 18.60 / 29.50 mm | y −2.10 … 16.50 |
+
+The EasyEDA footprint has the same 10.16 mm grid and pole grouping, with a 2.2 mm hole; ours uses the drawing's 2.3 mm. The base steps out (18.60 vs 14.50 mm at the screws) on the side away from the 2.10 mm edge, so the wire entry is at +y, toward the board edge; the footprint marks this on F.Fab, and the sample confirms it. No flange or mounting holes. Pad 1 = VBAT_IN, pad 2 = GND (this design's choice), to be marked on the silkscreen at layout. Rail pitch 29.5 + 4.3 + 1 = 34.8 mm (above), inside the 36 mm. **Rating:** 65 A UL (group B, 300 V), 57 A IEC; no derating curve or contact resistance on the drawing. 16 A is 25 % of 65 A, so about 6 % of the contact heat at the rated current; with the same 30 K-at-rating assumption as below, about 2 K. Wire 26–6 AWG, 10 mm², strip 10 mm, M4 at 1.2 N·m max. **What the fixed terminal changes:** a board is removed by unscrewing the battery leads, so the installation rule is to switch off the battery feed first; polarity is protected by Q30 (decision 82) up to 30 V. Hand-soldering the four 1.2 × 1.6 mm pins into 2 oz copper needs a powerful iron, as for the other J10.
+
+**pdm-4ch J10, 7.62 mm set (decisions 103, 104, T-0158, 2026-11-07; replaced on pdm-4ch by decision 121, the footprint stays for pdm-hc2 J11).** Footprint `Kefa_KF2EDGSRM-7.62-2P` checked against the C577772 drawing (KF2EDGSRM-7.62 rev. A, 2023-05-12, rendered and read; `docs/part-facts/C577772.md`): **pass, footprint unchanged, so HC2 J11 is unaffected.**
 
 | Drawing | Value | Footprint (origin pad 1) |
 |---|---|---|
@@ -1390,8 +1402,8 @@ only the two J10 leads are swapped while the loads return elsewhere, the case ha
 - **D31 fails open:** back to Q30 avalanche in a negative transient with VS charged (T-0132: about 60–63 V and 80–115 mJ in
   Q30). AGM601LL's EAS 1225 mJ is for Tj(start) 25 °C, 70 A, 0.5 mH (≈ 0.6 ms) only, and the facts file has no hot avalanche curve, so the margin at its ≈ 66–80 °C at 16 A is **unverified**. IPT007N06N's was about 1–2× in its hot 40 A case. Also not visible in use.
 - **More than 16 A through Q30 and J10 (T-0158):** nothing on the board limits the sum of the outputs, so the battery fuse has to. The channels' own limits lie above 4 A, so they do not hold the total at 16 A. About 20 A is still stable (Q30 ≈ 80–106 °C). Four BTT6010 at 8 A (32 A, unsupported on this version) would take Q30 to about 179 °C or into runaway: it fails short (first case above) or open (second case). J10 itself has margin (30 A UL).
-- **Bad J10 joint or a loose plug (T-0158):** the heat appears at the contact, not in Q30. A cold joint can overheat at 16 A in the battery path, and a plug that lets go makes the board dead, panel switches included (as "Q30 fails open"). Check the joints and the plug screws; the drawings give no contact resistance.
-- **pdm-4ch battery plug put in a pdm-hc2 J11 socket (T-0158, decision 104):** both are the 7.62 mm set, so it physically fits when both boards sit in one installation. Decision 98's keying holds only within one board. The owner's choice is listed in `hardware/pdm-4ch/STATUS.md`; label the plugs until then.
+- **Bad J10 joint or a loose screw (T-0158, decision 121):** the heat appears at the contact, not in Q30. A cold joint or a loose M4 clamp can overheat at 16 A in the battery path, and a lead that lets go makes the board dead, panel switches included (as "Q30 fails open"). Check the joints and torque the clamps (1.2 N·m max); the drawing gives no contact resistance.
+- **pdm-4ch battery plug put in a pdm-hc2 J11 socket (T-0158, decision 104): closed by decision 121.** The prototype J10 is a fixed terminal, so there is no pdm-4ch battery plug; a reversed lead is blocked by Q30 up to 30 V.
 - The TVS's own failure mode, short or open, is not in its datasheet (`docs/part-facts/C42371557.md`, unverified), so assume
   either case can happen.
 

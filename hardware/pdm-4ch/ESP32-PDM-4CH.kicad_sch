@@ -9637,7 +9637,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "KF2EDGSRM-7.62-2P"
+		(property "Value" "KF135T-10.16-2P"
 			(at 287.02 133.35 0)
 			(effects
 				(font
@@ -9646,7 +9646,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "ESP32-PDM:Kefa_KF2EDGSRM-7.62-2P"
+		(property "Footprint" "ESP32-PDM:Kefa_KF135T-10.16-2P"
 			(at 284.48 132.08 0)
 			(effects
 				(font
@@ -9664,7 +9664,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Battery input VBAT_IN / GND, 16 A, keyed locking plug (decisions 98, 103, 104)"
+		(property "Description" "Battery input VBAT_IN / GND, 16 A, fixed screw terminal 10 mm2 M4 (decisions 103, 121)"
 			(at 284.48 132.08 0)
 			(effects
 				(font
@@ -9673,16 +9673,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C577772"
-			(at 284.48 132.08 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC_Plug" "C577752"
+		(property "LCSC" "C475108"
 			(at 284.48 132.08 0)
 			(effects
 				(font

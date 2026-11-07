@@ -33,7 +33,7 @@ Steps 1–3 are done, including the fix rounds. Step 4 is in progress: mounting 
 ## Waiting on the owner
 
 - No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
-- Buy one sample of each `pdm-4ch` connector set and check them before layout (decision 98). J10 is C577772 + C577752 (decision 104). The socket is out of stock at LCSC (0 on 2026-11-07, plug 63), so buy it from any seller; if none has it, the sample, layout and order wait (decision 120).
+- Buy one sample of each `pdm-4ch` connector and check them before layout (decision 98): the J11, J5 and J4 plug sets and the fixed J10 terminal KF135T-10.16-2P C475108 (decision 121; wire entry at the board edge, M4 access at 36 mm pitch). Re-check connector stock before the next revision.
 - Measurements: bilge pump locations and feeds. Pump start current on or after the first working prototype, before a board runs a pump in service (decision 100, `docs/pump-start-current-test.md`).
 - Check whether the Standard PCBA fixture fee (16.42 $ per order) applies when quoting.
 
