@@ -54,7 +54,9 @@ The first version of `pdm-4ch` is built with four BTT6050-1ERA (≈ 4 A per chan
   **at most 15–18 A** (within minutes), in addition to the wire protection above. The built-in breaker trips at about
   17.5 A (≈ 15–20 A over part tolerances) only after 146 ms; between the 15 A rating and that level the board relies on
   the external breaker and the firmware soft fuse. The board label states the same. A bilge-pump output's breaker sits
-  between J11 and the junction with the float-switch circuit, so the float circuit never depends on the PDM.
+  between J11 and the junction with the float-switch circuit, so the float circuit never depends on the PDM. That
+  breaker must open before the float-circuit fuse: make it clearly smaller, or use a slower float fuse. Otherwise a
+  short on the PDM side can also take out the float circuit.
 - **`pdm-hc2` reverse battery destroys the board:** a reversed battery connection destroys both HC2 output controllers
   (TPS48110A-Q1, rated −1 V). There is no reverse-polarity protection on this revision. Use the keyed/polarised
   battery connector J10 only as marked, check polarity before connecting; the board label carries this warning.
