@@ -942,6 +942,7 @@ L78M05ABDT (ST DS0425 Rev 24):
   temperature (ISO1044 V_CC2 4.5–5.5 V).
 - Capacitors: the datasheet's test circuit uses C_I 0.33 µF and C_O 0.1 µF. C13 was raised from 0.1 µF to **1 µF/50 V
   X7R 0805 (C28323, basic)**. C12 1 µF + C11 0.1 µF on the output are kept.
+  T-0159: C13 stays on C28323, C12 is now C15849 (see "BOM merge" at the end of this section).
 - Heat: (16 − 0.4 − 5) V × 45 mA ≈ 0.48 W normal traffic (same as the TPS7B91 plus 0.07 W from I_d). R_θJA 100 K/W (DPAK,
   Table 2) gives +48 K, so ≈ 98 °C at 50 °C enclosure air (T_J max 125 °C). Copper under the tab lowers that.
 - **DPAK area:** body ≈ 6.6 × 6.1 mm plus leads, footprint ≈ 10.4 × 6.7 mm, against ≈ 3 × 3 mm for SOT-23-5. This is for
@@ -968,7 +969,7 @@ L78M05ABDT (ST DS0425 Rev 24):
   published TLP (e.g. a USBLC6-2 type) is the alternative.
 
 **Buck (T-0011, Q-0005).** TI SLUSEY1B §8.2.2.6: C_IN ≥ 2.2 µF rated about twice V_IN, plus 0.1 µF close to the pins.
-§7.3.5/8.2.2.7: C_BOOT 0.1 µF ≥ 16 V.
+§7.3.5/8.2.2.7: C_BOOT 0.1 µF ≥ 16 V. C2 is 100 nF/50 V X7R 0402 C307331 since T-0159.
 - C19 100 nF/100 V X7R 0805 (C28233, basic, same part as C54) from VIN to GND, next to C1. Place it at the VIN/GND pins.
 - R43 0 Ω 0402 (C17168, basic) in series with C2 between CB and C2. Fitted as 0 Ω. If the scan shows SW-edge noise, a
   few-ohm value slows the high-side turn-on (check that the boot capacitor still recharges).
@@ -1001,6 +1002,33 @@ R43 0.001, C13 0.042, C50–C53 4 × 0.023, FB1/FB2 2 × 0.020, D4–D6 3 × 0.0
 That is roughly +0.3 USD per board in part price. Unique extended parts: −PESD0402V05, −TPS7B91 (and the ferrite, which had
 no LCSC code before) removed; +C170101, +C107198 added. That is about one loading fee fewer per order (check the quote).
 T-0119: C107198 is gone again (C18 → C9196, basic, already on the BOM).
+
+**BOM merge (T-0159, decisions 99 and 105, 2026-11-07).** Standard PCBA charges 1.53 USD per unique line. Values and nets do not change. Same edit on both boards, because all of these parts are on the shared sheets.
+
+| Ref | Was | Now | Check |
+|---|---|---|---|
+| C2 boot | 0.1 µF C14663 0603 | C307331 0402 (100 nF/50 V X7R ±10 %) | TI SLUSEY1B §7.3.5, §8.2.2.7: 100 nF, X7R or X5R, ≥ 16 V. CB–SW abs max 5.5 V. Samsung curve below: 97 nF at 5 V |
+| C12 VCC2 | 1 µF C52923 0402 (25 V) | C15849 0603 (50 V X5R ±10 %) | 0.70 µF at 5 V, against 0.60 µF for the old part. CA-IS3050G asks for 0.1 µF at VCC2 (C11), L78M05 C_O is 0.1 µF. Better than before |
+| R9 | 68 k C23231 0603 | C36871 0402 | Both ±1 %, ±100 ppm/°C, Uniroyal thick film (series sheet V.3, §2.3, §11) |
+| R10 | 22 k C31850 0603 | C25768 0402 | As R9. The 3.3 V setpoint tolerance does not change, so nothing in decision 30 or the budgets moves. Divider current ≈ 37 µA, ≈ 0.1 mW in R9, far below the 62.5 mW rating |
+| C13 | 1 µF/50 V C28323 0805 | **unchanged** | Fails the DC-bias check on C15849, see below |
+
+*C13 check.* Requirement: C_I 0.33 µF (L78M05 DS0425 rev. 24, p. 8, Table 4 header; a test-circuit value, the only input figure the datasheet gives). Bias at the clamp voltage: 29 V. Curves: Samsung Component Library simulation, https://weblib.samsungsem.com/mlcc/mlcc-ec.do?partNumber=CL10A105KB8NNN (DC Bias graph, Precise model, 25 °C, read 2026-11-07). The catalog and the part's spec sheet carry no curve for this part. Worst case below takes ±10 % tolerance and ±15 % temperature (X5R and X7R, catalog p. 54) as a factor of 0.9 × 0.85 = 0.765 on the 25 °C curve, which is a simple product of limits, not a measurement.
+
+| Bias | C15849, X5R 0603 | C28323, X7R 0805 |
+|---|---|---|
+| 0 V | 1.06 µF | 1.01 µF |
+| 5 V | 0.70 µF | 0.99 µF |
+| 12 V | 0.31 µF | 0.87 µF |
+| 16 V | 0.21 µF | 0.79 µF |
+| 29 V | 0.10 µF (−90 %) | 0.55 µF (−46 %) |
+| 29 V, worst case | **0.08 µF: fails** | **0.42 µF: passes** |
+
+C15849 falls below 0.33 µF already at 12 V, before tolerance. C13 therefore keeps C28323 (decision 105's own outcome). Its line stays on both BOMs.
+
+*Result.* Removed: C14663, C52923, C31850, C23231 on both boards. pdm-hc2: 64 unique parts (−4, `fix_check.py`), 6.12 USD per order. pdm-4ch: C36871 is new there because R9 is on the shared sheet (one line swapped for one line), so 59 unique parts (−3), 4.59 USD per order. The cost report's 6 and 7.65 USD assumed C13 too, which is 1.53 USD per board not saved.
+
+*Layout.* New land patterns: C2, R9, R10 0402; C12 0603 (was 0402). C13 stays 0805.
 
 ### 8.4 Custom footprints: TDSO-14 paste, LMR51610 on SOT-23-6 (T-0066, Q-0036/Q-0037, 2026-11-02)
 
