@@ -162,11 +162,11 @@ Findings that drove the design:
 - A metal base plate was rejected: risk of bridging DC negative to a steel hull, and cost.
 - Above ~8 A per channel: the high-current board (§4a). Very large loads (hydraulic backup pump, ~100 A)
   stay on their own contactor/breaker outside the PDM.
-- At high total current the shared supply path dominates: 36 A through 4 mΩ is 5 W. Since T-0121 pdm-4ch adds the
-  reverse-battery blocker Q30 (IPT007N06N, ≤ 0.75 mΩ at 25 °C, ≈ 1.05–1.1 mΩ hot) to this path (§8.6); the tool's
-  default `--r-path` of 4 mΩ already covers 2 mΩ terminal + copper plus Q30, and `--r-path 0.00505` changes 4 × 4 A by
-  +1 K only. Keep the battery
-  terminal + VS copper ≤ 2 mΩ and rate the input terminal for 32 A (decision 95); output terminals ≥ 10 A.
+- At high total current the shared supply path dominates. Since T-0121 pdm-4ch adds the reverse-battery blocker Q30 to this
+  path (§8.6), since T-0158 AGM601LL (≤ 1.6 mΩ at 25 °C, ≈ 2.1 mΩ at its 16 A temperature, 2.9 mΩ at 150 °C). 16 A (decision
+  103) through `--r-path 0.0069` = the 4 mΩ default + 2.9 mΩ is 1.8 W, and 4 × 4 A stays at Tj 102 °C. Keep the battery
+  terminal + VS copper ≤ 2 mΩ and rate the input terminal for 16 A (decisions 103, 104; J10 is 30 A UL / 32 A IEC, §7);
+  output terminals ≥ 10 A.
 
 Layout rules from the budget: switches spread out and away from the ESP32; large VS copper on both
 layers around the cooling tabs, stitched with vias; 2 oz copper; vents at bottom and top; continuous
@@ -605,23 +605,37 @@ Decision 97 (amends decision 10). The board mounts two ways on the same four non
 **Rail pitch (the 36 mm is unverified until the sample check).** A terminal's height runs across the rail, so its drawing height plus pin length below the board plus 1 mm sets the
 pitch. KF135T-10.16 (C475108): 29.5 + 4.3 + 1 = 34.8 mm. KF7620-7.62 (C475104): 21.5 + 4.9 + 1 = 27.4 mm. DB128V-5.08 (C2915639):
 14 + 3.5 + 1 = 18.5 mm. Those fixed blocks set the first figure of about 36 mm per unit. Decision 98's J10 socket C6394053 is 13.4 + 4 + 1 = 18.4 mm, and its 27.8 mm plug
-at worst 27.8 + 4 + 1 = 32.8 mm, so 36 mm stays conservative; how the plug sits against the board is not on the drawing. The old 1-module target (about 14.5 mm inside) could
+at worst 27.8 + 4 + 1 = 32.8 mm, so 36 mm stays conservative; how the plug sits against the board is not on the drawing. The pdm-4ch J10 (decision 104) is C577772: socket 14.2 + 5 + 1 = 20.2 mm. Its plug C577752 has a 30.60 mm overall height on the drawing, which would be 36.6 mm if that dimension lay across the rail. The drawing does not settle which way it lies, so the sample check decides it (the same plug is on HC2 J11). The old 1-module target (about 14.5 mm inside) could
 not hold even the smallest of these.
 
 **Screw access (solved by decision 98).** On fixed screw blocks the screw faces away from the PCB, so edge-on it would face the
 neighbouring unit. Face-on mounting (about 60 mm per unit) was the alternative; the owner chose rail density and keyed plugs on
 right-angle sockets, wired on the bench and pushed in from the board edge.
 
-**Connectors (decision 98, drawings C6394053, C577772, C577767, C441238, C26895).** Footprints in `lib/ESP32-PDM.pretty`, origin at
-pad 1, y toward the mating face. Row lengths: 4-ch J10 38.1 + J11 21.9 = 60.0 mm; HC2 J10 38.1 + J11 30.5 = 68.6 mm; J5 39.0 + J4
-16.1 = 55.1 mm. Hence about 65 mm and 75 mm board depth with gaps. The J10 body reaches 34 mm in from the edge, the HC2 J11 body 29 mm,
-so those parts take most of one end of the HC2 board. J5 stays a Conn_02x05 symbol; its pins 1–10 run in a single row. The J10 plug
+**Connectors (decisions 98, 104, drawings C6394053, C577772, C577767, C441238, C26895).** Footprints in `lib/ESP32-PDM.pretty`, origin at
+pad 1, y toward the mating face. Row lengths: 4-ch J10 30.5 + J11 21.9 = 52.4 mm; HC2 J10 38.1 + J11 30.5 = 68.6 mm; J5 39.0 + J4
+16.1 = 55.1 mm. Hence about 65 mm and 75 mm board depth with gaps. On pdm-4ch the J5/J4 row now sets the depth; the board size stays decision 98's until layout. The 4-ch J10 and HC2 J11 bodies reach 29 mm in from the edge, the HC2 J10 body 34 mm,
+so the HC2 parts take most of one end of that board. J5 stays a Conn_02x05 symbol; its pins 1–10 run in a single row. The HC2 J10 plug
 adds about 39 mm past the board edge plus the cable bend, and it is 27.8 mm thick. **Not proven by the drawings, so checked on one
 sample of each set before layout:** that plugs cannot go in reversed, whether a 4-pole J4 plug can enter the 10-pole J5 socket (label
-them), and that plugs fit the 36 mm pitch. Pad 3.2 mm for the J10 pins (three per pole). Hand-soldering J10 into 2 oz copper needs a
-powerful iron; a cold joint at 32–36 A overheats. The flange holes are non-plated, so the header screws touch no copper. Stock when
-chosen: C6394053 39, C6394029 50, C577772 40, C577752 63. Enough for the first 5 + 5; the Phoenix 10.16 mm set (C6790556) is the
+them), and that plugs fit the 36 mm pitch. Pad 3.2 mm for the HC2 J10 pins (three per pole); 2.8 mm pads, drill 1.5 mm for the 7.62 mm set (two per pole). Hand-soldering J10 into 2 oz copper needs a
+powerful iron; a cold joint at the full input current (16 A on 4-ch, 36 A on HC2) overheats. The flange holes are non-plated, so the header screws touch no copper. Stock when
+chosen (2026-11-05): C6394053 39, C6394029 50, C577772 40, C577752 63. **Stock on 2026-11-07: C577772 0 (minimum order 18), C577752 63, and the set now serves both boards (pdm-4ch J10, pdm-hc2 J11).** The Phoenix 10.16 mm set (C6790556) is the
 fallback at a higher price, not footprint-compatible.
+
+**pdm-4ch J10, 7.62 mm set (decisions 103, 104, T-0158, 2026-11-07).** Footprint `Kefa_KF2EDGSRM-7.62-2P` checked against the C577772 drawing (KF2EDGSRM-7.62 rev. A, 2023-05-12, rendered and read; `docs/part-facts/C577772.md`): **pass, footprint unchanged, so HC2 J11 is unaffected.**
+
+| Drawing | Value | Footprint (origin pad 1) |
+|---|---|---|
+| Column / row spacing | 7.62 ± 0.03 mm both | pads x 0 / 7.62, y 0 / 7.62 |
+| PCB hole | Ø1.50 +0.10/0, pin 0.80 × 1.00 mm (1.28 mm diagonal) | drill 1.5, pad 2.8 mm |
+| Flange holes | Ø3.20, spacing (P−1) × 7.62 + 15.24 = 22.86 mm, 13.00 mm from the rear edge | NPTH 3.2 at x −7.62 / 15.24 (22.86 mm), y 11 = −2 + 13 |
+| First row to rear edge | 2.00 mm | body edge y −2 |
+| Body width / depth | P × 7.62 + 15.24 = 30.48 mm / 29.00 mm | x −11.43…19.05, y −2…27 |
+
+The pin rows lie at the rear edge and the mating face opposite it (side view), so the facts file's open point on the side of the second row is settled. The drawing does not number the poles. Pad 1 = VBAT_IN and pad 2 = GND are this design's choice, to be marked on the board at layout; the sample check covers the plug's one-way fit. The JLCPCB footprint has no flange holes; ours does. The socket is hand-soldered (decision 85), so no CPL check applies.
+
+**Rating at the enclosure temperatures of decision 97.** The ratings are 30 A UL (group B, 300 V) and 32 A IEC at pollution degree 2; the socket's IEC table has no current for pollution degree 3, which the plug lists at 32 A. Both parts are rated −40 to +105 °C. **Neither drawing has a derating curve or a contact resistance**, so the check below is an estimate, not a datasheet figure. 16 A is 53 % of the 30 A UL figure, and contact heat goes with I², so 28 % of the heat at the rated current. Assuming a 30 K rise at rated current (assumption, common for terminal-block ratings), that is about 8.5 K at 16 A: about 59 °C in 50 °C air (decision 97's full rating) and about 80 °C at 16 A in 70 °C air, which decision 97 does not allow anyway (3 A per channel there, 12 A, ≈ 5 K). All stay below 105 °C. The plug's wire limit is 4 mm² (24–10 AWG), M3, 0.5 N·m max, strip 7–8 mm. A 4 mm² feed suits 16 A; the installer's cable and fuse rules apply.
 
 **Heat in a shared enclosure.** Every board gives off about 9 W at full load, all into the same air, so the rating is the air inside
 the box (`heat_budget.py --r-box 0 --ambient T`, estimates): 4-ch at 4 A Tj 107 °C at 50 °C air, 114 °C (marginal) at 55 °C, 127 °C
@@ -1115,7 +1129,9 @@ power-up on the prototype.
 Finding EMC E16 (`docs/reviews/2026-11-03-emc-system.md`): C31 is a polarised electrolytic with no reverse rating and
 nothing in front of it. The owner ruled (Q-0054): add a reverse-blocking element on VS in front of the bulk capacitors
 on pdm-4ch in this revision, sized for the 40–50 A path and checked with the heat budget at 40 °C. pdm-hc2 keeps
-decision 40 (keyed J10, warning). J10 on pdm-4ch is keyed too (decision 98, one-way fit checked on a sample).
+decision 40 (keyed J10, warning). J10 on pdm-4ch is keyed too (decisions 98, 104, one-way fit checked on a sample).
+
+**Re-selected for 16 A (decisions 103, 104, T-0158, 2026-11-07).** The first pdm-4ch is 16 A only, all BTT6050, with no BTT6010 build. Q30 is now AGM601LL C5464765 instead of IPT007N06N C122552, with the same pin order and footprint. The 40–50 A in the ruling above and the 32 A of decision 95 no longer apply to this board.
 
 **Circuit (root sheet of pdm-4ch only).** J10.1 → `VBAT_IN` (D30, C30) → FL30 (DNP) / JP30 → new net `VBAT_FL` →
 Q30 source; Q30 drain → `VS` (C31, C104–C404, U11–U14, F1, F4, R60). U30 LM74500-Q1: SOURCE (pin 5) and EN (pin 1) on
@@ -1124,7 +1140,7 @@ ruling Q-0067) sits across Q30: VS (drain) to VBAT_FL (source).
 
 | Ref | Part | Facts |
 |---|---|---|
-| Q30 | Infineon IPT007N06N, PG-HSOF-8-1 (TOLL), C122552, extended, 3.55 USD @1, stock 4707 (2026-11-03) | `docs/part-facts/C122552.md`: VDS 60 V, VGS ±20 V, RDS(on) max 0.75 mΩ (10 V, 25 °C), ≈ 1.00 mΩ at 100 °C and ≈ 1.25 mΩ at 150 °C (max curve), Tj 175 °C, RthJC 0.4 K/W max, RthJA 40 K/W (6 cm² 70 µm Cu) / 62 K/W (minimal pad), body diode IS 300 A / ISM 1200 A, Ciss 21.3 nF max. Pin 1 G, pins 2–8 S, tab D = KiCad `Infineon_PG-HSOF-8-1` pads 1 G, 2 S, 3 D |
+| Q30 | AGM-Semi AGM601LL, TOLL, C5464765, extended, 0.85 USD @1, stock 2016 (2026-11-07) | `docs/part-facts/C5464765.md` (VER2.65): VDS 60 V, VGS ±20 V, VGS(th) ≤ 2.2 V, RDS(on) max 1.6 mΩ (10 V, 30 A, 25 °C), ≈ 2.35 mΩ at 100 °C and ≈ 2.9 mΩ at 150 °C (derived: Fig. 6 × max), Tj 175 °C, RthJC 0.7 K/W max, RthJA 50 K/W with no copper area stated, body diode IS 223 A, VSD ≤ 1.2 V at 20 A, ISM not given, IDM 892 A, Ciss 5.47 nF typ (no max), Qg 102 nC typ. Pin 1 G, pins 2–8 S, tab D = KiCad `Infineon_PG-HSOF-8-1` pads 1 G, 2 S, 3 D |
 | U30 | TI LM74500-Q1 (LM74500QDDFRQ1), SOT-23-THIN-8 (DDF), C5219210, extended, 1.82 USD @1, stock 2923 | `docs/part-facts/C5219210.md` (SNOSDB7): SOURCE ±65 V abs max (±60 V recommended), GATE–SOURCE abs max 15 V, gate drive VCAP−SOURCE 10.3/11.6/13.0 V on, 13.9 V max; **no reverse-current blocking** (FET fully on both ways); EN tied to SOURCE = always on; IQ 80/130 µA; Tj −40…150 °C; footprint KiCad `TSOT-23-8` (0.65 mm pitch, 2.9 × 1.6 mm body) |
 | C32 | 1 µF/50 V X5R 0603, Samsung CL10A105KB8NNN, C15849 (basic, already on the BOM) | `docs/part-facts/C15849.md`; VCAP capacitor |
 | D31 | hongjiacheng SMDJ40CA, SMC / DO-214AB, C42371557, preferred, 0.22 USD @1, stock 10271 (2026-11-04) | `docs/part-facts/C42371557.md`: bidirectional, VRWM 40 V, VBR 44.4–49.1 V (1 mA), VC 64.5 V at IPP 46.5 A (10/1000 µs), IR ≤ 2 µA at VRWM (25 °C), 3 kW 10/1000 µs on 8 × 8 mm copper per terminal, VBR +0.1 %/K, derating 60 % at 75 °C. Footprint `Diode_SMD:D_SMC` as D30 |
@@ -1145,44 +1161,47 @@ Why this topology:
     above SOURCE, abs max 15 V) or ties it to SOURCE (reversed or off). The ±20 V VGS rating is therefore never
     reached and no zener is needed (U30 datasheet: zener only for a FET with VGS rating < 15 V).
   - (c) Invariant 4: with the battery connected, Q30 is enhanced and conducts drain → source, so OUT → PROFET body diode
-    → VS → Q30 → VBAT_IN → D30 stays as before (≤ 1.25 mΩ more, ID pulse 1200 A). No TVS from VS to GND: the
+    → VS → Q30 → VBAT_IN → D30 stays as before (≤ 2.9 mΩ more; IDM 892 A, no pulse width stated, against about 62 A at D30's 3 kW and 48.4 V; 0.18 V extra drop there, 0.10 V more than with IPT007N06N). No TVS from VS to GND: the
     only TVS added, D31, is across Q30 (VS to VBAT_FL). This surge path stays and invariant 4 is unchanged.
   - (d) Turn-on: when the battery is connected, C31 + C104–C404 (≈ 109 µF nominal) charge through Q30's body diode
-    (IS 300 A, ISM 1200 A; ≈ 3.3 mC at 30 V, ≈ 3 mJ in the diode) before U30 enhances the gate. Q30 therefore
+    (IS 223 A continuous, ISM not in the datasheet; ≈ 3.3 mC at 30 V, ≈ 3 mJ in the diode) before U30 enhances the gate. Q30 therefore
     turns on with VDS below about 1 V and never works in its linear region at battery voltage. That is the same
-    inrush as before T-0121, now with the diode in series. SOA (≈ 10 A for 1 ms at 30 V) is not touched.
-- **C32 sizing.** U30 wants C(VCAP) ≥ 10 × Ciss = 10 × 21.3 nF = 213 nF (datasheet §9.3.1.2.3; recommended minimum
-  0.1 µF). C32 is 1 µF/50 V. At 12–14 V of bias it keeps at least 0.21 µF unless it loses more than 79 %; the bias
-  curve is not in the facts file, but an 0603 50 V X5R part usually keeps far more. Gate-on time ≈ 75 µs + C32 × 6.5 V
-  / I_CP = 22 ms typ (300 µA), ≤ 40 ms at the 162 µA minimum, to the 6.5 V UVLO. Until then the load current flows in
-  the body diode. Assuming ≈ 1 V body-diode drop (VSD at that current is not in the facts file), a panel-switched
-  24 A load gives ≈ 24 W for < 0.1 s, i.e. ≈ 10 K rise with RthJC 0.4 K/W. Harmless.
+    inrush as before T-0121, now with the diode in series. The peak is set by the cable and C31's ESR and was not calculated, and AGM601LL's SOA curve (Fig. 8) was not read: the linear region is not used.
+- **C32 sizing and gate drive.** U30 wants C(VCAP) ≥ 10 × Ciss = 55 nF (5.47 nF typ; the datasheet gives no max; recommended minimum
+  0.1 µF, so 0.1 µF is the real floor). C32 stays 1 µF/50 V, about 180 × Ciss. It stays above both unless it loses more than 90 %; the bias
+  curve is not in the facts file, but an 0603 50 V X5R part usually keeps far more. The worst VCAP at turn-on, 10.3 V, is above the
+  10 V at which RDS(on) max is specified, and 13.9 V max is below VGS ±20 V, so Q30 is fully enhanced and needs no zener. The gate charge sags C32 by about 0.1 V.
+  Gate-on time ≈ 75 µs + C32 × 6.5 V / I_CP = 22 ms typ (300 µA), ≤ 40 ms at the 162 µA minimum, to the 6.5 V UVLO. Until then the load
+  current flows in the body diode: at 16 A with VSD ≤ 1.2 V ≈ 19 W for < 0.1 s, i.e. ≈ 13 K rise with RthJC 0.7 K/W. Harmless.
 - **CIN.** U30 asks for ≥ 22 nF at SOURCE. C30 (2.2 µF/100 V) sits on the same node through the JP30 copper bridge. If
   FL30 is ever fitted instead of JP30, C30 is behind the ferrite. Then check whether U30 needs its own 22 nF–100 nF at
   SOURCE.
 
-**Heat at 40 °C (decision 9, `tools/heat_budget.py`, run 2026-11-03).** Q30's hot RDS(on) is added to the shared path
-(`--r-path 0.00505` = the 4 mΩ default + 1.05 mΩ), `--p-other 2.3`:
+**Heat at 40 °C (decision 9, `tools/heat_budget.py`, run 2026-11-07, T-0158).** Q30's RDS(on) is added to the shared path.
+`--r-path 0.0069` = the 4 mΩ default + 2.9 mΩ (the 150 °C value, conservative: it is ≈ 2.1 mΩ at the 16 A temperature), `--p-other 2.3`:
 
-| Case | Before (r_path 4 mΩ) | After (5.05 mΩ) |
+| Case | IPT007N06N (`--r-path 0.00505`) | AGM601LL (`--r-path 0.0069`) |
 |---|---|---|
-| 4 × BTT6050 at 4 A (16 A) | inside 45.4 °C, Tj 101 °C | inside 45.5 °C, Tj 102 °C (4.5 A: 125 °C marginal, as before) |
-| 2 × BTT6010 at 8 A + 2 × BTT6050 at 4 A (24 A) | P_tot 9.61 W, inside 45.8 °C, Tj 90/102 °C | P_tot 10.22 W, inside 46.1 °C, Tj 90/102 °C |
-| 4 × BTT6010 at 8 A (32 A) | P_tot 10.81 W, inside 46.5 °C, Tj 91 °C | P_tot 11.90 W, inside 47.1 °C, Tj 91 °C |
+| 4 × BTT6050 at 4 A (16 A) | inside 45.5 °C, Tj 102 °C | inside 45.8 °C, Tj 102 °C |
+| 4 × BTT6050 at 4.5 A (above the rating) | Tj 125 °C, marginal | Tj 125 °C, OVER (the tool's limit falls between the rounded figures) |
+| 4 × 4 A in 50 °C air (decision 97, `--r-box 0 --ambient 50`) | – | Tj 107 °C |
 
-The 4 A (BTT6050) and ≈ 8 A (BTT6010) channel ratings stand. Q30's own junction, with RDS(on) taken linearly from the max curve
-(0.75 mΩ at 25 °C, 1.00 at 100 °C, 1.25 at 150 °C) and solved with the enclosure air from the tool:
+The 4 A channel rating stands. Q30's own junction, solved by hand with RDS(on) interpolated linearly from the max curve
+(1.6 mΩ at 25 °C, ×1.14 at 50 °C, ×1.47 at 100 °C, ×1.80 at 150 °C) and the enclosure air from the tool:
 
-| Input current | Enclosure air | Q30 loss | Q30 Tj, 6 cm² 2 oz drain copper (40 K/W) | minimal pad (62 K/W) |
-|---|---|---|---|---|
-| 16 A (4 × 4 A) | 45.5 °C | 0.22 W | 54 °C | 59 °C |
-| 24 A (mix) | 46.1 °C | 0.51 W | 67 °C | 79 °C |
-| **32 A (board input limit, decision 95; air from 4 × 8 A)** | 47.2 °C | 0.98 W | **86 °C** | 116 °C |
-| 40 A (old input terminal basis, kept for comparison; air from 4 × 10 A) | 51.2 °C | 1.78 W | 122 °C (Tj max 175 °C) | 200 °C – not allowed |
+| Input current | Enclosure air | Q30 loss | Q30 Tj at 40 K/W | at 50 K/W | **at 62 K/W** |
+|---|---|---|---|---|---|
+| **16 A (board input limit, decision 103)** | 45.8 °C | 0.51–0.55 W | 66 °C | 72 °C | **80 °C** |
+| 16 A, decision 97's full rating | 50 °C | 0.52–0.56 W | 71 °C | 77 °C | 85 °C |
+| 12 A (3 A per channel, decision 97's hot case) | 65–70 °C | 0.30–0.32 W | 77–83 °C | 80–86 °C | 85–90 °C |
+| 20 A (not rated: fuse tolerance or overload) | 46 °C | 0.86–0.97 W | 80 °C | 91 °C | 106 °C |
+| 32 A (the old limit, not allowed on this version) | 48.4 °C | – | 179 °C, above Tj max | – | no solution |
 
-The 32 A limit would survive a smaller pad, but the ≥ 6 cm² of 2 oz copper on Q30's drain tab stays as the rule. The drain is VS, which already has large
-copper on both layers (decision 9 layout rules), so this costs no extra area. It is recorded as a PCB rule. U30 loses
-microwatts (80–130 µA).
+**Which RthJA.** AGM601LL's 50 K/W has no stated copper area (**UNVERIFIED**), so it is not relied on. The 40 and 62 K/W are Infineon's figures for its own TOLL package (6 cm² 70 µm Cu / minimal pad, `docs/part-facts/C122552.md`), used as an analogue for the same outline: an assumption, not an AGM figure. AGM's higher RthJC (0.7 against 0.4 K/W) adds under 0.2 K at this loss. The result is not sensitive to it: at 16 A Q30 stays at or below 125 °C up to RthJA ≈ 118 K/W (112 K/W in 50 °C air).
+
+**Copper rule (replaces the 6 cm² of decisions 90 and 95).** ≥ 2 cm² of 2 oz VS copper joined directly to Q30's drain tab. That is the tab land (0.8 cm²) plus D31's 8 × 8 mm terminal copper (0.64 cm²), rounded up, so it asks for no copper the layout does not already need. The Tj above is taken at the 62 K/W minimal-pad figure, so the 2 cm² is margin, not a calculated RthJA. U30 loses microwatts (80–130 µA).
+
+**Why AGM601LL (selection, T-0158).** No basic or preferred part fits: the lowest 60 V N-FET with no loading fee is 90 mΩ (`jlc_search`, catalogue of 2026-11-06), ≈ 23 W at 16 A. AGM601LL passes all criteria: VDS 60 V, VGS ±20 V, enhanced at 10.3 V, C32 unchanged, stable Tj at 16 A. The land was checked against the drawing (VER2.65 p. 5): body D 10.25–10.55, E 9.75–10.05, H 11.55–11.85 mm, pitch 1.20 mm, lead 1.55–1.85 mm long, 0.65–0.85 mm wide. Exposed pad from the tab end to 7.0 mm back (H2, or H1 6.95 in the second table), about 9.1 mm wide, 9.8 mm at the fingers. In the KiCad land, measured from the package centre: lead pads x −6.65…−3.85 over leads −5.85…−4.15; tab land x −1.35…6.65, ±4.85 mm (±5.05 mm at the fingers), over exposed pad about −1.15…+5.85. **Pass; `Infineon_PG-HSOF-8-1` unchanged.** Pad width 0.8 mm against lead width 0.65–0.85 mm, as tight as on IPT007N06N (0.70–0.90 mm); the exposed-pad extents are read from the drawing. The symbol stays `ESP32-PDM:IPT007N06N` with value AGM601LL (same pins); keep the value when updating symbols from the library.
 
 **D31 across Q30: residual risk the owner accepted (T-0143, ruling Q-0067, safety).** In a negative transient on VBAT_IN
 with VS charged, D31 conducts instead of Q30 avalanching, and it keeps conducting until its voltage is back at its
@@ -1196,9 +1215,9 @@ case and VS down to about −4 V for the 31 A bounding spike. The ruling's short
   between about 20.3 A and 31 A, in proportion. At 31 A, VS crosses 0 V after about 170 µs and stays negative until the
   spike ends (about 830 µs of a 1 ms pulse).
 - **VDS.** VBR max + chord = 49.1 V + 0.331 Ω × I gives 59.4 V at 31 A (59.7 V at the 32 A of decision 92). This figure is at
-  25 °C and at a source short-circuit current of at most 31 A.
-  - With the TVS at 47 °C, VDS is about 60.4 V, slightly above Q30's 60 V 25 °C minimum. Q30's own rating rises too (about
-    63 V at 125 °C). Q30 may then take a small share in avalanche.
+  25 °C and at a source short-circuit current of at most 31 A. It depends on D31, not on Q30, and AGM601LL has the same 60 V minimum (at 250 µA, against 1 mA for IPT007N06N), so the limit still holds (T-0158).
+  - With the TVS at 47 °C, VDS is about 60.4 V, slightly above Q30's 60 V 25 °C minimum. Q30's own rating rises with temperature too (IPT007N06N: about
+    63 V at 125 °C; AGM601LL's coefficient is not in the facts file). Q30 may then take a small share in avalanche, far inside EAS 1225 mJ (Tj(start) 25 °C), since the whole pulse is about 190 mJ.
   - A source tuned to 31 A at the D30 clamp drives more at first, so it stays under 60 V with SMDJ40CA only for Us ≥ about
     334 V. An inductive load on the bus is limited by its own running current and fits the 31 A model.
 - **Pulse rating.** Margin about ×5.3 at 25 °C for a 31 A, 1 ms pulse (about 190 mJ, 1.84 kW peak, Fig. 1 read at the
@@ -1206,6 +1225,8 @@ case and VS down to about −4 V for the 31 A bounding spike. The ruling's short
 - **Textbook pulse.** ISO 7637-2 pulse 1 (12–15 A, figures from secondary sources): VDS 53.1–54.1 V, VS +2 V or above.
 - **Unverified.** Whether such spikes occur on a real bus is unverified (T-0130). All figures use the straight chord from
   VBR max to VC at IPP, because the maker gives no VC at lower currents.
+
+**Recheck with AGM601LL (T-0158).** While D31 clamps, Q30 is off, so VS (−4.0 V at 31 A), the pulse energy (about 190 mJ in D31, ×5.3 margin) and the reversed-battery case do not depend on the FET. Its lower Qg (102 against 216 nC) turns it off faster. Decision 96's limits and D31 are unchanged.
 
 Calculation and method: `docs/reviews/2026-11-04-fix-pdm-4ch-T-0137.md`. The prototype test list in
 `hardware/pdm-4ch/STATUS.md` measures VDS and VS during a negative pulse.
@@ -1223,8 +1244,7 @@ The other VS branches at −4 V (checked against the netlist, T-0143):
 
 F3 and the CAN supply are not on VS. So C31 is the only polarised part exposed, as the ruling assumes.
 
-The heat budget is unchanged: D31 dissipates nothing in steady state (40 °C, `--r-path 0.00505`: 4 × 4 A inside 45.5 °C,
-Tj 102 °C; mix 8 A / 4 A 10.22 W, Tj 90/102 °C, before and after).
+D31 dissipates nothing in steady state, so it does not change the heat budget above.
 
 **Reverse battery now.** A reversed battery puts VBAT_IN negative. U30 ties GATE to SOURCE, Q30 is off and its body
 diode is reverse-biased. VS stays near 0 V.
@@ -1250,8 +1270,8 @@ only the two J10 leads are swapped while the loads return elsewhere, the case ha
 - **Q30 fails open**, or the JP30/Q30 copper is interrupted: the board is dead, panel switches included. Navigation
   lights and the bilge forced-run switch on the panel stop working. The float-switch circuit stays independent of
   the PDM (invariant 8), so the bilge pump still runs on its float.
-- **U30 fails (no gate drive, e.g. C32 open or U30 dead):** Q30 conducts only through its body diode (≈ 1 V). At 16 A
-  that is ≈ 16 W, at 24 A ≈ 24 W, far above what the package can shed on the PCB. Q30 heats until it fails, usually
+- **U30 fails (no gate drive, e.g. C32 open or U30 dead):** Q30 conducts only through its body diode (≈ 1 V, ≤ 1.2 V at 20 A). At 16 A
+  that is about 16–19 W, far above what the package can shed on the PCB. Q30 heats until it fails, usually
   short (→ first case), possibly open (→ second case). VS sits ≈ 1 V low. R60/VBAT_SENSE measures VS, not VBAT_IN, so the firmware
   cannot see the drop directly. See the suggestion in the T-0121 report.
 - **U30 fails with GATE shorted to SOURCE:** same as "U30 fails".
@@ -1260,27 +1280,30 @@ only the two J10 leads are swapped while the loads return elsewhere, the case ha
 - **D31 fails short:** it bypasses Q30, so there is no reverse protection. Normal operation is unaffected, so this fault
   is not visible in use: the same as "Q30 fails short".
 - **D31 fails open:** back to Q30 avalanche in a negative transient with VS charged (T-0132: about 60–63 V and 80–115 mJ in
-  Q30; EAS 1100 mJ is for Tj(start) 25 °C only, margin about 1–2× in the hot 40 A case). Also not visible in use.
+  Q30). AGM601LL's EAS 1225 mJ is for Tj(start) 25 °C, 70 A, 0.5 mH (≈ 0.6 ms) only, and the facts file has no hot avalanche curve, so the margin at its ≈ 66–80 °C at 16 A is **unverified**. IPT007N06N's was about 1–2× in its hot 40 A case. Also not visible in use.
+- **More than 16 A through Q30 and J10 (T-0158):** nothing on the board limits the sum of the outputs, so the battery fuse has to. The channels' own limits lie above 4 A, so they do not hold the total at 16 A. About 20 A is still stable (Q30 ≈ 80–106 °C). Four BTT6010 at 8 A (32 A, unsupported on this version) would take Q30 to about 179 °C or into runaway: it fails short (first case above) or open (second case). J10 itself has margin (30 A UL).
+- **Bad J10 joint or a loose plug (T-0158):** the heat appears at the contact, not in Q30. A cold joint can overheat at 16 A in the battery path, and a plug that lets go makes the board dead, panel switches included (as "Q30 fails open"). Check the joints and the plug screws; the drawings give no contact resistance.
+- **pdm-4ch battery plug put in a pdm-hc2 J11 socket (T-0158, decision 104):** both are the 7.62 mm set, so it physically fits when both boards sit in one installation. Decision 98's keying holds only within one board. The owner's choice is listed in `hardware/pdm-4ch/STATUS.md`; label the plugs until then.
 - The TVS's own failure mode, short or open, is not in its datasheet (`docs/part-facts/C42371557.md`, unverified), so assume
   either case can happen.
 
-A competent person reviews this reverse-battery circuit, D31 and the failure modes above before installation, because F4
+A competent person reviews this reverse-battery circuit, J10, D31 and the failure modes above before installation, because F4
 feeds the panel switches: the navigation lights and the bilge forced run depend on Q30 conducting.
 
-**PCB rules (T-0121).** Q30 sits in the 32 A path between J10 and the VS copper. Use VBAT_FL copper (source pins 2–8) and
-VS copper (drain tab) as wide as the existing VS copper, on both layers with stitching vias. Use ≥ 6 cm² of 2 oz
-copper on the drain tab (VS) for RthJA ≤ 40 K/W. Keep U30 next to Q30 with short SOURCE and GATE traces (U30 §11.1). Keep C32 at
+**PCB rules (T-0121, T-0158).** Q30 sits in the 16 A path between J10 and the VS copper. Use VBAT_FL copper (source pins 2–8) and
+VS copper (drain tab) as wide as the existing VS copper, on both layers with stitching vias. Use ≥ 2 cm² of 2 oz
+copper joined directly to the drain tab (VS), the rule derived under "Heat" above. Keep U30 next to Q30 with short SOURCE and GATE traces (U30 §11.1). Keep C32 at
 U30 but away from Q30's hot tab. Keep the VS loop from the four switches through Q30 to D30 short and wide (invariant 4
 path). Place D31 directly across Q30's drain tab and source pins, short and wide (T-0143); its 3 kW rating assumes 8 × 8 mm
 copper per terminal. Before ordering, check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30) and `TSOT-23-8` (U30) against the
-JLCPCB footprints of C122552 and C5219210. The U30 land pattern in the datasheet: 1.05 × 0.45 mm pads, 2.6 mm column pitch.
+JLCPCB footprints of C5464765 (`TOLL-8_L10.4-W9.9-P1.20-LS11.7-BL_2`) and C5219210. The U30 land pattern in the datasheet: 1.05 × 0.45 mm pads, 2.6 mm column pitch.
 
-**Cost.** Q30 3.55 + U30 1.82 + C32 0.01 ≈ 5.4 USD per board at 1 pc, plus two extended loading fees (≈ 3 USD each per
+**Cost.** Q30 0.85 + U30 1.82 + C32 0.01 ≈ 2.7 USD per board at 1 pc (T-0158; 5.4 USD with IPT007N06N), plus two extended loading fees (≈ 3 USD each per
 order). D31 (T-0143): +0.22 USD per board, one more unique preferred part, no loading fee. Alternative checked: 2 × BSC014N06NS (C113391, 1.45 mΩ max each, 1.52 USD, `docs/part-facts/C113391.md`) in
 parallel (≈ 1.1 mΩ hot, 3.03 USD) would also work, but it is two parts and more copper area for the same unique-part count; a
 single one gives ≈ 4.3 W at 40 A and is too hot.
 
-**Cheaper Q30 checked and dropped (T-0126, cost lever L1, 2026-11-04).** AGM-Semi AGM601LL (C5464765, TOLL, 0.85 USD,
+**Cheaper Q30 checked at 40 A and dropped (T-0126, cost lever L1, 2026-11-04; record, taken up at 16 A in T-0158).** AGM-Semi AGM601LL (C5464765, TOLL, 0.85 USD,
 `docs/part-facts/C5464765.md`, datasheet VER2.65): 60 V, VGS ±20 V, EAS 1225 mJ, Tj 175 °C, pin 1 G / 2–8 S / tab D.
 The 1.25 mΩ in the cost report is **typical**; the maximum is **1.6 mΩ** (10 V, 30 A, 25 °C), and Fig. 6 gives ×1.47 at
 100 °C and ×1.80 at 150 °C (≈ 2.9 mΩ at 150 °C, max). RthJA 50 K/W has no stated copper area, there is no Ciss max and no

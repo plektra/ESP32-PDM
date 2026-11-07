@@ -65,7 +65,7 @@ The first version of `pdm-4ch` is built with four BTT6050-1ERA (≈ 4 A per chan
   touch board copper. All connectors are keyed plugs that pull out from the board edge: wire them on the bench and leave room for the plug and cable bend.
   Alternatively use a vented 3D-printed enclosure, also for flat mounting. Each board gives off about 9 W at full load: in a
   shared enclosure keep the air inside at or below 50 °C for the full rating (estimate until measured), or derate.
-- **Board input limits:** at most **32 A** continuous through J10 on `pdm-4ch` and **36 A** on `pdm-hc2`, whatever the
+- **Board input limits:** at most **16 A** continuous through J10 on `pdm-4ch` and **36 A** on `pdm-hc2`, whatever the
   outputs could draw together. Size the battery feed, and its fuse, so that these limits are not exceeded.
 - **`pdm-hc2` timing:** after power is connected, the first switch-on of each output (also from a panel switch)
   takes about 0.1 s. After an overcurrent or short-circuit trip the output stays off for about 4 minutes and then
