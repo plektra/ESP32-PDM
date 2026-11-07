@@ -5361,12 +5361,13 @@
         "finding": "C1"
       },
       "door": "one-way",
-      "state": "blocked-owner",
-      "package": "T-0171",
+      "state": "parked",
       "question": "Q-0068",
       "why_big": [
         "found while fixing (T-0171): Neither named fallback passes: C577767 and C7422678 match the J10 pad grid, Ø1.5 mm holes and 30 A UL / 32 A IEC, but have no flange for the C577752 plug's ear screws and their drawings show no lock (docs/part-facts/C577767.md, C7422678.md). Using either needs a new plug or footprint, which amends decisions 98/104."
-      ]
+      ],
+      "ruling": "Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.",
+      "answered": "2026-11-07"
     },
     {
       "id": "T-0167",

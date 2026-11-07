@@ -6,18 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (2)
-
-## Q-0068 · MINOR · pdm-4ch · finding
-
-- **From:** `docs/reviews/2026-11-07-cost-system.md` C1 (J10 KF2EDGSRM-7.62-2P C577772); task T-0166
-- **Summary:** C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code
-- **Proposed:** If C577772 cannot be bought from any seller in time for the order or the decision 98 sample, should J10 move to a different socket + plug set (new footprint and/or plug, keyed against the 5.08 mm J11), or should the order wait for a C577772 restock?
-- **Why it needs you:** found while fixing (T-0171): Neither named fallback passes: C577767 and C7422678 match the J10 pad grid, Ø1.5 mm holes and 30 A UL / 32 A IEC, but have no flange for the C577752 plug's ear screws and their drawings show no lock (docs/part-facts/C577767.md, C7422678.md). Using either needs a new plug or footprint, which amends decisions 98/104.
-
-**Answer:** Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.
-
----
+## Open (1)
 
 ## Q-0069 · INFO · pdm-4ch · question
 
@@ -132,7 +121,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0154 · system · SH-ESP32 uses the same 60 V PTC without a series resistor; removing R54-R56 would save one line, about 2-3 USD per order → until prototype: kept until measured
 - T-0155 · system · SH-ESP32 fits standard 100 x 68 x 50 mm waterproof enclosures; pdm-4ch at about 100 x 65 mm is close, which could replace a printed MVP enclosure → until system-mechanical: needs a heat check
 
-## Answered (59)
+## Answered (60)
 
 - Q-0050 (pdm-hc2): MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → **covered by Q-0049: short EMC-only gate slew within the MOSFET SOA** (done)
 - Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (done)
@@ -193,3 +182,4 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0065 (system): Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → **Not all by JLCPCB: Economic PCBA without J4, J5, J10, J11; the owner hand-solders those four (ruling Q-0057). The owner checks the monthly assembly coupon at order time (ruling Q-0059).** (deferred)
 - Q-0064 (pdm-4ch): May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → **yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).** (done)
 - Q-0067 (pdm-4ch): A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → **A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.** (done)
+- Q-0068 (pdm-4ch): C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → **Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.** (parked)
