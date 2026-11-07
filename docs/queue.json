@@ -4799,10 +4799,12 @@
         "finding": "L4"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "ruling": "yes (owner, 2026-11-06)",
       "answered": "2026-11-06",
-      "package": "T-0159"
+      "package": "T-0159",
+      "fixed_by": "T-0159",
+      "merged": "698cbf87ba15d4bc8b9b04d32b1fa044f2014c85"
     },
     {
       "id": "T-0150",
@@ -5089,7 +5091,7 @@
       "id": "T-0159",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-07",
       "title": "Merge near-duplicate BOM lines",
       "brief": "Owner ruling on T-0149, verbatim: yes (owner, 2026-11-06). The approved fix, verbatim: C2 to C307331 (0402), C12 and C13 to C15849, R10 to C25768, HC2 R9 to C36871. C13 is the L78M05 input cap: check the X5R DC-bias curve at 29 V first and keep C28323 if it does not pass. This carries out the merge opened by decisions 33 and 99. Values do not change; only code and package do. All these parts are already on the BOM.\n\nIn order, same edit on both boards:\n1. Part checks first: C307331 voltage rating against the boot-capacitor requirement of LMR51610 (C2, between SW through R43 and CB); C25768 and C36871 tolerance against the present C31850 and C23231, because R9/R10 set the 3.3 V output; C15849 for C12 on U5 VCC2 (5 V).\n2. C13 check: docs/part-facts/C15849.md has no DC-bias curve (UNVERIFIED there, Samsung's simulation tool is the primary source). Take the curve from a primary source, and take the required input capacitance from the L78M05 datasheet (C58069). Effective capacitance at 29 V must meet that requirement with tolerance and temperature included. If no primary curve can be found, or it does not pass, keep C13 on C28323 as the item says and report it; this is the item's own outcome and no stop.\n3. Edit: C2 C14663 to C307331 on C_0402_1005Metric; C12 C52923 to C15849 on C_0603_1608Metric; C13 C28323 to C15849 on C_0603_1608Metric if step 2 passes; R10 C31850 to C25768 on R_0402_1005Metric; R9 C23231 to C36871 on R_0402_1005Metric.\n4. R9 is on the shared power-usb sheet, so it changes on both boards, not only on HC2 as the item words it, or the shared-sheets gate fails. On pdm-4ch this is cost-neutral (one line swapped for one line). Record this as an auto decision with that reason.\n5. Confirm that the old codes are gone from each BOM: C14663, C52923, C31850, C23231, and C28323 if C13 passed. Report lines removed per board and the saving at 1.53 USD per line.\n6. Update design-notes (8.3 and 8.5 where they name these parts) and both STATUS files, including the smaller land patterns for layout.\n\nChecks: ERC and netlist before and after on both boards (no connection may change, only the parts' fields); tools/fix_check.py with refs C2, C12, C13, R9, R10; tools/report_check.py.\n\nStop and ask if: the swap would change the 3.3 V setpoint tolerance in a way decision 30 or the budgets depend on, or C2's rating fails and no part already on the BOM fits (then leave C2 as it is and report it; it is not worth a new line).",
@@ -5097,7 +5099,35 @@
         "T-0149"
       ],
       "plan": "T-0157",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-07T10:38:54",
+      "ran_model": "opus",
+      "session": "cd165228-1339-405c-983e-1311b8ae176e",
+      "cost_usd": 3.0089,
+      "attempts": 1,
+      "refs": [
+        "C12",
+        "C2",
+        "R10",
+        "R9"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -3
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -4
+        }
+      },
+      "finished": "2026-11-07",
+      "note": "9 part-facts lookups (1.30 USD); not merged: docs/part-facts/C15849.md, docs/part-facts/C22427220.md",
+      "summary": "1 fixed, 0 blocked, merged 698cbf87; pdm-4ch +0 parts (+0 DNP), -3 unique, pdm-hc2 +0 parts (+0 DNP), -4 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-fix-shared-T-0159.md"
     },
     {
       "id": "T-0160",
@@ -5213,12 +5243,12 @@
     "pdm-4ch": {
       "parts": 218,
       "dnp": 15,
-      "unique": 62
+      "unique": 59
     },
     "pdm-hc2": {
       "parts": 232,
       "dnp": 11,
-      "unique": 68
+      "unique": 64
     }
   },
   "sync_seen": "8789271ca559"
