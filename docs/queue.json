@@ -5307,7 +5307,7 @@
       "id": "T-0165",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-07",
       "depends_on": [
         "T-0158",
@@ -5321,7 +5321,14 @@
       "recheck": "emc",
       "started": "2026-11-07T13:18:23",
       "ran_model": "sonnet",
-      "session": "72b9a240-b115-44c0-a609-d874cc61f035"
+      "session": "72b9a240-b115-44c0-a609-d874cc61f035",
+      "cost_usd": 0.2176,
+      "attempts": 1,
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-emc-system.md"
     },
     {
       "id": "T-0166",
