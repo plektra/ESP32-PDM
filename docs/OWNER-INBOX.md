@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** yes
 - **Why it needs you:** you took it back from the agents (was: assumed: yes)
 
-**Answer:** 
+**Answer:** no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.
 
 ---
 
