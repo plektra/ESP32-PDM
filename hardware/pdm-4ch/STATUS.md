@@ -1,6 +1,8 @@
 # pdm-4ch status
 
-Updated: 2026-11-07 (T-0160 status LEDs and service pads)
+Updated: 2026-11-07 (T-0161 buck input filter position)
+
+**2026-11-07 (T-0161: T-0153, owner ruling 2026-11-06, unattended, shared – `power-usb`, same on both boards):** buck input filter position. Net-(D2-K) is split: D2.K → **JP1** (copper bridge, bridged solder-jumper footprint, no part) ‖ **L2** (DNP, SWPA6045S8R2MT C96963 footprint, example 8.2 µH) → C1/C19/U3. D3 (USB) stays on the U3 side, so USB-only input is unchanged (3.74 V at 0.40 A, decision 87). Damping option **C22 2.2 µF C170101 + R73 10 Ω C17903 across C1, both DNP**. A 0 Ω chip part was not used: neither C17168 nor C21189 publishes pulse data for the ≈ 86 A / ≤ 9.6 A²s F1 trip. The 0.6 mm copper bar carries 87 A²s at 2 oz (Onderdonk). With JP1 fitted, the buck input changes only by ≈ 0.2 mΩ. L2 must be fitted only together with C22/R73: undamped, the filter peak (≤ 21 Ω) is only 1.4× below the buck's 29 Ω negative input impedance at a cranking dip, and a surge step can push U3 VIN to ≈ 64 V (65 V recommended). F1, R54 and their ratings are unchanged. ERC 0 errors, 5 warnings (unchanged); +4 DNP parts, unique +0. Design-notes §8.3. **A competent person reviews F1 and R54 before installation.** Report: `docs/reviews/2026-11-07-fix-shared-T-0161.md`.
 
 **2026-11-07 (T-0160: T-0150, T-0151, T-0152, owner rulings 2026-11-06, unattended, shared – controller part of the root sheet, same on both boards except J6 pins 4–6):** sign-of-life LEDs and service pads. **D8 + R67** power LED +3V3 → GND; **D7 + R59** status LED IO13 → GND (high = on, off while IO13 is undriven). LEDs KT-0603R red 0603 C2286 (basic, the one new line), resistors 2.2 k C25879 (on the BOM): ≈ 0.7 mA each. D8 draws continuously, also in Eco/Sleep (decision 13), ≈ 2.3 mW from 3.3 V. **J6** unfitted `PinHeader_1x08_P2.54mm_Vertical`, DNP, no BOM line: 1 GND, 2 TXD0, 3 RXD0, 4 IO35, 5 IO36, 6 IO37, 7 IO42, 8 +3V3. Pin checks: none strapping, none used in the N8 module. CAN TX/RX LEDs left out (an LED to GND on TXD sits at the 2 V VIH limit with R70; the active-low version would light too briefly to see). Pin map (IO13, IO34–IO37, IO42, TXD0/RXD0) and the controller power row updated in ARCHITECTURE. ERC 0 errors, 5 warnings (unchanged); netlist differs only in U1 pins 17, 31–33, 38–40 and the new parts. 223 parts (+5, J6 DNP), 60 unique (+1). Design-notes §8.7. Report: `docs/reviews/2026-11-07-fix-shared-T-0160.md`.
 
@@ -156,6 +158,7 @@ a competent person reviews F1–F4 and R54–R56 before installation.
      switches → VS → Q30 → D30 short and wide.
    - T-0143 (design-notes §8.6): D31 directly across the Q30 drain tab and source pins, short and wide.
    - T-0160 (design-notes §8.7): **J6** (unfitted service pads) inside the board near the EMC test points (VS, 3V3, GND, buck SW, CANH/CANL; `docs/reviews/2026-11-03-emc-system.md` item 9), not at an edge connector, short traces from U1, outside the antenna keep-out, pin 1 (GND) marked. On-board use only: no cable leaves the board (invariant 9 for 3V3; invariant 4, the lines are unprotected). **D7/D8** where they are visible with the board in its carrier.
+   T-0161 (design-notes §8.3): the buck input loop C1/C19/U3 stays tight and unchanged; the filter position JP1 ‖ L2 sits **before** C1 (D2.K → JP1/L2 → C1), with room for L2's 6 × 6 mm body. JP1 traces at least as wide as its 0.6 mm bar; JP1 on an outer layer where it can be cut. C22/R73 (DNP) next to C1, outside the C1/C19/U3 loop. D3.K joins on the C1 side.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
    board edges and screws.
@@ -174,6 +177,8 @@ R71/R72 go between D9 and U5 (D9 at J4).
   impedance), short J5.5 to GND (behind F4/R56), then behind F1 (D1/D2 node) and behind F3 (D10/FB2 node). Scope the
   current; afterwards inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Pass before installation
   (design-notes §8.3).
+  T-0161: make the short behind F1 with **JP1 fitted** (a short at C1 also puts JP1 in the path) and, if L2 is ever fitted, repeat it.
+- **T-0161 / decision 28 – buck input filter (pre-compliance scan):** conducted emission on the battery input with JP1 fitted. If the buck's 1.1 MHz or PFM components need it: cut JP1, fit L2 (start 8.2 µH C96963) **together with** C22 2.2 µF + R73 10 Ω (3.3–4.7 Ω 1206 if the ring at 33–57 kHz is not damped enough). Then scope U3 VIN at light load (PFM) and during a 28.8 V hot-plug; the peak must stay ≤ 65 V (design-notes §8.3).
 - **T-0042 / Q-0034 – switch-path margin:** measure IN − device GND (U11–U14 pin IN vs the channel's ground network) at
   SWIN = 10.5 V with the channel on, once with the 3.3 V rail removed and once with it present. Repeat at a 10.5 V battery
   with D55's drop (SWIN ≈ 9.8–10.1 V). Pass: ≥ 2.0 V (VIN(H) min). If short, the planned fix is **RIN R101/R201/R301/R401 →
