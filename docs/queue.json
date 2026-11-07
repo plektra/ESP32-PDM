@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 176,
+    "T": 186,
     "Q": 70
   },
   "tasks": [
@@ -5361,13 +5361,16 @@
         "finding": "C1"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0068",
       "why_big": [
         "found while fixing (T-0171): Neither named fallback passes: C577767 and C7422678 match the J10 pad grid, Ø1.5 mm holes and 30 A UL / 32 A IEC, but have no flange for the C577752 plug's ear screws and their drawings show no lock (docs/part-facts/C577767.md, C7422678.md). Using either needs a new plug or footprint, which amends decisions 98/104."
       ],
       "ruling": "Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.",
-      "answered": "2026-11-07"
+      "answered": "2026-11-07",
+      "package": "T-0179",
+      "fixed_by": "T-0179",
+      "merged": "ac1c04811b98c643cdddc0d45447960ce2d0a2a3"
     },
     {
       "id": "T-0167",
@@ -5418,14 +5421,17 @@
         "finding": "C3"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0069",
       "undone": "2026-11-07",
       "why_big": [
         "you took it back from the agents (was: assumed: yes)"
       ],
       "ruling": "no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.",
-      "answered": "2026-11-07"
+      "answered": "2026-11-07",
+      "package": "T-0179",
+      "fixed_by": "T-0179",
+      "merged": "ac1c04811b98c643cdddc0d45447960ce2d0a2a3"
     },
     {
       "id": "T-0169",
@@ -5577,9 +5583,291 @@
       "id": "T-0175",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-07",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-07T13:51:11",
+      "ran_model": "sonnet",
+      "session": "d421075f-1583-4a0b-9860-cba79a283f75",
+      "cost_usd": 0.7636,
+      "attempts": 1,
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "2 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-emc-system-2.md"
+    },
+    {
+      "id": "T-0176",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-07",
+      "finding": {
+        "id": "E20",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-hc2",
+        "location": "hc_channel 1/2: U11/U12 PD pin 14, R116/R216 0 Ω, GATE (Q11/Q12, C114/C214)",
+        "summary": "HC2 turn-off is not slewed (PD direct, R(PD) 0.69-1.34 Ω into about 10 nF): the output steps 28 V in tens of ns, about 500 V/µs, against 0.76 V/µs at turn-on, so a switch-off can click the VHF receiver.",
+        "fix": "No change now: add 'R116/R216 0 Ω to 10-22 Ω, watch the turn-off edge and VHF click' to the pre-compliance scan and recompute the short-circuit SOA before keeping any value.",
+        "door": "two-way",
+        "reason": "Policy: scan list and notes only, no part or decision changes now; a later value change would amend decision 25 and come back to the owner.",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-07-emc-system-2.md",
+        "finding": "E20"
+      },
+      "door": "two-way",
+      "state": "done",
+      "package": "T-0180",
+      "fixed_by": "T-0180",
+      "merged": "147034f0f0b11ad7cd1e4e76200ef3b4e997e909"
+    },
+    {
+      "id": "T-0177",
+      "role": "system",
+      "scope": "system",
+      "created": "2026-11-07",
+      "finding": {
+        "id": "E21",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "system",
+        "location": "pdm-4ch J10 and pdm-hc2 J11 (both C577772 + C577752); README line 65",
+        "summary": "The pdm-4ch battery plug fits an HC2 output socket and puts battery minus on OUT2, so turning channel 2 on is a dead short through Q21/Q22 (outside the calculated SOA from hot); the README still says all connectors are keyed.",
+        "fix": "Add one README sentence and a coloured sleeve or label on the battery plug saying the two plugs are interchangeable; no part change.",
+        "door": "two-way",
+        "reason": "Documentation only (policy: two-way); the physical keying choice stays with the owner under the existing open item and decision 104 is not changed.",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-07-emc-system-2.md",
+        "finding": "E21"
+      },
+      "door": "two-way",
+      "state": "done",
+      "package": "T-0179",
+      "fixed_by": "T-0179",
+      "merged": "ac1c04811b98c643cdddc0d45447960ce2d0a2a3"
+    },
+    {
+      "id": "T-0178",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-07",
+      "depends_on": [],
+      "items": [
+        "T-0166",
+        "T-0168",
+        "T-0176",
+        "T-0177"
+      ],
+      "started": "2026-11-07T13:55:56",
+      "ran_model": "opus",
+      "session": "d0e8bb25-3e62-4b00-9d2a-05de0c5e9ab1",
+      "cost_usd": 0.614,
+      "attempts": 1,
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "2 packages, 0 deferred, 1 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-plan-system-T-0178.md"
+    },
+    {
+      "id": "T-0179",
+      "role": "board-fixer",
+      "scope": "shared",
+      "state": "done",
+      "created": "2026-11-07",
+      "title": "C577772 + C577752 set: buying rule and interchangeable-plug warning (documents only)",
+      "brief": "Documents only. No schematic, footprint, BOM or ARCHITECTURE change. Files: hardware/pdm-4ch/STATUS.md, hardware/pdm-hc2/STATUS.md, README.md (design-notes §7 only if it states a fallback socket). Steps in order. (1) T-0166/T-0168, owner ruling Q-0068 verbatim: \"Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.\" Q-0069 verbatim: \"no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.\" In pdm-4ch STATUS (the decision 98 / T-0171 pre-order bullet, about line 194) replace the T-0171 wording that a socket change 'goes to the owner' with the ruling: any seller, check that the marking reads KF2EDGSRM-7.62 (flange header), no C577767/C7422678 or other socket, the order waits if none can be bought. Keep the stock figures that are already there (0 / 63 on 2026-11-07, minimum order 18). Add the same rule to the pdm-hc2 STATUS pre-order bullet for J11 C577772 + C577752 (about line 189). This closes the T-0171 'for the sync sweep' note in pdm-4ch STATUS (about line 226); mark it done. (2) T-0177: README Mounting bullet (line 65, 'All connectors are keyed plugs'). Keep the sentence, but say that keying holds within one board, and add one sentence: the pdm-4ch battery plug (J10) and the pdm-hc2 output plug (J11) are the same 7.62 mm set (C577772 + C577752) and fit each other. A battery plug in an HC2 output socket short-circuits the battery when channel 2 turns on. An HC2 load plug in a pdm-4ch J10 leaves the unit dead. Mark the battery plug (for example a red sleeve or label) and check it before power-up. Add a matching line to both STATUS files next to the decision 98 sample check (mark the battery plug; silkscreen 'BATTERY' + polarity at J10 and 'OUT1 OUT2' at J11 as layout notes, which the EMC report's layout rule 2 already gives). No part change. (3) Run python3 tools/fix_check.py with the shared scope and empty refs. The netlists must not change on either board. Stop and ask (one-way door) if a step would change a socket, plug, footprint or keying (that amends decisions 98/104), would choose a physical fix for the interchangeable plugs, or would edit the Invariants section. In the report, say that a competent person should check the plug marking before installation on a boat with both boards (CLAUDE.md item 7).",
+      "items": [
+        "T-0166",
+        "T-0168",
+        "T-0177"
+      ],
+      "plan": "T-0178",
+      "depends_on": [],
+      "started": "2026-11-07T13:57:35",
+      "ran_model": "opus",
+      "session": "2b3c3351-1b41-4e58-9d22-65d812b0c804",
+      "cost_usd": 0.437,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "3 fixed, 0 blocked, merged ac1c0481; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-fix-shared-T-0179.md"
+    },
+    {
+      "id": "T-0180",
+      "role": "board-fixer",
+      "scope": "pdm-hc2",
+      "state": "done",
+      "created": "2026-11-07",
+      "title": "HC2 turn-off edge: R116/R216 trial on the pre-compliance scan list (documents only)",
+      "brief": "Documents only. R116/R216 stay 0 Ω C17168 in the schematic. Files: hardware/pdm-hc2/STATUS.md and docs/design-notes.md §4a.3 (turn-off paragraph, about line 374). Steps. (1) In the pdm-hc2 STATUS prototype / pre-compliance list (next to the T-0161 decision 28 scan item), add: 'E20 / T-0176: the HC2 turn-off edge is not slewed (PD direct through R116/R216 0 Ω, R(PD) 0.69–1.34 Ω into about 10.5 nF, estimated about 500 V/µs against 0.5–0.77 V/µs at turn-on; estimate, not simulated). At the scan, hand-swap R116/R216 0 Ω → 10–22 Ω (0402), look at the turn-off edge on the scope and listen for a click on a VHF receiver at switch-off. Recompute the short-circuit SOA of design-notes §4a.3 (fast trip tSC 4–5 µs; the gate needs about 230 ns at 22 Ω) before any value is kept. Keeping a value amends decision 25 (PD direct) and goes to the owner.' (2) In design-notes §4a.3, next to 'Turn-off (f) unchanged: PD direct', add one sentence saying that the turn-off edge is fast (order 500 V/µs, estimate), with a pointer to the scan item. Also keep the layout note that R116/R216 sit close to U11/U12 pin 14 with pads a hand-swap can reach (already a rule). (3) Run python3 tools/fix_check.py with the pdm-hc2 scope and empty refs. The netlist must not change. Stop and ask if the work would need a value other than 0 Ω in the schematic, or any change to the PD/GATE path (that amends decision 25 and affects the short-circuit protection). Do not add a README paragraph: the item asks only for the scan list.",
+      "items": [
+        "T-0176"
+      ],
+      "plan": "T-0178",
+      "depends_on": [],
+      "started": "2026-11-07T13:59:07",
+      "ran_model": "opus",
+      "session": "f0ade6a3-b7e4-47ee-a3cd-6bbaa8a738e2",
+      "cost_usd": 0.2797,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "1 fixed, 0 blocked, merged 147034f0; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-fix-pdm-hc2-T-0180.md"
+    },
+    {
+      "id": "T-0181",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "done",
+      "created": "2026-11-07",
+      "depends_on": [
+        "T-0179"
+      ],
+      "verify": true,
+      "since": "1b667a36fb2f98dc55e26fdec696d86585b0a061",
+      "started": "2026-11-07T13:59:07",
+      "ran_model": "sonnet",
+      "session": "41c475dd-d555-4a1a-9f7d-199005a3fca8",
+      "cost_usd": 0.1003,
+      "attempts": 1,
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-validate-pdm-4ch-3.md"
+    },
+    {
+      "id": "T-0182",
+      "role": "validator",
+      "scope": "pdm-hc2",
+      "state": "done",
+      "created": "2026-11-07",
+      "depends_on": [
+        "T-0179",
+        "T-0180"
+      ],
+      "verify": true,
+      "since": "1b667a36fb2f98dc55e26fdec696d86585b0a061",
+      "started": "2026-11-07T14:00:12",
+      "ran_model": "sonnet",
+      "session": "60183790-8b70-41d2-a97e-d259913cd7f6",
+      "cost_usd": 0.1157,
+      "attempts": 1,
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-validate-pdm-hc2-2.md"
+    },
+    {
+      "id": "T-0183",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-07",
+      "depends_on": [
+        "T-0179",
+        "T-0180"
+      ],
+      "verify": true,
+      "since": "1b667a36fb2f98dc55e26fdec696d86585b0a061",
+      "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
+      "recheck": "cost",
+      "finished": "2026-11-07",
+      "summary": "skipped: no part changed in T-0179, T-0180",
+      "cost_usd": 0.0
+    },
+    {
+      "id": "T-0184",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-07",
+      "depends_on": [
+        "T-0179",
+        "T-0180"
+      ],
+      "verify": true,
+      "since": "1b667a36fb2f98dc55e26fdec696d86585b0a061",
+      "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
+      "recheck": "emc",
+      "finished": "2026-11-07",
+      "summary": "skipped: no connector, filter or protection part changed (refs: none)",
+      "cost_usd": 0.0
+    },
+    {
+      "id": "T-0185",
+      "role": "board-fixer",
+      "scope": "sync",
+      "state": "done",
+      "created": "2026-11-07",
+      "depends_on": [],
+      "items": [],
+      "sweep": true,
+      "title": "Sync the \"For /system\" lists",
+      "brief": "Sweep the \"For /system\" items of both boards under the rules for scope `sync` in your instructions: do the bookkeeping ones, leave the rest word for word.\n\npdm-4ch STATUS.md, For /system:\n- Decisions 103, 104: done in T-0158 (2026-11-07): J10 is C577772 + C577752 and Q30 is AGM601LL, with a 16 A input and ≥ 2 cm² tab copper; decision 98's sample check names the new set.\n- T-0160 done (T-0150–T-0152): the pin map now has IO13 = status LED and IO35–IO37, IO42, TXD0/RXD0 on unfitted J6. For the sync sweep: the ARCHITECTURE root (controller) row does not yet name D7/R59, D8/R67 or J6.\n- T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.\n- T-0158, ARCHITECTURE rows a `pdm-4ch` package may not edit, for the sync sweep: the Boards row (BTT6010 option, not on this version, decision 103); the root row (Q30 AGM601LL C5464765); the Mechanics J10 row (pdm-4ch C577772 + C577752); the BTT6010 budget row; the supply path row (Q30 figures, 16 A limit instead of 32 A).\n- T-0158, a choice for the owner: the pdm-4ch battery plug now physically fits a pdm-hc2 J11 output socket, and the HC2 output plug fits a pdm-4ch J10, because both are the 7.62 mm set. Decision 98's keying therefore holds only within one board, not across boards in one installation. What a mis-plug does has not been analysed. Options: accept it and label the plugs; or change the set on one board at the next pdm-hc2 revision. pdm-hc2 is not changed, and its layout follows pdm-4ch bring-up (decision 102), so this does not hold up the first order.\n- T-0171 sync-sweep note: done in T-0179 (2026-11-07). The pdm-hc2 STATUS pre-order bullet for J11 now carries the same buying rule (owner ruling Q-0068/Q-0069).\n- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.\n- T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.\n- T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.\n\n- T-0069: firmware requirements for DEN (design-notes §6.1) belong in the `/system firmware` list. T-0069 swapped one\n  unique extended part (−/+): C23228 (basic) is replaced by C17975 (extended, 1206 680 Ω); C25819 (basic) is added.\n- RIS at the 40 mA maximum fault current (≈ 1.1 W) is covered only by firmware; hardware cover would need a ≥ 1.5 W\n  resistor – owner decision if wanted.\n\n- T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended\n  parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).\n\n- DIN carrier and printed enclosure design: `/system mechanical`.\n\npdm-hc2 STATUS.md, For /system:\n- T-0072/T-0055: J10 is keyed (decision 98); the board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).\n- T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the\n  15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,\n  full scale ≈ 31.9 V) and reports \"OUT high while off\" as a float-driven run.\n- **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list). Pre-charge path (TPS48111-Q1) if the prototype shows real loads exceed about 50 µF (decision 94).\n- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.\n- T-0160 done (T-0150–T-0152): the pin map now has IO13 = status LED and IO42, TXD0/RXD0 on unfitted J6 (pins 4–6 not connected here). For the sync sweep: the ARCHITECTURE root (controller) row does not yet name D7/R59, D8/R67 or J6.\n- T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave IO42 with a pull enabled while unused.\n\n- T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended\n  parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).\n\n- **Bilge output fusing (T-0064 failure mode, needs README/installation rule):** D103/D203 sit outside the\n  back-to-back MOSFETs. If a TVS fails short, a float-switch run feeds the short through the PDM output wire. The\n  float circuit stays independent (invariant 8) only if the PDM leg has its own fuse, between J11 and the junction\n  with the float circuit, that opens before the float fuse. Add this to the README next to the external breaker of\n  decision 39; a competent person reviews the bilge wiring before installation.\n\n- DIN carrier and printed enclosure design: `/system mechanical`.",
+      "started": "2026-11-07T14:00:43",
+      "ran_model": "opus",
+      "session": "ca895193-106d-4896-b10b-daf0b1e2c99f",
+      "cost_usd": 0.6477,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "5 synced, 15 left for /system, merged 840bf4c9",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-fix-sync-T-0185.md"
     }
   ],
   "board_size_start": {
@@ -5606,5 +5894,5 @@
       "unique": 65
     }
   },
-  "sync_seen": "8789271ca559"
+  "sync_seen": "f21384955584"
 }

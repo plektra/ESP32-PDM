@@ -1,6 +1,12 @@
 # pdm-hc2 status
 
-Updated: 2026-11-07 (decision 120 J11 socket stock)
+Updated: 2026-11-07 (merge of auto/pilot: T-0179, T-0180, T-0185 after decisions 120, 121)
+
+**2026-11-07 (T-0185: "For /system" sweep, unattended, documents only):** the ARCHITECTURE root row now names D7/R59, D8/R67 and J6 (decisions 113, 115, 116), and the Mechanics table has its own HC2 J10 row (C6394053 + C6394029, unchanged). No schematic change. Report: `docs/reviews/2026-11-07-fix-sync-T-0185.md`.
+
+**2026-11-07 (T-0180: T-0176, unattended, documents only):** the HC2 turn-off edge (PD direct, estimated about 500 V/µs) is on the prototype test list as a pre-compliance scan trial: R116/R216 0 Ω → 10–22 Ω by hand, scope and VHF check, SOA recompute before any value is kept (decision 25 stays). R116/R216 stay 0 Ω C17168; no schematic, footprint or BOM change. Design-notes §4a.3. Report: `docs/reviews/2026-11-07-fix-pdm-hc2-T-0180.md`.
+
+**2026-11-07 (T-0179: T-0166, T-0168, T-0177, owner rulings Q-0068/Q-0069, unattended, documents only; cross-board plug fit superseded by decision 121):** J11 keeps C577772 + C577752 (no design change); buy C577772 from any seller, marking KF2EDGSRM-7.62 (flange header); no C577767, C7422678 or other socket; the order waits if none can be bought. The J11 output plug fits the pdm-4ch J10 battery socket and vice versa: mark the battery plug and check it before power-up (pre-order checklist, README). No schematic, footprint or BOM change. Report: `docs/reviews/2026-11-07-fix-shared-T-0179.md`.
 
 **2026-11-07 (T-0161: T-0153, owner ruling 2026-11-06, unattended, shared – `power-usb`, same on both boards):** buck input filter position. Net-(D2-K) is split: D2.K → **JP1** (copper bridge, bridged solder-jumper footprint, no part) ‖ **L2** (DNP, SWPA6045S8R2MT C96963 footprint, example 8.2 µH) → C1/C19/U3. D3 (USB) stays on the U3 side, so USB-only input is unchanged (3.74 V at 0.40 A, decision 87). Damping option **C22 2.2 µF C170101 + R73 10 Ω C17903 across C1, both DNP**. A 0 Ω chip part was not used: neither C17168 nor C21189 publishes pulse data for the ≈ 86 A / ≤ 9.6 A²s F1 trip. The 0.6 mm copper bar carries 87 A²s at 2 oz (Onderdonk). With JP1 fitted, the buck input changes only by ≈ 0.2 mΩ. L2 must be fitted only together with C22/R73: undamped, the filter peak (≤ 21 Ω) is only 1.4× below the buck's 29 Ω negative input impedance at a cranking dip, and a surge step can push U3 VIN to ≈ 64 V (65 V recommended). F1, R54 and their ratings are unchanged. ERC 0 errors, 5 warnings (unchanged); +4 DNP parts, unique +0. Design-notes §8.3. **A competent person reviews F1 and R54 before installation.** Report: `docs/reviews/2026-11-07-fix-shared-T-0161.md`.
 
@@ -120,7 +126,7 @@ point, prototype test). Turn-off and the fast trip unchanged (PD direct). Eq. 4 
 Tj 90 °C). README: HC2 load guidance and the 50 µF limit. T-0053: no change (R113/R213 68 k, decision 39); decision 19
 and the 21 A option are withdrawn. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those refs and U11/U12
 pin 14 (new net PD). Details: design-notes §4a.3, `docs/reviews/2026-11-03-fix-pdm-hc2-T-0106.md`. **For the PCB:**
-C114/C214 and R115/R215 at the MOSFET gates, C1 GND return to U11/U12 GND; R116/R216 close to U11/U12 pin 14.
+C114/C214 and R115/R215 at the MOSFET gates, C1 GND return to U11/U12 GND; R116/R216 close to U11/U12 pin 14, with pads a hand-swap can reach (T-0180 scan item).
 
 **Rules until bench-measured:** no PWM on HC2 outputs (Q-0001). Prototype tests: measure the real load input
 capacitance and inrush of every intended HC2 load, including grouped LED work lights (Q-0045), and confirm the ≈ 50 µF
@@ -180,6 +186,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
   (design-notes §8.3).
   T-0161: make the short behind F1 with **JP1 fitted** (a short at C1 also puts JP1 in the path) and, if L2 is ever fitted, repeat it.
 - **T-0161 / decision 28 – buck input filter (pre-compliance scan):** conducted emission on the battery input with JP1 fitted. If the buck's 1.1 MHz or PFM components need it: cut JP1, fit L2 (start 8.2 µH C96963) **together with** C22 2.2 µF + R73 10 Ω (3.3–4.7 Ω 1206 if the ring at 33–57 kHz is not damped enough). Then scope U3 VIN at light load (PFM) and during a 28.8 V hot-plug; the peak must stay ≤ 65 V (design-notes §8.3).
+- **E20 / T-0176 – HC2 turn-off edge (pre-compliance scan, T-0180):** the HC2 turn-off edge is not slewed (PD direct through R116/R216 0 Ω, R(PD) 0.69–1.34 Ω into about 10.5 nF, estimated about 500 V/µs against 0.5–0.77 V/µs at turn-on; estimate, not simulated). At the scan, hand-swap R116/R216 0 Ω → 10–22 Ω (0402), look at the turn-off edge on the scope and listen for a click on a VHF receiver at switch-off. Recompute the short-circuit SOA of design-notes §4a.3 (fast trip tSC 4–5 µs; the gate needs about 230 ns at 22 Ω) before any value is kept. Keeping a value amends decision 25 (PD direct) and goes to the owner.
 - **Q-0042 / decision 100 – bilge pump start current (SEAFLO SFBP2-G3500-01), mandatory before a board runs a pump in
   service:** procedure in `docs/pump-start-current-test.md`. The start must fall below ≈ 15 A (lower IOC tolerance)
   within ≈ 120 ms, else the breaker trips the forced run. If it does not, back to the owner.
@@ -187,6 +194,8 @@ R71/R72 go between D9 and U5 (D9 at J4).
 ## Pre-order checklist (T-0065)
 
 - Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. Then buy the sets for the order: stock is thin on C6394053 / C6394029, C577772 / C577752. J11 socket C577772 was 0 at LCSC on 2026-11-07: buy it from any seller (header must read KF2EDGSRM-7.62, flange), no substitute socket; the order waits if none is available (decision 120). Hand-solder J10 with a powerful iron; check the joints.
+- Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. Then buy the sets for the order: stock is thin on C6394053 / C6394029, C577772 / C577752. Hand-solder J10 with a powerful iron; check the joints. **J11 C577772 + C577752, owner ruling Q-0068/Q-0069 (T-0179):** keep the set, no design change. The sockets are hand-soldered (decision 85), so buy C577772 **from any seller** (LCSC restock, AliExpress Kefa, other distributors; LCSC 0 / 63 on 2026-11-07, C577772 minimum order 18) and check that the marking reads **KF2EDGSRM-7.62 (flange header)**, not KF2EDGSR. **No C577767, C7422678 or any other socket** (no flange for the C577752 plug's ear screws, no lock; `docs/part-facts/C577767.md`, `docs/part-facts/C7422678.md`). **If no seller has C577772 by order time, the order waits.**
+- J11 marking (T-0177, layout rule 2 of `docs/reviews/2026-11-07-emc-system-2.md`): silkscreen "OUT1 OUT2" at J11. The cross-board mis-plug with the pdm-4ch battery plug no longer applies: the pdm-4ch prototype J10 is a fixed screw terminal with no plug (decision 121). Re-check if a later pdm-4ch revision goes back to the 7.62 mm set.
 - Bilge pump start current: moved to the prototype test list (decision 100).
 
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
@@ -217,7 +226,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
   full scale ≈ 31.9 V) and reports "OUT high while off" as a float-driven run.
 - **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list). Pre-charge path (TPS48111-Q1) if the prototype shows real loads exceed about 50 µF (decision 94).
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
-- T-0160 done (T-0150–T-0152): the pin map now has IO13 = status LED and IO42, TXD0/RXD0 on unfitted J6 (pins 4–6 not connected here). For the sync sweep: the ARCHITECTURE root (controller) row does not yet name D7/R59, D8/R67 or J6.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave IO42 with a pull enabled while unused.
 
 - T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended

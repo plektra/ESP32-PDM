@@ -372,7 +372,7 @@ model: the old 10 Ω hard turn-on would, in the same model, drive > 400 A (ID,pu
 fully open within a microsecond; real shorts have wiring inductance that limits di/dt and VDS. Prototype test (STATUS).
 
 **Turn-off (f)** unchanged: PD direct through R116/R216 0 Ω, tSC 4–5 µs, 4 A PD sink; C1 discharges through R2
-10 Ω (≈ 12 nC). A short while the output is on (gate fully on) is cleared as before. While on, the gate sits at
+10 Ω (≈ 12 nC). A short while the output is on (gate fully on) is cleared as before. The turn-off edge is therefore fast, order 500 V/µs (R(PD) 0.69–1.34 Ω into ≈ 10.5 nF; estimate, not simulated); a 10–22 Ω trial in R116/R216 is on the pre-compliance scan list (pdm-hc2 STATUS, E20 / T-0176), and the SOA here is recomputed before any value is kept. While on, the gate sits at
 SRC + 12 V through R1 (C1 has no DC load); a fast VS step of ΔV lowers VGS by C1 / (C1 + Cgs) ≈ 10 % of ΔV.
 Heat budget unchanged (2 × 15 A → Tj 90 °C, 40 °C).
 

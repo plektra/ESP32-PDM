@@ -17,12 +17,16 @@ Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back 
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (63)
+## Applied by agents (67)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0177 · system · The pdm-4ch battery plug fits an HC2 output socket and puts battery minus on OUT2, so turning channel 2 on is a dead short through Q21/Q22 (outside the calculated SOA from hot); the README still says all connectors are keyed. → T-0179 (`ac1c0481`)
+- T-0176 · pdm-hc2 · HC2 turn-off is not slewed (PD direct, R(PD) 0.69-1.34 Ω into about 10 nF): the output steps 28 V in tens of ns, about 500 V/µs, against 0.76 V/µs at turn-on, so a switch-off can click the VHF receiver. → T-0180 (`147034f0`)
 - T-0169 · pdm-4ch · J10 socket C577772 is out of stock at JLCPCB (stock 0, min order 18), so the battery input cannot be assembled as designed until restocked. → T-0171 (`9d4e6dd8`)
+- T-0168 · pdm-4ch · May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → T-0179 (`ac1c0481`)
 - T-0167 · pdm-4ch · T-0158 saves about 4.8 $ per board at 5 (Q30 2.7 $, J10 set 2.2 $) with no new extended part; confirmed → T-0171 (`9d4e6dd8`)
+- T-0166 · pdm-4ch · C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → T-0179 (`ac1c0481`)
 - T-0153 · system · The buck input has capacitors but no LC filter position; SH-ESP32 uses an inductor with damping to limit conducted noise → T-0161 (`9024407b`)
 - T-0152 · system · The serial console is unconnected, so a firmware crash that takes native USB down leaves no diagnostics → T-0160 (`c01c3a6d`)
 - T-0151 · system · Spare GPIOs are unconnected, so later design changes have nowhere to attach without a new PCB → T-0160 (`c01c3a6d`)
@@ -77,10 +81,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0014 · system · USB shield is tied to battery negative (shore PE loop via a laptop) and the ESD diode is listed with a 40 V clamp against 3.6 V ESP32 pins (unverified). → T-0065 (`e5fedd96`)
 - T-0013 · pdm-4ch · 4-ch outputs rely on the PROFET (body diode to VS, clamp, 4 kV HBM) and D30 at J10; this meets the intent of invariant 4 but not its wording, and D30 is far from J11. → T-0064 (`dbc672cd`)
 - T-0012 · system · Hardware switch path has tau 0.32 ms (no real debounce), turns the output off below about 8 V at the switch (12 V cranking), and a lamp across the switch contacts above about 1.4 mA turns it on. → T-0068 (`86fbfe03`)
-- T-0011 · system · Buck is the 1.1 MHz PFM variant; PFM drops into the 150-350 kHz band at light load, the datasheet's separate 0.1 uF at VIN is missing, C1 is only 50 V, and SW ringing can land in the tightly limited 156-165 MHz band. → T-0065 (`e5fedd96`)
-- T-0010 · system · No high-frequency return across the isolation barrier (CIO about 1 pF) and no CMC option, so the N2K cable can radiate logic-ground noise and ESD lifts the whole island; not measured. → T-0067 (`5ffcfb6f`)
-- T-0009 · pdm-hc2 · HC2 outputs have no surge/ESD clamp at the connector (invariant 4); the back-to-back MOSFETs also stop positive surges from reaching D30, so only the 80 V avalanche limits them. → T-0064 (`dbc672cd`)
-- T-0008 · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → T-0071 (`80bb3bd1`)
 
 ## Deferred (25)
 
@@ -171,5 +171,5 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0065 (system): Should the first order use the free-assembly coupon (L6) or hand-soldered connectors (L3)? → **Not all by JLCPCB: Economic PCBA without J4, J5, J10, J11; the owner hand-solders those four (ruling Q-0057). The owner checks the monthly assembly coupon at order time (ruling Q-0059).** (deferred)
 - Q-0064 (pdm-4ch): May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → **yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).** (done)
 - Q-0067 (pdm-4ch): A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → **A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.** (done)
-- Q-0068 (pdm-4ch): C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → **Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.** (parked)
-- Q-0069 (pdm-4ch): May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → **no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.** (parked)
+- Q-0068 (pdm-4ch): C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → **Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.** (done)
+- Q-0069 (pdm-4ch): May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → **no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.** (done)
