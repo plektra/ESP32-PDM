@@ -5418,12 +5418,14 @@
         "finding": "C3"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0069",
       "undone": "2026-11-07",
       "why_big": [
         "you took it back from the agents (was: assumed: yes)"
-      ]
+      ],
+      "ruling": "no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.",
+      "answered": "2026-11-07"
     },
     {
       "id": "T-0169",

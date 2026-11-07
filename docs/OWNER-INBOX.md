@@ -6,18 +6,7 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-## Open (1)
-
-## Q-0069 · INFO · pdm-4ch · question
-
-- **From:** `docs/reviews/2026-11-07-cost-system.md` C3 (); task T-0168
-- **Summary:** May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check?
-- **Proposed:** yes
-- **Why it needs you:** you took it back from the agents (was: assumed: yes)
-
-**Answer:** no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.
-
----
+No open questions.
 
 ## Decided by agents (4) – two-way doors
 
@@ -121,7 +110,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0154 · system · SH-ESP32 uses the same 60 V PTC without a series resistor; removing R54-R56 would save one line, about 2-3 USD per order → until prototype: kept until measured
 - T-0155 · system · SH-ESP32 fits standard 100 x 68 x 50 mm waterproof enclosures; pdm-4ch at about 100 x 65 mm is close, which could replace a printed MVP enclosure → until system-mechanical: needs a heat check
 
-## Answered (60)
+## Answered (61)
 
 - Q-0050 (pdm-hc2): MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → **covered by Q-0049: short EMC-only gate slew within the MOSFET SOA** (done)
 - Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (done)
@@ -183,3 +172,4 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0064 (pdm-4ch): May pdm-4ch C104-C404 change to C170101 (already open from T-0107)? It removes C13832 from the 4ch BOM (-3.07 USD per order) and is cheaper up to about 9 boards → **yes: same ruling as Q-0063 (C104-C404 -> C170101, decision 26 amended).** (done)
 - Q-0067 (pdm-4ch): A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → **A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.** (done)
 - Q-0068 (pdm-4ch): C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → **Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.** (parked)
+- Q-0069 (pdm-4ch): May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → **no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.** (parked)
