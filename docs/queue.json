@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 169,
+    "T": 170,
     "Q": 68
   },
   "tasks": [
@@ -5238,7 +5238,7 @@
       "id": "T-0162",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-07",
       "depends_on": [
         "T-0158",
@@ -5250,7 +5250,14 @@
       "since": "619a24338297bd9b647c5a871d522114a4797235",
       "started": "2026-11-07T13:17:03",
       "ran_model": "sonnet",
-      "session": "4f4e49cb-4b71-4bf4-b811-2a2c801c9916"
+      "session": "4f4e49cb-4b71-4bf4-b811-2a2c801c9916",
+      "cost_usd": 0.4539,
+      "attempts": 1,
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "1 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-validate-pdm-4ch.md"
     },
     {
       "id": "T-0163",
@@ -5403,6 +5410,31 @@
       "door": "two-way",
       "state": "done",
       "ruling": "assumed: yes"
+    },
+    {
+      "id": "T-0169",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-07",
+      "finding": {
+        "id": "V1",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-4ch",
+        "location": "root sheet: J10 KF2EDGSRM-7.62-2P C577772",
+        "summary": "J10 socket C577772 is out of stock at JLCPCB (stock 0, min order 18), so the battery input cannot be assembled as designed until restocked.",
+        "fix": "Re-check stock at order time; if still 0, buy the socket elsewhere (hand-soldered, decision 85) or use a part with the same drawing.",
+        "door": "two-way",
+        "reason": "stock check and sourcing, no design change and no money committed yet",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-07-validate-pdm-4ch.md",
+        "finding": "V1"
+      },
+      "door": "two-way",
+      "state": "parked"
     }
   ],
   "board_size_start": {

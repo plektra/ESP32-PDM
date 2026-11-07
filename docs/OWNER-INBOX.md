@@ -8,10 +8,11 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (7) – two-way doors
+## Decided by agents (8) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0169 · MAJOR · pdm-4ch · J10 socket C577772 is out of stock at JLCPCB (stock 0, min order 18), so the battery input cannot be assembled as designed until restocked. → Re-check stock at order time; if still 0, buy the socket elsewhere (hand-soldered, decision 85) or use a part with the same drawing.
 - T-0168 · INFO · pdm-4ch · May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → assumed yes
 - T-0167 · INFO · pdm-4ch · T-0158 saves about 4.8 $ per board at 5 (Q30 2.7 $, J10 set 2.2 $) with no new extended part; confirmed → none needed
 - T-0166 · MINOR · pdm-4ch · C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → Recheck stock before ordering and name a fallback (C577767 or C7422678, footprint check needed); no design change now
