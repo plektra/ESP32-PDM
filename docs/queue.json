@@ -4925,10 +4925,12 @@
         "finding": "S4"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "ruling": "yes (owner, 2026-11-06)",
       "answered": "2026-11-06",
-      "package": "T-0161"
+      "package": "T-0161",
+      "fixed_by": "T-0161",
+      "merged": "9024407b693d8c4603d074d7573a213b78fbd311"
     },
     {
       "id": "T-0154",
@@ -5187,7 +5189,7 @@
       "id": "T-0161",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-07",
       "title": "Buck input filter position",
       "brief": "Owner ruling on T-0153, verbatim: yes (owner, 2026-11-06). The approved fix, verbatim: Add a filter position between D2 and C1/U3: an inductor footprint bridged by a fitted 0 Ohm part or equivalent, DNP inductor, plus a damping option, so the decision 28 pre-compliance scan can decide. Check the current rating, PTC and R54 interaction and stability against the LMR51610 input requirements.\n\nIn order, on power-usb, identical on both boards:\n1. Today D2.K, D3.K (USB path), C1, C19 and U3 VIN/EN share one net, Net-(D2-K). Split it so the position is D2.K -> position -> C1/C19/U3. Keep D3.K on the C1/U3 side, so USB-only input keeps its present 3.74 V at 0.40 A (decision 87), which is already below 4 V. C1 and C19 stay at U3 (decisions 30 and 48).\n2. Bridge: a fitted 0 Ohm part. First choice C17168 0402, already on the BOM as R43, R71, R72, so no new line. Check its current rating against the normal input current and against a short behind the position while F1 trips (F1 C70113, R54 0.2 Ohm, decision 81). If 0402 is not enough, use a larger 0 Ohm part (C21189 0603 is on the BOM but DNP there, so fitting it adds a line) or a copper bridge, and say why.\n3. Inductor: DNP, in parallel with the bridge. Footprint and example value from L1 SWPA6045S8R2MT C96963 (Inductor_SMD:L_Sunlord_SWPA6045S, 8.2 uH, already on the BOM), unless the checks show it does not fit. Its current rating must cover F1's hold and trip behaviour. The final value is set at the scan.\n4. Damping option: DNP only, using values and parts already on the BOM where they fit (for example an R in series with a C across C1, or an R across the inductor; R44's 10 Ohm C17903 and C170101 are on the BOM). No fitted part and no new line.\n5. Checks, and write them in design-notes 8.3: bridge fitted: no change to the buck input beyond the added resistance. Inductor fitted: LC resonance with C1 + C19 against the switching frequency; filter output impedance against the buck's negative input impedance at the lowest input voltage, with R54 + PTC resistance included; the drop at peak input current; LMR51610 input requirements from docs/part-facts/C22427220.md, including the 2.2 uF minimum behind decision 48. Say which damping values the scan should start from.\n6. Add to both STATUS files: the layout rule (the input loop C1/C19/U3 stays tight and is unchanged; the position sits before C1); the pre-compliance item for decision 28; and that decision 81's mandatory hard-short test behind F1 is made with the bridge fitted.\n\nChecks: ERC and netlist before and after on both boards; tools/fix_check.py with refs D2, D3, C1, C19, U3 and the new parts; tools/report_check.py. The EMC re-check follows automatically. A competent person reviews F1 and R54 before installation (decision 81).\n\nStop and ask if: the position only works by changing F1, R54 or their ratings (decision 81), C1 below its minimum, or the USB-only margin; or the bridge cannot survive the F1 trip in any footprint, because that changes the protection (safety). Do not fit the inductor or damping parts: that is the scan's decision.",
@@ -5198,23 +5200,39 @@
       "depends_on": [
         "T-0159"
       ],
-      "started": "2026-11-07T11:02:03",
+      "started": "2026-11-07T13:12:00",
       "ran_model": "opus",
       "session": "fac9827f-570a-433c-9103-45c0e810bc96",
-      "cost_usd": 1.7735,
-      "attempts": 1,
-      "resume": {
-        "session": "fac9827f-570a-433c-9103-45c0e810bc96",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0161",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0161-8icpwahw",
-        "report": "docs/reviews/2026-11-07-fix-shared-T-0161.md",
-        "head": "b18b351cc8472e90186421a7611f614cd2136da1",
-        "reason": "a usage limit"
-      },
+      "cost_usd": 5.0763,
+      "attempts": 2,
       "finished": "2026-11-07",
-      "note": "4 part-facts lookups (0.58 USD); no report written (api_error): You've hit your 5-hour limit · resets 1:10pm (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "note": "1 tool calls denied (Bash); log T-0161-20261107-131205.json",
+      "summary": "1 fixed, 0 blocked, merged 9024407b; pdm-4ch +4 parts (+4 DNP), +0 unique, pdm-hc2 +4 parts (+4 DNP), +0 unique",
+      "interrupted": null,
+      "refs": [
+        "C1",
+        "C19",
+        "C22",
+        "D2",
+        "D3",
+        "JP1",
+        "L2",
+        "R73",
+        "U3"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 4,
+          "dnp": 4,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 4,
+          "dnp": 4,
+          "unique": 0
+        }
+      },
+      "report": "docs/reviews/2026-11-07-fix-shared-T-0161.md"
     },
     {
       "id": "T-0162",
@@ -5294,13 +5312,13 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 223,
-      "dnp": 16,
+      "parts": 227,
+      "dnp": 20,
       "unique": 60
     },
     "pdm-hc2": {
-      "parts": 237,
-      "dnp": 12,
+      "parts": 241,
+      "dnp": 16,
       "unique": 65
     }
   },

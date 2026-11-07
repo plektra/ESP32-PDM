@@ -8,20 +8,20 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (5) – two-way doors
+## Decided by agents (4) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0153 · INFO · system · The buck input has capacitors but no LC filter position; SH-ESP32 uses an inductor with damping to limit conducted noise → Add a filter position between D2 and C1/U3: an inductor footprint bridged by a fitted 0 Ohm part or equivalent, DNP inductor, plus a damping option, so the decision 28 pre-compliance scan can decide. Check the current rating, PTC and R54 interaction and stability against the LMR51610 input requirements.
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (60)
+## Applied by agents (61)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0153 · system · The buck input has capacitors but no LC filter position; SH-ESP32 uses an inductor with damping to limit conducted noise → T-0161 (`9024407b`)
 - T-0152 · system · The serial console is unconnected, so a firmware crash that takes native USB down leaves no diagnostics → T-0160 (`c01c3a6d`)
 - T-0151 · system · Spare GPIOs are unconnected, so later design changes have nowhere to attach without a new PCB → T-0160 (`c01c3a6d`)
 - T-0150 · system · The boards have no on-board LED, so a new board gives no sign of life without firmware and a panel (SH-ESP32 comparison in the cost report) → T-0160 (`c01c3a6d`)
@@ -81,7 +81,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0008 · pdm-hc2 · Current-sense, UVLO/OV and DIODE pins have no EMI filtering; 35-100 V/m near a 25 W VHF set can offset the 25 mV breaker and 80 mV short-circuit comparators or chatter UV/OV on a safety-relevant output. → T-0071 (`80bb3bd1`)
 - T-0007 · system · Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → T-0064 (`dbc672cd`)
 - T-0006 · pdm-hc2 · MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → T-0106 (`c036d2a6`)
-- T-0005 · pdm-hc2 · TPS48110A VS pin wired straight to VS; TI recommends RVS 100 ohm + CVS 0.1-10 uF and gives 60 V/us as abs-max slew on VS/CS+/CS-/ISCP. → T-0071 (`80bb3bd1`)
 
 ## Deferred (25)
 
