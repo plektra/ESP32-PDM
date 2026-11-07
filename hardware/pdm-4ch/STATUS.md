@@ -1,6 +1,8 @@
 # pdm-4ch status
 
-Updated: 2026-11-05 (decisions 97, 98)
+Updated: 2026-11-07 (decisions 99–103)
+
+**2026-11-06 (cost session, no schematic change):** `pdm-4ch` is the whole first order and the MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 218 $ with connector sets (decisions 99, 101, 102; `docs/reviews/2026-11-05-cost-system.md`). First version is 16 A only, all BTT6050 (decision 103). **Queued, not done:** T-0148 smaller J10 and re-selected Q30; T-0149 part merges; T-0150 status LEDs; T-0151 spare GPIO pads; T-0152 serial pads; T-0153 buck filter position. The current schematic still has the 65 A J10 and the 32 A Q30.
 
 **Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
 after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
@@ -201,6 +203,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
+- Decision 103: if the planner defers T-0148, T-0150 or T-0151 to `/system`, handle them before layout. They change J10 and Q30, and the pin map. Decision 98's connector sample check should use the new J10 set.
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
 - T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.

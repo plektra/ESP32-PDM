@@ -1,6 +1,8 @@
 # pdm-hc2 status
 
-Updated: 2026-11-05 (decisions 97, 98)
+Updated: 2026-11-07 (decisions 99–102)
+
+**2026-11-06 (cost session, no schematic change):** on hold. Layout and order follow `pdm-4ch` bring-up, so shared-sheet fixes go in once (decision 102). Later orders: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 230 $ with connector sets (decisions 99, 101). Shared-sheet items T-0149 to T-0153 are queued and will change this board too. The pump start current test moved to the prototype list (decision 100). Moving to 1 oz was examined and not chosen: about 13 A per channel and a lower breaker setting (design-notes §4a).
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18

@@ -5,22 +5,22 @@ panel switches and over NMEA 2000, with current and fault reporting. Built aroun
 Infineon PROFET+24V high-side switches, for 12 V and 24 V systems, assembled by JLCPCB.
 
 **Status:** schematic phase. Both boards (`hardware/pdm-4ch`, `hardware/pdm-hc2`) are complete at schematic
-level and pass ERC (apart from library-version notices); no PCB layout yet. Not tested in hardware.
+level and pass ERC (apart from library-version notices); no PCB layout yet. Not tested in hardware. `pdm-4ch`
+goes first as a prototype, with `pdm-hc2` after its bring-up.
 
 ## Boards
 
 | Board | Channels | Output stage | Continuous current per channel (estimate, 40 °C, vented) |
 |---|---|---|---|
-| `pdm-4ch` | 4 | Infineon PROFET+24V, fitted per channel: BTT6050-1ERA / BTT6010-1ERA | ≈ 4 A / ≈ 8 A |
+| `pdm-4ch` | 4 | Infineon PROFET+24V BTT6050-1ERA (first version, 16 A in total) | ≈ 4 A |
 | `pdm-hc2` | 2 | TI TPS48110A-Q1 + back-to-back MOSFETs, built-in breaker ≈ 17.5 A / 146 ms (≈ 15–20 A over tolerances) | ≈ 15 A |
 
 Both boards share the controller, power, NMEA 2000 and switch-input design.
 
 ## Population and ordering rule (`pdm-4ch`)
 
-The standard `pdm-4ch` is built with four BTT6050-1ERA (≈ 4 A per channel). Heavy loads go on `pdm-hc2`. Fit a
-BTT6010-1ERA (≈ 8 A) only on a channel that carries more than 4 A. A mixed build adds one extended-part loading fee
-per order, so order mixed builds together to pay it once.
+The first version of `pdm-4ch` is built with four BTT6050-1ERA (≈ 4 A per channel, 16 A in total). Heavy loads go on
+`pdm-hc2`. A BTT6010-1ERA (≈ 8 A) option may return in a later revision; it is not supported on this version.
 
 ## Features
 

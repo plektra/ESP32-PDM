@@ -1,6 +1,6 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-05.
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-07.
 
 ## Boards
 
@@ -15,6 +15,8 @@ Firmware: not started.
 
 Steps 1–3 are done, including the fix rounds. Step 4 is in progress: mounting and connectors are decided (decisions 97, 98).
 
+**First order (decisions 99–103):** `pdm-4ch` only, as the cheapest MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 218 $ with connector sets, 16 A only. `pdm-hc2` follows after bring-up. Next: `python3 tools/orchestrate.py run` plans the approved items T-0148 to T-0153; whatever it defers goes to `/system` before layout.
+
 1. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.
 2. **`/cost system deep`** – price both BOMs (parts, JLCPCB extended-part fees, 2 oz copper; connectors are hand-soldered keyed sockets, decisions 85, 98, not yet priced in the report)
@@ -22,7 +24,7 @@ Steps 1–3 are done, including the fix rounds. Step 4 is in progress: mounting 
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
 4. **`/system mechanical`** – still open: DIN carrier and printed enclosure design, sample connector check. PCB can start once the samples pass.
-5. **`/board pdm-4ch pcb`**, then **`/board pdm-hc2 pcb`**.
+5. **`/board pdm-4ch pcb`**, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102).
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
    blinking = fault; alerts and failures go to Signal K where they can be acknowledged and muted – design the
@@ -31,8 +33,9 @@ Steps 1–3 are done, including the fix rounds. Step 4 is in progress: mounting 
 ## Waiting on the owner
 
 - No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
-- Buy one sample of each connector set (decision 98) and check them before layout.
-- Measurements: bilge pump locations and feeds.
+- Buy one sample of each `pdm-4ch` connector set and check them before layout (decision 98). Wait for T-0148, which downsizes J10 (decision 103).
+- Measurements: bilge pump locations and feeds. Pump start current on or after the first working prototype, before a board runs a pump in service (decision 100, `docs/pump-start-current-test.md`).
+- Check whether the Standard PCBA fixture fee (16.42 $ per order) applies when quoting.
 
 ## Backlog (not now)
 
