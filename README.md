@@ -63,6 +63,9 @@ The first version of `pdm-4ch` is built with four BTT6050-1ERA (≈ 4 A per chan
 - **Mounting:** two ways, on the same four M3 holes. On a DIN rail the bare board goes on a plastic carrier, edge-on, about 36 mm
   of rail per unit, inside an enclosure you provide; it must keep out drips and loose metal, and carrier and screws must never
   touch board copper. All connectors are keyed plugs that pull out from the board edge: wire them on the bench and leave room for the plug and cable bend.
+  The keying holds within one board only: the `pdm-4ch` battery plug (J10) and the `pdm-hc2` output plug (J11) are the same 7.62 mm set
+  (C577772 + C577752) and fit each other. A battery plug in an HC2 output socket short-circuits the battery when channel 2 turns on; an
+  HC2 load plug in a `pdm-4ch` J10 leaves the unit dead. Mark the battery plug (for example a red sleeve or label) and check it before power-up.
   Alternatively use a vented 3D-printed enclosure, also for flat mounting. Each board gives off about 9 W at full load: in a
   shared enclosure keep the air inside at or below 50 °C for the full rating (estimate until measured), or derate.
 - **Board input limits:** at most **16 A** continuous through J10 on `pdm-4ch` and **36 A** on `pdm-hc2`, whatever the
