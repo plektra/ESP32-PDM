@@ -1,6 +1,8 @@
 # pdm-hc2 status
 
-Updated: 2026-11-05 (decisions 97, 98)
+Updated: 2026-11-07 (decisions 99–102)
+
+**2026-11-06 (cost session, no schematic change):** on hold. Layout and order follow `pdm-4ch` bring-up, so shared-sheet fixes go in once (decision 102). Later orders: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 230 $ with connector sets (decisions 99, 101). Shared-sheet items T-0149 to T-0153 are queued and will change this board too. The pump start current test moved to the prototype list (decision 100). Moving to 1 oz was examined and not chosen: about 13 A per channel and a lower breaker setting (design-notes §4a).
 
 **Where it stands:** schematic complete (scripted), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066); netlist checked.
 TPS48110A-Q1 + 2 × BSC030N08NS5 per channel, values in `docs/design-notes.md` §4a. No PCB. Decisions 1–6, 8–15, 17, 18
@@ -168,12 +170,14 @@ R71/R72 go between D9 and U5 (D9 at J4).
   impedance), short J5.5 to GND (behind F4/R56), then behind F1 (D1/D2 node) and behind F3 (D10/FB2 node). Scope the
   current; afterwards inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Pass before installation
   (design-notes §8.3).
+- **Q-0042 / decision 100 – bilge pump start current (SEAFLO SFBP2-G3500-01), mandatory before a board runs a pump in
+  service:** procedure in `docs/pump-start-current-test.md`. The start must fall below ≈ 15 A (lower IOC tolerance)
+  within ≈ 120 ms, else the breaker trips the forced run. If it does not, back to the owner.
 
 ## Pre-order checklist (T-0065)
 
 - Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. Then buy the sets for the order: stock is thin on C6394053 / C6394029, C577772 / C577752. Hand-solder J10 with a powerful iron; check the joints.
-- **Measure the bilge pump start current (SEAFLO SFBP2-G3500-01) before ordering** (Q-0042): it must fall below
-  ≈ 15 A (lower IOC tolerance) within ≈ 120 ms, else the breaker trips the forced run. If it does not, back to the owner.
+- Bilge pump start current: moved to the prototype test list (decision 100).
 
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
   LMR51610YF (only if the scan asks for FPWM), plus the new C170101.

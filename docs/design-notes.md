@@ -222,6 +222,8 @@ Notes and open points:
     facts read (UNVERIFIED) – check it on the prototype, then note the result here and in the README.
   - *No PWM on HC2 outputs* until switching loss and SOA are measured on the bench (owner ruling Q-0001).
 
+**1 oz copper, examined and not chosen (2026-11-06).** `tools/heat_budget.py --channels 2 --part HC-2xBSC030 --rth-ja 25 --r-box 0.9 --r-path 0.004`, assuming 25 K/W and double the path resistance, both channels loaded, 40 °C: 13 A → Tj 87 °C, 14 A → 96 °C, 15 A → 106 °C, 16 A → 118 °C, 17.5 A → 139 °C, 19.7 A → 182 °C. The 50 µF hot-start margin of 1.03 at 90 °C (§4a.3) would hold at about 13 A; scaling k gives about 0.93 at 14 A and 0.75 at 15 A. The breaker would also need RIWRN about 75 k: 15.9 A nominal, about 13.8–17.9 A scaled from the 68 k spread (UNVERIFIED). `pdm-4ch` on 1 oz: 4 × 3.5 A → 97 °C. The first-order saving is only about 71 $ with U1 machine-placed (decision 100). PCB quotes for 5 pieces at 100 × 65 and 100 × 75 mm: €36.43 with 2 oz and €4.72 with 1 oz. Economic PCBA is offered only on 1 oz (decision 99).
+
 ### 4a.1 Controller pin filtering (T-0071: T-0056, T-0005, T-0008; 2026-11-03, auto)
 
 Source: TPS4811-Q1 SLUSEE5E, facts file `docs/part-facts/C17556513.md` (p. 7–10, 16, 37–40, Table 9-3, Fig. 9-18).
@@ -288,7 +290,7 @@ VSNS = 1190 / 68 k = 17.5 mV → **IOC ≈ 17.5 A** (nominal).
   `--p-other 1.9` 17.5 A → 113 °C, 18 A → 118 °C. All below the MOSFET Tj max 150 °C (Table 2), so the hardware
   breaker now closes the gap that the 25 A setting left (Tj 169 °C at 22 A).
 - Motor starts: a start current above IOC is passed only if it falls below IOC within ≈ 122 ms (lower end of tOC).
-  The SEAFLO SFBP2-G3500-01 start current is not published: **measure it before ordering** (HC2 pre-order checklist).
+  The SEAFLO SFBP2-G3500-01 start current is not published: **measure it on or after the first working prototype, before a board runs a pump in service** (decision 100, `docs/pump-start-current-test.md`).
   At the lower tolerance end (≈ 15.2 A) a pump drawing 12.5 A max still has ≈ 20 % margin in steady state.
 - Required outside the board (README, label): an external breaker ≤ 15–18 A per output, and a **firmware soft fuse**
   on IMON (for `/system firmware`: e.g. I²t against the 15 A rating, alarm and switch-off above it while the ESP32 runs).
