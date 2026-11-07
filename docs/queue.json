@@ -4743,7 +4743,7 @@
       "report": "docs/reviews/2026-11-04-fix-sync-T-0147.md"
     },
     {
-      "id": "T-0148",
+      "id": "T-0156",
       "role": "board-fixer",
       "scope": "sync",
       "state": "done",
@@ -4775,7 +4775,7 @@
       "note": null,
       "summary": "0 synced, 14 left for /system, merged 2d4d9b57",
       "interrupted": null,
-      "report": "docs/reviews/2026-11-07-fix-sync-T-0148.md"
+      "report": "docs/reviews/2026-11-07-fix-sync-T-0156.md"
     }
   ],
   "board_size_start": {
