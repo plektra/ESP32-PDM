@@ -8,23 +8,23 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (8) – two-way doors
+## Decided by agents (5) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
 - T-0153 · INFO · system · The buck input has capacitors but no LC filter position; SH-ESP32 uses an inductor with damping to limit conducted noise → Add a filter position between D2 and C1/U3: an inductor footprint bridged by a fitted 0 Ohm part or equivalent, DNP inductor, plus a damping option, so the decision 28 pre-compliance scan can decide. Check the current rating, PTC and R54 interaction and stability against the LMR51610 input requirements.
-- T-0152 · INFO · system · The serial console is unconnected, so a firmware crash that takes native USB down leaves no diagnostics → Bring TXD0, RXD0 and GND to unfitted test pads with no BOM line, near the layout test points of the EMC report.
-- T-0151 · INFO · system · Spare GPIOs are unconnected, so later design changes have nowhere to attach without a new PCB → Bring IO35, IO36, IO37 and IO42, with 3V3 and GND, to an unfitted pad or header footprint with no BOM line (IO13 goes to the status LED, S1). Do not use the strapping pins IO45 and IO46. Check each pin in the datasheet and against the pin map, and record the footprint for layout.
-- T-0150 · MINOR · system · The boards have no on-board LED, so a new board gives no sign of life without firmware and a panel (SH-ESP32 comparison in the cost report) → Add a 3.3 V power LED and a firmware status LED on spare IO13, both low current, using one LED line and a resistor value already on the BOM where it fits. Update the pin map (IO13). Optionally add CAN TX/RX LEDs only if a check against the CA-IS3050G and R70 shows they do not load the signals; otherwise leave them out and say so.
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (57)
+## Applied by agents (60)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0152 · system · The serial console is unconnected, so a firmware crash that takes native USB down leaves no diagnostics → T-0160 (`c01c3a6d`)
+- T-0151 · system · Spare GPIOs are unconnected, so later design changes have nowhere to attach without a new PCB → T-0160 (`c01c3a6d`)
+- T-0150 · system · The boards have no on-board LED, so a new board gives no sign of life without firmware and a panel (SH-ESP32 comparison in the cost report) → T-0160 (`c01c3a6d`)
 - T-0149 · system · Standard PCBA charges 1.53 USD per unique line, so near-duplicate values cost about 6 USD (4-ch) and 7.65 USD (HC2) per order → T-0159 (`698cbf87`)
 - T-0148 · pdm-4ch · Decision 103 makes the first pdm-4ch 16 A only, all BTT6050, but J10 is still the 65 A 10.16 mm set and Q30 the 0.75 mOhm IPT007N06N sized for 32 A → T-0158 (`232c3185`)
 - T-0129 · pdm-4ch · A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → T-0143 (`9cda47c8`)

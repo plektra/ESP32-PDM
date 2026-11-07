@@ -4831,10 +4831,12 @@
         "finding": "S1"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "ruling": "yes (owner, 2026-11-06)",
       "answered": "2026-11-06",
-      "package": "T-0160"
+      "package": "T-0160",
+      "fixed_by": "T-0160",
+      "merged": "c01c3a6d9bfa8c3aa8a548ce01a62f2c5edd4c1f"
     },
     {
       "id": "T-0151",
@@ -4861,10 +4863,12 @@
         "finding": "S2"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "ruling": "yes (owner, 2026-11-06)",
       "answered": "2026-11-06",
-      "package": "T-0160"
+      "package": "T-0160",
+      "fixed_by": "T-0160",
+      "merged": "c01c3a6d9bfa8c3aa8a548ce01a62f2c5edd4c1f"
     },
     {
       "id": "T-0152",
@@ -4890,10 +4894,12 @@
         "finding": "S3"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "ruling": "yes (owner, 2026-11-06)",
       "answered": "2026-11-06",
-      "package": "T-0160"
+      "package": "T-0160",
+      "fixed_by": "T-0160",
+      "merged": "c01c3a6d9bfa8c3aa8a548ce01a62f2c5edd4c1f"
     },
     {
       "id": "T-0153",
@@ -5133,7 +5139,7 @@
       "id": "T-0160",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-07",
       "title": "Sign-of-life LEDs, spare GPIO and serial console access",
       "brief": "Owner rulings, verbatim: T-0150 yes (owner, 2026-11-06); T-0151 yes (owner, 2026-11-06); T-0152 yes (owner, 2026-11-06). Approved fixes, verbatim. T-0150: Add a 3.3 V power LED and a firmware status LED on spare IO13, both low current, using one LED line and a resistor value already on the BOM where it fits. Update the pin map (IO13). Optionally add CAN TX/RX LEDs only if a check against the CA-IS3050G and R70 shows they do not load the signals; otherwise leave them out and say so. T-0151: Bring IO35, IO36, IO37 and IO42, with 3V3 and GND, to an unfitted pad or header footprint with no BOM line (IO13 goes to the status LED, S1). Do not use the strapping pins IO45 and IO46. Check each pin in the datasheet and against the pin map, and record the footprint for layout. T-0152: Bring TXD0, RXD0 and GND to unfitted test pads with no BOM line, near the layout test points of the EMC report.\n\nIn order, identical on both boards except where stated:\n1. Pin checks through tools/part_facts.py C2913206 (docs/part-facts/C2913206.md): IO13, IO35, IO36, IO37, IO42, TXD0, RXD0 on ESP32-S3-MINI-1-N8: boot state, strapping, in-package use.\n2. LEDs: one new fitted LED line, a basic 0603 LED if one fits, datasheet-checked. Power LED from +3V3 to GND. Status LED from IO13 to GND, off while IO13 is not driven. Series resistor from the BOM: 2.2 k C25879 is about 0.5 mA and is the first choice; check brightness against the LED's rated current and IO13's drive. Place the status LED in the controller part of the root sheet on both boards, and the power LED on power-usb or root, the same on both boards. No LED may depend on or load the switch-to-output path (invariant 1). Note in design-notes that the power LED draws continuously, also in the low-power modes of decision 13, and add its current to the controller power figure.\n3. Optional CAN LEDs: check U5 RXD drive and TXD input levels from the CA-IS3050G facts (C528763) and R70 10 k on IO17. Add them only if the check shows they do not load the signals, with no new line. Otherwise leave them out and say so. Do not spend a part-facts lookup beyond what this needs.\n4. One DNP footprint for T-0151 and T-0152 together, with no LCSC code and no BOM line, next free J reference on both boards, e.g. Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical if it is in the installed KiCad library. Pins: GND, TXD0, RXD0, IO35, IO36, IO37, IO42, 3V3, with 3V3 at the far end from GND.\n5. pdm-hc2 difference: IO35, IO36 and IO37 are FLT_T1, FLT_I2 and FLT_T2 there and are not spare. Under T-0151's own pin-map check, leave those three positions unconnected with no-connect flags on pdm-hc2, and do not touch the FLT nets. pdm-hc2 brings out only GND, TXD0, RXD0, IO42 and 3V3. Record this as an auto decision. Do not add IO33 (HC2) or IO34 (4-ch) to the footprint; mention them as a suggestion in the report only. Do not use IO45 or IO46.\n6. Remove the no-connect state from the pins now used. Update ARCHITECTURE pin map: IO13 becomes the status LED on both boards; split IO34-IO37 so that the 4-ch column shows IO34 spare and IO35-IO37 on the unfitted footprint while HC2 stays FLT; add IO42 and TXD0/RXD0 on the unfitted footprint. Do not edit the Invariants section.\n7. Layout list in both STATUS files: footprint position near the EMC report's test points (VS, 3V3, GND, buck SW, CANH/CANL; docs/reviews/2026-11-03-emc-system.md item 9), inside the board and not at an edge connector; on-board use only, with no cable leaving the board (invariant 9 for 3V3, invariant 4 because these lines are unprotected); LEDs placed visible with the board in its carrier. Update the T-0150/T-0151 line in 'For /system'. Add the firmware use of IO13 to the /system firmware list.\n\nChecks: ERC with no new errors or warnings, netlist before and after on both boards; tools/fix_check.py with refs U1 and all new parts; tools/report_check.py.\n\nStop and ask if: a listed pin turns out to be strapping or used inside the module, on the board that was to bring it out, and the item has no alternative; a request would make these lines reach an external connector or take 3V3 off the board (invariants 4 and 9).",
@@ -5145,7 +5151,37 @@
       "plan": "T-0157",
       "depends_on": [
         "T-0159"
-      ]
+      ],
+      "started": "2026-11-07T10:52:18",
+      "ran_model": "opus",
+      "session": "124dcd07-8517-4311-bb8d-43e7b322d86c",
+      "cost_usd": 4.1257,
+      "attempts": 1,
+      "refs": [
+        "D7",
+        "D8",
+        "J6",
+        "R59",
+        "R67",
+        "U1"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 5,
+          "dnp": 1,
+          "unique": 1
+        },
+        "pdm-hc2": {
+          "parts": 5,
+          "dnp": 1,
+          "unique": 1
+        }
+      },
+      "finished": "2026-11-07",
+      "note": "3 part-facts lookups (0.77 USD); 1 tool calls denied (Bash); log T-0160-20261107-105223.json; not merged: docs/part-facts/C2913206.md, docs/part-facts/C528763.md",
+      "summary": "3 fixed, 0 blocked, merged c01c3a6d; pdm-4ch +5 parts (+1 DNP), +1 unique, pdm-hc2 +5 parts (+1 DNP), +1 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-fix-shared-T-0160.md"
     },
     {
       "id": "T-0161",
@@ -5241,14 +5277,14 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 218,
-      "dnp": 15,
-      "unique": 59
+      "parts": 223,
+      "dnp": 16,
+      "unique": 60
     },
     "pdm-hc2": {
-      "parts": 232,
-      "dnp": 11,
-      "unique": 64
+      "parts": 237,
+      "dnp": 12,
+      "unique": 65
     }
   },
   "sync_seen": "8789271ca559"
