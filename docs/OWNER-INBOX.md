@@ -8,21 +8,21 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (5) – two-way doors
+## Decided by agents (4) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0176 · MINOR · pdm-hc2 · HC2 turn-off is not slewed (PD direct, R(PD) 0.69-1.34 Ω into about 10 nF): the output steps 28 V in tens of ns, about 500 V/µs, against 0.76 V/µs at turn-on, so a switch-off can click the VHF receiver. → No change now: add 'R116/R216 0 Ω to 10-22 Ω, watch the turn-off edge and VHF click' to the pre-compliance scan and recompute the short-circuit SOA before keeping any value.
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (66)
+## Applied by agents (67)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
 - T-0177 · system · The pdm-4ch battery plug fits an HC2 output socket and puts battery minus on OUT2, so turning channel 2 on is a dead short through Q21/Q22 (outside the calculated SOA from hot); the README still says all connectors are keyed. → T-0179 (`ac1c0481`)
+- T-0176 · pdm-hc2 · HC2 turn-off is not slewed (PD direct, R(PD) 0.69-1.34 Ω into about 10 nF): the output steps 28 V in tens of ns, about 500 V/µs, against 0.76 V/µs at turn-on, so a switch-off can click the VHF receiver. → T-0180 (`147034f0`)
 - T-0169 · pdm-4ch · J10 socket C577772 is out of stock at JLCPCB (stock 0, min order 18), so the battery input cannot be assembled as designed until restocked. → T-0171 (`9d4e6dd8`)
 - T-0168 · pdm-4ch · May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → T-0179 (`ac1c0481`)
 - T-0167 · pdm-4ch · T-0158 saves about 4.8 $ per board at 5 (Q30 2.7 $, J10 set 2.2 $) with no new extended part; confirmed → T-0171 (`9d4e6dd8`)
@@ -81,7 +81,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0014 · system · USB shield is tied to battery negative (shore PE loop via a laptop) and the ESD diode is listed with a 40 V clamp against 3.6 V ESP32 pins (unverified). → T-0065 (`e5fedd96`)
 - T-0013 · pdm-4ch · 4-ch outputs rely on the PROFET (body diode to VS, clamp, 4 kV HBM) and D30 at J10; this meets the intent of invariant 4 but not its wording, and D30 is far from J11. → T-0064 (`dbc672cd`)
 - T-0012 · system · Hardware switch path has tau 0.32 ms (no real debounce), turns the output off below about 8 V at the switch (12 V cranking), and a lamp across the switch contacts above about 1.4 mA turns it on. → T-0068 (`86fbfe03`)
-- T-0011 · system · Buck is the 1.1 MHz PFM variant; PFM drops into the 150-350 kHz band at light load, the datasheet's separate 0.1 uF at VIN is missing, C1 is only 50 V, and SW ringing can land in the tightly limited 156-165 MHz band. → T-0065 (`e5fedd96`)
 
 ## Deferred (25)
 
