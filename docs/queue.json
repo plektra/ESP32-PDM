@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 148,
+    "T": 149,
     "Q": 68
   },
   "tasks": [
@@ -4741,6 +4741,41 @@
       "summary": "4 synced, 15 left for /system, merged f6f643aa",
       "interrupted": null,
       "report": "docs/reviews/2026-11-04-fix-sync-T-0147.md"
+    },
+    {
+      "id": "T-0148",
+      "role": "board-fixer",
+      "scope": "sync",
+      "state": "done",
+      "created": "2026-11-07",
+      "depends_on": [],
+      "items": [],
+      "sweep": true,
+      "title": "Sync the \"For /system\" lists",
+      "brief": "Sweep the \"For /system\" items of both boards under the rules for scope `sync` in your instructions: do the bookkeeping ones, leave the rest word for word.\n\npdm-4ch STATUS.md, For /system:\n- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.\n- T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.\n- T-0069 RIS note below: C17975 is gone again since T-0107. The 40 mA fault case is now 0.8 W in two 0.25 W parts, still covered only by firmware.\n\n- T-0069: firmware requirements for DEN (design-notes §6.1) belong in the `/system firmware` list. T-0069 swapped one\n  unique extended part (−/+): C23228 (basic) is replaced by C17975 (extended, 1206 680 Ω); C25819 (basic) is added.\n- RIS at the 40 mA maximum fault current (≈ 1.1 W) is covered only by firmware; hardware cover would need a ≥ 1.5 W\n  resistor – owner decision if wanted.\n\n- T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended\n  parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).\n\n- DIN carrier and printed enclosure design: `/system mechanical`.\n\npdm-hc2 STATUS.md, For /system:\n- T-0072/T-0055: J10 is keyed (decision 98); the board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).\n- T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the\n  15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,\n  full scale ≈ 31.9 V) and reports \"OUT high while off\" as a float-driven run.\n- **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list). Pre-charge path (TPS48111-Q1) if the prototype shows real loads exceed about 50 µF (decision 94).\n- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.\n\n- T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended\n  parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).\n\n- **Bilge output fusing (T-0064 failure mode, needs README/installation rule):** D103/D203 sit outside the\n  back-to-back MOSFETs. If a TVS fails short, a float-switch run feeds the short through the PDM output wire. The\n  float circuit stays independent (invariant 8) only if the PDM leg has its own fuse, between J11 and the junction\n  with the float circuit, that opens before the float fuse. Add this to the README next to the external breaker of\n  decision 39; a competent person reviews the bilge wiring before installation.\n\n- DIN carrier and printed enclosure design: `/system mechanical`.",
+      "started": "2026-11-07T10:12:05",
+      "ran_model": "opus",
+      "session": "a5e33149-ee78-40c8-a0ce-6374bc77b68a",
+      "cost_usd": 0.6071,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "0 synced, 14 left for /system, merged 2d4d9b57",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-fix-sync-T-0148.md"
     }
   ],
   "board_size_start": {
@@ -4757,15 +4792,15 @@
   },
   "board_size": {
     "pdm-4ch": {
-      "parts": 216,
+      "parts": 218,
       "dnp": 15,
       "unique": 62
     },
     "pdm-hc2": {
-      "parts": 230,
+      "parts": 232,
       "dnp": 11,
       "unique": 68
     }
   },
-  "sync_seen": "b620be3bfaf7"
+  "sync_seen": "8789271ca559"
 }
