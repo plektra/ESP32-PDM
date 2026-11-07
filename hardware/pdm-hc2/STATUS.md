@@ -1,6 +1,8 @@
 # pdm-hc2 status
 
-Updated: 2026-11-07 (T-0179 C577772 buying rule, plug marking)
+Updated: 2026-11-07 (T-0180 turn-off edge scan item)
+
+**2026-11-07 (T-0180: T-0176, unattended, documents only):** the HC2 turn-off edge (PD direct, estimated about 500 V/µs) is on the prototype test list as a pre-compliance scan trial: R116/R216 0 Ω → 10–22 Ω by hand, scope and VHF check, SOA recompute before any value is kept (decision 25 stays). R116/R216 stay 0 Ω C17168; no schematic, footprint or BOM change. Design-notes §4a.3. Report: `docs/reviews/2026-11-07-fix-pdm-hc2-T-0180.md`.
 
 **2026-11-07 (T-0179: T-0166, T-0168, T-0177, owner rulings Q-0068/Q-0069, unattended, documents only):** J11 keeps C577772 + C577752 (no design change); buy C577772 from any seller, marking KF2EDGSRM-7.62 (flange header); no C577767, C7422678 or other socket; the order waits if none can be bought. The J11 output plug fits the pdm-4ch J10 battery socket and vice versa: mark the battery plug and check it before power-up (pre-order checklist, README). No schematic, footprint or BOM change. Report: `docs/reviews/2026-11-07-fix-shared-T-0179.md`.
 
@@ -122,7 +124,7 @@ point, prototype test). Turn-off and the fast trip unchanged (PD direct). Eq. 4 
 Tj 90 °C). README: HC2 load guidance and the 50 µF limit. T-0053: no change (R113/R213 68 k, decision 39); decision 19
 and the 21 A option are withdrawn. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those refs and U11/U12
 pin 14 (new net PD). Details: design-notes §4a.3, `docs/reviews/2026-11-03-fix-pdm-hc2-T-0106.md`. **For the PCB:**
-C114/C214 and R115/R215 at the MOSFET gates, C1 GND return to U11/U12 GND; R116/R216 close to U11/U12 pin 14.
+C114/C214 and R115/R215 at the MOSFET gates, C1 GND return to U11/U12 GND; R116/R216 close to U11/U12 pin 14, with pads a hand-swap can reach (T-0180 scan item).
 
 **Rules until bench-measured:** no PWM on HC2 outputs (Q-0001). Prototype tests: measure the real load input
 capacitance and inrush of every intended HC2 load, including grouped LED work lights (Q-0045), and confirm the ≈ 50 µF
@@ -182,6 +184,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
   (design-notes §8.3).
   T-0161: make the short behind F1 with **JP1 fitted** (a short at C1 also puts JP1 in the path) and, if L2 is ever fitted, repeat it.
 - **T-0161 / decision 28 – buck input filter (pre-compliance scan):** conducted emission on the battery input with JP1 fitted. If the buck's 1.1 MHz or PFM components need it: cut JP1, fit L2 (start 8.2 µH C96963) **together with** C22 2.2 µF + R73 10 Ω (3.3–4.7 Ω 1206 if the ring at 33–57 kHz is not damped enough). Then scope U3 VIN at light load (PFM) and during a 28.8 V hot-plug; the peak must stay ≤ 65 V (design-notes §8.3).
+- **E20 / T-0176 – HC2 turn-off edge (pre-compliance scan, T-0180):** the HC2 turn-off edge is not slewed (PD direct through R116/R216 0 Ω, R(PD) 0.69–1.34 Ω into about 10.5 nF, estimated about 500 V/µs against 0.5–0.77 V/µs at turn-on; estimate, not simulated). At the scan, hand-swap R116/R216 0 Ω → 10–22 Ω (0402), look at the turn-off edge on the scope and listen for a click on a VHF receiver at switch-off. Recompute the short-circuit SOA of design-notes §4a.3 (fast trip tSC 4–5 µs; the gate needs about 230 ns at 22 Ω) before any value is kept. Keeping a value amends decision 25 (PD direct) and goes to the owner.
 - **Q-0042 / decision 100 – bilge pump start current (SEAFLO SFBP2-G3500-01), mandatory before a board runs a pump in
   service:** procedure in `docs/pump-start-current-test.md`. The start must fall below ≈ 15 A (lower IOC tolerance)
   within ≈ 120 ms, else the breaker trips the forced run. If it does not, back to the owner.
