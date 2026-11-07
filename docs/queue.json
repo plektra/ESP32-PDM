@@ -5361,14 +5361,16 @@
         "finding": "C1"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0068",
       "why_big": [
         "found while fixing (T-0171): Neither named fallback passes: C577767 and C7422678 match the J10 pad grid, Ø1.5 mm holes and 30 A UL / 32 A IEC, but have no flange for the C577752 plug's ear screws and their drawings show no lock (docs/part-facts/C577767.md, C7422678.md). Using either needs a new plug or footprint, which amends decisions 98/104."
       ],
       "ruling": "Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.",
       "answered": "2026-11-07",
-      "package": "T-0179"
+      "package": "T-0179",
+      "fixed_by": "T-0179",
+      "merged": "ac1c04811b98c643cdddc0d45447960ce2d0a2a3"
     },
     {
       "id": "T-0167",
@@ -5419,7 +5421,7 @@
         "finding": "C3"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0069",
       "undone": "2026-11-07",
       "why_big": [
@@ -5427,7 +5429,9 @@
       ],
       "ruling": "no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.",
       "answered": "2026-11-07",
-      "package": "T-0179"
+      "package": "T-0179",
+      "fixed_by": "T-0179",
+      "merged": "ac1c04811b98c643cdddc0d45447960ce2d0a2a3"
     },
     {
       "id": "T-0169",
@@ -5642,8 +5646,10 @@
         "finding": "E21"
       },
       "door": "two-way",
-      "state": "parked",
-      "package": "T-0179"
+      "state": "done",
+      "package": "T-0179",
+      "fixed_by": "T-0179",
+      "merged": "ac1c04811b98c643cdddc0d45447960ce2d0a2a3"
     },
     {
       "id": "T-0178",
@@ -5673,7 +5679,7 @@
       "id": "T-0179",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-07",
       "title": "C577772 + C577752 set: buying rule and interchangeable-plug warning (documents only)",
       "brief": "Documents only. No schematic, footprint, BOM or ARCHITECTURE change. Files: hardware/pdm-4ch/STATUS.md, hardware/pdm-hc2/STATUS.md, README.md (design-notes §7 only if it states a fallback socket). Steps in order. (1) T-0166/T-0168, owner ruling Q-0068 verbatim: \"Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.\" Q-0069 verbatim: \"no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.\" In pdm-4ch STATUS (the decision 98 / T-0171 pre-order bullet, about line 194) replace the T-0171 wording that a socket change 'goes to the owner' with the ruling: any seller, check that the marking reads KF2EDGSRM-7.62 (flange header), no C577767/C7422678 or other socket, the order waits if none can be bought. Keep the stock figures that are already there (0 / 63 on 2026-11-07, minimum order 18). Add the same rule to the pdm-hc2 STATUS pre-order bullet for J11 C577772 + C577752 (about line 189). This closes the T-0171 'for the sync sweep' note in pdm-4ch STATUS (about line 226); mark it done. (2) T-0177: README Mounting bullet (line 65, 'All connectors are keyed plugs'). Keep the sentence, but say that keying holds within one board, and add one sentence: the pdm-4ch battery plug (J10) and the pdm-hc2 output plug (J11) are the same 7.62 mm set (C577772 + C577752) and fit each other. A battery plug in an HC2 output socket short-circuits the battery when channel 2 turns on. An HC2 load plug in a pdm-4ch J10 leaves the unit dead. Mark the battery plug (for example a red sleeve or label) and check it before power-up. Add a matching line to both STATUS files next to the decision 98 sample check (mark the battery plug; silkscreen 'BATTERY' + polarity at J10 and 'OUT1 OUT2' at J11 as layout notes, which the EMC report's layout rule 2 already gives). No part change. (3) Run python3 tools/fix_check.py with the shared scope and empty refs. The netlists must not change on either board. Stop and ask (one-way door) if a step would change a socket, plug, footprint or keying (that amends decisions 98/104), would choose a physical fix for the interchangeable plugs, or would edit the Invariants section. In the report, say that a competent person should check the plug marking before installation on a boat with both boards (CLAUDE.md item 7).",
@@ -5683,7 +5689,30 @@
         "T-0177"
       ],
       "plan": "T-0178",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-07T13:57:35",
+      "ran_model": "opus",
+      "session": "2b3c3351-1b41-4e58-9d22-65d812b0c804",
+      "cost_usd": 0.437,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-07",
+      "note": null,
+      "summary": "3 fixed, 0 blocked, merged ac1c0481; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-07-fix-shared-T-0179.md"
     },
     {
       "id": "T-0180",
