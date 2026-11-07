@@ -1,6 +1,8 @@
 # pdm-4ch status
 
-Updated: 2026-11-07 (decisions 99–105, T-0158, T-0159)
+Updated: 2026-11-07 (T-0160 status LEDs and service pads)
+
+**2026-11-07 (T-0160: T-0150, T-0151, T-0152, owner rulings 2026-11-06, unattended, shared – controller part of the root sheet, same on both boards except J6 pins 4–6):** sign-of-life LEDs and service pads. **D8 + R67** power LED +3V3 → GND; **D7 + R59** status LED IO13 → GND (high = on, off while IO13 is undriven). LEDs KT-0603R red 0603 C2286 (basic, the one new line), resistors 2.2 k C25879 (on the BOM): ≈ 0.7 mA each. D8 draws continuously, also in Eco/Sleep (decision 13), ≈ 2.3 mW from 3.3 V. **J6** unfitted `PinHeader_1x08_P2.54mm_Vertical`, DNP, no BOM line: 1 GND, 2 TXD0, 3 RXD0, 4 IO35, 5 IO36, 6 IO37, 7 IO42, 8 +3V3. Pin checks: none strapping, none used in the N8 module. CAN TX/RX LEDs left out (an LED to GND on TXD sits at the 2 V VIH limit with R70; the active-low version would light too briefly to see). Pin map (IO13, IO34–IO37, IO42, TXD0/RXD0) and the controller power row updated in ARCHITECTURE. ERC 0 errors, 5 warnings (unchanged); netlist differs only in U1 pins 17, 31–33, 38–40 and the new parts. 223 parts (+5, J6 DNP), 60 unique (+1). Design-notes §8.7. Report: `docs/reviews/2026-11-07-fix-shared-T-0160.md`.
 
 **2026-11-07 (T-0159: T-0149, owner ruling, decisions 99 and 105, unattended, shared – same on both boards):** near-duplicate BOM lines merged; values and nets unchanged. C2 → C307331 0402, C12 → C15849 0603, R9 → C36871 0402, R10 → C25768 0402. **C13 stays on C28323:** C15849 keeps only 0.10 µF at 29 V and 0.31 µF at 12 V (Samsung's simulation), below the L78M05's 0.33 µF, while C28323 keeps 0.42 µF worst case at 29 V. C14663, C52923, C31850, C23231 are gone; C36871 is new on this board because R9 is on the shared sheet, so net 3 lines fewer: 59 unique (−3), 4.59 USD per order. **Layout:** C2, R9, R10 are 0402, C12 is 0603 (was 0402), C13 stays 0805. ERC 0 errors, 5 warnings (unchanged). 3.3 V setpoint tolerance unchanged (±1 %, ±100 ppm/°C). Design-notes §8.3. Report: `docs/reviews/2026-11-07-fix-shared-T-0159.md`.
 
@@ -153,6 +155,7 @@ a competent person reviews F1–F4 and R54–R56 before installation.
      figures as an analogue; AGM gives no copper area). U30 next to Q30 with short SOURCE/GATE traces. C32 at U30, away from Q30's tab. The surge loop
      switches → VS → Q30 → D30 short and wide.
    - T-0143 (design-notes §8.6): D31 directly across the Q30 drain tab and source pins, short and wide.
+   - T-0160 (design-notes §8.7): **J6** (unfitted service pads) inside the board near the EMC test points (VS, 3V3, GND, buck SW, CANH/CANL; `docs/reviews/2026-11-03-emc-system.md` item 9), not at an edge connector, short traces from U1, outside the antenna keep-out, pin 1 (GND) marked. On-board use only: no cable leaves the board (invariant 9 for 3V3; invariant 4, the lines are unprotected). **D7/D8** where they are visible with the board in its carrier.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
    board edges and screws.
@@ -204,10 +207,13 @@ R71/R72 go between D9 and U5 (D9 at J4).
   2016 on 2026-11-07, C5219210 2923 on 2026-11-03).
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
+- T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
 
 ## For /system
 
-- Decisions 103, 104: done in T-0158 (2026-11-07): J10 is C577772 + C577752 and Q30 is AGM601LL, with a 16 A input and ≥ 2 cm² tab copper; decision 98's sample check names the new set. If the planner defers T-0150 or T-0151 to `/system`, handle them before layout, since they change the pin map.
+- Decisions 103, 104: done in T-0158 (2026-11-07): J10 is C577772 + C577752 and Q30 is AGM601LL, with a 16 A input and ≥ 2 cm² tab copper; decision 98's sample check names the new set.
+- T-0160 done (T-0150–T-0152): the pin map now has IO13 = status LED and IO35–IO37, IO42, TXD0/RXD0 on unfitted J6. For the sync sweep: the ARCHITECTURE root (controller) row does not yet name D7/R59, D8/R67 or J6.
+- T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.
 - T-0158, ARCHITECTURE rows a `pdm-4ch` package may not edit, for the sync sweep: the Boards row (BTT6010 option, not on this version, decision 103); the root row (Q30 AGM601LL C5464765); the Mechanics J10 row (pdm-4ch C577772 + C577752); the BTT6010 budget row; the supply path row (Q30 figures, 16 A limit instead of 32 A).
 - T-0158, a choice for the owner: the pdm-4ch battery plug now physically fits a pdm-hc2 J11 output socket, and the HC2 output plug fits a pdm-4ch J10, because both are the 7.62 mm set. Decision 98's keying therefore holds only within one board, not across boards in one installation. What a mis-plug does has not been analysed. Options: accept it and label the plugs; or change the set on one board at the next pdm-hc2 revision. pdm-hc2 is not changed, and its layout follows pdm-4ch bring-up (decision 102), so this does not hold up the first order.
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
