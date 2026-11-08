@@ -6732,7 +6732,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "2.2uF/50V"
+		(property "Value" "2.2uF/100V"
 			(at 234.95 78.7399 0)
 			(effects
 				(font
@@ -6741,7 +6741,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric"
 			(at 232.1052 81.28 0)
 			(effects
 				(font
@@ -6768,7 +6768,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C377773"
+		(property "LCSC" "C170101"
 			(at 231.14 77.47 0)
 			(effects
 				(font

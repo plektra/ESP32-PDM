@@ -191,7 +191,7 @@ Per channel (source: TI TPS4811-Q1 datasheet SLUSEE5E):
 | RISCP + 1 nF | 4.7 kΩ | fast short-circuit ≈ 80 A: ISC × RSNS / 15.6 µA − 464 |
 | CTMR | 10 µF | overcurrent time 82 µA·t/1.2 → ≈ 146 ms; auto-retry 22.7·10⁶ × CTMR ≈ 3.8 min |
 | RIMON | 12 kΩ | gain 0.9 × RIMON / RSET = 108 → 25 A = 2.7 V; 10 kΩ + BAT54S clamp + 1 nF to the ADC |
-| UVLO/OV divider | 1 MΩ / 100 kΩ / 39 kΩ | UVLO ≈ 9.7 V, OV cut-off ≈ 34.5 V |
+| UVLO/OV divider | 1 MΩ (R105/R205, 1206 C17927 since T-0191) / 100 kΩ / 39 kΩ | UVLO ≈ 9.7 V, OV cut-off ≈ 34.5 V |
 | CBST | 1 µF / 50 V | > Qg(total) / 1 V = 152 nF |
 | R1 (RG_PU) | 10 kΩ (C25744) | PU → gate, gate slew (§4a.3, T-0106) |
 | C1 + R2 | 1 nF/2 kV 1206 (C9196) + 10 Ω (C25077) | gate → GND, sets the output ramp ≈ 0.7 V/µs (§4a.3) |
@@ -1505,6 +1505,24 @@ from U1 pins 31–33 and 38–40, outside the antenna keep-out.
 footprint `LED-SMD_L1.6-W0.8-R-RD` of C2286: pad 2 = K at −0.75 mm, pad 1 = A at +0.75 mm, pads 0.8 × 0.8 mm. So the cathode is on
 the same side in both, only the pad numbers differ, and the electrical connection is by name. The maker's mark (green) is at the
 cathode. Check the CPL rotation of D7/D8 at the first order.
+
+### 8.8 C3 on +3V3: C377773 → C170101 (T-0190: T-0187, cost lever L5, 2026-11-08, auto)
+
+C3 (`power-usb`, both boards, +3V3 to GND at the L1 output) is now **2.2 µF/100 V X7R 1206 CL31B225KCHSNNE C170101**
+instead of 2.2 µF/50 V 0805 C377773. C170101 is already on both BOMs (C1, C22, C30, channel caps), so each board loses one
+unique part (cost review `docs/reviews/2026-11-07-cost-system-2.md`, L5: about 1.53 USD loading fee per order, +0.08 USD
+per part). Live stock 2026-11-08: 121 066.
+
+- Part (`docs/part-facts/C170101.md`, Samsung MLCC catalog p. 45 row 48, p. 4 codes): 2.2 µF ±10 %, 100 V, X7R, 1206
+  (3.2 × 1.6 mm), footprint `Capacitor_SMD:C_1206_3216Metric`.
+- U3 output-capacitor guidance (`docs/part-facts/C22427220.md`, TI SLUSEY1B §8.2.2.5, Table 8-1): typical C_OUT at
+  3.3 V / 1.1 MHz is 10 µF ceramic; no minimum other than ripple/load-step, **no maximum and no ESR limit** (internal
+  compensation; ESR only sets ripple). C3 keeps the same nominal value and dielectric class (ceramic), so the loop is
+  unchanged; the X7R 100 V 1206 loses less capacitance at 3.3 V bias than the X5R 50 V 0805 (no curve read, qualitative),
+  so effective C_OUT rises slightly. C8 (22 µF) stays the main output capacitor.
+- Footprint 0805 → 1206: the layout must give C3 the larger land (no PCB placed yet).
+- Checks: ERC 0 errors/5 warnings on both boards (unchanged); netlist: only C3 Value/Footprint/LCSC differ, nets unchanged;
+  `fix_check.py`: pdm-4ch 59 unique (−1), pdm-hc2 64 unique (−1). No output changed, no heat-budget run.
 
 ## 9. Open items
 
