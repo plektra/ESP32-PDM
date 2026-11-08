@@ -192,7 +192,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Prototype test list
 
-- **Decision 124 – connector fit (moved from decision 98):** on the first assembled boards check that the J11, J5 and J4 plugs cannot go in reversed; whether the J4 plug enters the J5 socket (labels are on the silkscreen either way); the height across the rail (part height + pin length + 1 mm ≤ 36 mm, J10 expected 34.8 mm); the J10 wire-entry side and M4 screw access at 36 mm pitch; reach of mated plugs and cable bend past the edge. Findings go into the next revision.
+- **Decision 124 – connector fit (moved from decision 98):** on the first assembled boards check that the J11, J5 and J4 plugs cannot go in reversed; whether the J4 plug enters the J5 socket (labels are on the silkscreen either way); the height across the rail (part height + pin length + 1 mm; J10 expected 34.8 mm; recorded, not a pass/fail limit); the J10 wire-entry side and M4 screw access at 36 mm pitch; reach of mated plugs and cable bend past the edge. Findings go into the next revision.
 - **T-0118 / decision 81 – PTC hard short (mandatory before installation):** from a 30 V battery-like supply (low source
   impedance), short J5.5 to GND (behind F4/R56), then behind F1 (D1/D2 node) and behind F3 (D10/FB2 node). Scope the
   current; afterwards inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Pass before installation
@@ -244,4 +244,5 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - RIS at the 40 mA maximum fault current: 0.8 W in two 0.25 W parts since T-0107, covered only by firmware; hardware
   cover needs a resistor of at least the fault power – owner decision if wanted.
 
+- Decision 124 (`/system mechanical`): the rail pitch is a soft goal, not a constraint. ARCHITECTURE Mechanics and decisions 97/123 still say "about 36 mm"; reword it as a target. Decision 123's arms-instead-of-plate choice for the long DIN mount was made for the 36 mm and may be revisited.
 - Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).
