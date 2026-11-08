@@ -1506,6 +1506,24 @@ footprint `LED-SMD_L1.6-W0.8-R-RD` of C2286: pad 2 = K at −0.75 mm, pad 1 = A 
 the same side in both, only the pad numbers differ, and the electrical connection is by name. The maker's mark (green) is at the
 cathode. Check the CPL rotation of D7/D8 at the first order.
 
+### 8.8 C3 on +3V3: C377773 → C170101 (T-0190: T-0187, cost lever L5, 2026-11-08, auto)
+
+C3 (`power-usb`, both boards, +3V3 to GND at the L1 output) is now **2.2 µF/100 V X7R 1206 CL31B225KCHSNNE C170101**
+instead of 2.2 µF/50 V 0805 C377773. C170101 is already on both BOMs (C1, C22, C30, channel caps), so each board loses one
+unique part (cost review `docs/reviews/2026-11-07-cost-system-2.md`, L5: about 1.53 USD loading fee per order, +0.08 USD
+per part). Live stock 2026-11-08: 121 066.
+
+- Part (`docs/part-facts/C170101.md`, Samsung MLCC catalog p. 45 row 48, p. 4 codes): 2.2 µF ±10 %, 100 V, X7R, 1206
+  (3.2 × 1.6 mm), footprint `Capacitor_SMD:C_1206_3216Metric`.
+- U3 output-capacitor guidance (`docs/part-facts/C22427220.md`, TI SLUSEY1B §8.2.2.5, Table 8-1): typical C_OUT at
+  3.3 V / 1.1 MHz is 10 µF ceramic; no minimum other than ripple/load-step, **no maximum and no ESR limit** (internal
+  compensation; ESR only sets ripple). C3 keeps the same nominal value and dielectric class (ceramic), so the loop is
+  unchanged; the X7R 100 V 1206 loses less capacitance at 3.3 V bias than the X5R 50 V 0805 (no curve read, qualitative),
+  so effective C_OUT rises slightly. C8 (22 µF) stays the main output capacitor.
+- Footprint 0805 → 1206: the layout must give C3 the larger land (no PCB placed yet).
+- Checks: ERC 0 errors/5 warnings on both boards (unchanged); netlist: only C3 Value/Footprint/LCSC differ, nets unchanged;
+  `fix_check.py`: pdm-4ch 59 unique (−1), pdm-hc2 64 unique (−1). No output changed, no heat-budget run.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
