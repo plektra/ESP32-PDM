@@ -3,6 +3,12 @@
 How to run the unattended agents day to day. Background and rules: `docs/AUTONOMY.md`, `docs/WORKING-WITH-CLAUDE.md`.
 Run every command from the repo folder.
 
+## Lay out a board
+
+`python3 tools/orchestrate.py pcb pdm-4ch`, then start a run as below. Six layout stages run one after another, each
+checked (DRC, schematic parity, outline, keep-outs) and landed on `main`; an EMC and a validator review follow. Open
+`hardware/pdm-4ch/ESP32-PDM-4CH.kicad_pcb` in KiCad to look, but do not save it while a run is going.
+
 ## See what is planned and done
 
 - **What to do next:** `python3 tools/orchestrate.py next` – your next steps, most urgent first, each with the command

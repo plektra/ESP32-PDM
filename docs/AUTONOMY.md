@@ -176,3 +176,24 @@ it small and short:
 One board-fixer per board at a time (a `shared` package holds both). `run --no-fixes` runs reviews only. Each
 task lands on `main` right after it is committed (`tools/land.py`, decision 129): landing is a two-way door (a revert
 or `undo` takes it back). The owner reviews `main` before any order – ordering is a one-way door.
+
+## PCB layout (decision 130)
+
+`python3 tools/orchestrate.py pcb <board>` queues the layout of one board as six `pcb-fixer` stages, each after the
+previous: connectors and holes; power path and output channels; logic half and all remaining parts; power copper;
+routing; silkscreen and a clean DRC. Then an EMC review (focus layout) and a deep validator review (focus pcb) run.
+The planner may also send a layout-only item to a `pcb-fixer` package (`"role": "pcb-fixer"`).
+
+A pcb-fixer edits only the board file with `tools/kpcb.py` (KiCad 10's own Python), plus `STATUS.md` and
+design-notes. **Gates** (the same as `tools/fix_check.py --role pcb-fixer`), checked by the orchestrator:
+- the schematic is unchanged (ERC and netlist as before, no refs may differ);
+- schematic parity 0 (`kicad-cli pcb drc --schematic-parity`; a symbol without a footprint, such as FL30, is not
+  counted);
+- 0 DRC errors on the board (parts still parked beside it are not judged yet);
+- outline and hole keep-outs unchanged (decisions 123, 128); no SMT part on the bottom (decision 122); no part in a
+  hole keep-out;
+- from the third stage on no part may stay off the board; in the routing and silkscreen stages nothing may stay
+  unconnected.
+Placement, copper and routing are two-way doors (a revert takes them back). A bottom-side part, an outline, hole or
+connector-edge change, or anything that weakens an invariant is a one-way door for the owner. Ordering boards stays
+the owner's.

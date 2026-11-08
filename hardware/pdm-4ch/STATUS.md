@@ -2,6 +2,8 @@
 
 Updated: 2026-11-08 (/board pcb: decision 127)
 
+**2026-11-08 (decision 130):** footprints imported from the schematic with `tools/kpcb.py sync` (226 parts parked beside the board, FL30 has no footprint; schematic parity 0, DRC 0 errors); the hole keep-outs now allow the hole itself (pads and footprints allowed, no copper; `kpcb drc` reports any other part's courtyard inside them). Layout stages T-0197–T-0202 are queued for the pcb-fixer agent, then an EMC (layout) and a validator (pcb) review.
+
 **2026-11-08 (/board pdm-4ch pcb, documents only):** decision 127: no connector sample check before layout or order; the decision 98 checks move to the prototype test list, and the layout covers the risks (footprints checked against drawing and JLCPCB footprint in software, J10 clear zone on both sides, J4/J5 labelled and apart, edge margin). PCB can start. No schematic change.
 
 **2026-11-08 (/board pdm-4ch pcb):** decision 128: floorplan 100 × 65 mm, power edge J10/J11, signal edge J5/J4, rail on a long edge, antenna at the front signal-end corner, H1–H4 4 mm from both edges (rail-side spacing 92 mm). New skeleton `ESP32-PDM-4CH.kicad_pcb`: Edge.Cuts outline, 2-layer 2 oz stackup (HASL lead-free), four Ø 8 mm keep-out rule areas at the hole centres, floorplan notes on Cmts.User; no footprints yet. `kicad-cli pcb drc`: 0 violations. Footprint check (decision 127, item 1) against the maker drawings: J11 `Kefa_KF2EDGRC-5.08-4P` (drawing KF2EDGRC-5.08 rev. A 2021-03-13: pitch 5.08, hole Ø1.60 +0.10/0, pin 1.0 mm, row 1.30 mm from the rear edge, body (P×5.08+1.60) × 8.40 × 12.20 mm, pin 4.1 mm) and J5/J4 `Kangnex_WJ15EDGRC-3.81-10P/-04P` (drawing WJ15EDGRC-3.81-XXP rev. A 2024-03-10: pitch 3.81, hole Ø1.40, pin 0.80 mm, row 1.20 mm from the rear edge, body (N×3.81+0.88) × 7.25 × 9.20 mm, pin 3.5 mm): **pass, unchanged**. The EasyEDA footprints have the same pitch and pad 1 but other holes (C441238 1.8, C26895 1.5, C7245 1.26 mm); ours follow the drawings.
@@ -162,7 +164,8 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°).
 4. Remaining part checks from the BOM audit: PESD2CAN
    pin 3 = common; Molex 39301080 = 5569-08A2 (if still used).
-5. PCB layout (no sample check first, decision 127): 2 oz, VS copper on both
+5. PCB layout is done by the orchestrator (decision 130): `python3 tools/orchestrate.py run` works through the
+   queued stages T-0197–T-0202 (footprints already imported: 226 parked beside the board, parity 0). Rules: 2 oz, VS copper on both
    layers around the cooling tabs, switches spread out and away from the ESP32; TH1 next to the hottest switch;
    J5 TVSs at the connector.
 6. PCB rules from T-0064 (design-notes §8.1/§8.2):

@@ -6,7 +6,7 @@ Project-level handoff: which board is where and what to do next. Updated: 2026-1
 
 | Board | Schematic | PCB | Status file |
 |---|---|---|---|
-| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | floorplan (decision 128): outline, holes, keep-outs; no footprints yet | `hardware/pdm-4ch/STATUS.md` |
+| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | footprints imported; layout queued for the orchestrator (T-0197–T-0202, decision 130) | `hardware/pdm-4ch/STATUS.md` |
 | `pdm-hc2` (2 × TPS48110A-Q1 + MOSFETs) | done, ERC clean except library notices | not started | `hardware/pdm-hc2/STATUS.md` |
 
 Firmware: not started.

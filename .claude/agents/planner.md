@@ -18,7 +18,10 @@ reports in `docs/reviews/` that the items come from.
    (`power-usb`, `can`, `analog_sw`, the controller part of the root sheet), `lib/` or `docs/ARCHITECTURE.md`
    changes – a shared package changes both boards identically – or `sync` when the item changes no design, only
    `docs/ARCHITECTURE.md` (not its invariants), `docs/design-notes.md`, the boards' `STATUS.md` or the inputs of
-   `tools/heat_budget.py` to match what is already decided (decision 71). Put part-fact checks that decide a swap in the same
+   `tools/heat_budget.py` to match what is already decided (decision 71). An item that only changes a board's PCB
+   layout (placement, copper, routing, silkscreen – not the schematic) goes in a package with `"role": "pcb-fixer"`
+   and `scope` `pdm-4ch` or `pdm-hc2` (decision 130); an item that needs a schematic change first gets a normal
+   package, and the layout package comes `after` it. Put part-fact checks that decide a swap in the same
    package as the swap. Order with `after` when one package needs another's result. Write a `brief`: what to change,
    in order, the owner's ruling verbatim where there is one, the checks to run, and what would make it a one-way door
    (stop and ask) – for example a part check that fails.

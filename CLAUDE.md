@@ -53,12 +53,14 @@ directly, not on a branch or PR. Before starting work, sync: `git fetch origin &
 ```
 CLAUDE.md, README.md, LICENSE
 .claude/commands/   /board /system /handoff /progress /validate /cost /emc /inbox
-.claude/agents/     architect, validator, cost-controller, emc-reviewer, part-facts, stock-check, planner, board-fixer
+.claude/agents/     architect, validator, cost-controller, emc-reviewer, part-facts, stock-check, planner, board-fixer,
+                    pcb-fixer
 docs/               CONTINUE-FROM-HERE.md, ARCHITECTURE.md, decisions.md, design-notes.md, WORKING-WITH-CLAUDE.md,
                     AUTONOMY.md, RUNNING-AGENTS.md, ROADMAP.md (generated), queue.json, OWNER-INBOX.md
   reviews/          validator, cost and EMC reports
 hardware/pdm-4ch/   KiCad project + STATUS.md
 hardware/pdm-hc2/   KiCad project + STATUS.md
 lib/                shared symbols (ESP32-PDM.kicad_sym) and footprints (ESP32-PDM.pretty)
-tools/              heat_budget.py, ksch.py (schematic editing), kicad_netlist.py, orchestrate.py, land.py
+tools/              heat_budget.py, ksch.py (schematic editing), kpcb.py (PCB editing), kicad_netlist.py,
+                    orchestrate.py, land.py
 ```
