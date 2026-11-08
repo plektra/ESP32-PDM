@@ -1,12 +1,12 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-08 (decisions 124, 125).
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-08 (decisions 124–129).
 
 ## Boards
 
 | Board | Schematic | PCB | Status file |
 |---|---|---|---|
-| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | floorplan (decision 125): outline, holes, keep-outs; no footprints yet | `hardware/pdm-4ch/STATUS.md` |
+| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | floorplan (decision 128): outline, holes, keep-outs; no footprints yet | `hardware/pdm-4ch/STATUS.md` |
 | `pdm-hc2` (2 × TPS48110A-Q1 + MOSFETs) | done, ERC clean except library notices | not started | `hardware/pdm-hc2/STATUS.md` |
 
 Firmware: not started.
@@ -15,7 +15,7 @@ Firmware: not started.
 
 Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run on 2026-11-07 (`docs/reviews/2026-11-07-cost-system-2.md`). Step 4 is in progress: mounting and connectors are decided (decisions 97, 98, 121).
 
-**First order (decisions 99–103):** `pdm-4ch` only, as the cheapest MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 204 $ with connector sets (about 220 $ if the 16.42 $ fixture fee applies), 16 A only; all SMT parts on one side (decision 122). `pdm-hc2` follows after bring-up. Queued: T-0187 (cost lever L5, C3 → C170101 on `power-usb`) and T-0188 (L6, HC2 R105/R205 → C17927); `python3 tools/orchestrate.py run` applies them.
+**First order (decisions 99–103):** `pdm-4ch` only, as the cheapest MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 204 $ with connector sets (about 220 $ if the 16.42 $ fixture fee applies), 16 A only; all SMT parts on one side (decision 122). `pdm-hc2` follows after bring-up. Applied by the orchestrator on 2026-11-08 (decisions 124, 125): C3 → C170101 on `power-usb` (T-0190) and HC2 R105/R205 → C17927 (T-0191).
 
 1. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.
@@ -23,7 +23,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
    and propose levers.
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
-4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 124), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout.
+4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout.
 5. **`/board pdm-4ch pcb`**, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102).
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
@@ -33,7 +33,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 ## Waiting on the owner
 
 - No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
-- Connector checks of decision 98 on the first assembled boards, not before the order (decision 124). Re-check connector stock before ordering.
+- Connector checks of decision 98 on the first assembled boards, not before the order (decision 127). Re-check connector stock before ordering.
 - Measurements: bilge pump locations and feeds. Pump start current on or after the first working prototype, before a board runs a pump in service (decision 100, `docs/pump-start-current-test.md`).
 - Check whether the Standard PCBA fixture fee (16.42 $ per order) applies when quoting.
 

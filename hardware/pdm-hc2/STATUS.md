@@ -234,7 +234,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
-- Decision 125 (from the pdm-4ch floorplan, 2026-11-08): pdm-hc2 is **100 × 75 mm**, H1–H4 hole centres 4 mm from both edges, rail-side hole spacing 92 mm (the same as pdm-4ch, decision 123), 67 mm across. Lay out to these figures.
+- Decision 128 (from the pdm-4ch floorplan, 2026-11-08): pdm-hc2 is **100 × 75 mm**, H1–H4 hole centres 4 mm from both edges, rail-side hole spacing 92 mm (the same as pdm-4ch, decision 123), 67 mm across. Lay out to these figures.
 - T-0072/T-0055: J10 is keyed (decision 98); the board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).
 - T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the
   15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,

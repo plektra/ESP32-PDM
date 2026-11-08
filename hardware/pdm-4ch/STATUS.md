@@ -1,10 +1,10 @@
 # pdm-4ch status
 
-Updated: 2026-11-08 (/board pcb: decision 124)
+Updated: 2026-11-08 (/board pcb: decision 127)
 
-**2026-11-08 (/board pdm-4ch pcb, documents only):** decision 124: no connector sample check before layout or order; the decision 98 checks move to the prototype test list, and the layout covers the risks (footprints checked against drawing and JLCPCB footprint in software, J10 clear zone on both sides, J4/J5 labelled and apart, edge margin). PCB can start. No schematic change.
+**2026-11-08 (/board pdm-4ch pcb, documents only):** decision 127: no connector sample check before layout or order; the decision 98 checks move to the prototype test list, and the layout covers the risks (footprints checked against drawing and JLCPCB footprint in software, J10 clear zone on both sides, J4/J5 labelled and apart, edge margin). PCB can start. No schematic change.
 
-**2026-11-08 (/board pdm-4ch pcb):** decision 125: floorplan 100 × 65 mm, power edge J10/J11, signal edge J5/J4, rail on a long edge, antenna at the front signal-end corner, H1–H4 4 mm from both edges (rail-side spacing 92 mm). New skeleton `ESP32-PDM-4CH.kicad_pcb`: Edge.Cuts outline, 2-layer 2 oz stackup (HASL lead-free), four Ø 8 mm keep-out rule areas at the hole centres, floorplan notes on Cmts.User; no footprints yet. `kicad-cli pcb drc`: 0 violations. Footprint check (decision 124, item 1) against the maker drawings: J11 `Kefa_KF2EDGRC-5.08-4P` (drawing KF2EDGRC-5.08 rev. A 2021-03-13: pitch 5.08, hole Ø1.60 +0.10/0, pin 1.0 mm, row 1.30 mm from the rear edge, body (P×5.08+1.60) × 8.40 × 12.20 mm, pin 4.1 mm) and J5/J4 `Kangnex_WJ15EDGRC-3.81-10P/-04P` (drawing WJ15EDGRC-3.81-XXP rev. A 2024-03-10: pitch 3.81, hole Ø1.40, pin 0.80 mm, row 1.20 mm from the rear edge, body (N×3.81+0.88) × 7.25 × 9.20 mm, pin 3.5 mm): **pass, unchanged**. The EasyEDA footprints have the same pitch and pad 1 but other holes (C441238 1.8, C26895 1.5, C7245 1.26 mm); ours follow the drawings.
+**2026-11-08 (/board pdm-4ch pcb):** decision 128: floorplan 100 × 65 mm, power edge J10/J11, signal edge J5/J4, rail on a long edge, antenna at the front signal-end corner, H1–H4 4 mm from both edges (rail-side spacing 92 mm). New skeleton `ESP32-PDM-4CH.kicad_pcb`: Edge.Cuts outline, 2-layer 2 oz stackup (HASL lead-free), four Ø 8 mm keep-out rule areas at the hole centres, floorplan notes on Cmts.User; no footprints yet. `kicad-cli pcb drc`: 0 violations. Footprint check (decision 127, item 1) against the maker drawings: J11 `Kefa_KF2EDGRC-5.08-4P` (drawing KF2EDGRC-5.08 rev. A 2021-03-13: pitch 5.08, hole Ø1.60 +0.10/0, pin 1.0 mm, row 1.30 mm from the rear edge, body (P×5.08+1.60) × 8.40 × 12.20 mm, pin 4.1 mm) and J5/J4 `Kangnex_WJ15EDGRC-3.81-10P/-04P` (drawing WJ15EDGRC-3.81-XXP rev. A 2024-03-10: pitch 3.81, hole Ø1.40, pin 0.80 mm, row 1.20 mm from the rear edge, body (N×3.81+0.88) × 7.25 × 9.20 mm, pin 3.5 mm): **pass, unchanged**. The EasyEDA footprints have the same pitch and pad 1 but other holes (C441238 1.8, C26895 1.5, C7245 1.26 mm); ours follow the drawings.
 Updated: 2026-11-08 (T-0190: C3 → C170101, shared power-usb)
 
 **2026-11-08 (T-0196: "For /system" sweep, unattended, documents only):** every entry in "For /system" is a firmware, mechanical, installation/safety or owner choice, not a record to sync, so all stay word for word for an interactive `/system` session. No schematic change. Report: `docs/reviews/2026-11-08-fix-sync-T-0196.md`.
@@ -160,7 +160,7 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°).
 4. Remaining part checks from the BOM audit: PESD2CAN
    pin 3 = common; Molex 39301080 = 5569-08A2 (if still used).
-5. PCB layout (no sample check first, decision 124): 2 oz, VS copper on both
+5. PCB layout (no sample check first, decision 127): 2 oz, VS copper on both
    layers around the cooling tabs, switches spread out and away from the ESP32; TH1 next to the hottest switch;
    J5 TVSs at the connector.
 6. PCB rules from T-0064 (design-notes §8.1/§8.2):
@@ -199,7 +199,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Prototype test list
 
-- **Decision 124 – connector fit (moved from decision 98):** on the first assembled boards check that the J11, J5 and J4 plugs cannot go in reversed; whether the J4 plug enters the J5 socket (labels are on the silkscreen either way); the height across the rail (part height + pin length + 1 mm; J10 expected 34.8 mm; recorded, not a pass/fail limit); the J10 wire-entry side and M4 screw access at 36 mm pitch; reach of mated plugs and cable bend past the edge. Findings go into the next revision.
+- **Decision 127 – connector fit (moved from decision 98):** on the first assembled boards check that the J11, J5 and J4 plugs cannot go in reversed; whether the J4 plug enters the J5 socket (labels are on the silkscreen either way); the height across the rail (part height + pin length + 1 mm; J10 expected 34.8 mm; recorded, not a pass/fail limit); the J10 wire-entry side and M4 screw access at 36 mm pitch; reach of mated plugs and cable bend past the edge. Findings go into the next revision.
 - **T-0118 / decision 81 – PTC hard short (mandatory before installation):** from a 30 V battery-like supply (low source
   impedance), short J5.5 to GND (behind F4/R56), then behind F1 (D1/D2 node) and behind F3 (D10/FB2 node). Scope the
   current; afterwards inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Pass before installation
@@ -216,7 +216,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Pre-order checklist (T-0065)
 
-- Decision 124: no connector samples before the order; buy the connector sets with the board order and re-check their stock, plug sets included. Footprints of J10, J11, J5, J4 checked against the maker drawings and the EasyEDA footprints: pass (2026-11-08, see the log above). Hand-solder J10 with a powerful iron; check the joints.
+- Decision 127: no connector samples before the order; buy the connector sets with the board order and re-check their stock, plug sets included. Footprints of J10, J11, J5, J4 checked against the maker drawings and the EasyEDA footprints: pass (2026-11-08, see the log above). Hand-solder J10 with a powerful iron; check the joints.
 - J10 marking (T-0177, layout rule 2 of `docs/reviews/2026-11-07-emc-system-2.md`): silkscreen "BATTERY" and the polarity at J10. The cross-board mis-plug of T-0177 (battery plug into a pdm-hc2 J11) no longer applies: J10 is a fixed screw terminal with no plug (decision 121).
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
   LMR51610YF (only if the scan asks for FPWM), plus the new C170101.
@@ -251,6 +251,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - RIS at the 40 mA maximum fault current: 0.8 W in two 0.25 W parts since T-0107, covered only by firmware; hardware
   cover needs a resistor of at least the fault power – owner decision if wanted.
 
-- Decision 124 (`/system mechanical`): the rail pitch is a soft goal, not a constraint. ARCHITECTURE Mechanics and decisions 97/123 still say "about 36 mm"; reword it as a target. Decision 123's arms-instead-of-plate choice for the long DIN mount was made for the 36 mm and may be revisited.
-- Decision 125: ARCHITECTURE Mechanics still says "length up to 100 mm, set at layout"; now 100 mm on both boards, H1–H4 4 mm from both edges, rail-side hole spacing 92 mm. Sync in `/system`.
+- Decision 127 (`/system mechanical`): the rail pitch is a soft goal, not a constraint. ARCHITECTURE Mechanics and decisions 97/123 still say "about 36 mm"; reword it as a target. Decision 123's arms-instead-of-plate choice for the long DIN mount was made for the 36 mm and may be revisited.
+- Decision 128: ARCHITECTURE Mechanics still says "length up to 100 mm, set at layout"; now 100 mm on both boards, H1–H4 4 mm from both edges, rail-side hole spacing 92 mm. Sync in `/system`.
 - Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).

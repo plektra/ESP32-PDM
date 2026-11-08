@@ -14,7 +14,7 @@ Run every command from the repo folder.
 - **Dashboard** (right pane in tmux, or `python3 tools/orchestrate.py watch`) – live: running agents, up next, board
   size, inbox.
 - **What changed in the schematics:** `git log --stat` on `main` – every finished task lands there by itself
-  (decision 126). Open the files in the main checkout in KiCad to look (don't save there while agents run).
+  (decision 129). Open the files in the main checkout in KiCad to look (don't save there while agents run).
 
 ## Start
 

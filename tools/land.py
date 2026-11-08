@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Land the current branch on origin/main (decision 126): the one place all work ends up.
+"""Land the current branch on origin/main (decision 129): the one place all work ends up.
 
 Used by every Claude session before it ends (CLAUDE.md, /handoff) and by tools/orchestrate.py after each merged
 package and at the end of a run. Run it from the worktree whose HEAD should land:

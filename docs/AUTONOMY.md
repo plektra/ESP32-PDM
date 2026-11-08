@@ -174,5 +174,5 @@ it small and short:
   cost per package for comparison.
 
 One board-fixer per board at a time (a `shared` package holds both). `run --no-fixes` runs reviews only. Each
-task lands on `main` right after it is committed (`tools/land.py`, decision 126): landing is a two-way door (a revert
+task lands on `main` right after it is committed (`tools/land.py`, decision 129): landing is a two-way door (a revert
 or `undo` takes it back). The owner reviews `main` before any order – ordering is a one-way door.

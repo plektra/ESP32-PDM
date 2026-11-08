@@ -8,7 +8,7 @@ docs/reviews/ may change, the report must end with a valid finding block. Under 
 to the `auto/pilot` worktree (`../<repo>-auto`) and sorts the findings by the policy in docs/AUTONOMY.md (decision 23):
 two-way doors are decided by agents (approved `board-fix` tasks, questions answered with their default; listed in
 the inbox digest, `undo` takes one back), one-way doors become owner questions in docs/OWNER-INBOX.md. Each task is
-committed on `auto/pilot` and landed on origin/main right away by tools/land.py (decision 126); the owner never
+committed on `auto/pilot` and landed on origin/main right away by tools/land.py (decision 129); the owner never
 merges by hand. Inside tmux every running agent gets a pane in the window `workers`.
 
 Pilot: only the reviewer roles run (validator, emc-reviewer, cost-controller).
@@ -117,7 +117,7 @@ NO_LAND = False    # run --no-land: keep the work on auto/pilot only
 
 
 def land_now():
-    """Land auto/pilot on origin/main (tools/land.py, decision 126). Never stops a run: a failure is reported and
+    """Land auto/pilot on origin/main (tools/land.py, decision 129). Never stops a run: a failure is reported and
     the next landing tries again."""
     global LAND_ERROR
     if NO_LAND or not WORKTREE.exists():
@@ -1704,7 +1704,7 @@ def next_steps(root, q, run=None):
     exists = subprocess.run(['git', 'rev-parse', '--verify', '--quiet', BRANCH], cwd=REPO,
                             capture_output=True).returncode == 0
     ahead = int(git('rev-list', '--count', f'origin/main..{BRANCH}', cwd=REPO)) if exists else 0
-    if ahead and not active:  # normally 0: every task lands on main by itself (decision 126)
+    if ahead and not active:  # normally 0: every task lands on main by itself (decision 129)
         steps.append(('act', f'{ahead} commit{"s" if ahead > 1 else ""} on {BRANCH} not yet on main'
                       + (f' (last landing failed: {LAND_ERROR[-120:]})' if LAND_ERROR else ''),
                       f'{ORCH} land'))
@@ -2211,7 +2211,7 @@ def main():
             s.add_argument('--task', help='run only this task')
             s.add_argument('--dry-run', action='store_true', help='print the agent commands, run nothing')
             s.add_argument('--no-land', action='store_true',
-                           help='keep the work on auto/pilot only; do not land it on origin/main (decision 126)')
+                           help='keep the work on auto/pilot only; do not land it on origin/main (decision 129)')
             s.add_argument('--fixer-model', choices=('opus', 'sonnet'),
                            help='model for board-fixers in this run (default opus); for trials, e.g. with --task')
             s.add_argument('--wait-for-limit', action='store_true',

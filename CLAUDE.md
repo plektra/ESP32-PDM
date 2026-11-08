@@ -40,7 +40,7 @@ assembled by JLCPCB. First user: the tug Vega (24 V).
    note; remind the owner that a competent person should review them before installation.
 8. **Public repo** (MIT): no personal data, credentials or manufacturer PDFs.
 
-## Git (decision 126)
+## Git (decision 129)
 
 Everything lands on `main`; no branch waits for the owner. Commit whenever a step is done and right away run
 `python3 tools/land.py` (fetch, merge `origin/main`, check decision numbers, push to `main`, delete a landed
