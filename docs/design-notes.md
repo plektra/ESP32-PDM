@@ -191,7 +191,7 @@ Per channel (source: TI TPS4811-Q1 datasheet SLUSEE5E):
 | RISCP + 1 nF | 4.7 kΩ | fast short-circuit ≈ 80 A: ISC × RSNS / 15.6 µA − 464 |
 | CTMR | 10 µF | overcurrent time 82 µA·t/1.2 → ≈ 146 ms; auto-retry 22.7·10⁶ × CTMR ≈ 3.8 min |
 | RIMON | 12 kΩ | gain 0.9 × RIMON / RSET = 108 → 25 A = 2.7 V; 10 kΩ + BAT54S clamp + 1 nF to the ADC |
-| UVLO/OV divider | 1 MΩ / 100 kΩ / 39 kΩ | UVLO ≈ 9.7 V, OV cut-off ≈ 34.5 V |
+| UVLO/OV divider | 1 MΩ (R105/R205, 1206 C17927 since T-0191) / 100 kΩ / 39 kΩ | UVLO ≈ 9.7 V, OV cut-off ≈ 34.5 V |
 | CBST | 1 µF / 50 V | > Qg(total) / 1 V = 152 nF |
 | R1 (RG_PU) | 10 kΩ (C25744) | PU → gate, gate slew (§4a.3, T-0106) |
 | C1 + R2 | 1 nF/2 kV 1206 (C9196) + 10 Ω (C25077) | gate → GND, sets the output ramp ≈ 0.7 V/µs (§4a.3) |

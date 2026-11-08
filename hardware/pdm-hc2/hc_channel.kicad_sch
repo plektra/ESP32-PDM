@@ -4141,7 +4141,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
 			(at 38.1 165.1 0)
 			(effects
 				(font
@@ -4168,7 +4168,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C26083"
+		(property "LCSC" "C17927"
 			(at 38.1 165.1 0)
 			(effects
 				(font
