@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 196,
+    "T": 197,
     "Q": 70
   },
   "tasks": [
@@ -6154,6 +6154,41 @@
       "finished": "2026-11-08",
       "summary": "skipped: no connector, filter or protection part changed (refs: C3, R105, R205)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0196",
+      "role": "board-fixer",
+      "scope": "sync",
+      "state": "done",
+      "created": "2026-11-08",
+      "depends_on": [],
+      "items": [],
+      "sweep": true,
+      "title": "Sync the \"For /system\" lists",
+      "brief": "Sweep the \"For /system\" items of both boards under the rules for scope `sync` in your instructions: do the bookkeeping ones, leave the rest word for word.\n\npdm-4ch STATUS.md, For /system:\n- T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.\n- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.\n- T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.\n- T-0069 (`/system firmware`): firmware requirements for DEN (design-notes §6.1).\n- RIS at the 40 mA maximum fault current: 0.8 W in two 0.25 W parts since T-0107, covered only by firmware; hardware\n  cover needs a resistor of at least the fault power – owner decision if wanted.\n\n- Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).\n\npdm-hc2 STATUS.md, For /system:\n- T-0072/T-0055: J10 is keyed (decision 98); the board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).\n- T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the\n  15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,\n  full scale ≈ 31.9 V) and reports \"OUT high while off\" as a float-driven run.\n- **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list). Pre-charge path (TPS48111-Q1) if the prototype shows real loads exceed about 50 µF (decision 94).\n- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.\n- T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave IO42 with a pull enabled while unused.\n\n- **Bilge output fusing (T-0064 failure mode, needs README/installation rule):** D103/D203 sit outside the\n  back-to-back MOSFETs. If a TVS fails short, a float-switch run feeds the short through the PDM output wire. The\n  float circuit stays independent (invariant 8) only if the PDM leg has its own fuse, between J11 and the junction\n  with the float circuit, that opens before the float fuse. Add this to the README next to the external breaker of\n  decision 39; a competent person reviews the bilge wiring before installation.\n\n- Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).",
+      "started": "2026-11-08T20:56:43",
+      "ran_model": "opus",
+      "session": "07b01599-eb34-48b2-8ebe-89be57b15362",
+      "cost_usd": 0.3277,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-08",
+      "note": null,
+      "summary": "0 synced, 11 left for /system, merged 4d92de34",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-08-fix-sync-T-0196.md"
     }
   ],
   "board_size_start": {
@@ -6180,5 +6215,5 @@
       "unique": 63
     }
   },
-  "sync_seen": "c2a1119bcbf8"
+  "sync_seen": "4b5cbdcc32f0"
 }
