@@ -2022,6 +2022,67 @@ def cmd_add(args):
           f"added {t['id']} to {root / QUEUE}; commit it, the next run merges it in")
 
 
+RULES = ("Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions "
+         "122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 "
+         "(floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants "
+         "4 and 6. ")
+PCB_STAGES = (
+    ('Place connectors and mounting holes', {},
+     "Place H1–H4 on the keep-out centres and the edge connectors per the floorplan (decision 128): J10 battery "
+     "and J11 outputs on the power short edge, J5 panel and J4 CAN on the signal short edge, plugs and wires "
+     "leaving the board edge, a few mm margin beyond the drawing reach (decision 127), J10 with room on both "
+     "sides of its body. Also the parts that must sit at a connector pin: the TVS and filter parts at J10, J5, "
+     "J4 and J11 named in the rules. Leave everything else parked."),
+    ('Place the power path and output channels', {},
+     "Place the battery path (J10 → D30/C30 → JP30/FL30 position → Q30/U30/D31/C32 → VS, C31) and the four "
+     "output channels (each PROFET with its sense, input and protection parts) between J10 and J11, the "
+     "switches spread out, room for wide VS copper on both layers around their tabs and for ≥ 2 cm² at Q30's "
+     "drain; TH1 next to the hottest switch. Leave the logic half parked."),
+    ('Place the logic half and all remaining parts', {'placed': True},
+     "Place everything still parked: the ESP32 with its antenna at the front corner of the signal end and its "
+     "keep-out clear of copper, the buck (tight C1/C19/U3 loop, L2/JP1 position before C1), USB J3, the CAN "
+     "transceiver across its isolation gap (PCB rule 9), the analog_sw parts near J5, J6 service pads inside "
+     "the board, D7/D8 visible. No part may stay off the board."),
+    ('Power copper: pours and wide paths', {'placed': True},
+     "Draw the high-current copper: VBAT_IN, VBAT_FL and VS as wide pours on both layers sized for 16 A in "
+     "2 oz copper, the output paths to J11, GND pours, Q30 drain copper ≥ 2 cm², PROFET tab copper with "
+     "thermal vias, the surge loop switches → VS → D30 short and wide; no copper across the CAN barrier or in "
+     "the antenna or hole keep-outs. Use `kpcb zone` / `track` / `via`."),
+    ('Route all remaining connections', {'placed': True, 'final': True},
+     "Route every remaining connection with `kpcb track`/`via` (signal 0.25 mm or wider, power per the rules); "
+     "short loops for the buck and the CAN lines as a pair; no routing under the isolation barrier or in the "
+     "keep-outs. Finish with 0 unconnected and 0 DRC errors."),
+    ('Silkscreen, markings and a clean DRC', {'placed': True, 'final': True},
+     "Silkscreen: BATTERY and polarity at J10, function labels and pin 1 at every connector, PANEL and CAN at "
+     "J5/J4, the board name, version and date. References readable, nothing on pads. Refill zones; 0 DRC "
+     "errors, 0 unconnected, then record in STATUS.md what the layout does and what the bring-up should check."),
+)
+
+
+def cmd_pcb(args):
+    """Queue the layout stages of one board as pcb-fixer tasks, then an EMC and a validator check of the layout."""
+    root = state_root()
+    q = load_queue(root)
+    open_ = [t for t in q['tasks'] if t['role'] == 'pcb-fixer' and t['scope'] == args.board
+             and t['state'] in ('ready', 'running')]
+    if open_:
+        raise SystemExit(f"{args.board} already has open PCB stages: {', '.join(t['id'] for t in open_)}")
+    prev, ids = [], []
+    for title, flags, brief in PCB_STAGES:
+        t = dict(id=new_id(q, 'T'), role='pcb-fixer', scope=args.board, state='ready', created=today(),
+                 title=title, brief=RULES + brief, items=[], depends_on=prev, **flags)
+        q['tasks'].append(t)
+        prev, ids = [t['id']], ids + [t['id']]
+    for role, focus in (('emc-reviewer', 'layout: the new PCB against the layout rules of the EMC reports'),
+                        ('validator', 'pcb: the layout against the schematic, the heat budget copper and the rules')):
+        q['tasks'].append(dict(id=new_id(q, 'T'), role=role, scope=args.board, state='ready', created=today(),
+                               depends_on=prev, focus=focus, deep=True))
+    save_queue(root, q)
+    write_roadmap(root, q)
+    print(f"queued {len(ids)} PCB stages for {args.board} ({ids[0]}–{ids[-1]}) and an EMC and a validator check; "
+          f"start them with: {ORCH} run")
+
+
 def cmd_retry(args):
     root = state_root()
     q = load_queue(root)
@@ -2265,6 +2326,9 @@ def main():
     s = sub.add_parser('undo', help="take back an agent's two-way decision: it becomes an owner question")
     s.add_argument('task')
     s.set_defaults(fn=cmd_undo)
+    s = sub.add_parser('pcb', help='queue the PCB layout stages of a board (pcb-fixer, decision 130)')
+    s.add_argument('board', choices=BOARDS)
+    s.set_defaults(fn=cmd_pcb)
     s = sub.add_parser('retry', help='set a failed task ready again')
     s.add_argument('task')
     s.set_defaults(fn=cmd_retry)
