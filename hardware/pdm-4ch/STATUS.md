@@ -2,6 +2,8 @@
 
 Updated: 2026-11-08 (T-0190: C3 → C170101, shared power-usb)
 
+**2026-11-08 (T-0196: "For /system" sweep, unattended, documents only):** every entry in "For /system" is a firmware, mechanical, installation/safety or owner choice, not a record to sync, so all stay word for word for an interactive `/system` session. No schematic change. Report: `docs/reviews/2026-11-08-fix-sync-T-0196.md`.
+
 **2026-11-08 (T-0190: T-0187, cost lever L5, unattended, shared `power-usb`):** C3 (+3V3 at the L1 output) C377773 2.2 µF/50 V 0805 → **C170101** 2.2 µF/100 V X7R 1206 (`Capacitor_SMD:C_1206_3216Metric`), the part already used for C1/C22/C30; identical on both boards. U3 (LMR51610) gives no C_OUT maximum or ESR limit; same nominal value, less DC-bias loss (design-notes §8.8). ERC 0 errors, 5 warnings (unchanged); netlist: only C3 Value/Footprint/LCSC differ; unique parts **−1** (59). No output changed, no heat-budget run. Layout: C3 needs the 1206 land. Report: `docs/reviews/2026-11-08-fix-shared-T-0190.md`.
 
 **2026-11-08 (/system tidy and mechanical, documents only):** decision 122: all SMT parts on the top side. Decision 123: M3 holes H1–H4 in the four corners, the same length and rail-side hole spacing on both boards, Ø 8 mm keep-out at each hole; the DIN mount is one printed ASA part on the two rail-side holes or all four. Cost review `docs/reviews/2026-11-07-cost-system-2.md`: first pdm-4ch order about 204 $ (about 220 $ with the fixture fee); T-0187 (C3 → C170101, shared sheet) done in T-0190. No schematic change.

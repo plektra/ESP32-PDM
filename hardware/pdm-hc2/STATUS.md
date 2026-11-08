@@ -2,6 +2,8 @@
 
 Updated: 2026-11-08 (T-0191: R105/R205 → C17927 1206)
 
+**2026-11-08 (T-0196: "For /system" sweep, unattended, documents only):** every entry in "For /system" is a firmware, mechanical, installation/safety or owner choice, not a record to sync, so all stay word for word for an interactive `/system` session. No schematic change. Report: `docs/reviews/2026-11-08-fix-sync-T-0196.md`.
+
 **2026-11-08 (T-0191: T-0188, cost lever L6, unattended, `hc_channel`):** R105/R205 (EN/UVLO top resistor, VS → EN) C26083 1 MΩ 0402 → **C17927** 1 MΩ ±1 % 1/4 W 200 V 1206 (`Resistor_SMD:R_1206_3216Metric`, basic, the part already used for R13; `docs/part-facts/C17927.md`). Value, nets, divider 1 MΩ/100 kΩ/39 kΩ and C111/C211 unchanged, so the UV/OV thresholds and response times of design-notes §4a are unchanged. ERC 0 errors, 5 warnings (unchanged); netlist: only R105/R205 Footprint/LCSC differ; 241 parts (+0), unique parts **−1** (63). No output changed, no heat-budget run. Layout: R105/R205 need the 1206 land. Report: `docs/reviews/2026-11-08-fix-pdm-hc2-T-0191.md`.
 
 **2026-11-08 (T-0190: T-0187, cost lever L5, unattended, shared `power-usb`):** C3 (+3V3 at the L1 output) C377773 2.2 µF/50 V 0805 → **C170101** 2.2 µF/100 V X7R 1206 (`Capacitor_SMD:C_1206_3216Metric`), the part already used for C1/C22/C30; identical on both boards. U3 (LMR51610) gives no C_OUT maximum or ESR limit; same nominal value, less DC-bias loss (design-notes §8.8). ERC 0 errors, 5 warnings (unchanged); netlist: only C3 Value/Footprint/LCSC differ; unique parts **−1** (64). No output changed, no heat-budget run. Layout: C3 needs the 1206 land. Report: `docs/reviews/2026-11-08-fix-shared-T-0190.md`.
