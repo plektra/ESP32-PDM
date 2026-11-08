@@ -66,6 +66,7 @@ FIX_SCOPES = BOARDS + ('shared', 'sync')
 SYNC_FILES = ('docs/ARCHITECTURE.md', 'docs/design-notes.md', 'tools/heat_budget.py') + tuple(
     f'hardware/{b}/STATUS.md' for b in BOARDS)
 BOARD_SCH = {'pdm-4ch': 'hardware/pdm-4ch/ESP32-PDM-4CH.kicad_sch', 'pdm-hc2': 'hardware/pdm-hc2/ESP32-PDM-HC2.kicad_sch'}
+PCB_FILES = {'pdm-4ch': 'ESP32-PDM-4CH.kicad_pcb', 'pdm-hc2': 'ESP32-PDM-HC2.kicad_pcb'}
 SHARED_SHEETS = ('analog_sw', 'can', 'power-usb')
 DECISIONS = Path('docs/decisions.md')
 # Runnable roles: report name, model and per-task budget (USD) for normal and deep runs; `edits`: may change the
@@ -76,9 +77,11 @@ ROLES = {
     'cost-controller': dict(kind='cost', model=('sonnet', 'opus'), budget=(8.0, 25.0)),
     'planner': dict(kind='plan', model=('opus', 'opus'), budget=(6.0, 6.0)),
     'board-fixer': dict(kind='fix', model=('opus', 'opus'), budget=(20.0, 20.0), edits=True),
+    # Lays out one board's PCB with tools/kpcb.py, one stage per task (decision 130); gated by pcb_gates.
+    'pcb-fixer': dict(kind='fix', model=('opus', 'opus'), budget=(25.0, 25.0), edits=True, pcb=True),
 }
 REVIEWERS = ('validator', 'emc-reviewer', 'cost-controller')
-FIX_ROLES = ('planner', 'board-fixer')  # off with `run --no-fixes`
+FIX_ROLES = ('planner', 'board-fixer', 'pcb-fixer')  # off with `run --no-fixes`
 TASK_TIMEOUT = 90 * 60  # seconds
 # Never allowed to an unattended agent, whatever its tool list says. Roles without `edits` also lose Edit.
 DENIED_TOOLS = ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(git reset:*)', 'Bash(git checkout:*)',
@@ -181,7 +184,7 @@ def runnable(q):
 
 def task_locks(t):
     """One board-fixer per board at a time (a shared or sync package holds both); one planner at a time."""
-    if t['role'] == 'board-fixer':
+    if t['role'] in ('board-fixer', 'pcb-fixer'):  # schematic and PCB of one board never change at once
         return set(BOARDS) if t['scope'] in ('shared', 'sync') else {t['scope']}
     return {'plan'} if t['role'] == 'planner' else set()
 
@@ -275,7 +278,7 @@ def mermaid_label(text):
 def write_roadmap(root, q):
     """docs/ROADMAP.md: what the agents will change next, what they changed, how the boards grew. Generated."""
     tasks = q['tasks']
-    pkgs = [t for t in tasks if t['role'] == 'board-fixer']
+    pkgs = [t for t in tasks if t['role'] in ('board-fixer', 'pcb-fixer')]
     verify = [t for t in tasks if t.get('verify')]
     upcoming = [t for t in pkgs if t['state'] in ('running', 'ready')]
     done = [t for t in pkgs if t['state'] == 'done']
@@ -489,6 +492,11 @@ CHECK_HINT = ("Before your final message run `python3 tools/report_check.py`: th
               "in only when it says OK.\n")
 FIX_HINT = ("Before writing the report run `python3 tools/fix_check.py --scope $PDM_SCOPE --refs <refs you touched>`: "
             "the orchestrator's own merge gates. Hand in only when it says OK.\n")
+PCB_HINT = ("Edit the board only with `python3 tools/kpcb.py <board> …` (sync, list, place, zone, track, via, delete, "
+            "text, fill, drc, render; `--help` shows each). Look at your work with `kpcb.py <board> render "
+            "$CLAUDE_JOB_DIR/board.png` and read the image. Never touch the schematic, lib/ or the outline. Before "
+            "the report run `python3 tools/fix_check.py --scope $PDM_SCOPE` – the orchestrator's own gates for this "
+            "stage. Hand in only when it says OK.\n")
 FACTS_DIR = 'docs/part-facts'
 FACTS_MAX = 15  # part_facts.py lookups per agent attempt
 FIXER_MODEL = None  # run --fixer-model
@@ -526,6 +534,14 @@ def prompt_for(t, report, inputs=None):
         return (common + f"The approved items to plan are in `{inputs}` (JSON). Write your report to exactly "
                 f"`{report}` and end it with the plan block. Change no other file in the repository. {CHECK_HINT}Your final "
                 f"message: the report path and the number of packages, deferred items and decision rows.")
+    if kind == 'fix' and t['role'] == 'pcb-fixer':
+        return (common + f"PCB stage {t['id']}: {t.get('title', '')} (board {t['scope']}).\n"
+                f"What this stage does:\n{t.get('brief', '')}\n"
+                + (f"Approved items for this stage are in `{inputs}` (JSON).\n" if t.get('items') else '')
+                + PCB_HINT + CHECK_HINT +
+                f"Write your report to exactly `{report}` and end it with the fix block (`done`/`blocked` list the "
+                f"item ids, empty when the stage has none; `refs`: the parts you placed or moved). Your final "
+                f"message: the report path and what the stage did.")
     if kind == 'fix':
         return (common + f"Work package {t['id']}: {t.get('title', '')} (scope {t['scope']}).\n"
                 f"Brief from the planner:\n{t.get('brief', '')}\n"
@@ -807,7 +823,11 @@ def shared_sheets_equal(wt):
     return [s for s, a, b in zip(SHARED_SHEETS, norm('pdm-4ch'), norm('pdm-hc2')) if a != b]
 
 
-def fix_allowed(path, scope):
+def fix_allowed(path, scope, role='board-fixer'):
+    if role == 'pcb-fixer':  # the board file only, plus its notes; never the schematic or lib/
+        d = f'hardware/{scope}/'
+        return (path.startswith(d) and path.endswith(('.kicad_pcb', '.kicad_pro', 'STATUS.md'))) or \
+            path == 'docs/design-notes.md'
     if scope == 'sync':
         return path in SYNC_FILES
     boards = BOARDS if scope == 'shared' else (scope,)
@@ -819,14 +839,15 @@ def fix_allowed(path, scope):
 
 def fix_gates(wt, t, base, after, block, changed, report):
     """Everything a board-fixer change must pass before it is merged. Returns the list of failures."""
-    fails, declared = [], set(block.get('refs') or [])
+    pcb = t.get('role') == 'pcb-fixer'
+    fails, declared = [], (set() if pcb else set(block.get('refs') or []))  # a PCB stage changes no netlist
     for p in changed:
         if p == report or p.endswith('.kicad_prl'):
             continue
         tracked = bool(git('ls-files', '--', p, cwd=wt))
         if p.lower().endswith('.pdf'):
             fails.append(f'adds a PDF ({p}); public repo')
-        elif tracked and not fix_allowed(p, t['scope']):
+        elif tracked and not fix_allowed(p, t['scope'], t.get('role', 'board-fixer')):
             fails.append(f'changed {p}, outside the package scope {t["scope"]}')
     for b in BOARDS:
         if after[b] is None:
@@ -847,6 +868,55 @@ def fix_gates(wt, t, base, after, block, changed, report):
         fails.append('shared sheets differ between the boards: ' + ', '.join(differ))
     if t['scope'] == 'sync':
         fails += sync_gates(wt, changed)
+    if pcb:
+        fails += pcb_gates(wt, t)
+    return fails
+
+
+def kpcb(wt, board, *args):
+    """tools/kpcb.py in a worktree; returns its first output line parsed as JSON (None on failure)."""
+    r = subprocess.run([sys.executable, str(wt / 'tools' / 'kpcb.py'), board, *args], cwd=wt,
+                       capture_output=True, text=True)
+    line = r.stdout.strip().splitlines()[0] if r.stdout.strip() else ''
+    try:
+        return json.loads(line)
+    except json.JSONDecodeError:
+        return None
+
+
+def pcb_gates(wt, t):
+    """Gates of a pcb-fixer stage (decision 130): schematic parity, no DRC errors on the board, outline and hole
+    keep-outs unchanged, nothing SMT on the bottom (decision 122), no part in a hole keep-out (decision 123); the
+    placement stages leave no part parked, the routing stage leaves nothing unconnected."""
+    board, fails = t['scope'], []
+    rel = Path(f'hardware/{board}/{PCB_FILES[board]}')
+    if not (wt / rel).exists():
+        return [f'{rel} missing']
+    d = kpcb(wt, board, 'drc', '--show', '0')
+    if d is None:
+        return ['tools/kpcb.py drc failed (run it yourself to see why)']
+    if d['parity']:
+        fails.append(f"schematic parity: {d['parity']} differences (run `kpcb.py {board} sync`)")
+    if d['errors']:
+        fails.append(f"DRC: {d['errors']} errors on the board (`kpcb.py {board} drc` lists them)")
+    if d['bottom_smt']:
+        fails.append(f"SMT parts on the bottom (decision 122): {', '.join(d['bottom_smt'][:10])}")
+    if d['hole_keepout']:
+        fails.append(f"parts in a hole keep-out (decision 123): {', '.join(d['hole_keepout'][:10])}")
+    if (t.get('placed') or t.get('final')) and d['parked']:
+        fails.append(f"{len(d['parked'])} parts still off the board: {', '.join(d['parked'][:12])}")
+    if t.get('final') and d['unconnected']:
+        fails.append(f"{d['unconnected']} unconnected items left")
+    base = subprocess.run(['git', 'show', f'HEAD:{rel}'], cwd=wt, capture_output=True, text=True)
+    if base.returncode == 0:
+        tmp = wt / rel.with_name('.gate-base.kicad_pcb')
+        tmp.write_text(base.stdout)
+        try:
+            before, after = kpcb(wt, board, '--pcb', str(tmp), 'outline'), kpcb(wt, board, 'outline')
+        finally:
+            tmp.unlink(missing_ok=True)
+        if before != after:
+            fails.append('board outline or hole keep-outs changed (decisions 123, 128; owner only)')
     return fails
 
 
@@ -891,7 +961,7 @@ def maybe_sync(q):
     """Queue a sync sweep of the "For /system" lists once fixes have settled and the lists changed since the last
     sweep. The agent does the two-way bookkeeping and leaves design choices for an interactive /system session."""
     busy = ('ready', 'running')
-    if any(t['role'] in ('planner', 'board-fixer') and t['state'] in busy for t in q['tasks']):
+    if any(t['role'] in ('planner', 'board-fixer', 'pcb-fixer') and t['state'] in busy for t in q['tasks']):
         return False
     if any(t['role'] in REVIEWERS and (t['state'] == 'running' or (t['state'] == 'ready' and deps_done(q, t)))
            for t in q['tasks']):
@@ -973,7 +1043,8 @@ def apply_plan(q, t, plan):
         if not tasks:
             continue
         seen |= set(tasks)
-        pkg = dict(id=new_id(q, 'T'), role='board-fixer', scope=p['scope'], state='ready', created=today(),
+        role = 'pcb-fixer' if p.get('role') == 'pcb-fixer' and p['scope'] in BOARDS else 'board-fixer'
+        pkg = dict(id=new_id(q, 'T'), role=role, scope=p['scope'], state='ready', created=today(),
                    title=p.get('title', ''), brief=p.get('brief', ''), items=tasks, plan=t['id'], depends_on=[])
         pkg_ids[p.get('id')] = pkg
         q['tasks'].append(pkg)
@@ -1119,7 +1190,8 @@ def run_task(q, t, budget_left, dry_run=False):
     log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
     ledger = log.with_name(log.stem + '-facts.jsonl')  # tools/part_facts.py lookups of this attempt and their cost
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}",
-               PDM_PDF_PYTHON=PDF_PY or 'python3', PDM_BASE=head, PDM_SCOPE=t['scope'],
+               PDM_PDF_PYTHON=PDF_PY or 'python3', PDM_BASE=head, PDM_SCOPE=t['scope'], PDM_ROLE=t['role'],
+               PDM_PCB_PLACED='1' if t.get('placed') else '', PDM_PCB_FINAL='1' if t.get('final') else '',
                PDM_COST_LEDGER=str(ledger), PDM_FACTS_MAX=str(FACTS_MAX), PDM_REPORT=str(report),
                PDM_BLOCK=block_name(spec['kind']))
     (scratch / 'scripts').mkdir(exist_ok=True)
@@ -1766,7 +1838,7 @@ def dashboard(width, recent):
                    + paint(f"{g['parts']:+d} parts, {g['unique']:+d} unique since the agents started",
                            'yellow' if grew else 'dim'))
 
-    nxt = [t for t in q['tasks'] if t['role'] == 'board-fixer' and t['state'] == 'ready']
+    nxt = [t for t in q['tasks'] if t['role'] in ('board-fixer', 'pcb-fixer') and t['state'] == 'ready']
     if nxt:
         out += ['', paint(f' UP NEXT ({len(nxt)} packages, details in docs/ROADMAP.md)', 'bold')]
         for t in nxt[:5]:
