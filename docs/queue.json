@@ -6027,7 +6027,7 @@
       "id": "T-0191",
       "role": "board-fixer",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-08",
       "title": "HC2 EN/UVLO top resistors R105/R205 to C17927 (cost lever L6)",
       "brief": "Two-way item T-0188, cost lever L6 from docs/reviews/2026-11-07-cost-system-2.md. Edit the pdm-hc2 hc_channel sheets (HC channel 1 and HC channel 2) only. (1) Check the part with python3 tools/part_facts.py C17927 \"resistance, tolerance, rated power, max working voltage, package 1206\". Expected: 1 MOhm, 1 %, 1206, working voltage at least 200 V. It is already on the BOM as R13. (2) Edit R105 and R205 with tools/ksch.py. LCSC C26083 -> C17927. Footprint Resistor_SMD:R_0402_1005Metric -> Resistor_SMD:R_1206_3216Metric. The value stays 1M. Nets stay VS to /HC channel n/EN. The divider (1 MOhm / 100 kOhm / 39 kOhm) is unchanged, and so is C111/C211 1 nF. The UV/OV thresholds and the response times in design-notes section 4a are therefore unchanged. (3) Run sch_query parts on pdm-hc2 and confirm that no C26083 is left. (4) Run ERC and compare the netlists before and after. Only the LCSC and footprint of R105 and R205 may change; ERC must stay at 0 errors, 5 warnings. Run tools/fix_check.py --scope pdm-hc2 --refs R105,R205. No heat-budget run (no output change). (5) Documents. In pdm-hc2 STATUS.md, add an entry with unique parts -1 and mark T-0188 as done in the 2026-11-08 line. If design-notes section 4a names the R105/R205 part or package, update that text. Stop and ask (one-way) if C17927's tolerance is worse than 1 % or its rating is below the 0402 it replaces. Stop and ask as well if C17927 is out of stock.",
@@ -6037,19 +6037,32 @@
       "plan": "T-0189",
       "depends_on": [
         "T-0190"
-      ]
+      ],
+      "started": "2026-11-08T20:54:07",
+      "ran_model": "opus",
+      "session": "83c8a7d4-5f4f-4c48-ba3b-268739b41d95"
     },
     {
       "id": "T-0192",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-08",
       "depends_on": [
         "T-0190"
       ],
       "verify": true,
-      "since": "a58f6c897a963d4e8508de72cbe519e669ae73ca"
+      "since": "a58f6c897a963d4e8508de72cbe519e669ae73ca",
+      "started": "2026-11-08T20:54:07",
+      "ran_model": "sonnet",
+      "session": "33c4cdc7-e7d6-44fd-b30f-7b3b984f18aa",
+      "cost_usd": 0.1489,
+      "attempts": 1,
+      "finished": "2026-11-08",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-08-validate-pdm-4ch.md"
     },
     {
       "id": "T-0193",
