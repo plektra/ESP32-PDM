@@ -6093,20 +6093,30 @@
       "id": "T-0193",
       "role": "validator",
       "scope": "pdm-hc2",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-08",
       "depends_on": [
         "T-0190",
         "T-0191"
       ],
       "verify": true,
-      "since": "a58f6c897a963d4e8508de72cbe519e669ae73ca"
+      "since": "a58f6c897a963d4e8508de72cbe519e669ae73ca",
+      "started": "2026-11-08T20:56:05",
+      "ran_model": "sonnet",
+      "session": "e2b4ebb5-a638-4877-9e0f-58c838b48dd0",
+      "cost_usd": 0.1398,
+      "attempts": 1,
+      "finished": "2026-11-08",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-08-validate-pdm-hc2.md"
     },
     {
       "id": "T-0194",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-08",
       "depends_on": [
         "T-0190",
@@ -6115,7 +6125,10 @@
       "verify": true,
       "since": "a58f6c897a963d4e8508de72cbe519e669ae73ca",
       "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
-      "recheck": "cost"
+      "recheck": "cost",
+      "started": "2026-11-08T20:56:05",
+      "ran_model": "sonnet",
+      "session": "b12e9689-f27e-4553-960e-fe0ca8ec56c2"
     },
     {
       "id": "T-0195",
