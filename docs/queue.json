@@ -5929,9 +5929,11 @@
         "finding": "L5"
       },
       "door": "two-way",
-      "state": "parked",
+      "state": "done",
       "note": "Owner put L5 in the queue on 2026-11-08 (/cost system deep). C3 is on the shared sheet power-usb: change both boards identically (scope shared).",
-      "package": "T-0190"
+      "package": "T-0190",
+      "fixed_by": "T-0190",
+      "merged": "ca774491b31fc5722a6eb80add2e83a1b6eda5d3"
     },
     {
       "id": "T-0188",
@@ -5986,7 +5988,7 @@
       "id": "T-0190",
       "role": "board-fixer",
       "scope": "shared",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-08",
       "title": "Shared power-usb: C3 to C170101 (cost lever L5)",
       "brief": "Two-way item T-0187, cost lever L5 from docs/reviews/2026-11-07-cost-system-2.md. Make the change on the shared power-usb sheet of both boards, identical on each. (1) Check the part. Read the cached docs/part-facts/C170101.md and confirm: 2.2 uF, 100 V, X7R, 1206, footprint C_1206_3216Metric. Read the cached LMR51610 (U3) facts for its output-capacitor guidance, because C3 sits on +3V3 next to the buck output L1. A ceramic of the same nominal value is expected to be fine. The X7R 100 V part loses less capacitance under 3.3 V DC bias than the X5R 50 V 0805, so the effective value rises a little. (2) Edit C3 on pdm-4ch and pdm-hc2 with tools/ksch.py. Value 2.2uF/50V -> 2.2uF/100V. LCSC C377773 -> C170101. Footprint Capacitor_SMD:C_0805_2012Metric -> Capacitor_SMD:C_1206_3216Metric. Nets stay +3V3/GND. (3) Run sch_query parts on both boards and confirm that no C377773 is left, so the loading fee is really gone. (4) Run ERC on both boards and compare the netlists before and after. Only C3's value, LCSC and footprint may change; ERC must stay at 0 errors, 5 warnings. Run tools/fix_check.py --scope shared --refs C3. No heat-budget run (no output change). (5) Documents. Add a STATUS.md entry on both boards with unique parts -1 on each board. Mark T-0187 as done in the 2026-11-08 STATUS lines. If ARCHITECTURE or design-notes names C3's part, update that text too (sync text only, no invariant change). Stop and ask (one-way) if C170101 is out of stock, or if the U3 facts give an output-capacitance or ESR limit that the swap breaks. In that case leave C3 unchanged on both boards: a swap on one board only would break the shared sheet.",
@@ -5994,7 +5996,32 @@
         "T-0187"
       ],
       "plan": "T-0189",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-08T20:50:56",
+      "ran_model": "opus",
+      "session": "93ab51d4-3790-4143-88b7-916844faa62f",
+      "cost_usd": 0.975,
+      "attempts": 1,
+      "refs": [
+        "C3"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -1
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -1
+        }
+      },
+      "finished": "2026-11-08",
+      "note": "1 part-facts lookups (0.22 USD); not merged: docs/part-facts/C22427220.md",
+      "summary": "1 fixed, 0 blocked, merged ca774491; pdm-4ch +0 parts (+0 DNP), -1 unique, pdm-hc2 +0 parts (+0 DNP), -1 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-08-fix-shared-T-0190.md"
     },
     {
       "id": "T-0191",
@@ -6084,12 +6111,12 @@
     "pdm-4ch": {
       "parts": 227,
       "dnp": 20,
-      "unique": 60
+      "unique": 59
     },
     "pdm-hc2": {
       "parts": 241,
       "dnp": 16,
-      "unique": 65
+      "unique": 64
     }
   },
   "sync_seen": "c2a1119bcbf8"
