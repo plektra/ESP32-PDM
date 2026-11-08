@@ -171,6 +171,9 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
    node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
    board edges and screws.
+   **Decision 122 (cost lever L3):** all SMT parts on the top side; nothing SMT on the bottom (a double-sided
+   Standard PCBA job costs 33.77 USD more per order). Through-hole connectors are hand-soldered and do not count.
+   A bottom-side part needs an owner ruling.
 7. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384
    and C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2.
 
