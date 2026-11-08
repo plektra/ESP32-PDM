@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 188,
+    "T": 189,
     "Q": 70
   },
   "tasks": [
@@ -5931,6 +5931,32 @@
       "door": "two-way",
       "state": "parked",
       "note": "Owner put L5 in the queue on 2026-11-08 (/cost system deep). C3 is on the shared sheet power-usb: change both boards identically (scope shared)."
+    },
+    {
+      "id": "T-0188",
+      "role": "board-fix",
+      "scope": "pdm-hc2",
+      "created": "2026-11-08",
+      "finding": {
+        "id": "L6",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "pdm-hc2",
+        "location": "hc_channel: R105/R205 1M 0402 C26083 (VS to EN)",
+        "summary": "R105/R205 to C17927 1M 1206 (already R13) removes C26083 from the HC2 BOM: 1.53 USD per order, higher voltage rating on VS",
+        "fix": "swap R105/R205 LCSC/footprint to C17927 / R_1206_3216Metric",
+        "door": "two-way",
+        "reason": "same-value part swap to a part on the BOM before any order",
+        "touches": [],
+        "cost_delta_usd": -0.15
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-07-cost-system-2.md",
+        "finding": "L6"
+      },
+      "door": "two-way",
+      "state": "parked",
+      "note": "Owner put L6 in the queue on 2026-11-08. hc_channel only (pdm-hc2); R105 and R205 both."
     }
   ],
   "board_size_start": {

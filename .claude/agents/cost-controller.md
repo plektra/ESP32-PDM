@@ -22,8 +22,18 @@ Scope from the caller: `pdm-4ch`, `pdm-hc2` or `system`. Read `CLAUDE.md`, `docs
    with 2 oz copper (get a fresh figure; mark estimates). Give price, source and date for every figure.
 2. **Rules:** parts that are extended where a basic/preferred part fits (`jlc_search` with `library_type="no_fee"`),
    non-standard values, low stock (< 500), single-source parts.
-3. **Scenarios:** fewer unique parts across both boards, merged functions, cheaper protection or connectors, panel and
-   enclosure costs, population options (BTT6050 vs BTT6010), board count per order.
+3. **Scenarios:** fewer unique parts across both boards, merged functions, cheaper protection or connectors,
+   enclosure costs, population options (BTT6050 vs BTT6010).
+
+**Settled by the owner – never propose, price as a lever or ask again** (the owner has ruled on these repeatedly):
+- **Order quantity:** the first order is the prototype, 5 bare pdm-4ch PCBs of which JLCPCB assembles **two**
+  (decisions 101, 102). No "more boards per order", "assemble more of the 5" or quantity-scenario levers or questions.
+  Price only the ordered quantity; other quantities may appear as plain figures in the table, never as a lever.
+- **Combined panel of both boards:** not proposed.
+- **Owner hand-solders SMD parts to save loading fees:** ruled out; JLCPCB places all SMT parts (decision 85 keeps
+  only the through-hole connectors with the owner).
+- **Fee items the owner checks on the quote** (e.g. whether the fixture fee applies) are notes under Not checked,
+  not owner questions.
 4. Never edit design files. Work in `$CLAUDE_JOB_DIR/tmp` or a `mktemp -d` folder.
 
 Report `docs/reviews/<YYYY-MM-DD>-cost-<scope>.md`: **Figures** (per board and quantity, top cost drivers, change
