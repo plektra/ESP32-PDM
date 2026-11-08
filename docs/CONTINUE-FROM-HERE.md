@@ -1,6 +1,6 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-08.
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-08 (decision 124).
 
 ## Boards
 
@@ -23,7 +23,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
    and propose levers.
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
-4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). Still open: the connector sample check (owner), then the DIN mount and enclosure as OpenSCAD files after layout. PCB can start once the samples pass.
+4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 124), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout.
 5. **`/board pdm-4ch pcb`**, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102).
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
@@ -33,7 +33,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 ## Waiting on the owner
 
 - No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
-- Buy one sample of each `pdm-4ch` connector and check them before layout (decision 98): the J11, J5 and J4 plug sets and the fixed J10 terminal KF135T-10.16-2P C475108 (decision 121; wire entry at the board edge, M4 access at 36 mm pitch). Re-check connector stock before the next revision.
+- Connector checks of decision 98 on the first assembled boards, not before the order (decision 124). Re-check connector stock before ordering.
 - Measurements: bilge pump locations and feeds. Pump start current on or after the first working prototype, before a board runs a pump in service (decision 100, `docs/pump-start-current-test.md`).
 - Check whether the Standard PCBA fixture fee (16.42 $ per order) applies when quoting.
 

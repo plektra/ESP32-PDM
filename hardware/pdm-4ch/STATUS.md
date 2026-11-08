@@ -1,6 +1,8 @@
 # pdm-4ch status
 
-Updated: 2026-11-08 (/system: decisions 122, 123)
+Updated: 2026-11-08 (/board pcb: decision 124)
+
+**2026-11-08 (/board pdm-4ch pcb, documents only):** decision 124: no connector sample check before layout or order; the decision 98 checks move to the prototype test list, and the layout covers the risks (footprints checked against drawing and JLCPCB footprint in software, J10 clear zone on both sides, J4/J5 labelled and apart, edge margin). PCB can start. No schematic change.
 
 **2026-11-08 (/system tidy and mechanical, documents only):** decision 122: all SMT parts on the top side. Decision 123: M3 holes H1–H4 in the four corners, the same length and rail-side hole spacing on both boards, Ø 8 mm keep-out at each hole; the DIN mount is one printed ASA part on the two rail-side holes or all four. Cost review `docs/reviews/2026-11-07-cost-system-2.md`: first pdm-4ch order about 204 $ (about 220 $ with the fixture fee); T-0187 (C3 → C170101, shared sheet) queued. No schematic change.
 
@@ -151,7 +153,7 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°).
 4. Remaining part checks from the BOM audit: PESD2CAN
    pin 3 = common; Molex 39301080 = 5569-08A2 (if still used).
-5. PCB layout after the connector sample check (decision 98): 2 oz, VS copper on both
+5. PCB layout (no sample check first, decision 124): 2 oz, VS copper on both
    layers around the cooling tabs, switches spread out and away from the ESP32; TH1 next to the hottest switch;
    J5 TVSs at the connector.
 6. PCB rules from T-0064 (design-notes §8.1/§8.2):
@@ -190,6 +192,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Prototype test list
 
+- **Decision 124 – connector fit (moved from decision 98):** on the first assembled boards check that the J11, J5 and J4 plugs cannot go in reversed; whether the J4 plug enters the J5 socket (labels are on the silkscreen either way); the height across the rail (part height + pin length + 1 mm ≤ 36 mm, J10 expected 34.8 mm); the J10 wire-entry side and M4 screw access at 36 mm pitch; reach of mated plugs and cable bend past the edge. Findings go into the next revision.
 - **T-0118 / decision 81 – PTC hard short (mandatory before installation):** from a 30 V battery-like supply (low source
   impedance), short J5.5 to GND (behind F4/R56), then behind F1 (D1/D2 node) and behind F3 (D10/FB2 node). Scope the
   current; afterwards inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Pass before installation
@@ -206,7 +209,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## Pre-order checklist (T-0065)
 
-- Decision 98: buy one sample of each connector set **before layout**. Check that plugs cannot go in reversed, whether the J4 plug enters the J5 socket (label them if so), and the fit at 36 mm rail pitch. pdm-4ch J10 is now the fixed terminal KF135T-10.16-2P C475108 (decision 121): check the wire entry faces the board edge, the M4 screw access at the 36 mm pitch and the pad fit. The J10/J11 pair on pdm-hc2 is unchanged. Hand-solder J10 with a powerful iron; check the joints. Before the next revision, re-check connector stock, plug sets included (decision 121).
+- Decision 124: no connector samples before the order; buy the connector sets with the board order and re-check their stock, plug sets included. Before layout, check the J10, J11, J5 and J4 footprints against the maker drawings and the JLCPCB footprints (C475108, C441238, C26895, C7245) in software. Hand-solder J10 with a powerful iron; check the joints.
 - J10 marking (T-0177, layout rule 2 of `docs/reviews/2026-11-07-emc-system-2.md`): silkscreen "BATTERY" and the polarity at J10. The cross-board mis-plug of T-0177 (battery plug into a pdm-hc2 J11) no longer applies: J10 is a fixed screw terminal with no plug (decision 121).
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
   LMR51610YF (only if the scan asks for FPWM), plus the new C170101.
