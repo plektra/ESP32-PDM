@@ -2,6 +2,19 @@
 
 Updated: 2026-11-08 (/board pcb: decision 127)
 
+**2026-11-08 (T-0197, layout stage 1, unattended):**
+- **Placed:**
+  - H1–H4 on the keep-out centres.
+  - On the power edge, J11 toward the front and J10 toward the rail, with D30/C30 at the J10 pins and the DNP D103–D403 at the J11 pins.
+  - On the signal edge, J5 toward the rail with the nine TVSs (two staggered columns), R34–R37/C14–C17 and the SW_SUPPLY chain D54/C54/D55/R56/F4.
+  - Silkscreen "BATTERY", "+", "−", OUT1–OUT4, "PANEL" and pin 1.
+- **Blocked, owner:** J4 does not fit. The H2/H4 keep-outs leave 49 mm of the signal edge, and J5 + J4 need 55–57 mm. Decision 128 counted the full 65 mm edge. J4, D9 and D10 stay parked.
+- **Next stages:**
+  - Keep the J10 clear zone behind its rear face (x 20–35, y 33–56) free of other parts.
+  - Remaining DRC warnings are silkscreen reference overlaps for the silkscreen pass, including the "OUT3" text over the D303 reference; `kpcb` cannot delete text.
+
+Checks: `kpcb drc` 0 errors, 10 warnings, parity 0; `fix_check` OK. Details in design-notes §8.9 and `docs/reviews/2026-11-08-fix-pdm-4ch-T-0197.md`.
+
 **2026-11-08 (decision 130):** footprints imported from the schematic with `tools/kpcb.py sync` (226 parts parked beside the board, FL30 has no footprint; schematic parity 0, DRC 0 errors); the hole keep-outs now allow the hole itself (pads and footprints allowed, no copper; `kpcb drc` reports any other part's courtyard inside them). Layout stages T-0197–T-0202 are queued for the pcb-fixer agent, then an EMC (layout) and a validator (pcb) review.
 
 **2026-11-08 (/board pdm-4ch pcb, documents only):** decision 127: no connector sample check before layout or order; the decision 98 checks move to the prototype test list, and the layout covers the risks (footprints checked against drawing and JLCPCB footprint in software, J10 clear zone on both sides, J4/J5 labelled and apart, edge margin). PCB can start. No schematic change.

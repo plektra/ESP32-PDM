@@ -1524,6 +1524,53 @@ per part). Live stock 2026-11-08: 121 066.
 - Checks: ERC 0 errors/5 warnings on both boards (unchanged); netlist: only C3 Value/Footprint/LCSC differ, nets unchanged;
   `fix_check.py`: pdm-4ch 59 unique (−1), pdm-hc2 64 unique (−1). No output changed, no heat-budget run.
 
+### 8.9 pdm-4ch layout stage 1: holes, edge connectors, connector protection (T-0197, 2026-11-08, auto)
+
+Coordinates in mm from the top-left board corner (board 100 × 65; x = 0 power edge, x = 100 signal edge, y = 0 front,
+y = 65 rail side). H1–H4 sit on the keep-out centres (4,4), (96,4), (4,61), (96,61). The Ø 8 mm keep-outs leave
+**y 8–57 (49 mm)** free on each short edge: a connector's courtyard runs right up to the edge, so it must stay
+outside the circle's whole y range.
+
+- **Power edge.** J11 (outputs, origin 7.8/12.0, pins OUT1–OUT4 at y 12.0–27.2) sits toward the front. J10 (battery,
+  origin 17.2/39.5) sits toward the rail: it is the heaviest and tallest part (29.5 mm, M4 screws at up to 1.2 N·m,
+  10 mm² cable), and the rail-side holes H3/H4 carry the short DIN mount, so screw torque and cable pull go into the
+  mounted part of the board. VBAT_IN (+, pin 1) is the upper pole, at y 39.5; GND (−) is at y 49.7, on the rail side.
+  Both connectors' front faces are about 0.5 mm inside the edge, so the courtyards end on the edge line. The wire entry
+  and the plugs face outward, and the J10/J11 pad copper is at least 5 mm from the edge (EMC rule 10 asks for ≥ 1 mm).
+  The gap between the J10 and J11 courtyards is 2.7 mm, and 1.7 mm on the hole side. More is not possible on a 49 mm
+  edge, which also has to hold J11.
+- **J10 clear zone (decision 127 item 2).** Only D30 (SMCJ30CA) and C30 sit behind J10's rear face, and both are low
+  SMT parts. If the sample shows the wire entry on the inner face, a wire there passes over D30/C30 and does not need
+  to be soldered near them. Later stages keep x 20–35, y 33–56 free of other parts and of tall parts.
+- **D30 / C30.** D30 is vertical with pad 2 (VBAT_IN) next to J10's rear VBAT_IN pin (17.2/39.5) and pad 1 (GND) next
+  to the rear GND pin (17.2/49.7). The clamp loop J10.1 → D30 → J10.2 is about 10 mm of pour. C30 is beside D30 at
+  x 28.3, about 9 mm from the pins. Both lie parallel to the edge, so a bend from cable pull on J10 does not load them
+  along their length. Both are kept clear of the screw area and the board edge. C31, JP30/FL30, Q30 and U30 are for the
+  power stage (EMC 2026-11-03-2 rule 10: C31 at Q30's drain).
+- **D103–D403 (DNP SMAJ30CA)** are next to J11 in two staggered columns (OUT1/OUT3 at x 13.6, OUT2/OUT4 at x 21.2),
+  with pad 2 (OUT) toward the pin. This leaves 6.6 mm gaps for the OUT copper from the PROFETs to pass the TVSs.
+  Their GND pads go to J10.2 over the GND pour, not through logic ground.
+- **Signal edge, J5** (origin 93.3/53.5, pin 1 at the rail end, pin 10 GND at y 19.2): placed toward the rail so
+  that the front corner (y < 16) stays free for the ESP32 antenna. The nine TVSs are horizontal, with pad 2 toward the
+  pin, in two staggered columns: odd pins at x 87.6, even pins at x 79.5. Each pin trace runs straight to its TVS pad.
+  Even-pin traces pass through the 4 mm gaps of the first column, and the onward route leaves the TVS pad sideways into
+  the same gaps (flow-through, no stub). R34–R37 (x 71.5) and C14–C17 (x 67.3) follow at pins 1–4: TVS → R → C. The
+  SW_SUPPLY chain runs from J5.5 along y 38.3: D54 → C54 → D55 → R56 → F4 (F4.1 = VS, which the power stage routes
+  from the VS copper). The LED-line parts R19/R22/R25/R28 and C50–C53 go to the panel-interface stage, after D50–D53.
+- **J4 is not placed (blocked, owner).** J5 (39.0 mm body, 40.1 mm courtyard) and J4 (16.1 / 17.2 mm) need at least
+  55–57 mm, but the signal edge has 49 mm between the H2 and H4 keep-outs. Decision 128 counted 55 mm against the full
+  65 mm edge. J4, D9, D10 and the GND_CAN parts stay parked until the owner chooses where J4 goes (see
+  `docs/reviews/2026-11-08-fix-pdm-4ch-T-0197.md`).
+- **Safety.** J10 carries the battery input, and J11's outputs may feed a bilge pump or navigation lights. This stage
+  draws no copper, so widths come with the power stage. The placement sets these failure modes:
+  - J10 pad copper is ≥ 5 mm from the edge, so salt and moisture at the edge do not bridge VBAT_IN and GND.
+  - The J10 poles are 10.16 mm apart.
+  - The bolted terminal sits next to the mount, so a pulled cable is less likely to crack the board.
+  - D30 is at the pins, so the surge clamp loop stays short.
+  - No MLCC sits under the cable or near the screws. A cracked C30 would short the battery input.
+
+  A competent person reviews the board before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
