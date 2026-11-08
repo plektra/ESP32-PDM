@@ -231,9 +231,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave IO42 with a pull enabled while unused.
 
-- T-0118: the PTC interrupt-rating problem is settled (decision 81): F1–F4 C70113, R54–R56 0.2 Ω C7420022, unique extended
-  parts ±0. A competent person reviews F1–F4 and R54–R56 before installation (F4: panel switches).
-
 - **Bilge output fusing (T-0064 failure mode, needs README/installation rule):** D103/D203 sit outside the
   back-to-back MOSFETs. If a TVS fails short, a float-switch run feeds the short through the PDM output wire. The
   float circuit stays independent (invariant 8) only if the PDM leg has its own fuse, between J11 and the junction

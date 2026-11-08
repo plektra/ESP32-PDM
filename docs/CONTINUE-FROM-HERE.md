@@ -1,6 +1,6 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-07.
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-08.
 
 ## Boards
 
@@ -13,9 +13,9 @@ Firmware: not started.
 
 ## Order of work
 
-Steps 1–3 are done, including the fix rounds. Step 4 is in progress: mounting and connectors are decided (decisions 97, 98).
+Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run on 2026-11-07 (`docs/reviews/2026-11-07-cost-system-2.md`). Step 4 is in progress: mounting and connectors are decided (decisions 97, 98, 121).
 
-**First order (decisions 99–103):** `pdm-4ch` only, as the cheapest MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 218 $ with connector sets, 16 A only. `pdm-hc2` follows after bring-up. Next: `python3 tools/orchestrate.py run` plans the approved items T-0148 to T-0153; whatever it defers goes to `/system` before layout.
+**First order (decisions 99–103):** `pdm-4ch` only, as the cheapest MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 204 $ with connector sets (about 220 $ if the 16.42 $ fixture fee applies), 16 A only; all SMT parts on one side (decision 122). `pdm-hc2` follows after bring-up. Queued: T-0187 (cost lever L5, C3 → C170101 on `power-usb`); `python3 tools/orchestrate.py run` applies it.
 
 1. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.
