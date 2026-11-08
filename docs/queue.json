@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 187,
+    "T": 188,
     "Q": 70
   },
   "tasks": [
@@ -5903,6 +5903,34 @@
       "summary": "0 synced, 16 left for /system, merged 306f49be",
       "interrupted": null,
       "report": "docs/reviews/2026-11-07-fix-sync-T-0186.md"
+    },
+    {
+      "id": "T-0187",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-08",
+      "finding": {
+        "id": "L5",
+        "kind": "lever",
+        "severity": "INFO",
+        "board": "system",
+        "location": "power-usb: C3 2.2uF/50V 0805 C377773 (+3V3)",
+        "summary": "C3 to C170101 2.2uF/100V X7R 1206 (already on both BOMs) removes one line per board: 1.53 USD per order, +0.08 USD per part",
+        "fix": "swap C3 LCSC/footprint to C170101 / C_1206_3216Metric on the shared sheet, both boards",
+        "door": "two-way",
+        "reason": "same-value part swap to a part on the BOM before any order",
+        "touches": [
+          "shared-sheet"
+        ],
+        "cost_delta_usd": -0.07
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-07-cost-system-2.md",
+        "finding": "L5"
+      },
+      "door": "two-way",
+      "state": "parked",
+      "note": "Owner put L5 in the queue on 2026-11-08 (/cost system deep). C3 is on the shared sheet power-usb: change both boards identically (scope shared)."
     }
   ],
   "board_size_start": {
