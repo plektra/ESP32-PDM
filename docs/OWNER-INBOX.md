@@ -8,10 +8,12 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (6) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0188 · INFO · pdm-hc2 · R105/R205 to C17927 1M 1206 (already R13) removes C26083 from the HC2 BOM: 1.53 USD per order, higher voltage rating on VS → swap R105/R205 LCSC/footprint to C17927 / R_1206_3216Metric
+- T-0187 · INFO · system · C3 to C170101 2.2uF/100V X7R 1206 (already on both BOMs) removes one line per board: 1.53 USD per order, +0.08 USD per part → swap C3 LCSC/footprint to C170101 / C_1206_3216Metric on the shared sheet, both boards
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
