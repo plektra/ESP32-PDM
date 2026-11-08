@@ -5958,9 +5958,11 @@
         "finding": "L6"
       },
       "door": "two-way",
-      "state": "parked",
+      "state": "done",
       "note": "Owner put L6 in the queue on 2026-11-08. hc_channel only (pdm-hc2); R105 and R205 both.",
-      "package": "T-0191"
+      "package": "T-0191",
+      "fixed_by": "T-0191",
+      "merged": "93a72d3b71dcb44f6c14bc78d8a0d78bf784cda1"
     },
     {
       "id": "T-0189",
@@ -6027,7 +6029,7 @@
       "id": "T-0191",
       "role": "board-fixer",
       "scope": "pdm-hc2",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-08",
       "title": "HC2 EN/UVLO top resistors R105/R205 to C17927 (cost lever L6)",
       "brief": "Two-way item T-0188, cost lever L6 from docs/reviews/2026-11-07-cost-system-2.md. Edit the pdm-hc2 hc_channel sheets (HC channel 1 and HC channel 2) only. (1) Check the part with python3 tools/part_facts.py C17927 \"resistance, tolerance, rated power, max working voltage, package 1206\". Expected: 1 MOhm, 1 %, 1206, working voltage at least 200 V. It is already on the BOM as R13. (2) Edit R105 and R205 with tools/ksch.py. LCSC C26083 -> C17927. Footprint Resistor_SMD:R_0402_1005Metric -> Resistor_SMD:R_1206_3216Metric. The value stays 1M. Nets stay VS to /HC channel n/EN. The divider (1 MOhm / 100 kOhm / 39 kOhm) is unchanged, and so is C111/C211 1 nF. The UV/OV thresholds and the response times in design-notes section 4a are therefore unchanged. (3) Run sch_query parts on pdm-hc2 and confirm that no C26083 is left. (4) Run ERC and compare the netlists before and after. Only the LCSC and footprint of R105 and R205 may change; ERC must stay at 0 errors, 5 warnings. Run tools/fix_check.py --scope pdm-hc2 --refs R105,R205. No heat-budget run (no output change). (5) Documents. In pdm-hc2 STATUS.md, add an entry with unique parts -1 and mark T-0188 as done in the 2026-11-08 line. If design-notes section 4a names the R105/R205 part or package, update that text. Stop and ask (one-way) if C17927's tolerance is worse than 1 % or its rating is below the 0402 it replaces. Stop and ask as well if C17927 is out of stock.",
@@ -6040,7 +6042,30 @@
       ],
       "started": "2026-11-08T20:54:07",
       "ran_model": "opus",
-      "session": "83c8a7d4-5f4f-4c48-ba3b-268739b41d95"
+      "session": "83c8a7d4-5f4f-4c48-ba3b-268739b41d95",
+      "cost_usd": 0.46,
+      "attempts": 1,
+      "refs": [
+        "R105",
+        "R205"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": -1
+        }
+      },
+      "finished": "2026-11-08",
+      "note": "1 part-facts lookups (0.12 USD)",
+      "summary": "1 fixed, 0 blocked, merged 93a72d3b; pdm-hc2 +0 parts (+0 DNP), -1 unique",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-08-fix-pdm-hc2-T-0191.md"
     },
     {
       "id": "T-0192",
@@ -6129,7 +6154,7 @@
     "pdm-hc2": {
       "parts": 241,
       "dnp": 16,
-      "unique": 64
+      "unique": 63
     }
   },
   "sync_seen": "c2a1119bcbf8"
