@@ -113,10 +113,12 @@ Each task is a fresh headless session (`claude -p --agent <role>`) in the siblin
 must carry a valid finding block. Since decision 24 approved items are also applied unattended: a planner groups
 them into work packages, board-fixer agents make the schematic changes, and the script gates every change (scope,
 ERC, netlist against declared refs, LCSC, shared sheets equal) before merging it; a validator then re-checks the
-board (`docs/AUTONOMY.md`, "Unattended fixes"). Merge `auto/pilot` into `main` when you have read the result –
-`git log --stat main..auto/pilot`. `run --no-fixes` runs reviews only.
+board (`docs/AUTONOMY.md`, "Unattended fixes"). Every finished task lands on `main` by itself (`tools/land.py`,
+decision 126); read what changed with `git log --stat` on `main`, take something back with `orchestrate.py undo`.
+`run --no-fixes` runs reviews only; `run --no-land` keeps a run's work on `auto/pilot`.
 
 ## Parallel sessions
 
-Shared files conflict easily: `lib/`, `docs/decisions.md`, the shared sheets. Run parallel sessions in separate
-worktrees; `/handoff` merges each into `main` in turn.
+Shared files conflict easily: `lib/`, `docs/decisions.md`, the shared sheets. Every session lands its commits on
+`main` with `python3 tools/land.py` as soon as it commits (decision 126), so parallel sessions and the orchestrator
+always build on each other's work and no branch is left for the owner to merge.

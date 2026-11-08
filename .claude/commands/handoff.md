@@ -18,8 +18,8 @@ Wrap up so the next session can start from the files alone. Note from the owner:
    documentation updates now; stop and ask the owner on a CONFLICT. Otherwise say "architecture review skipped".
 6. Never commit `*.kicad_prl`, backups or files the session did not make. Commit with a short message
    (`<board or System>: <what changed> (decisions N-M)`) and the attribution lines from the session's instructions.
-7. Push: in a worktree, `git fetch origin`, merge `origin/main`, resolve conflicts (keep both sides' decision rows,
-   renumber clashing decisions; for KiCad files take main's version and redo the scripted edit, then ERC), push to
-   `main` as a fast-forward, delete the remote branch and remove the worktree. On `main` directly: `git pull
-   --rebase`, then `git push`.
+7. Land: `python3 tools/land.py` (decision 126; works in a worktree and on `main`). Exit 2 = a merge conflict:
+   merge `origin/main` by hand (for KiCad files take main's version and redo the scripted edit, then ERC), commit,
+   run it again. Exit 3 = a decision number used twice: renumber the newer row and its references, commit, run
+   again.
 8. Report the commit on `main` and say `/clear` is safe.

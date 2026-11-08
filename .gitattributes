@@ -1,3 +1,7 @@
 # Board-fixer packages run in parallel and each add dated paragraphs to the STATUS files;
 # keep both sides instead of stopping the merge on a conflict.
 hardware/*/STATUS.md merge=union
+
+# Sessions and the orchestrator append decision rows in parallel (decision 126); tools/land.py then
+# refuses duplicate numbers, so a clash is renumbered instead of stopping the merge.
+docs/decisions.md merge=union

@@ -173,5 +173,6 @@ it small and short:
 - `run --fixer-model sonnet` runs board-fixers on Sonnet (default Opus); the roadmap's "Done" table shows model and
   cost per package for comparison.
 
-One board-fixer per board at a time (a `shared` package holds both). `run --no-fixes` runs reviews only. The owner
-merges `auto/pilot` into `main`, and reviews it before any order – ordering is a one-way door.
+One board-fixer per board at a time (a `shared` package holds both). `run --no-fixes` runs reviews only. Each
+task lands on `main` right after it is committed (`tools/land.py`, decision 126): landing is a two-way door (a revert
+or `undo` takes it back). The owner reviews `main` before any order – ordering is a one-way door.

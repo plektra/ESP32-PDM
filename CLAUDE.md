@@ -40,6 +40,14 @@ assembled by JLCPCB. First user: the tug Vega (24 V).
    note; remind the owner that a competent person should review them before installation.
 8. **Public repo** (MIT): no personal data, credentials or manufacturer PDFs.
 
+## Git (decision 126)
+
+Everything lands on `main`; no branch waits for the owner. Commit whenever a step is done and right away run
+`python3 tools/land.py` (fetch, merge `origin/main`, check decision numbers, push to `main`, delete a landed
+`worktree-*` branch). This applies to background sessions in a worktree too: the owner wants their commits on `main`
+directly, not on a branch or PR. Before starting work, sync: `git fetch origin && git merge --ff-only origin/main`
+(in a fresh worktree this is already the case). Never force-push. The orchestrator lands its own work the same way.
+
 ## Repo layout
 
 ```
@@ -52,5 +60,5 @@ docs/               CONTINUE-FROM-HERE.md, ARCHITECTURE.md, decisions.md, design
 hardware/pdm-4ch/   KiCad project + STATUS.md
 hardware/pdm-hc2/   KiCad project + STATUS.md
 lib/                shared symbols (ESP32-PDM.kicad_sym) and footprints (ESP32-PDM.pretty)
-tools/              heat_budget.py, ksch.py (schematic editing), kicad_netlist.py, orchestrate.py
+tools/              heat_budget.py, ksch.py (schematic editing), kicad_netlist.py, orchestrate.py, land.py
 ```

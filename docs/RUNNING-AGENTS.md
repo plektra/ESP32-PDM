@@ -13,8 +13,8 @@ Run every command from the repo folder.
   orchestrator's copy `../ESP32-PDM-auto/docs/ROADMAP.md` while a run is going.
 - **Dashboard** (right pane in tmux, or `python3 tools/orchestrate.py watch`) – live: running agents, up next, board
   size, inbox.
-- **What changed in the schematics:** `git log --stat main..auto/pilot`; open `../ESP32-PDM-auto/hardware/…` in KiCad
-  to look (don't save there while agents run).
+- **What changed in the schematics:** `git log --stat` on `main` – every finished task lands there by itself
+  (decision 126). Open the files in the main checkout in KiCad to look (don't save there while agents run).
 
 ## Start
 
@@ -51,7 +51,8 @@ Never close tmux or the terminal while a run is going: the running agents' progr
 
 ## Finish
 
-When you are happy with the result: `git merge auto/pilot && git push` in the main checkout.
+Nothing to merge: each task lands on `main` when it is committed, and the main checkout is fast-forwarded when it is
+clean. If `next` says commits are waiting on `auto/pilot` (a landing failed), run `python3 tools/orchestrate.py land`.
 
 ## tmux keys (prefix Ctrl-a)
 

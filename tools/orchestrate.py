@@ -8,7 +8,8 @@ docs/reviews/ may change, the report must end with a valid finding block. Under 
 to the `auto/pilot` worktree (`../<repo>-auto`) and sorts the findings by the policy in docs/AUTONOMY.md (decision 23):
 two-way doors are decided by agents (approved `board-fix` tasks, questions answered with their default; listed in
 the inbox digest, `undo` takes one back), one-way doors become owner questions in docs/OWNER-INBOX.md. Each task is
-committed on `auto/pilot`; the owner merges. Inside tmux every running agent gets a pane in the window `workers`.
+committed on `auto/pilot` and landed on origin/main right away by tools/land.py (decision 126); the owner never
+merges by hand. Inside tmux every running agent gets a pane in the window `workers`.
 
 Pilot: only the reviewer roles run (validator, emc-reviewer, cost-controller).
 
@@ -109,6 +110,33 @@ def git(*args, cwd=None, check=True):
     if check and r.returncode:
         raise SystemExit(f'git {" ".join(args)} failed:\n{r.stderr.strip()}')
     return r.stdout.strip()
+
+
+LAND_ERROR = None  # why the last landing failed; next_steps shows it until a landing succeeds
+NO_LAND = False    # run --no-land: keep the work on auto/pilot only
+
+
+def land_now():
+    """Land auto/pilot on origin/main (tools/land.py, decision 126). Never stops a run: a failure is reported and
+    the next landing tries again."""
+    global LAND_ERROR
+    if NO_LAND or not WORKTREE.exists():
+        return False
+    if git('status', '--porcelain', '--', *STATE_FILES):
+        commit_state('Auto: queue, inbox and roadmap')
+    r = subprocess.run([sys.executable, str(WORKTREE / 'tools' / 'land.py')], cwd=WORKTREE,
+                       capture_output=True, text=True)
+    out = (r.stdout + r.stderr).strip()
+    if r.returncode:
+        if LAND_ERROR is None:
+            notify(f'Landing on main failed: {out[-150:]}')
+        LAND_ERROR = out[-300:] or f'land.py exit {r.returncode}'
+        print(f'  landing on main failed: {LAND_ERROR}', flush=True)
+        return False
+    LAND_ERROR = None
+    if out:
+        print('  ' + out.replace('\n', '\n  '), flush=True)
+    return True
 
 
 # ---------------------------------------------------------------- state
@@ -1260,6 +1288,7 @@ def run_task(q, t, budget_left, dry_run=False):
         git('commit', '-m', f"Auto: {t['role']} {t['scope']} ({t['id']}): {summary}\n\n"
             f"Unattended run by tools/orchestrate.py, model {model}, {cost:.2f} USD.\n\n"
             f"Co-Authored-By: Claude <noreply@anthropic.com>")
+        land_now()
         if not keep and not hold:
             git('worktree', 'remove', '--force', str(wt), check=False)
         if not hold:
@@ -1422,6 +1451,7 @@ def finish_fix(q, t, wt, sha, paths, changed, got, block, gate_fails, sizes=None
 # ---------------------------------------------------------------- worktree, lock, notify
 
 def ensure_worktree(base):
+    subprocess.run(['git', 'fetch', '-q', 'origin', 'main'], cwd=REPO, capture_output=True)
     if not WORKTREE.exists():
         exists = subprocess.run(['git', 'rev-parse', '--verify', '--quiet', BRANCH], cwd=REPO,
                                 capture_output=True).returncode == 0
@@ -1673,12 +1703,11 @@ def next_steps(root, q, run=None):
             steps.append(('go', 'Start a run: ' + ', '.join(what), f'{ORCH} run'))
     exists = subprocess.run(['git', 'rev-parse', '--verify', '--quiet', BRANCH], cwd=REPO,
                             capture_output=True).returncode == 0
-    ahead = int(git('rev-list', '--count', f'main..{BRANCH}', cwd=REPO)) if exists else 0
-    if ahead and not active:
-        steps.append(('act' if not (work or approved or sweep) else 'info',
-                      f'Review and merge the agents\' work: {ahead} commit{"s" if ahead > 1 else ""} on {BRANCH} '
-                      f'not in main' + (' (or after the run)' if work or approved or sweep else ''),
-                      f'git log --stat main..{BRANCH}, then in the repo: git merge --ff-only {BRANCH}'))
+    ahead = int(git('rev-list', '--count', f'origin/main..{BRANCH}', cwd=REPO)) if exists else 0
+    if ahead and not active:  # normally 0: every task lands on main by itself (decision 126)
+        steps.append(('act', f'{ahead} commit{"s" if ahead > 1 else ""} on {BRANCH} not yet on main'
+                      + (f' (last landing failed: {LAND_ERROR[-120:]})' if LAND_ERROR else ''),
+                      f'{ORCH} land'))
     if not sweep:
         left = sum(1 for text in for_system_items(root).values() for line in text.splitlines()
                    if line.startswith('- '))
@@ -1977,11 +2006,22 @@ def cmd_inbox(args):
         git('add', '--', *STATE_FILES)
         git('commit', '-m', f'Auto: apply {n} owner answers')
     print(f'{n} answers applied')
+    land_now()
     fh.close()
 
 
+def cmd_land(args):
+    """Land auto/pilot on origin/main by hand (normally every task and run does this by itself)."""
+    fh = lock()
+    ensure_worktree(args.base)
+    ok = land_now()
+    fh.close()
+    if not ok:
+        raise SystemExit(f'not landed: {LAND_ERROR}')
+
+
 def cmd_run(args):
-    global WORKTREE, PDF_PY, FIXER_MODEL
+    global WORKTREE, PDF_PY, FIXER_MODEL, NO_LAND
     FIXER_MODEL = args.fixer_model
     if args.dry_run:  # touch nothing: read the queue where it is
         WORKTREE = state_root()
@@ -1992,7 +2032,9 @@ def cmd_run(args):
     fh = lock()
     PAUSE_FLAG.unlink(missing_ok=True)  # left from an earlier run
     STOPPING.clear()
+    NO_LAND = args.no_land
     ensure_worktree(args.base)
+    land_now()  # work left on auto/pilot by an earlier run
     PDF_PY = pdf_python()
     print(f"PDF tools for agents: {PDF_PY or 'not available (agents use python3)'}", flush=True)
     q = load_queue(WORKTREE)
@@ -2107,8 +2149,7 @@ def cmd_run(args):
     write_run(run_info)
     if stop:
         notify(f'Run stopped: {stop}')
-    if args.push:
-        git('push', '-u', 'origin', BRANCH)
+    land_now()
     fh.close()  # released first, so the next steps do not see this run as still active
     steps = [s for s in next_steps(WORKTREE, q, run_info) if s[0] != 'info']
     print('\n' + '\n'.join(next_lines(WORKTREE, q, run_info)))
@@ -2155,9 +2196,10 @@ def main():
     s = sub.add_parser('retry', help='set a failed task ready again')
     s.add_argument('task')
     s.set_defaults(fn=cmd_retry)
-    for name, fn, text in (('run', cmd_run, 'run ready tasks'), ('inbox', cmd_inbox, 'apply owner answers only')):
+    for name, fn, text in (('run', cmd_run, 'run ready tasks'), ('inbox', cmd_inbox, 'apply owner answers only'),
+                           ('land', cmd_land, 'land auto/pilot on origin/main now (normally automatic)')):
         s = sub.add_parser(name, help=text)
-        s.add_argument('--base', default='main', help='branch merged into auto/pilot first (default main)')
+        s.add_argument('--base', default='origin/main', help='branch merged into auto/pilot first (default origin/main)')
         s.set_defaults(fn=fn)
         if name == 'run':
             s.add_argument('--max-tasks', type=int, default=12)
@@ -2168,7 +2210,8 @@ def main():
             s.add_argument('--budget', type=float, default=60.0, help='USD for this run (default 60)')
             s.add_argument('--task', help='run only this task')
             s.add_argument('--dry-run', action='store_true', help='print the agent commands, run nothing')
-            s.add_argument('--push', action='store_true', help=f'push {BRANCH} to origin afterwards')
+            s.add_argument('--no-land', action='store_true',
+                           help='keep the work on auto/pilot only; do not land it on origin/main (decision 126)')
             s.add_argument('--fixer-model', choices=('opus', 'sonnet'),
                            help='model for board-fixers in this run (default opus); for trials, e.g. with --task')
             s.add_argument('--wait-for-limit', action='store_true',
