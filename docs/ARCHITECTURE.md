@@ -64,7 +64,7 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 
 ## Mechanics
 
-Same four non-plated M3 holes (H1–H4) for every mounting (decision 97). DIN rail: bare board on a plastic carrier, PCB edge-on to the rail, about 36 mm of rail per unit, in an enclosure the installer provides. Alternative: a 3D-printed vented ASA enclosure, also for flat mounting. Nothing conductive from carrier, screws or enclosure reaches board copper (invariant 6).
+Same four non-plated M3 holes (H1–H4) for every mounting (decision 97), one in each corner; both boards have the same length and the same hole spacing along the rail-side edge, with no copper and no parts within Ø 8 mm of each hole (decision 123). DIN mount: one solid printed ASA part on the two rail-side holes, or a long version also reaching the far corners along the short edges (65 / 75 mm depth), nylon M3 hardware (decision 123). DIN rail: bare board on a plastic carrier, PCB edge-on to the rail, about 36 mm of rail per unit, in an enclosure the installer provides. Alternative: a 3D-printed vented ASA enclosure, also for flat mounting. Nothing conductive from carrier, screws or enclosure reaches board copper (invariant 6).
 
 Connectors (decision 98): keyed plugs on right-angle sockets, hand-soldered, plugs pull away from the board edge. Exception for the pdm-4ch prototype: J10 is a fixed screw terminal, wire entry at the board edge (decision 121).
 

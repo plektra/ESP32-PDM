@@ -1,6 +1,8 @@
 # pdm-hc2 status
 
-Updated: 2026-11-07 (merge of auto/pilot: T-0179, T-0180, T-0185 after decisions 120, 121)
+Updated: 2026-11-08 (/system: decisions 122, 123)
+
+**2026-11-08 (/system tidy and mechanical, documents only):** decision 122: all SMT parts on the top side. Decision 123: M3 holes H1–H4 in the four corners, the same length and rail-side hole spacing on both boards, Ø 8 mm keep-out at each hole; the DIN mount is one printed ASA part on the two rail-side holes or all four. Cost review `docs/reviews/2026-11-07-cost-system-2.md`: first pdm-4ch order about 204 $ (about 220 $ with the fixture fee); T-0187 (C3 → C170101, shared sheet) queued. No schematic change.
 
 **2026-11-07 (T-0185: "For /system" sweep, unattended, documents only):** the ARCHITECTURE root row now names D7/R59, D8/R67 and J6 (decisions 113, 115, 116), and the Mechanics table has its own HC2 J10 row (C6394053 + C6394029, unchanged). No schematic change. Report: `docs/reviews/2026-11-07-fix-sync-T-0185.md`.
 
@@ -172,6 +174,9 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    **Decision 122 (cost lever L3):** all SMT parts on the top side; nothing SMT on the bottom (a double-sided
    Standard PCBA job costs 33.77 USD more per order). Through-hole connectors are hand-soldered and do not count.
    A bottom-side part needs an owner ruling.
+   **Decision 123 (mounting holes):** H1–H4 (M3, non-plated) in the four board corners; board length and the rail-side
+   hole spacing the same as on the other board (set at the first layout, pdm-4ch). No copper and no parts within
+   Ø 8 mm of each hole (nylon screw head and washer). The printed DIN mount fits the two rail-side holes, or all four.
 6. Cost lever: R1/R2 (2.2 k pull-downs on IO8/IO11, left over from the 4-ch drive) have no function here – remove
    in `/cost` or keep the controller part identical to `pdm-4ch`.
 

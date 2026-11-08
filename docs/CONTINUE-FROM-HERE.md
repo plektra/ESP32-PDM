@@ -23,7 +23,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
    and propose levers.
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
-4. **`/system mechanical`** – still open: DIN carrier and printed enclosure design, sample connector check. PCB can start once the samples pass.
+4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). Still open: the connector sample check (owner), then the DIN mount and enclosure as OpenSCAD files after layout. PCB can start once the samples pass.
 5. **`/board pdm-4ch pcb`**, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102).
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,

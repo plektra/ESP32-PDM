@@ -655,6 +655,8 @@ the box (`heat_budget.py --r-box 0 --ambient T`, estimates): 4-ch at 4 A Tj 107 
 300 × 200 × 120 mm plastic box rises roughly 0.75 K/W (rule of thumb), so three boards at full load in a 40 °C space give about
 60 °C: derate or vent. Board spacing and the tall blocks affect the assumed RthJA; measure on the prototype.
 
+**Mounting holes and DIN mount (decision 123, 2026-11-08).** H1–H4 sit in the four corners of each board. Both boards share the length and the hole spacing along the rail-side edge, so the short mount (two rail-side holes) fits both; the long mount also reaches the far corners and comes in 65 and 75 mm depths. The mount is one solid printed ASA part (Bambu P1S, enclosed, so ASA prints at home). Why the long version uses arms along the short edges rather than a plate: units sit side by side on the rail, so anything behind the board adds its thickness to every unit's pitch. The 34.8 mm of the 4-ch J10 (above) plus a 2 mm plate and 1 mm clearance gives about 38 mm, while arms at the edges, where no tall parts sit, keep about 36 mm. Ø 8 mm keep-out at each hole for a nylon M3 head and washer (M3 washer about 7 mm). The mount is drawn in OpenSCAD after layout.
+
 **Bare board rules (README).** The enclosure must keep out drips and loose metal, because an open board has unfused battery copper.
 Conformal coating is an option to consider for marine air.
 

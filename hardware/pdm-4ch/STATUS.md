@@ -1,6 +1,8 @@
 # pdm-4ch status
 
-Updated: 2026-11-07 (decision 121 J10 fixed terminal)
+Updated: 2026-11-08 (/system: decisions 122, 123)
+
+**2026-11-08 (/system tidy and mechanical, documents only):** decision 122: all SMT parts on the top side. Decision 123: M3 holes H1–H4 in the four corners, the same length and rail-side hole spacing on both boards, Ø 8 mm keep-out at each hole; the DIN mount is one printed ASA part on the two rail-side holes or all four. Cost review `docs/reviews/2026-11-07-cost-system-2.md`: first pdm-4ch order about 204 $ (about 220 $ with the fixture fee); T-0187 (C3 → C170101, shared sheet) queued. No schematic change.
 
 **2026-11-07 (decision 121, /system, `pdm-4ch` root sheet only):** J10 is now the fixed screw terminal **KF135T-10.16-2P C475108** (65 A UL / 57 A IEC, 10 mm², M4) for the prototype, because every flange-locking socket that fits is out of stock or thin at LCSC (C577772 0, C6394053 4). New footprint `ESP32-PDM:Kefa_KF135T-10.16-2P` from the Kefa drawing (`docs/part-facts/C475108.md`, design-notes connectors section). J10 fields only: Value, Footprint, Description, LCSC; `LCSC_Plug` removed. ERC 0 errors, 5 warnings (unchanged); netlist: 169 nets identical, 227 parts, only J10 fields differ; unique parts unchanged (C577772 out, C475108 in). No output changed, so the heat budget was not rerun. The T-0158 cross-board mis-plug question closes (no pdm-4ch battery plug). **A competent person reviews the battery path (J10, Q30/U30, D31) before installation.**
 
@@ -174,6 +176,9 @@ a competent person reviews F1–F4 and R54–R56 before installation.
    **Decision 122 (cost lever L3):** all SMT parts on the top side; nothing SMT on the bottom (a double-sided
    Standard PCBA job costs 33.77 USD more per order). Through-hole connectors are hand-soldered and do not count.
    A bottom-side part needs an owner ruling.
+   **Decision 123 (mounting holes):** H1–H4 (M3, non-plated) in the four board corners; board length and the rail-side
+   hole spacing the same as on the other board (set at the first layout, pdm-4ch). No copper and no parts within
+   Ø 8 mm of each hole (nylon screw head and washer). The printed DIN mount fits the two rail-side holes, or all four.
 7. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384
    and C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2.
 
