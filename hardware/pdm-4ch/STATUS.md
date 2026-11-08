@@ -152,9 +152,11 @@ a competent person reviews F1–F4 and R54–R56 before installation.
 
 ## Next
 
-1. Open in KiCad: tidy what the scripts placed (labels, part positions; the new parts in `analog_sw` and the
-   VBAT/NTC block at the bottom of the root sheet), run *Update Symbols from Library* (USB-C; keep Q3–Q6
-   on the BC817 symbol with value MMBT5551 – same pinout; keep Q30 on the IPT007N06N symbol with value AGM601LL – same pins), then ERC.
+1. **Do not run *Update Symbols from Library*, and do not save the schematics from KiCad 10 by hand** (2026-11-08):
+   a KiCad 10 save with a symbol update reset every Value/Footprint/LCSC field, merged GND_CAN into GND and renamed
+   SW_BOOT1/SW_RESET1, FL30, JP30. That copy is kept on the local branch `backup/kicad10-resave-2026-11-08`, never
+   merged. Schematic changes go through `tools/ksch.py` (agents), checked by ERC and the netlist compare; a KiCad 10
+   format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
 2. After `/emc pdm-4ch` and `/validate pdm-4ch deep`: fix findings.
 3. ~~Verify `Infineon_PG-TDSO-14_ThermalVias` against the JLCPCB footprint~~ done (T-0066). At the first order, check the
    CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°).

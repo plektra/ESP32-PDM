@@ -1551,6 +1551,6 @@ per part). Live stock 2026-11-08: 121 066.
 - [ ] Auxiliary sense-only inputs (1-2, same protected input circuit, spare GPIO) for pump-running /
       float-switch state
 - [ ] Load list with nameplate currents (VHF, FM radio, wipers incl. park circuit, bilge pumps, work lights)
-- [ ] Update Symbols from Library in KiCad (USB-C symbols; LMR51610 done in T-0066; Q3–Q6 use the BC817 symbol with value
-      MMBT5551 – same SOT-23 pinout 1 B / 2 E / 3 C – keep that when updating)
+- [x] ~~Update Symbols from Library in KiCad~~ dropped 2026-11-08: in KiCad 10 it reset every field and merged GND_CAN
+      into GND (pdm-4ch STATUS "Next" 1). The symbols stay as they are; Q3–Q6 keep the BC817 symbol with value MMBT5551.
 - [ ] Remaining checks from the BOM audit: Kangnex CAN connector footprint, PESD2CAN pinout
