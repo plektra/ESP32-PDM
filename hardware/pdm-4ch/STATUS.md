@@ -241,4 +241,4 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - RIS at the 40 mA maximum fault current: 0.8 W in two 0.25 W parts since T-0107, covered only by firmware; hardware
   cover needs a resistor of at least the fault power – owner decision if wanted.
 
-- DIN carrier and printed enclosure design: `/system mechanical`.
+- Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).

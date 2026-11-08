@@ -595,7 +595,7 @@ reviews this before installation.
 
 ## 7. Mechanics and connectors
 
-Decision 97 (amends decision 10). The board mounts two ways on the same four non-plated M3 holes H1–H4:
+Decision 97 (amends decision 10), refined by decision 123 (corner holes, shared length and rail-side hole spacing, one printed ASA mount; see "Mounting holes and DIN mount" below). The board mounts two ways on the same four non-plated M3 holes H1–H4:
 
 - **DIN rail, no enclosure of its own:** bare board on a plastic carrier, PCB edge-on to the rail, about 65 mm (4-ch) / 75 mm (HC2) deep and up to 100 mm long (decision 98), in an enclosure the
   installer provides. One enclosure can hold several units. The carrier and its screws never reach board copper, because the
@@ -960,7 +960,7 @@ L78M05ABDT (ST DS0425 Rev 24):
 - Heat: (16 − 0.4 − 5) V × 45 mA ≈ 0.48 W normal traffic (same as the TPS7B91 plus 0.07 W from I_d). R_θJA 100 K/W (DPAK,
   Table 2) gives +48 K, so ≈ 98 °C at 50 °C enclosure air (T_J max 125 °C). Copper under the tab lowers that.
 - **DPAK area:** body ≈ 6.6 × 6.1 mm plus leads, footprint ≈ 10.4 × 6.7 mm, against ≈ 3 × 3 mm for SOT-23-5. This is for
-  `/system mechanical` (decisions 97, 98: no module width limit; board size set at layout).
+  `/system mechanical` (decisions 97, 98: no module width limit; board depth set at layout, the length and the rail-side hole spacing shared by both boards, decision 123).
 
 **USB service port (T-0014, Q-0008).**
 - README: USB-C is a service port only (battery-powered laptop or USB isolator).

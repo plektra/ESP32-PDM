@@ -2,7 +2,7 @@
 
 Updated: 2026-11-08 (/system: decisions 122, 123)
 
-**2026-11-08 (/system tidy and mechanical, documents only):** decision 122: all SMT parts on the top side. Decision 123: M3 holes H1–H4 in the four corners, the same length and rail-side hole spacing on both boards, Ø 8 mm keep-out at each hole; the DIN mount is one printed ASA part on the two rail-side holes or all four. Cost review `docs/reviews/2026-11-07-cost-system-2.md`: first pdm-4ch order about 204 $ (about 220 $ with the fixture fee); T-0187 (C3 → C170101, shared sheet) queued. No schematic change.
+**2026-11-08 (/system tidy and mechanical, documents only):** decision 122: all SMT parts on the top side. Decision 123: M3 holes H1–H4 in the four corners, the same length and rail-side hole spacing on both boards, Ø 8 mm keep-out at each hole; the DIN mount is one printed ASA part on the two rail-side holes or all four. Cost review `docs/reviews/2026-11-07-cost-system-2.md`: first pdm-4ch order about 204 $ (about 220 $ with the fixture fee); T-0187 (C3 → C170101, shared sheet) and T-0188 (R105/R205 → C17927, cost lever L6) queued. No schematic change.
 
 **2026-11-07 (T-0185: "For /system" sweep, unattended, documents only):** the ARCHITECTURE root row now names D7/R59, D8/R67 and J6 (decisions 113, 115, 116), and the Mechanics table has its own HC2 J10 row (C6394053 + C6394029, unchanged). No schematic change. Report: `docs/reviews/2026-11-07-fix-sync-T-0185.md`.
 
@@ -242,4 +242,4 @@ R71/R72 go between D9 and U5 (D9 at J4).
   with the float circuit, that opens before the float fuse. Add this to the README next to the external breaker of
   decision 39; a competent person reviews the bilge wiring before installation.
 
-- DIN carrier and printed enclosure design: `/system mechanical`.
+- Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).
