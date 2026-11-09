@@ -2,6 +2,27 @@
 
 Updated: 2026-11-08 (/board pcb: decision 127)
 
+**2026-11-09 (T-0199, layout stage 3, unattended):** all remaining parts are placed and nothing is parked.
+- **Signal edge:** J5 and its protection cluster moved 7.4 mm toward the front, and J4 sits below it (pin 1 at the rail
+  end, 0.6 mm courtyard gap, both between the H2 and H4 keep-outs). The SW_SUPPLY chain turns down to F4, which is
+  unchanged.
+- **U1:** at 69.25/9.75 with its antenna on the front edge in the signal-end corner. The keep-out strip x 46.5–92,
+  y 0–4.5 is clear, so channel 2 moved 2.6 mm toward the rail and its IS column was reshaped.
+- **Front corner:** D7/D8, the EN/IO0 parts and the LED-line caps. Below U1: C8/C10, the VBAT/NTC dividers and the
+  four LED sinks.
+- **USB:** J3 on the front edge in the power-end corner, with its ESD, CC and shield parts.
+- **Buck:** along the rail edge, from VS at D31 through F1 → R54 → D1/D2 → JP1 ‖ L2 → C1/C19/U3 (input loop about 3 mm,
+  no via) → L1 → C3.
+- **CAN:** one barrier block at J4 (PCB rule 9): U5 logic pins facing the board, a GND_CAN island x ≥ 78.1 / y ≥ 51.4
+  with D9, FL1, R71/R72, F3/R55/D10/FB2/D11/C13 and U6, and only C70 across the 13 mm band.
+- **Other parts:** the switch inputs on the logic side and the rail strip; J6 upright at 55.2/55.1 (a compromise,
+  35–55 mm from U1); SW_RESET1 below JP30 and SW_BOOT1 below J10; U30 at its reserved spot with TI_DDF0008A.
+- **Checks:** `kpcb drc` 0 errors, 403 warnings (silkscreen), 469 unconnected, parity 0; `fix_check` OK.
+- **Left for the next stages:** silkscreen labels "CAN"/"PANEL" and pin-1 marks, and copper: a short wide C8/C10 →
+  U1 pin 3 feed, the USB pair through the switch-row corridor, the barrier pours ≥ 8 mm apart, and the antenna strip
+  free of copper.
+- Details in design-notes §8.11 and `docs/reviews/2026-11-09-fix-pdm-4ch-T-0199.md`.
+
 **2026-11-09 (decision 138):** the board is 100 × 75 mm: bottom (rail) edge moved 10 mm down, H3/H4 and their keep-outs to y 71; stages 1–2 unchanged (`kpcb drc`: 0 errors, parity 0). Stage 3 (T-0199) is queued again; J5 moves up the signal edge so J4 fits below it.
 
 **2026-11-09 (layout stage 3 blocked, interactive):** U30 gets its own footprint `ESP32-PDM:TI_DDF0008A` from TI's DDF0008A example land (pads 1.05 × 0.45 mm, pitch 0.65, columns 2.6 mm; LM74500-Q1 drawing 4222047/E p. 27): KiCad's TSOT-23-8 has 0.5 mm pads with 0.15 mm gaps, below the 0.2 mm clearance. Schematic: U30 Footprint field only; netlist connectivity identical, ERC unchanged (0 errors, 5 warnings); board refreshed with `kpcb sync` (U30 replaced, still parked at its reserved spot 42.5/39.3). Stage 3 (T-0199) stopped because the 100 × 65 mm board is full and J5 + J4 (57 mm) do not fit the 49 mm between the signal-edge hole keep-outs – a floorplan error of decision 128 – owner question on the board depth.

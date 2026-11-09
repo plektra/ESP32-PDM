@@ -1624,6 +1624,90 @@ only and draws no copper. Widths and pours come with the power-copper stage.
 
   A competent person reviews the board before installation.
 
+### 8.11 pdm-4ch layout stage 3: logic half and all remaining parts (T-0199, 2026-11-09, auto)
+
+Coordinates are in mm from the top-left corner on the 100 × 75 mm board (decision 138): x = 0 is the power edge,
+x = 100 the signal edge, y = 0 the front and y = 75 the rail side. This stage places parts only and draws no copper.
+All SMT parts are on top. Nothing is parked.
+
+- **J5 / J4 on the signal edge.**
+  - J5 and its whole protection cluster moved 7.4 mm toward the front: D16–D19, D50–D54, R34–R37, C14–C17 and C54.
+    J5 pin 1 is now at y 46.1, and the courtyard spans y 8.9–49.0.
+  - J4 sits below J5, origin 93.3/63.9, rot 90. Pin 1 (GND_CAN) is at the rail end, the same direction as J5. Its
+    courtyard spans y 49.6–66.8.
+  - Both courtyards fit between the H2 and H4 keep-outs, which leave y 8–67. The gap between J5 and J4 is only
+    0.6 mm. The 59 mm edge leaves no more room for the 57.3 mm the two connectors need. The "CAN" and "PANEL" labels
+    and the pin-1 marks (decision 127 item 3) go to the silkscreen stage.
+  - D52 moved 1.3 mm toward the edge to clear U1's courtyard.
+  - The SW_SUPPLY chain now turns toward the rail: D54 and C54 at pin 5 (y 30.9), D55 at 68.5/30.9, R56 upright at
+    63.5/33.6, then F4, which is unchanged at 57.8/38.3 on the VS copper. It stays pad to pad in that order
+    (EMC 2026-11-07-2 rule 3).
+- **ESP32 U1** at 69.25/9.75, rot 0.
+  - The module's front edge is on the board edge, so the antenna is in the front signal-end corner (decision 128).
+  - Its keep-out (no copper, no parts, both layers) covers x 46.55–91.95, y 0–4.5 on the board. That strip is clear.
+  - 69.25 is the right-most x at which the keep-out stays out of H2's keep-out circle.
+- **Channel 2 adjustments** needed to clear the keep-out:
+  - U12, C201–C204, R201, R202, R205 and R206 moved 2.6 mm toward the rail.
+  - The IS/clamp parts form one column between U12 and the module: R204, D202, R203 and R207 (upright, parallel RIS
+    pair), with D201 below them.
+  - The OUT pins and the corridor between the switch rows are unchanged.
+- **Front signal corner** (x 77–91.5, y 4.5–17.5):
+  - D8/R67 and D7/R59 in a row at y 5.35, right behind the antenna strip, visible at the front edge.
+  - The EN parts C6/C9/R15 and the IO0 parts C7/R16 sit next to the right-hand pin column.
+  - The LED-line capacitors C50, C52 and C53 sit with R25/R28. C51/R22 sit in the gap of the even TVS column at pin 7.
+- **Below U1** (x 63.5–77, y 20–33):
+  - The 3V3 decoupling C8/C10, the VBAT_SENSE divider R60/R61/C60, the NTC parts R62/C61, R29/R42 (MOD_ID), and
+    R58 (SW_SENSE_IO).
+  - The four LED sinks: Q3–Q6 with their base, pull-down and emitter resistors, and R19.
+  - U1's left pins face channel 2 with no room in between. C8/C10 therefore reach pin 3 over about 12 mm: route it as
+    a short wide 3V3 trace, with the GND return on the bottom plane.
+- **USB:** J3 at the front edge in the power-end corner (15.2/4.2, rot 180, receptacle outward).
+  - Around it: D4–D6 (ESD) and R11/R12 (CC) at the pins, R13/C18/R14 at the shield, and F2/FB1/C4/C5.
+  - The USB D+/D− pair runs to U1 IO19/IO20 through the corridor between the switch rows, at about 55 mm.
+  - VBUS reaches the buck through D3 at 26.5/58, whose cathode joins on the C1 side.
+- **Buck along the rail edge** (x 9–51, y 56–72), away from TH1, the ADC lines and J4 (rule 5 of 2026-10-30):
+  - Path: VS at D31's drain pad → F1 (48.2/62.2, VS pad toward D31) → R54 → D1 (clamp) / D2 → JP1 (29.3/61.2, an
+    outer-layer cut point) ‖ L2 (DNP, 6.8 mm body room at 29/68, its pads toward D2 and C1, about 11 mm from L1) → C1.
+  - C1 → C19 → U3, all upright: VIN pads in one row at y ≈ 61, GND pads at y ≈ 63.3. The input loop is about
+    3 × 6 mm with no via.
+  - U3 SW pad → L1 (13.2/62.2, SW pad toward U3) → C3.
+  - R44/C20 (snubber) and C2/R43 (boot) are at the SW/CB pins, and R9/R10 at FB.
+  - C22/R73 (DNP) are next to C1, outside the C1/C19/U3 loop.
+  - The VS → F1 → R54 copper is sized for the short-circuit pulse (≥ 0.6 mm at 2 oz, §8.3).
+- **CAN barrier block at J4 (PCB rule 9):**
+  - U5 at 71.5/56.5, rot 0. Logic pins 1–4 face the board (x 66.2), bus pins 5–8 face J4 (x 76.8).
+  - The GND_CAN island is x ≥ 78.1, y ≥ 51.4, up to J4 and the rail edge. The band x 65–78.1 from y 47.4 to the rail
+    edge holds no other part, so the GND and GND_CAN pours can stay ≥ 8 mm apart across the body.
+  - C70 (DNP Y-cap) is the only part across the band, at 71.5/61.7, right below U5.
+  - Bus side: D9 at J4 pins 3/4, then FL1 with R71/R72 beside it, then U5 pins 6/7.
+  - NET-S: J4.2 → F3 → R55 → D10 → FB2 → D11 → C13 → U6. U6 is a DPAK at 86.7/71.4 with the copper under its tab
+    on the island (≈ 0.5 W); C13 is at U6's input pin.
+  - C11/C12 are at U5 pin 8 (VCC2). U6's output reaches them over about 20 mm on the island.
+  - R70 (TXD pull-up) is on the logic side, at U5 pins 2/3.
+- **Switch inputs:**
+  - D12–D15, D20–D23, R30–R33, R38–R41, R1/R2/R5/R6, R3–R8/R45–R48 and the SW_SENSE detector (R49, R57, C21 at the
+    SW_SUPPLY end next to R56; D24) are on the logic side of the barrier and along the rail strip (x 42–65, y 52–75).
+  - Each SWn reaches them from C14–C17 down the strip between C31 and the barrier band. SW_INn runs from there to the
+    channel IN resistors.
+- **J6** (DNP service pads) stands upright at 55.2/55.1, pin 1 (GND) at the top, inside the board.
+  - It is a compromise. No 21 mm free strip exists next to U1. The front corner, the area below U1 and the J5 cluster
+    are full.
+  - Its traces run 35–55 mm from U1's right-hand pins. The routing stage keeps TXD0/RXD0/IO35–37 away from the switch
+    inputs and the CAN pair (EMC 2026-11-07 rule 4).
+- **Buttons:** SW_RESET1 sits at 39/56 below JP30, outside the J10 clear zone (x 20–35, y 33–56). SW_BOOT1 sits at
+  5/59, below J10 on the power edge, clear of H3. These are service buttons only.
+- **U30** is at its reserved spot, 42.5/39.3, rot 180, with the new TI_DDF0008A footprint. DRC gives no clearance
+  error.
+- **Safety:**
+  - No battery-path or output part moved. The new parts on the battery side are only F1/R54/D1/D2, which feed the buck
+    from VS.
+  - F1 caps a fault in the buck chain at 0.5 A (hold), and D1 clamps behind it.
+  - The buck sits on the rail edge, away from the switches' heat.
+  - The routing stage must keep ≥ 1 mm creepage from VS/VBAT_FL (F1 VS pad, D31) to the switch-input parts at
+    x 42–53.
+
+  A competent person reviews the board before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
