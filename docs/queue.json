@@ -6571,7 +6571,7 @@
       "id": "T-0200",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-08",
       "title": "Power copper: pours and wide paths",
       "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Draw the high-current copper: VBAT_IN, VBAT_FL and VS as wide pours on both layers sized for 16 A in 2 oz copper, the output paths to J11, GND pours, Q30 drain copper ≥ 2 cm², PROFET tab copper with thermal vias, the surge loop switches → VS → D30 short and wide; no copper across the CAN barrier or in the antenna or hole keep-outs. Use `kpcb zone` / `track` / `via`.",
@@ -6579,7 +6579,32 @@
       "depends_on": [
         "T-0199"
       ],
-      "placed": true
+      "placed": true,
+      "started": "2026-11-09T20:13:19",
+      "ran_model": "opus",
+      "session": "f12196ef-2d73-448a-840f-b36536dd15b5",
+      "cost_usd": 4.337,
+      "attempts": 1,
+      "refs": [
+        "C70"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-09",
+      "note": null,
+      "summary": "0 fixed, 0 blocked, merged 4c911f85; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-09-fix-pdm-4ch-T-0200.md"
     },
     {
       "id": "T-0201",
