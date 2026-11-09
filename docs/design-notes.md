@@ -1571,6 +1571,59 @@ outside the circle's whole y range.
 
   A competent person reviews the board before installation.
 
+### 8.10 pdm-4ch layout stage 2: power path and output channels (T-0198, 2026-11-09, auto)
+
+Coordinates as in §8.9 (mm from the top-left corner, x = 0 power edge, y = 65 rail side). This stage places parts
+only and draws no copper. Widths and pours come with the power-copper stage.
+
+- **Battery path along the rail side**, behind the J10 clear zone (x 20–35, y 33–56, kept free):
+  - J10.1 → D30/C30 (stage 1) → **JP30** at 38.1/47.0, rot 180: VBAT_IN pad toward J10, VBAT_FL pad toward Q30. Its
+    courtyard starts at x 35.1, just outside the clear zone.
+  - VBAT_IN copper crosses the clear zone as copper only, with no parts. FL30 has no footprint yet (decide at
+    pre-compliance, STATUS rule 6), so JP30's spot is where the FL30 land would go.
+  - **Q30** at 48.2/47.0, rot 0: gate and source pins on the left toward JP30; the drain tab (VS) on the right at
+    x ≈ 52 toward C31 and up toward the switches.
+  - **D31** directly below, at 48.2/56.2, rot 0. Its VBAT_FL pad (x 44.8) sits under the source pins and its VS pad
+    (x 51.6) under the drain tab, so it spans the FET on the shortest path, inside the VS loop.
+  - **C31** (100 µF) at 60.9/47.0, rot 0, with its VS pad toward the drain (EMC 2026-11-03-2 rule 10).
+  - **C32** at 42.5/35.9, at U30's VCAP/SOURCE end, well away from the drain tab.
+- **Copper room at Q30's drain.** About x 44–60, y 34–43 is free between Q30, the switch block and F4 (F4.1 is VS too),
+  plus the tab and the C31 pad: more than 2 cm² on the top layer alone. The bottom layer under Q30 and the switches is
+  free for VS or GND as the copper stage decides.
+- **Four BTT6050 channels in a 2×2 grid, spread for heat.** Pitch is about 19 mm across and 17–19 mm along.
+  - U11 (OUT1) 32/9.2, U12 (OUT2) 51/9.2, U14 (OUT4) 32/25.8, U13 (OUT3) 51/27.8.
+  - All at rot 180: the OUT pins (10–12) face J11, and the logic pins (GND, IN, DEN, IS) face the logic half.
+  - Each OUT reaches its J11 pin without crossing another output. OUT1 and OUT4 run straight left. OUT2 and OUT3 run
+    in the 4–7 mm corridor between the rows (y ≈ 14–19) to J11 pins 2/3 at y 17.1/22.2.
+- **Per-channel parts** (n = 1–4), offsets from the switch centre:
+  - C_n04 2.2 µF and C_n03 100 nF side by side at the tab end away from the corridor (front end for the front row,
+    rail end for the rear row). Their VS pads sit on the strip between the pin rows, which is where the exposed VS pad
+    is reachable on the top layer (STATUS rule: C104–C404 at the VS tab).
+  - OUT side: C_n02 10 nF and the DNP R_n06 above and below the OUT pin group, so the OUT copper leaves the pins
+    sideways unobstructed.
+  - Logic side: R_n05 22 Ω, R_n01 (IN), R_n02 (DEN) and C_n01 (IS, 100 pF) in a column at the pins.
+  - Also on the logic side: D_n01 below; the RIS pair R_n03 ‖ R_n07 (1206) beside; R_n04 and the clamp D_n02 at the
+    IO end, toward the logic half.
+- **TH1** at 45.2/33.9, at the rail-end tab of U13. U13 is the hottest place: the inner rear switch next to Q30 and C31,
+  and the one fed first from the drain copper.
+- **U30 is not placed (blocked, two-way).** The stock KiCad `Package_TO_SOT_SMD:TSOT-23-8` has 0.50 mm pads at
+  0.65 mm pitch, so the pad gaps are 0.15 mm. That is below the board's 0.2 mm clearance and the JLCPCB 2 oz spacing,
+  so DRC gives 6 errors. TI's DDF land (pre-order checklist) uses 0.45 mm pads with a 0.2 mm gap. A footprint change
+  is a schematic/lib edit for a board-fixer.
+  - Reserved spot: 42.5/39.3, rot 180. VCAP/SOURCE pins 4/5 face C32 above; GATE pin 6 is about 4 mm from Q30's gate
+    pad; SOURCE pin 1 is next to the Q30 source pins.
+- **Safety (battery input, outputs that may feed a bilge pump or navigation lights).**
+  - The load current runs J10 → JP30 → Q30 → VS along the rail edge, away from the logic half. The output surge path
+    OUT → body diode → VS → D30 stays on one side of the board and is short (≈ 40 mm from the switches to D30).
+  - Q30's drain and the four tabs share one connected VS area. The power-copper stage must make it wide on both layers
+    and keep ≥ 1 mm creepage from VS/VBAT_IN to other nets (EMC 2026-11-03 rule 7).
+  - C31 sits next to Q30 (Tj ≈ 66–80 °C at 16 A). If its case runs above the 65 °C behind the life figure of §8.1, it
+    ages faster; check it in the thermal prototype test.
+  - No VS MLCC is near a hole or a screw. The front-row C_n03/C_n04 are about 2 mm from the front edge, which is not a
+    mounting edge.
+
+  A competent person reviews the board before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
