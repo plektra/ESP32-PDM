@@ -2,6 +2,8 @@
 
 Updated: 2026-11-08 (/board pcb: decision 127)
 
+**2026-11-09 (decision 150):** the board is 4 layers (F.Cu/B.Cu 2 oz, In1/In2 0.5 oz, 1.6 mm, JLCPCB stack-up in the board file). Stages 1–4 stay; the 2-layer routing stage T-0201 is superseded. Queued: T-0205 (In1 GND plane split at the CAN barrier, In2 VS under the switches, stitching and thermal vias), T-0206 (routing on 4 layers), then T-0202 (silkscreen) and the EMC and validator reviews.
+
 **2026-11-09 (T-0200, layout stage 4 – power copper, unattended):** the high-current copper is drawn as 18 zones and 103 vias, with a few short stubs.
 - **Battery path:** VBAT_IN is a pour on both layers from both J10.1 pins through D30/C30 to JP30 (about 3.4 cm² per layer, stitched with 36 vias). VBAT_FL is a pour on both layers over the Q30 source pins, JP30.1, D31's anode and U30 pin 1.
 - **VS:** top VS pour of 2.67 cm² on Q30's drain tab (rule ≥ 2 cm²), with C31, F4, C304/C303, D31 and F1 on it. The surge loop switches → VS → D31/Q30 → D30 stays on one compact area.
@@ -307,6 +309,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
+- Decision 150: cost reviews still price pdm-4ch as 2 layers; the owner's quote is €43.95 for 5 boards (4 layers, 100 × 75 mm). ARCHITECTURE Mechanics/Budgets: note 4 layers.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
 - T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.

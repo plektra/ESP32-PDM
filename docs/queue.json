@@ -6610,7 +6610,7 @@
       "id": "T-0201",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-08",
       "title": "Route all remaining connections",
       "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Route every remaining connection with `kpcb track`/`via` (signal 0.25 mm or wider, power per the rules); short loops for the buck and the CAN lines as a pair; no routing under the isolation barrier or in the keep-outs. Finish with 0 unconnected and 0 DRC errors.",
@@ -6625,17 +6625,9 @@
       "session": "e878d24a-dde8-4d8c-89cc-b308c9b7f2de",
       "cost_usd": 6.3329,
       "attempts": 1,
-      "resume": {
-        "session": "e878d24a-dde8-4d8c-89cc-b308c9b7f2de",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0201",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0201-h8r_tr1g",
-        "report": "docs/reviews/2026-11-09-fix-pdm-4ch-T-0201.md",
-        "head": "466e51db948e5b9153f54b89eb1a73b05017736e",
-        "reason": "an interruption"
-      },
       "finished": "2026-11-09",
       "note": "no report written (aborted_tools): ",
-      "summary": "interrupted, queued again, resumes where it stopped",
+      "summary": "superseded: 4 layers (decision 150), routed again by a new stage",
       "interrupted": true
     },
     {
@@ -6648,7 +6640,7 @@
       "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Silkscreen: BATTERY and polarity at J10, function labels and pin 1 at every connector, PANEL and CAN at J5/J4, the board name, version and date. References readable, nothing on pads. Refill zones; 0 DRC errors, 0 unconnected, then record in STATUS.md what the layout does and what the bring-up should check.",
       "items": [],
       "depends_on": [
-        "T-0201"
+        "T-0206"
       ],
       "placed": true,
       "final": true
@@ -6676,6 +6668,35 @@
       ],
       "focus": "pcb: the layout against the schematic, the heat budget copper and the rules",
       "deep": true
+    },
+    {
+      "id": "T-0205",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-09",
+      "placed": true,
+      "title": "4-layer planes and stitching vias",
+      "items": [],
+      "depends_on": [
+        "T-0200"
+      ],
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. The board is now 4 layers (decision 150): F.Cu and B.Cu 2 oz, In1.Cu and In2.Cu 0.5 oz. In1.Cu: a solid GND plane under the whole GND side; GND_CAN its own In1 area on the CAN side of U5, the gap between them at least the barrier spacing of PCB rule 9, and no copper on any layer under U5 between pins 1–4 and 5–8. In2.Cu: VS under the four switches and Q30's drain (heat spreading, low-impedance VS for the surge path to D30), the rest GND, with room left for routing. Nothing in the antenna or hole keep-outs on any layer. Stitching vias: GND vias along the board edges and around the buck and the ESP32 about every 5 mm, thermal vias under each PROFET tab and Q30's drain into the VS copper, the outer GND pours tied to In1. The 16 A paths stay on the outer 2 oz copper; the 0.5 oz inner layers carry no load current. Refill zones; 0 DRC errors. Record the plane plan in design-notes."
+    },
+    {
+      "id": "T-0206",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-09",
+      "placed": true,
+      "final": true,
+      "title": "Route all remaining connections on 4 layers",
+      "items": [],
+      "depends_on": [
+        "T-0205"
+      ],
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Route every remaining connection on the 4-layer board: signals on F.Cu/B.Cu (In2.Cu where it is free), every ground pin by a short via to the In1 GND plane, CAN H/L as a pair over GND_CAN, USB D+/D- as a pair, the buck loop on the top only, nothing across the CAN barrier on any layer, nothing in the keep-outs. An autorouter (Freerouting, as the earlier 2-layer attempt T-0201 did) is fine with the planes and power copper protected. Finish with 0 unconnected and 0 DRC errors."
     }
   ],
   "board_size_start": {
