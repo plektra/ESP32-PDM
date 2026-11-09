@@ -1708,6 +1708,113 @@ All SMT parts are on top. Nothing is parked.
 
   A competent person reviews the board before installation.
 
+### 8.12 pdm-4ch layout stage 4: power copper (T-0200, 2026-11-09, auto)
+
+Coordinates are in mm from the top-left corner (x = 0 power edge, y = 0 front, y = 75 rail side), as in §8.11. The
+copper is 2 oz on both layers. All copper is drawn as zones with `kpcb zone`, plus vias and a few short stubs.
+
+**Priorities and clearances.**
+
+| Nets | Priority | Clearance | Pad connection |
+|---|---|---|---|
+| VS | 6 (bottom front and rear bands 7) | 1.0 mm | solid |
+| VBAT_IN | 5 | 1.0 mm | thermal, 1.5 mm spokes (J10 is hand-soldered) |
+| VBAT_FL | 5 | 1.0 mm | solid |
+| OUT1–OUT4 | 4 | 0.4 mm | OUT2–OUT4 thermal, 1.0 mm spokes; OUT1 solid |
+| GND_CAN | 2 | 0.3 mm | solid |
+| GND | 1 | 0.3 mm | solid |
+
+- The 1.0 mm clearance meets EMC rule 7 (2026-11-03) for poured copper. The only closer spacings are the pad gaps
+  inside the part footprints (PROFET tab to pins, 0.3 mm).
+- GND and OUT1 are solid because thermal reliefs left many small pads with a single spoke ("starved" DRC errors).
+  GND carries no load current on this board (the loads return to the battery outside the board), so solid joints cost
+  nothing electrically.
+- Every pour stays 1 mm inside the board edge.
+
+**Battery path.**
+
+- VBAT_IN covers x 5–37.6, y 34.6–45.3 (to y 48.8 at JP30) on both layers.
+  - It joins both J10.1 pins, the D30 cathode and the C30 pad, and ends at JP30.2.
+  - 36 vias stitch the layers, most of them in the J10 clear zone, where copper is allowed but parts are not.
+  - About 3.4 cm² per layer, at least 10 mm wide: well above what 16 A needs.
+- JP30 is the 2 × 2 mm net-tie bar between the two pads, top layer only. That is one square of 2 oz copper,
+  ≈ 0.25 mΩ: 64 mW at 16 A, sunk into the pours on both sides.
+  - The STATUS rule asks for a bridge "as wide as the VS copper on both layers". That needs a new net-tie footprint
+    (a lib/schematic change), which is not needed for current or heat. It is recorded for a later revision or the
+    FL30 decision at pre-compliance.
+- VBAT_FL is on both layers:
+  - Top: x 38.6–45.7, y 44.2–52.6, then x 43.1–46.3 down to y 58.6 for D31's anode.
+  - Bottom: x 38.6–45.4, y 34.6–58.6, under U30/C32 too. U30 pin 1 joins through a via. U30 pin 5 and C32 are left
+    for routing.
+  - 10 stitching vias.
+- The VS pour on top is 2.67 cm² including the drain tab (rule ≥ 2 cm², decision 104):
+  - It covers x 46.3–58.3, y 32.3–41.9 above the tab and reaches C304/C303 and F4.1.
+  - East of the tab it takes in C31.1 (to x 60.8).
+  - Below the tab it covers D31's cathode, and a strip runs to F1.1.
+  - D31 spans source and drain inside the VS loop, with ≥ 1 mm between the VBAT_FL and VS pours.
+- The surge loop (OUT → body diode → VS → Q30 → JP30 → D30) runs on this pour and the VBAT_IN pour. About 40 mm from
+  the switches to D30, and no narrower than the 3.2 mm bottom bands.
+
+**VS to the switches (bottom).**
+
+- The spine is x 45.5/46.5–55, y 5–58.7, widening to x 61 between y 35 and 52.8. It lies under U12, U13, Q30, D31
+  and C31.
+- The front band (y 1.2–6, x 27.4–45.9) and its stripe under U11 (x 29.4–36) feed U11. The rear band (y 30–33.4) and
+  its stripe under U14 (x 26.5–36) feed U14.
+- Each band is ≥ 3.2 mm of 2 oz copper for one 4 A channel. The spine (≈ 9 mm) carries U11 and U12.
+- 40 vias of 0.8/0.4 mm join the top drain pour to the spine, ≈ 0.4 A each at 16 A.
+- The PROFET tab heat goes down through the ten footprint thermal vias of each switch into these areas. Total VS
+  bottom copper is ≈ 11 cm².
+- The front-row caps C104/C103/C204/C203 and the rear-row C404/C403 reach the bottom VS through a via next to their
+  VS pad. C203 also has a short stub straight to U12's tab.
+- The bottom between the switches stays GND: the corridor between the rows and the logic sides of U11/U14. It joins
+  the main GND plane at the west, so the switch logic parts have their ground returns there.
+
+**Outputs.**
+
+- OUT1:
+  - A bottom band, y 8.9–11.6, from J11.1 to x 28.4.
+  - Four vias go up to a top patch on U11's OUT pins.
+  - J11.1 and D103.2 share a top patch.
+- OUT2 and OUT3 run on top through the corridor between the switch rows:
+  - OUT2 is about 1.7 mm wide at its narrowest point, by D101 and D203.
+  - OUT3 goes down a strip beside C302 that is about 1.2 mm wide (x 44.6–45.8) to U13's pins.
+  - Both widths are enough for the 4 A rating in 2 oz copper over a few mm.
+- OUT4 runs on top below D403.
+- Each output passes over its DNP TVS pad (invariant 4: the TVS sits on the OUT copper at J11). The TVS GND pads have
+  their own via into the bottom GND.
+- Bottom GND reaches J10.2 through a 3 mm strip along the power edge (x 1–4, west of the J10 pins). This is the
+  shortest return that does not cross VBAT_IN or the logic ground (EMC 2026-11-03 rule 1).
+
+**Barrier and keep-outs.**
+
+- GND pours stop at x 67.6. The GND_CAN island (both layers, solid for U6's tab) starts at x 75.7, so the gap is
+  8.1 mm across U5. Nothing crosses it under the body.
+- Between the J5 cluster (GND, y ≤ 47.4) and the J4 island (y ≥ 51.4) the gap is 4.0 mm. That is the PCB rule 9
+  minimum away from the body: J5 and J4 are only 0.6 mm apart (§8.11).
+- C70 is turned 180° so its GND pad faces the GND side and its GND_CAN pad faces the island. Two short stubs join
+  them.
+- The antenna strip (x 46.55–91.95, y 0–4.5) and the four Ø 8 mm hole keep-outs are copper-free on both layers
+  (checked on the filled zones).
+
+**Safety (battery input, outputs that may feed a bilge pump or navigation lights).**
+
+- The 16 A path never narrows below about 9 mm of 2 oz copper, except at:
+  - JP30 (2 mm, one square, 64 mW);
+  - the two single-channel bottom bands (≥ 3.2 mm, 4 A each).
+- Every pour of VBAT_IN, VBAT_FL and VS keeps ≥ 1 mm to every other net. A tin whisker or salt film therefore needs
+  more than 1 mm to short the battery.
+- Q30's drain copper meets the ≥ 2 cm² rule on the top layer alone, before the bottom spine.
+- Failure modes:
+  - A cracked C30, C31 or C_n04 MLCC still shorts the battery input. None of them sits near a hole, and C30 is
+    inside the J10 clear zone, away from the screws.
+  - An OUT neck (1.2–1.7 mm) carries a short-circuit current only for as long as the PROFET's current limit and
+    thermal shutdown let it, not continuously.
+  - The pulse rating of the necks against the BTT6050 short-circuit limit is not checked here. It is a validator
+    (pcb) item.
+
+  A competent person reviews the board, in particular the battery path and the outputs, before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
