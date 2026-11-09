@@ -873,6 +873,9 @@ def fix_gates(wt, t, base, after, block, changed, report):
     return fails
 
 
+Q_FOR_GATES = None  # the queue, so pcb_gates can see the owner's rulings on a package's items
+
+
 def kpcb(wt, board, *args):
     """tools/kpcb.py in a worktree; returns its first output line parsed as JSON (None on failure)."""
     r = subprocess.run([sys.executable, str(wt / 'tools' / 'kpcb.py'), board, *args], cwd=wt,
@@ -907,8 +910,10 @@ def pcb_gates(wt, t):
         fails.append(f"{len(d['parked'])} parts still off the board: {', '.join(d['parked'][:12])}")
     if t.get('final') and d['unconnected']:
         fails.append(f"{d['unconnected']} unconnected items left")
+    ruled = t.get('outline_ok') or any(find_task(Q_FOR_GATES, i).get('ruling') for i in t.get('items', [])
+                                       if Q_FOR_GATES and any(x['id'] == i for x in Q_FOR_GATES['tasks']))
     base = subprocess.run(['git', 'show', f'HEAD:{rel}'], cwd=wt, capture_output=True, text=True)
-    if base.returncode == 0:
+    if base.returncode == 0 and not ruled:
         tmp = wt / rel.with_name('.gate-base.kicad_pcb')
         tmp.write_text(base.stdout)
         try:
@@ -1079,6 +1084,38 @@ def apply_plan(q, t, plan):
                                    recheck=ROLES[role]['kind']))
     left = [i for i in items if i not in seen]
     return dict(packages=len(pkg_ids), deferred=deferred, decisions=numbers, unplanned=left)
+
+
+def stage_blocks(q, t, block, report):
+    """A pcb-fixer stage has no queued items of its own, so what it reports as blocked becomes new items: one-way
+    blocks are owner questions in the inbox, two-way blocks approved items for the planner (a board-fixer or
+    pcb-fixer package). A stage that could not pass its gates waits for them and then runs again. Returns the
+    new item ids."""
+    mine = set(t.get('items', []))
+    new = []
+    for b in block.get('blocked', []):
+        key = b.get('task') or b.get('id') or ''
+        if key in mine or not b.get('reason'):
+            continue
+        one_way = b.get('door') == 'one-way'
+        f = dict(id=key or f"{t['id']}-{len(new) + 1}", kind='question' if one_way else 'finding',
+                 severity='MAJOR', board=t['scope'], location=f"PCB layout ({t['id']})", door=b.get('door', 'two-way'),
+                 summary=b['reason'][:300], fix=b.get('question') or b['reason'], default=b.get('default'))
+        if any(x.get('finding', {}).get('summary') == f['summary'] for x in q['tasks'] if x.get('finding')):
+            continue  # already asked (a repeated attempt)
+        s = dict(id=new_id(q, 'T'), role='board-fix', scope=t['scope'], created=today(), finding=f,
+                 source=dict(report=str(report), finding=f['id']), door=f['door'])
+        if one_way:
+            s.update(state='blocked-owner', question=new_id(q, 'Q'),
+                     why_big=[f"layout stage {t['id']}: {b.get('reason', '')[:200]}"])
+        else:
+            s.update(state='parked')
+        q['tasks'].append(s)
+        new.append(s['id'])
+    if new:
+        t['waits_for'] = sorted(set(t.get('waits_for', [])) | set(new))
+        t['depends_on'] = sorted(set(t.get('depends_on', [])) | set(new))
+    return new
 
 
 def apply_fix(q, t, block, merged):
@@ -1301,6 +1338,10 @@ def run_task(q, t, budget_left, dry_run=False):
             result, merge_note = finish_fix(q, t, wt, sha, fix_paths, changed, got, block, gate_fails, sizes)
             notes += merge_note
             commit_paths.append(str(DECISIONS))
+            if spec.get('pcb') and block:
+                waits = stage_blocks(q, t, block, got)
+                if waits:
+                    notes.append(f"waits for {', '.join(waits)}")
         else:
             facts = keep_new_facts(wt, changed)  # fact sheets a reviewer had written are worth keeping
             commit_paths += facts
@@ -1348,7 +1389,11 @@ def run_task(q, t, budget_left, dry_run=False):
             summary += ', resumes where it stopped'
         else:
             t.pop('resume', None)
-        t.update(state='done' if result else 'ready' if paused or interrupted else 'failed', finished=today(),
+        waiting = result is None and bool(t.get('waits_for')) and not keep
+        if waiting:
+            summary = f"waits for {', '.join(t['waits_for'])} (blocked items), then runs again"
+            t.pop('resume', None)
+        t.update(state='done' if result else 'ready' if paused or interrupted or waiting else 'failed', finished=today(),
                  note='; '.join(notes) or None, summary=summary, interrupted=interrupted or None)
         if result:
             t['report'] = result['report']
@@ -2154,7 +2199,7 @@ def cmd_land(args):
 
 
 def cmd_run(args):
-    global WORKTREE, PDF_PY, FIXER_MODEL, NO_LAND
+    global WORKTREE, PDF_PY, FIXER_MODEL, NO_LAND, Q_FOR_GATES
     FIXER_MODEL = args.fixer_model
     if args.dry_run:  # touch nothing: read the queue where it is
         WORKTREE = state_root()
@@ -2170,7 +2215,7 @@ def cmd_run(args):
     land_now()  # work left on auto/pilot by an earlier run
     PDF_PY = pdf_python()
     print(f"PDF tools for agents: {PDF_PY or 'not available (agents use python3)'}", flush=True)
-    q = load_queue(WORKTREE)
+    q = Q_FOR_GATES = load_queue(WORKTREE)
     if 'board_size' not in q and any(t['role'] == 'board-fixer' for t in q['tasks']):
         print('measuring board size (once)…', flush=True)
         measure_sizes(q)

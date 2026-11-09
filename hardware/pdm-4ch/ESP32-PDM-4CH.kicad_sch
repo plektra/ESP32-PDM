@@ -11702,7 +11702,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_SMD:TSOT-23-8"
+		(property "Footprint" "ESP32-PDM:TI_DDF0008A"
 			(at 195.58 175.26 0)
 			(effects
 				(font

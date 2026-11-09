@@ -2,6 +2,8 @@
 
 Updated: 2026-11-08 (/board pcb: decision 127)
 
+**2026-11-09 (layout stage 3 blocked, interactive):** U30 gets its own footprint `ESP32-PDM:TI_DDF0008A` from TI's DDF0008A example land (pads 1.05 × 0.45 mm, pitch 0.65, columns 2.6 mm; LM74500-Q1 drawing 4222047/E p. 27): KiCad's TSOT-23-8 has 0.5 mm pads with 0.15 mm gaps, below the 0.2 mm clearance. Schematic: U30 Footprint field only; netlist connectivity identical, ERC unchanged (0 errors, 5 warnings); board refreshed with `kpcb sync` (U30 replaced, still parked at its reserved spot 42.5/39.3). Stage 3 (T-0199) stopped because the 100 × 65 mm board is full and J5 + J4 (57 mm) do not fit the 49 mm between the signal-edge hole keep-outs – a floorplan error of decision 128 – owner question on the board depth.
+
 **2026-11-09 (T-0198, layout stage 2, unattended):** placed the power path and the four output channels. The battery path runs along the rail side: J10 → D30/C30 → JP30 (38.1/47) → Q30 (48.2/47, drain tab toward C31 and the switches) with D31 directly under Q30, C31 at the drain and C32 above. The J10 clear zone x 20–35, y 33–56 stays free. U11/U12/U14/U13 sit in a 2×2 grid (about 19 × 18 mm pitch), OUT pins toward J11, each with its VS caps at the tab end, the OUT parts beside the OUT pins and the IN/DEN/IS/GND-network parts on the logic side. TH1 is at U13, the hottest place. There is room for more than 2 cm² of VS at Q30's drain. **Blocked (two-way, board-fixer): U30 stays parked.** Its stock `TSOT-23-8` footprint has 0.15 mm pad gaps (6 DRC clearance errors; 2 oz needs 0.2 mm; TI DDF land uses 0.45 mm pads). The spot is reserved at 42.5/39.3, rot 180. Logic half still parked. FL30 has no footprint. `kpcb drc` 0 errors on the board, parity 0; `fix_check` OK. Details in design-notes §8.10 and `docs/reviews/2026-11-08-fix-pdm-4ch-T-0198.md`.
 
 **2026-11-08 (T-0197, layout stage 1, unattended):**
@@ -255,7 +257,7 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0051 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IS2 network
   (design-notes §2).
 - T-0107/T-0120: C30 and C104–C404 use C170101 2.2 µF instead of C13832 1 µF. pdm-4ch no longer carries C13832, so its loading fee is gone; this pays on short runs only. Revisit the choice if runs grow past about 12 boards (owner ruling Q-0063). RIS is now 2 × C4410 per channel.
-- T-0121: check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30, pads 1 G / 2 S / 3 D) and `TSOT-23-8` (U30; TI DDF land
+- T-0121: check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30, pads 1 G / 2 S / 3 D) and `ESP32-PDM:TI_DDF0008A` (U30, since 2026-11-09; was `TSOT-23-8`; TI DDF land
   1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C5464765 and C5219210. Recheck stock (C5464765
   2016 on 2026-11-07, C5219210 2923 on 2026-11-03).
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
