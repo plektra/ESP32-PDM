@@ -6673,7 +6673,7 @@
       "id": "T-0205",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-09",
       "placed": true,
       "title": "4-layer planes and stitching vias",
@@ -6681,7 +6681,30 @@
       "depends_on": [
         "T-0200"
       ],
-      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. The board is now 4 layers (decision 150): F.Cu and B.Cu 2 oz, In1.Cu and In2.Cu 0.5 oz. In1.Cu: a solid GND plane under the whole GND side; GND_CAN its own In1 area on the CAN side of U5, the gap between them at least the barrier spacing of PCB rule 9, and no copper on any layer under U5 between pins 1–4 and 5–8. In2.Cu: VS under the four switches and Q30's drain (heat spreading, low-impedance VS for the surge path to D30), the rest GND, with room left for routing. Nothing in the antenna or hole keep-outs on any layer. Stitching vias: GND vias along the board edges and around the buck and the ESP32 about every 5 mm, thermal vias under each PROFET tab and Q30's drain into the VS copper, the outer GND pours tied to In1. The 16 A paths stay on the outer 2 oz copper; the 0.5 oz inner layers carry no load current. Refill zones; 0 DRC errors. Record the plane plan in design-notes."
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. The board is now 4 layers (decision 150): F.Cu and B.Cu 2 oz, In1.Cu and In2.Cu 0.5 oz. In1.Cu: a solid GND plane under the whole GND side; GND_CAN its own In1 area on the CAN side of U5, the gap between them at least the barrier spacing of PCB rule 9, and no copper on any layer under U5 between pins 1–4 and 5–8. In2.Cu: VS under the four switches and Q30's drain (heat spreading, low-impedance VS for the surge path to D30), the rest GND, with room left for routing. Nothing in the antenna or hole keep-outs on any layer. Stitching vias: GND vias along the board edges and around the buck and the ESP32 about every 5 mm, thermal vias under each PROFET tab and Q30's drain into the VS copper, the outer GND pours tied to In1. The 16 A paths stay on the outer 2 oz copper; the 0.5 oz inner layers carry no load current. Refill zones; 0 DRC errors. Record the plane plan in design-notes.",
+      "started": "2026-11-09T23:22:52",
+      "ran_model": "opus",
+      "session": "cc95017a-5de4-414d-8273-b37391ed311e",
+      "cost_usd": 2.4376,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-09",
+      "note": null,
+      "summary": "0 fixed, 0 blocked, merged 83a4c8b8; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-09-fix-pdm-4ch-T-0205.md"
     },
     {
       "id": "T-0206",
