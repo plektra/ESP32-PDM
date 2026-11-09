@@ -2,6 +2,8 @@
 
 Updated: 2026-11-08 (/board pcb: decision 127)
 
+**2026-11-09 (decision 131):** the board is 100 × 75 mm: bottom (rail) edge moved 10 mm down, H3/H4 and their keep-outs to y 71; stages 1–2 unchanged (`kpcb drc`: 0 errors, parity 0). Stage 3 (T-0199) is queued again; J5 moves up the signal edge so J4 fits below it.
+
 **2026-11-09 (layout stage 3 blocked, interactive):** U30 gets its own footprint `ESP32-PDM:TI_DDF0008A` from TI's DDF0008A example land (pads 1.05 × 0.45 mm, pitch 0.65, columns 2.6 mm; LM74500-Q1 drawing 4222047/E p. 27): KiCad's TSOT-23-8 has 0.5 mm pads with 0.15 mm gaps, below the 0.2 mm clearance. Schematic: U30 Footprint field only; netlist connectivity identical, ERC unchanged (0 errors, 5 warnings); board refreshed with `kpcb sync` (U30 replaced, still parked at its reserved spot 42.5/39.3). Stage 3 (T-0199) stopped because the 100 × 65 mm board is full and J5 + J4 (57 mm) do not fit the 49 mm between the signal-edge hole keep-outs – a floorplan error of decision 128 – owner question on the board depth.
 
 **2026-11-09 (T-0198, layout stage 2, unattended):** placed the power path and the four output channels. The battery path runs along the rail side: J10 → D30/C30 → JP30 (38.1/47) → Q30 (48.2/47, drain tab toward C31 and the switches) with D31 directly under Q30, C31 at the drain and C32 above. The J10 clear zone x 20–35, y 33–56 stays free. U11/U12/U14/U13 sit in a 2×2 grid (about 19 × 18 mm pitch), OUT pins toward J11, each with its VS caps at the tab end, the OUT parts beside the OUT pins and the IN/DEN/IS/GND-network parts on the logic side. TH1 is at U13, the hottest place. There is room for more than 2 cm² of VS at Q30's drain. **Blocked (two-way, board-fixer): U30 stays parked.** Its stock `TSOT-23-8` footprint has 0.15 mm pad gaps (6 DRC clearance errors; 2 oz needs 0.2 mm; TI DDF land uses 0.45 mm pads). The spot is reserved at 42.5/39.3, rot 180. Logic half still parked. FL30 has no footprint. `kpcb drc` 0 errors on the board, parity 0; `fix_check` OK. Details in design-notes §8.10 and `docs/reviews/2026-11-08-fix-pdm-4ch-T-0198.md`.
@@ -274,5 +276,6 @@ R71/R72 go between D9 and U5 (D9 at J4).
   cover needs a resistor of at least the fault power – owner decision if wanted.
 
 - Decision 127 (`/system mechanical`): the rail pitch is a soft goal, not a constraint. ARCHITECTURE Mechanics and decisions 97/123 still say "about 36 mm"; reword it as a target. Decision 123's arms-instead-of-plate choice for the long DIN mount was made for the 36 mm and may be revisited.
+- Decision 131: ARCHITECTURE Mechanics and decision 123's two mount depths (65/75 mm) – both boards are now 100 × 75 mm, one long DIN mount. Sync in `/system`.
 - Decision 128: ARCHITECTURE Mechanics still says "length up to 100 mm, set at layout"; now 100 mm on both boards, H1–H4 4 mm from both edges, rail-side hole spacing 92 mm. Sync in `/system`.
 - Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).

@@ -6368,10 +6368,10 @@
       "id": "T-0199",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "failed",
+      "state": "ready",
       "created": "2026-11-08",
       "title": "Place the logic half and all remaining parts",
-      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Place everything still parked: the ESP32 with its antenna at the front corner of the signal end and its keep-out clear of copper, the buck (tight C1/C19/U3 loop, L2/JP1 position before C1), USB J3, the CAN transceiver across its isolation gap (PCB rule 9), the analog_sw parts near J5, J6 service pads inside the board, D7/D8 visible. No part may stay off the board.",
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Place everything still parked: the ESP32 with its antenna at the front corner of the signal end and its keep-out clear of copper, the buck (tight C1/C19/U3 loop, L2/JP1 position before C1), USB J3, the CAN transceiver across its isolation gap (PCB rule 9), the analog_sw parts near J5, J6 service pads inside the board, D7/D8 visible. No part may stay off the board. Since decision 131 the board is 100 × 75 mm (rail edge 10 mm lower, H3/H4 at y 71): move J5 up the signal edge so J4 fits below it between the H2 and H4 keep-outs, then place the CAN block as one barrier block at J4 (PCB rule 9). U30 now has the footprint TI_DDF0008A; place it at its reserved spot. The earlier attempt's report is docs/reviews/2026-11-09-fix-pdm-4ch-T-0199-rejected.md – reuse its placement reasoning.",
       "items": [],
       "depends_on": [
         "T-0198"
@@ -6383,8 +6383,8 @@
       "cost_usd": 14.416,
       "attempts": 1,
       "finished": "2026-11-09",
-      "note": "repair 1: 18 parts still off the board: C11, C12, C13, C70, D10, D11, D9, F3, FB2, FL1, J4, J6; repair 2: 18 parts still off the board: C11, C12, C13, C70, D10, D11, D9, F3, FB2, FL1, J4, J6; gates failed: 18 parts still off the board: C11, C12, C13, C70, D10, D11, D9, F3, FB2, FL1, J4, J6; report kept as docs/reviews/2026-11-09-fix-pdm-4ch-T-0199-rejected.md",
-      "summary": "failed",
+      "note": null,
+      "summary": null,
       "interrupted": null
     },
     {
