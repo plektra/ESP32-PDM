@@ -2,6 +2,24 @@
 
 Updated: 2026-11-08 (/board pcb: decision 127)
 
+**2026-11-09 (T-0200, layout stage 4 – power copper, unattended):** the high-current copper is drawn as 18 zones and 103 vias, with a few short stubs.
+- **Battery path:** VBAT_IN is a pour on both layers from both J10.1 pins through D30/C30 to JP30 (about 3.4 cm² per layer, stitched with 36 vias). VBAT_FL is a pour on both layers over the Q30 source pins, JP30.1, D31's anode and U30 pin 1.
+- **VS:** top VS pour of 2.67 cm² on Q30's drain tab (rule ≥ 2 cm²), with C31, F4, C304/C303, D31 and F1 on it. The surge loop switches → VS → D31/Q30 → D30 stays on one compact area.
+- **VS on the bottom:** a spine under U12/U13 and the drain, plus a front band (U11) and a rear band (U14), about 11 cm² together. Thermal vias come from the footprints; 40 stitching vias join the drain pour to the spine.
+- **Outputs:**
+  - OUT1 runs as a bottom band with four vias at U11.
+  - OUT2 and OUT3 run on top through the corridor between the switch rows. OUT4 runs on top below D403.
+  - Each OUT passes through its TVS pad to J11. The narrowest point is about 1.2 mm (OUT3 beside C302) for 4 A.
+- **GND:** pours on both layers. A 3 mm strip along the power edge carries the J11 TVS returns to J10.2.
+- **CAN barrier (PCB rule 9):** the GND_CAN island has its own pour; the gap is 8.1 mm across U5. C70 is turned 180° so that each pad faces its own side.
+- **Clearances and keep-outs:** 1.0 mm from VS/VBAT_IN/VBAT_FL copper to every other net (EMC rule 7). The antenna strip and the hole keep-outs are copper-free.
+- **Checks:** `kpcb drc` 0 errors, 403 warnings (silkscreen, FL30), 256 unconnected, parity 0; `fix_check` OK.
+- **Left for routing (T-0201):**
+  - U30 pin 5, C32, U30 VCAP and gate; R60 (VS sense); R106.
+  - All signal nets; the C104–C404 GND returns.
+  - JP30 stays the 2 mm net tie (about 0.25 mΩ, 64 mW at 16 A, top only). Widening it is a footprint change for a later revision.
+- Details in design-notes §8.12 and `docs/reviews/2026-11-09-fix-pdm-4ch-T-0200.md`.
+
 **2026-11-09 (T-0199, layout stage 3, unattended):** all remaining parts are placed and nothing is parked.
 - **Signal edge:** J5 and its protection cluster moved 7.4 mm toward the front, and J4 sits below it (pin 1 at the rail
   end, 0.6 mm courtyard gap, both between the H2 and H4 keep-outs). The SW_SUPPLY chain turns down to F4, which is
