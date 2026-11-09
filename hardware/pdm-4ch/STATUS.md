@@ -2,6 +2,8 @@
 
 Updated: 2026-11-08 (/board pcb: decision 127)
 
+**2026-11-09 (T-0198, layout stage 2, unattended):** placed the power path and the four output channels. The battery path runs along the rail side: J10 → D30/C30 → JP30 (38.1/47) → Q30 (48.2/47, drain tab toward C31 and the switches) with D31 directly under Q30, C31 at the drain and C32 above. The J10 clear zone x 20–35, y 33–56 stays free. U11/U12/U14/U13 sit in a 2×2 grid (about 19 × 18 mm pitch), OUT pins toward J11, each with its VS caps at the tab end, the OUT parts beside the OUT pins and the IN/DEN/IS/GND-network parts on the logic side. TH1 is at U13, the hottest place. There is room for more than 2 cm² of VS at Q30's drain. **Blocked (two-way, board-fixer): U30 stays parked.** Its stock `TSOT-23-8` footprint has 0.15 mm pad gaps (6 DRC clearance errors; 2 oz needs 0.2 mm; TI DDF land uses 0.45 mm pads). The spot is reserved at 42.5/39.3, rot 180. Logic half still parked. FL30 has no footprint. `kpcb drc` 0 errors on the board, parity 0; `fix_check` OK. Details in design-notes §8.10 and `docs/reviews/2026-11-08-fix-pdm-4ch-T-0198.md`.
+
 **2026-11-08 (T-0197, layout stage 1, unattended):**
 - **Placed:**
   - H1–H4 on the keep-out centres.
