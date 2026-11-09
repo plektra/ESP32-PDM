@@ -4,6 +4,20 @@ Updated: 2026-11-08 (/board pcb: decision 127)
 
 **2026-11-09 (decision 150):** the board is 4 layers (F.Cu/B.Cu 2 oz, In1/In2 0.5 oz, 1.6 mm, JLCPCB stack-up in the board file). Stages 1–4 stay; the 2-layer routing stage T-0201 is superseded. Queued: T-0205 (In1 GND plane split at the CAN barrier, In2 VS under the switches, stitching and thermal vias), T-0206 (routing on 4 layers), then T-0202 (silkscreen) and the EMC and validator reviews.
 
+**2026-11-09 (T-0205, layout stage 5 – inner planes and stitching, unattended):** five inner zones and 90 stitching vias. The outer copper is unchanged.
+- **In1.Cu:**
+  - A solid GND plane under the whole GND side, in one piece. It has the outer GND outline: antenna notch, barrier cut at x 67.55, Ø 8.8 mm arcs around H1–H3.
+  - A GND_CAN area equal to the outer island (x ≥ 75.65, y ≥ 51.35). The gap is 8.1 mm across U5 and 4.0 mm above J4, the same as outside. No copper on any layer under U5 between the pin rows (PCB rule 9).
+- **In2.Cu:**
+  - VS (12.2 cm², pads solid) under the four switches, Q30's drain, C31 and D31's VS side. All 40 PROFET tab thermal vias and all 38 VS vias at the drain land in it.
+  - The rest GND, and GND_CAN under the CAN island. Tracks displace the fill, so routing can use In2.
+- **Vias:** 34 GND vias along the edges (about 5 mm), 5 on the GND_CAN edge, 12 around the buck, 8 around U1, 30 on an open-area grid and 1 island tie. Every outer GND/GND_CAN fill island is now tied to In1.
+- **Load current:** the 16 A paths stay on the 2 oz outer layers. VS-In2 runs in parallel and takes only about 11 %.
+- **Keep-outs:** the hole and antenna keep-out rule areas cover only F.Cu/B.Cu, so the inner zone outlines leave those areas out themselves. A later revision could add In1/In2 to the rule areas (decision 123, owner).
+- **Checks:** `kpcb drc` 0 errors, 404 warnings, 253 unconnected (all signal or routing items; no GND, GND_CAN or zone item; one VS item, R60, for routing), parity 0; `fix_check` OK.
+- **Left for T-0206 (routing):** all signal nets, U30/C32/R60/R106. Route on In2 first; keep In1 unbroken under the ESP32, the buck and the switch networks.
+- Details in design-notes §8.13 and `docs/reviews/2026-11-09-fix-pdm-4ch-T-0205.md`.
+
 **2026-11-09 (T-0200, layout stage 4 – power copper, unattended):** the high-current copper is drawn as 18 zones and 103 vias, with a few short stubs.
 - **Battery path:** VBAT_IN is a pour on both layers from both J10.1 pins through D30/C30 to JP30 (about 3.4 cm² per layer, stitched with 36 vias). VBAT_FL is a pour on both layers over the Q30 source pins, JP30.1, D31's anode and U30 pin 1.
 - **VS:** top VS pour of 2.67 cm² on Q30's drain tab (rule ≥ 2 cm²), with C31, F4, C304/C303, D31 and F1 on it. The surge loop switches → VS → D31/Q30 → D30 stays on one compact area.

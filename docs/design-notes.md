@@ -1815,6 +1815,88 @@ copper is 2 oz on both layers. All copper is drawn as zones with `kpcb zone`, pl
 
   A competent person reviews the board, in particular the battery path and the outputs, before installation.
 
+### 8.13 pdm-4ch layout stage 5: inner planes and stitching (T-0205, 2026-11-09, auto)
+
+The board has 4 layers (decision 150): F.Cu and B.Cu 2 oz carry the load current, In1.Cu and In2.Cu 0.5 oz. The
+dielectric between F.Cu and In1 is 0.21 mm (the JLCPCB stack-up in the board file). The outer pours of stage 4 (§8.12)
+are unchanged. Coordinates are mm from the top-left board corner.
+
+**Plane plan.**
+
+| Layer | Zone | Net | Outline, priority, clearance |
+|---|---|---|---|
+| In1.Cu | GND-In1 | GND | Same footprint as the outer GND pours: inset 1 mm from the edge; antenna notch x ≥ 45.85, y < 4.95; barrier cut x ≤ 67.55 for y > 47.35. Ø 8.8 mm arcs around H1–H3. Priority 1, 0.3 mm. One solid piece (5583 mm²). |
+| In1.Cu | GND_CAN-In1 | GND_CAN | The outer GND_CAN island: x 75.65–98.95, y 51.35–73.95, H4 corner cut out. Priority 2, 0.3 mm (445 mm²). |
+| In2.Cu | VS-In2 | VS | Under the four switches and Q30's drain: x 26.5–56.5, y 1.2–34 (the switch block, antenna notch kept); x 46.5–61, y 34–50.5 (drain and C31); x 46.5–53.3 down to y 58.7 (D31's VS side). Priority 3, 0.5 mm, pads solid. 12.2 cm². |
+| In2.Cu | GND-In2 | GND | Same outline as GND-In1, fills around VS-In2. Priority 1, 0.3 mm. |
+| In2.Cu | GND_CAN-In2 | GND_CAN | Same as GND_CAN-In1. A second reference plane for the CAN side. |
+
+- **Why GND on In1:** In1 is the reference plane next to the top layer (0.21 mm away). It sits under every signal
+  part, the ESP32, the buck and the switch IN/IS/DEN networks, with no split or slot on the GND side. This is EMC
+  rule 3 of 2026-10-30, and ISO1044/CA-IS3050 §11.1 asks for it.
+- **Why VS on In2:** heat spreading and a low-impedance VS for the output surge path OUT → PROFET body diode → VS → D30
+  (invariant 4).
+  - The 10 PTH thermal vias under each PROFET tab are all in VS-In2, 40 in total, as are all 38 VS vias at Q30's
+    drain and D31. VS-In2 joins the top drain pour, the bottom VS spine and bands, and the four tabs in one plane.
+  - Q30's drain pad gets no via in the pad (that would need plugged vias, an extra JLCPCB option). Its thermal vias
+    are the stage-4 rows in the drain pour beside the tab.
+- **Load current stays on the outer copper.** No load path is designed into the inner layers. Where VS-In2 runs
+  parallel to the 2 oz VS copper, it takes about 0.5/(2+2+0.5) ≈ 11 % of the current: under 2 A of the 16 A total,
+  spread over ≥ 10 mm of width, so its heating is negligible. The OUT, VBAT_IN and VBAT_FL nets have no inner copper.
+- **Room for routing (T-0206):** a track on In2 (or In1, if needed) displaces the fill on refill; the planes are pours,
+  not keep-outs. Use In2 first, outside the VS area, and keep In1 whole under the ESP32, the buck and the switch
+  networks (EMC rule 3).
+
+**CAN barrier (PCB rule 9) on the inner layers.**
+
+- The inner layers repeat the outer gap: GND stops at x 67.55, GND_CAN starts at x 75.65. That is 8.1 mm across U5,
+  with nothing under the body between pins 1–4 and 5–8 on any layer.
+- Above the J4 island the gap is 4.0 mm (y 47.35 to 51.35), the same as on the outer layers (§8.12). That is the
+  PCB rule 9 minimum away from the body.
+
+**Keep-outs.**
+
+- The hole keep-out rule areas (decision 123) and U1's antenna keep-out cover only F.Cu and B.Cu. Both are fixed
+  (outline/keep-out gate, and the footprint).
+- The inner zones therefore leave them out in their own outlines:
+  - Ø 8.8 mm arcs around H1–H3, and the H4 corner cut-out of the GND_CAN island;
+  - the antenna notch x ≥ 45.85, y < 4.95.
+- No new via sits within 4.9 mm of a hole centre or in the antenna strip. The older vias are checked by the outer
+  rule areas.
+- A later revision could add In1/In2 to the keep-out rule areas. That is an owner change (decision 123), not needed
+  while the zone outlines exclude them.
+
+**Stitching vias (90 new, 0.8/0.4 mm, tented).** Each site is checked on the filled zones: inside GND (or GND_CAN)
+on F.Cu, B.Cu and In1, ≥ 0.75 mm from every pad, and clear of the holes, the antenna strip and U1's body.
+
+| Group | Vias | Where |
+|---|---|---|
+| Board edges | 34 | About every 5 mm along a line 2 mm in from the edge, where there is GND copper on both outer layers. There is none at J10/J11 (VBAT_IN/OUT pours) and the J5 pins. |
+| CAN island edge | 5 | GND_CAN, ties the four GND_CAN layers. |
+| Buck | 12 | A ring about every 4 mm around U3/L1/C1/C19/C3/C20/R44. |
+| ESP32 | 8 | Beside and below U1's pads. |
+| Open GND areas | 30 | Grid of ≥ 8 mm. |
+| Island tie | 1 | The top GND island below D31 (38 mm², was unconnected). |
+
+- With these vias every outer GND and GND_CAN fill island is tied to In1. After the refill `kpcb drc` shows no
+  unconnected GND or GND_CAN item.
+
+**Safety (battery input, outputs that may feed a bilge pump or navigation lights).**
+
+- The planes add no copper to the load path and do not narrow any outer 16 A path. The outer pours keep the stage-4
+  widths and ≥ 1 mm to other nets.
+- Inside the laminate the spacings are:
+  - 0.5 mm VS-In2 to GND-In2;
+  - 0.3 mm GND-In1 around VBAT_IN/VBAT_FL/VS vias and J10's pins;
+  - 0.21 mm of prepreg between the outer power pours and the In1 GND plane.
+- IPC-2221B internal (B1) asks for 0.05 mm up to 100 V, and moisture or salt cannot reach the inner layers. The new
+  failure mode is a laminate defect (void, CAF) between VS or VBAT_IN and the GND plane. That is a hard battery short
+  behind J10, the same as a cracked input MLCC. JLCPCB's electrical test of the bare board and the first-power-up
+  current check (bench supply, current limit) catch a short before installation.
+- More inner VS copper also lowers Tj of the switches and Q30 a little, which helps a bilge-pump or navigation-light
+  channel that runs for a long time.
+- A competent person reviews the board, in particular the battery path and the outputs, before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
