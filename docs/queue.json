@@ -6377,15 +6377,23 @@
         "T-0198"
       ],
       "placed": true,
-      "started": "2026-11-09T07:25:52",
+      "started": "2026-11-09T17:31:49",
       "ran_model": "opus",
-      "session": "0c52c970-1e4d-4dd3-88ba-f4a7cbc111c7",
-      "cost_usd": 14.416,
+      "session": "62580bf6-a7ef-4da6-a4a7-7ff85395ec28",
+      "cost_usd": 18.1951,
       "attempts": 1,
       "finished": "2026-11-09",
-      "note": null,
-      "summary": null,
-      "interrupted": null
+      "note": "1 tool calls denied (Bash); log T-0199-20261109-173154.json; no report written (aborted_tools): ",
+      "summary": "interrupted, queued again, resumes where it stopped",
+      "interrupted": true,
+      "resume": {
+        "session": "62580bf6-a7ef-4da6-a4a7-7ff85395ec28",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0199",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0199-xwrdu03m",
+        "report": "docs/reviews/2026-11-09-fix-pdm-4ch-T-0199.md",
+        "head": "d948d8733a5729a723079d89be42fead3b6b1bad",
+        "reason": "an interruption"
+      }
     },
     {
       "id": "T-0200",
