@@ -6620,10 +6620,10 @@
       ],
       "placed": true,
       "final": true,
-      "started": "2026-11-09T20:32:04",
+      "started": "2026-11-09T22:02:00",
       "ran_model": "opus",
       "session": "e878d24a-dde8-4d8c-89cc-b308c9b7f2de",
-      "cost_usd": 0.0,
+      "cost_usd": 2.9226,
       "attempts": 1,
       "resume": {
         "session": "e878d24a-dde8-4d8c-89cc-b308c9b7f2de",
@@ -6631,12 +6631,12 @@
         "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0201-h8r_tr1g",
         "report": "docs/reviews/2026-11-09-fix-pdm-4ch-T-0201.md",
         "head": "466e51db948e5b9153f54b89eb1a73b05017736e",
-        "reason": "a usage limit"
+        "reason": "an interruption"
       },
       "finished": "2026-11-09",
-      "note": "no report written (api_error): You've hit your 5-hour limit · resets 10pm (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "note": "no report written (aborted_tools): ",
+      "summary": "interrupted, queued again, resumes where it stopped",
+      "interrupted": true
     },
     {
       "id": "T-0202",
