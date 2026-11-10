@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 213,
+    "T": 214,
     "Q": 70
   },
   "tasks": [
@@ -6900,7 +6900,24 @@
       "depends_on": [
         "T-0210"
       ],
-      "final": true
+      "final": true,
+      "started": "2026-11-11T01:28:26",
+      "ran_model": "opus",
+      "session": "5cd52528-ce69-4ba9-8b1a-75cb24d607f0",
+      "cost_usd": 0.0586,
+      "attempts": 1,
+      "resume": {
+        "session": "5cd52528-ce69-4ba9-8b1a-75cb24d607f0",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0211",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0211-w1tl_1ip",
+        "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0211.md",
+        "head": "78d53b6ef1e2d24b264cc8608c547212366db163",
+        "reason": "a usage limit"
+      },
+      "finished": "2026-11-11",
+      "note": "no report written (api_error): You've hit your 5-hour limit · resets 4:10am (Europe/Helsinki)",
+      "summary": "paused, API unavailable, resumes where it stopped",
+      "interrupted": null
     },
     {
       "id": "T-0212",
@@ -6924,6 +6941,20 @@
       },
       "door": "two-way",
       "state": "parked"
+    },
+    {
+      "id": "T-0213",
+      "role": "planner",
+      "scope": "system",
+      "state": "running",
+      "created": "2026-11-11",
+      "depends_on": [],
+      "items": [
+        "T-0212"
+      ],
+      "started": "2026-11-11T01:28:26",
+      "ran_model": "opus",
+      "session": "f4bc724b-ea49-4c43-8dfc-ef023b2e5421"
     }
   ],
   "board_size_start": {
