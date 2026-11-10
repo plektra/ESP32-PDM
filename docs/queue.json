@@ -6710,7 +6710,7 @@
       "id": "T-0206",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "failed",
       "created": "2026-11-09",
       "placed": true,
       "final": true,
@@ -6719,7 +6719,16 @@
       "depends_on": [
         "T-0205"
       ],
-      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Route every remaining connection on the 4-layer board: signals on F.Cu/B.Cu (In2.Cu where it is free), every ground pin by a short via to the In1 GND plane, CAN H/L as a pair over GND_CAN, USB D+/D- as a pair, the buck loop on the top only, nothing across the CAN barrier on any layer, nothing in the keep-outs. An autorouter (Freerouting, as the earlier 2-layer attempt T-0201 did) is fine with the planes and power copper protected. Finish with 0 unconnected and 0 DRC errors."
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Route every remaining connection on the 4-layer board: signals on F.Cu/B.Cu (In2.Cu where it is free), every ground pin by a short via to the In1 GND plane, CAN H/L as a pair over GND_CAN, USB D+/D- as a pair, the buck loop on the top only, nothing across the CAN barrier on any layer, nothing in the keep-outs. An autorouter (Freerouting, as the earlier 2-layer attempt T-0201 did) is fine with the planes and power copper protected. Finish with 0 unconnected and 0 DRC errors.",
+      "started": "2026-11-09T23:32:07",
+      "ran_model": "opus",
+      "session": "142a2664-33b2-4b43-aea4-1e362e9b481b",
+      "cost_usd": 0.0,
+      "attempts": 1,
+      "finished": "2026-11-10",
+      "note": "no report written (unknown): timeout after 5400 s",
+      "summary": "failed",
+      "interrupted": null
     }
   ],
   "board_size_start": {
