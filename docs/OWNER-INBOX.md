@@ -8,10 +8,11 @@ lines are read; other edits are lost.
 
 No open questions.
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (5) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0212 · MAJOR · pdm-4ch · pcb-fixer merge gate admits only the board file and notes; the fixed_routes.py entries for the CAN/USB/CC1 routes and LAND_BEST=1 in build_routing.sh are held back as a patch in this report and need a package whose scope covers hardware/pdm-4ch/scripts/ (the routes themselves are locked copper on th → pcb-fixer merge gate admits only the board file and notes; the fixed_routes.py entries for the CAN/USB/CC1 routes and LAND_BEST=1 in build_routing.sh are held back as a patch in this report and need a package whose scope covers hardware/pdm-4ch/scripts/ (the routes themselves are locked copper on the board and survive every build)
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order

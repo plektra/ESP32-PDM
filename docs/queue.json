@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 212,
+    "T": 213,
     "Q": 70
   },
   "tasks": [
@@ -6850,15 +6850,42 @@
       "id": "T-0210",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-10",
       "placed": true,
       "title": "CAN and USB pairs as fixed routes, rebuild",
       "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Method (decision 163, owner): routing is a reproducible build, not hand edits. One command, `hardware/pdm-4ch/scripts/build_routing.sh [runs]`, run with KiCad closed under KiCad's own Python (pcbnew; it exports Specctra DSN and imports SES, kicad-cli cannot), works on a temp copy of the project and copies a board in only when it is better and clean. Steps: (1) fixed copper = every LOCKED track, via and zone: the stage 4–5 power copper and the scripted links of T-0207/T-0208 (lock them once, in the first build) plus the fixed tracks listed in `scripts/fixed_routes.py` (pairs, tight escapes; coordinates in mm, the place where hand-made routing lives); all UNLOCKED tracks and vias are removed before each build; (2) clear every zone fill, keep the power zone outlines (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) as keep-outs for foreign nets, In1 barred for signals, the antenna, CAN-barrier, JP30/JP1 and hole keep-outs on all layers; (3) Freerouting 2.5.0 headless (`~/.local/opt/jdk-25.0.4.1+1/Contents/Home/bin/java -Djava.awt.headless=true -jar ~/.local/opt/freerouting-2.5.0/freerouting-2.5.0.jar --gui.enabled=false -de in.dsn -do out.ses -mt 1`) routes the signals only; (4) import the SES, then pour: refill every zone, add GND stitching vias, remove dangling vias and stubs; (5) check: no power pour split, no starved thermal, `kpcb drc` with parity; (6) Freerouting differs per run: do several runs (up to 3 in parallel, in the background, each in its own folder) and keep the one with 0 DRC errors and the fewest unconnected. A problem the router leaves is fixed by adding fixed routes or a part move to the scripts and rebuilding, never by editing only the board. Each Freerouting run takes 15–20 min: start runs early and hand in within the 90-min limit. Record the method and the script usage in the board's STATUS.md and design-notes. Rules: no signal on In1.Cu; buck SW/CB/input loop on F.Cu with no via in the C1/C19/U3 loop; nothing across the CAN barrier; power pours stay whole. Earlier failures: docs/reviews/2026-11-10-fix-pdm-4ch-T-0206-rejected.md. Add CAN H/L (a pair over GND_CAN) and USB D+/D- (a pair from J3 through its ESD parts) to `fixed_routes.py`, plus fixed routes for what the last build left open; rebuild. This stage need not reach 0 unconnected: land the best clean build (0 DRC errors, parity 0, pours whole) and list what is left. ",
       "items": [],
       "depends_on": [
-        "T-0209"
-      ]
+        "T-0209",
+        "T-0212"
+      ],
+      "started": "2026-11-11T00:51:38",
+      "ran_model": "opus",
+      "session": "96ae5742-d43d-4dac-8139-5aef1b0f107a",
+      "cost_usd": 5.9344,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "waits_for": [
+        "T-0212"
+      ],
+      "finished": "2026-11-11",
+      "note": "1 tool calls denied (Bash); log T-0210-20261111-005143.json; waits for T-0212",
+      "summary": "0 fixed, 0 blocked, merged e5818743; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0210.md"
     },
     {
       "id": "T-0211",
@@ -6874,6 +6901,29 @@
         "T-0210"
       ],
       "final": true
+    },
+    {
+      "id": "T-0212",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-11",
+      "finding": {
+        "id": "T-0210-scripts",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-4ch",
+        "location": "PCB layout (T-0210)",
+        "door": "two-way",
+        "summary": "pcb-fixer merge gate admits only the board file and notes; the fixed_routes.py entries for the CAN/USB/CC1 routes and LAND_BEST=1 in build_routing.sh are held back as a patch in this report and need a package whose scope covers hardware/pdm-4ch/scripts/ (the routes themselves are locked copper on th",
+        "fix": "pcb-fixer merge gate admits only the board file and notes; the fixed_routes.py entries for the CAN/USB/CC1 routes and LAND_BEST=1 in build_routing.sh are held back as a patch in this report and need a package whose scope covers hardware/pdm-4ch/scripts/ (the routes themselves are locked copper on the board and survive every build)",
+        "default": null
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0210.md",
+        "finding": "T-0210-scripts"
+      },
+      "door": "two-way",
+      "state": "parked"
     }
   ],
   "board_size_start": {
