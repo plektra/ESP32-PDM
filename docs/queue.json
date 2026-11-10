@@ -6720,15 +6720,23 @@
         "T-0205"
       ],
       "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Route every remaining connection on the 4-layer board: signals on F.Cu/B.Cu (In2.Cu where it is free), every ground pin by a short via to the In1 GND plane, CAN H/L as a pair over GND_CAN, USB D+/D- as a pair, the buck loop on the top only, nothing across the CAN barrier on any layer, nothing in the keep-outs. An autorouter (Freerouting, as the earlier 2-layer attempt T-0201 did) is fine with the planes and power copper protected. Finish with 0 unconnected and 0 DRC errors.",
-      "started": "2026-11-09T23:32:07",
+      "started": "2026-11-10T17:28:46",
       "ran_model": "opus",
-      "session": "142a2664-33b2-4b43-aea4-1e362e9b481b",
-      "cost_usd": 0.0,
+      "session": "0c00c5f7-8ec3-42a0-9794-b80809d5b4b7",
+      "cost_usd": 1.2391,
       "attempts": 1,
       "finished": "2026-11-10",
-      "note": null,
-      "summary": "failed",
-      "interrupted": null
+      "note": "no report written (aborted_tools): ",
+      "summary": "interrupted, queued again, resumes where it stopped",
+      "interrupted": true,
+      "resume": {
+        "session": "0c00c5f7-8ec3-42a0-9794-b80809d5b4b7",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0206",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0206-t416vjk8",
+        "report": "docs/reviews/2026-11-10-fix-pdm-4ch-T-0206.md",
+        "head": "6b412f724f33f6ee98c5311a971fb074f9e7a773",
+        "reason": "an interruption"
+      }
     }
   ],
   "board_size_start": {
