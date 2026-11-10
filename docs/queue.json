@@ -6710,7 +6710,7 @@
       "id": "T-0206",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "failed",
+      "state": "ready",
       "created": "2026-11-09",
       "placed": true,
       "final": true,
@@ -6726,7 +6726,7 @@
       "cost_usd": 0.0,
       "attempts": 1,
       "finished": "2026-11-10",
-      "note": "no report written (unknown): timeout after 5400 s",
+      "note": null,
       "summary": "failed",
       "interrupted": null
     }
