@@ -1,8 +1,26 @@
 # pdm-4ch status
 
-Updated: 2026-11-08 (/board pcb: decision 127)
+Updated: 2026-11-10 (T-0207 layout stage 6a)
 
 **2026-11-09 (decision 150):** the board is 4 layers (F.Cu/B.Cu 2 oz, In1/In2 0.5 oz, 1.6 mm, JLCPCB stack-up in the board file). Stages 1–4 stay; the 2-layer routing stage T-0201 is superseded. Queued: T-0205 (In1 GND plane split at the CAN barrier, In2 VS under the switches, stitching and thermal vias), T-0206 (routing on 4 layers), then T-0202 (silkscreen) and the EMC and validator reviews.
+
+**2026-11-10 (T-0207, layout stage 6a – short local links and ground vias, unattended):** I routed the local links by script on F.Cu only. No track is on In1.Cu, and nothing crosses the CAN barrier or the antenna strip. The links:
+- **Buck:** VIN chain U3.4/5–C19–C1–D3–JP1–L2–C22 (0.6 mm), D2-K (JP1–D2–L2), D2–R54–D1, R54–F1 (1.2 mm).
+- **Buck switch side:** SW U3.6–C2–L1, plus L1–R44 (snubber) and R44–C20. CB through R43, and FB R9/R10.
+- **Buck GND:** a GND track from U3.2 under the IC body to C19.2/C1.1. The C1/C19/U3 input loop closes on F.Cu with no via.
+- **Other links:** U30/C32/Q30 (VCAP, VBAT_FL, gate), C4–F2–FB1, R106–OUT1, D7–R59, D8–R67, C22–R73, L1.2–C3.
+
+Parts moved (two-way, recorded in the report):
+- C2 and R43 now sit stacked between L1 and U3. A bootstrap link on F.Cu would otherwise have to cross SW.
+- R67 and R59 are turned 180°. Their +3V3/IO13 pad sat between the LED anode and the resistor's anode pad, under the antenna strip.
+
+Ground vias:
+- Every GND/GND_CAN pad reaches In1 through its F.Cu pour island.
+- New GND vias at U30.2 and R106.2, whose pockets the new tracks closed.
+- Two vias beside C19/C1, outside the loop.
+- Nine stitching vias under the ESP32 module (around pad 61 and under the top GND pin row).
+
+Result: `kpcb drc` 0 errors, 222 unconnected (from 253), parity 0. Every VS/VBAT/OUT pour is still one island after the refill. **Left:** the U1 strip, J6, the panel/switch nets, sense lines, +3V3 distribution, and D3-A (FB1–D4–D3) to later routing stages. Details: design-notes §8.14.
 
 **2026-11-09 (T-0205, layout stage 5 – inner planes and stitching, unattended):** five inner zones and 90 stitching vias. The outer copper is unchanged.
 - **In1.Cu:**

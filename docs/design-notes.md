@@ -1897,6 +1897,31 @@ on F.Cu, B.Cu and In1, ≥ 0.75 mm from every pad, and clear of the holes, the a
   channel that runs for a long time.
 - A competent person reviews the board, in particular the battery path and the outputs, before installation.
 
+### 8.14 pdm-4ch layout stage 6a: short local links and ground vias (T-0207, 2026-11-10, auto)
+
+The links were drawn by script with `kpcb track`/`via`, on F.Cu only (In1 stays a solid plane, EMC rule 3).
+
+- **Buck input loop.** U3 is SOT-23-6 with CB-GND-FB on one side and SW-VIN-VIN on the other. With C19/C1 to the right
+  of U3, a GND path from pin 2 around pin 3 would box in the FB pin, so FB could only leave through a via. Instead a
+  0.3 mm GND track runs from U3.2 up under the IC body, between pins 3 and 4 (0.32 mm clearance each side), into C19.2.
+  A 0.6 mm strap joins C19.2 and C1.1. The input loop C19.1 → U3.4/5 → U3.2 → C19.2 is about 3 × 2 mm, all on F.Cu,
+  with no via. Two GND vias at (23.0, 64.4) and (25.0, 64.85) tie the cap grounds to In1 outside the loop.
+- **SW and CB.** SW runs 0.6 mm from U3.6 straight to L1.1. C2 and R43 now stand stacked in the 1.46 mm corridor
+  between the L1 and U3 courtyards: C2's SW pad sits on the SW track, and R43.2 sits 1.6 mm from U3.1. The bootstrap
+  loop is about 2 × 3 mm, and CB does not cross SW. The R44/C20 snubber hangs off the bottom end of L1.1.
+- **FB** (R9/R10) stays on F.Cu, left of R9.1. It is a 0.25 mm track away from the SW copper.
+- **U30.** VCAP goes from C32.1 under C32.2 to U30.4. VBAT_FL goes from C32.2 down the right side past the existing
+  via, and from U30.5 down the left side. Both reach the VBAT_FL pour at Q30's drain. The gate track runs between the
+  pin rows to Q30.1. The pocket left around U30.2 dropped its fill, so U30.2 has its own GND via at (42.75, 39.62).
+- **Status LEDs.** R67 and R59 are turned 180° so that the LED-anode links are straight and short under the antenna
+  strip. Their +3V3/IO13 pads now face outward and stay reachable from below.
+- **ESP32 ground.** Nine tented GND vias under the module (six around the centre pad, three under the top GND pin row).
+  They shorten the module's return path to In1, which was 7–10 mm before.
+- **Pours.** After every refill, each VS, VBAT_IN, VBAT_FL and OUT pour is still a single island, and no thermal is
+  starved (0 DRC errors). R54–F1 (buck supply from VS after F1) is 1.2 mm, and D1–R54 is 0.8 mm. Both are short and
+  carry only buck input current. The battery and output paths are not changed by this stage. A competent person
+  reviews the board, in particular the battery path and the outputs, before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
