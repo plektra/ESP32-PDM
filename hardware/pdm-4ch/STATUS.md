@@ -1,6 +1,39 @@
 # pdm-4ch status
 
-Updated: 2026-11-10 (T-0208 layout stage 6b)
+Updated: 2026-11-11 (T-0209 routing build script)
+
+**2026-11-11 (T-0209, routing as a build, U1 strip – unattended):** routing is now a reproducible build
+(decision 163). No part was moved, and no zone outline changed.
+- **Build:** close KiCad and run `hardware/pdm-4ch/scripts/build_routing.sh [runs=3] [passes=25]`. Two optional
+  environment variables: `FR_STRATS` (one Freerouting strategy per run) and `KEEP_WORK=<dir>` (keeps the work
+  folder).
+  - The steps live in `scripts/routing_build.py` (pcbnew, under KiCad's Python).
+  - Hand-made routing, router classes and parameters live in `scripts/fixed_routes.py` (mm from the top-left
+    corner).
+  - A problem the router leaves is fixed in these files, followed by a rebuild. Never edit only the board.
+- **Fixed copper:** the first build locked every existing track, via and zone: the stage 4–5 power copper and the
+  T-0207/T-0208 links and fan-out. The router's tracks are unlocked, and each build replaces them.
+- **Router input:**
+  - Each power outline (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) is both a plane and a keep-out for foreign nets,
+    minus 0.5 mm escapes around foreign pads.
+  - Keep-outs on all four layers: antenna, CAN barrier, JP30/JP1, the holes and a 0.35 mm edge strip.
+  - Signals never use In1. The buck SW/CB nets are F.Cu only.
+- **Result:**
+  - `kpcb drc`: 0 errors, 75 unconnected (from 216), parity 0.
+  - Every VS/VBAT/OUT pour is one island, with ≤ 2 % area change.
+  - GND stitching and island tie-in vias are added by the build.
+- **Freerouting:** it is deterministic for one input, and its best result is pass 1. Progress comes from changing
+  the input, not from more runs.
+- **Left:**
+  - The west-bound nets have no lane across the VS block: DEN, SW_IN1–4, +3V3 to D102/D202/D402 and R9, EN, IO0,
+    USB/J3, IO2, IO5, NTC and U12/U14-IS. The next stage needs a deliberate lane: an F.Cu gap between U12 and U13,
+    or a channel through VS-In2.
+  - U1 strip legs from the fan-out vias: IO6/7/8/11/17/18/39, SW1–4_IO and SW_SENSE. They need fixed lanes in the
+    corridor x 59.5–67.5.
+  - Analog-block short links (Q3–Q5, R60/R61, SWIN1–3, LED_K3, SW1–4) need fixed F.Cu tracks.
+  - Three GND islands (D52/U1.64, D101, J3).
+  - CANH at FL1/R71.
+- Details: design-notes §8.16 and `docs/reviews/2026-11-11-fix-pdm-4ch-T-0209.md`.
 
 **2026-11-10 (T-0208, layout stage 6b – room in the U1 strip, U1 fan-out, unattended):** no part was moved.
 - **VS narrowed:** VS-B-spine and VS-In2 now end at x 59.5 instead of 61.0 next to C31. This is a side area with no

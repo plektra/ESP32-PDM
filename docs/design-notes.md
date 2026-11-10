@@ -1998,6 +1998,110 @@ are left. 27 nets cross it:
 other net on the outer layers and ≥ 0.5 mm on In2. A competent person reviews the board, in particular the battery
 path and the outputs, before installation.
 
+### 8.16 pdm-4ch routing as a build: script, fixed copper, first autorouted signals (T-0209, 2026-11-11, auto)
+
+Decision 163 makes routing a reproducible build. The board is never routed by hand. A change goes into the scripts,
+and then the board is rebuilt.
+
+**Usage.** Close KiCad, then run `hardware/pdm-4ch/scripts/build_routing.sh [runs=3] [passes=25]`. Two optional
+environment variables:
+- `FR_STRATS`: one Freerouting item-selection strategy per run (default `prioritized sequential random`);
+- `KEEP_WORK=<dir>`: keeps the work folder.
+
+The script copies the project into a temp folder and runs the pcbnew steps in `scripts/routing_build.py` under
+KiCad's Python. Hand-made routing (fixed tracks and vias, router net classes, escape and stitching parameters) lives
+in `scripts/fixed_routes.py`, with coordinates in mm from the top-left board corner.
+
+**Steps.**
+1. **prep**
+   - On the first build (no locked item on the board), every existing track, via and zone is locked. That covers the
+     stage 4–5 power copper and the T-0207/T-0208 links and fan-out (this happened in T-0209).
+   - Every unlocked track and via is removed, so the previous router result is discarded.
+   - The fixed routes are added, locked. They are skipped when an identical item is already there.
+   - Pour baseline: the zones are filled once and the island count and area of each zone are recorded.
+2. **Router copy**
+   - The GND/GND_CAN pours on F, In2 and B are removed for routing. The In1 GND and GND_CAN planes stay as planes.
+   - Each power zone (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) is exported twice: as a plane of its net, and as a
+     **keep-out with the same outline**. Freerouting lets foreign nets run across a plane, and a first test without
+     the keep-out split VS-B-spine, VS-In2, OUT1-B and OUT3.
+   - Both shapes have a 0.5 mm escape (`ESCAPE_MM`) cut out around every foreign pad, via and track end inside the
+     outline, so pins inside a pour stay reachable.
+   - Own-net copper is *not* cut out of the keep-out. A test that did so (0.15 mm margin) let tracks through the VS
+     pours along the cut-outs and split VS-B-spine and VS-In2.
+   - Keep-outs on all four layers: antenna strip (x 45.85–92.5, y < 4.5), CAN barrier (x 67.5–75.7 for y > 47.3,
+     and y 47.3–51.4 east of it), JP30, JP1, the four hole keep-outs, and a 0.35 mm strip along the board edge. The
+     router does not know the 0.5 mm copper-to-edge rule; its first run had three edge errors.
+3. **Router net classes** (DSN `use_layer`):
+   - signals 0.2/0.2 mm, +3V3 0.3 mm: F/In2/B only, never In1.Cu;
+   - buck SW and CB (`Net-(U3-SW)`, `Net-(U3-CB)`): F.Cu only, so no via enters the C1/C19/U3 loop;
+   - VS/VBAT_IN 0.5 mm with 1.0 mm clearance; power branches 0.6 or 0.4 mm;
+   - GND/GND_CAN 0.4 mm, all layers (same-net copper inside the plane).
+4. **Freerouting 2.5.0** runs headless, `-mt 1`, up to three runs in parallel, each in its own folder.
+5. **apply**
+   - The SES is parsed and new wires and vias are added to the base copy. Items identical to locked ones are skipped.
+   - Refill.
+   - Unlocked dangling vias and stubs are removed.
+   - GND/GND_CAN stitching is added on a 5 mm grid, only where all four layers are fill of that net with 0.75 mm
+     margin.
+   - **Island tie-in:** every F/B GND island without a via or THT pad gets one via. The via sits inside the island
+     and In1 GND (0.31 mm margin). On the other layers it sits in same-net fill, or ≥ 0.55 mm from any foreign pad,
+     track or via. A foreign pour there is refilled around it.
+   - Clean again, refill.
+6. **Checks**
+   - Pours: a power pour fails if it has more islands than the baseline or has lost more than 2 % of its area
+     (`POUR_LOSS_MAX`).
+   - `kpcb drc` with parity.
+   - A run is clean when it has 0 errors, parity 0, no bottom SMT, no hole keep-out item and whole pours.
+   - The best clean run replaces the board only when it has fewer unconnected items than the board has *at that
+     moment*, so parallel builds cannot overwrite a better result.
+
+**What the runs showed.**
+- Freerouting 2.5.0 is deterministic for one DSN: three parallel runs with the default strategy were identical pass
+  for pass.
+- Its best result is pass 1 (~95 s). Later passes rip up and end with 250–280 router-unrouted against 130 after
+  pass 1. The SES it writes is the best state.
+- So more passes or more runs do not help. Progress comes from changing the input: fixed routes in
+  `fixed_routes.py`, part moves, or copper changes. A build with `runs=2 passes=3` takes about 5 minutes.
+- Freerouting reports about 500–700 "unfixable" pre-existing clearance violations: power copper inside its own pour
+  keep-out, and pads near the edge strip. The violations are noise. The KiCad DRC of the result has 0 errors.
+
+**Result (T-0209).**
+- Unconnected went from 216 to 75: 0 DRC errors, parity 0, and every VS/VBAT/OUT pour is one island with ≤ 2 % area
+  change.
+- No signal is on In1.Cu.
+- The buck SW/CB nets are F.Cu only.
+- Nothing crosses the CAN barrier or the antenna strip.
+- The router's signal tracks are unlocked. Each build replaces them.
+
+**What is left, and why.**
+- **West-bound nets with no lane across the VS block.** In2 (VS-In2), B.Cu (VS spine) and F.Cu (PROFETs, OUT
+  pours) are all closed between the U1 strip and the channel side at x < 58:
+  - DEN to R102/R202/R302/R402;
+  - SW_IN1–4 from R101/R201/R301/R401 to D12–D15;
+  - +3V3 to D102/D202/D402 and R9/C3;
+  - EN and IO0 to SW_RESET1/SW_BOOT1;
+  - USB_DN/DP and F2/J3 CC/VBUS around J3;
+  - IO2, IO5, NTC, U12-IS and U14-IS.
+
+  The router will not open such a lane, because the power outlines are keep-outs. The next stage needs a deliberate
+  lane: an F.Cu gap through the switch block between U12 and U13 (§8.15), or a narrow signal channel cut through
+  VS-In2 checked against the VS current path. Either becomes a fixed route or zone change in the scripts.
+- **U1 strip legs.** Some legs from U1's locked fan-out vias are still open: IO6, IO7, IO8, IO11, IO17, IO18, IO39,
+  SW1–4_IO and SW_SENSE. The legs on the far side of the strip (to D12–D15, R1, R2, R30–R33) are routed. The
+  corridor x 59.5–67.5 needs fixed lanes on In2/B.Cu, one per net, in `fixed_routes.py`.
+- **Analog block, short links:** Q3-E, Q4-B, Q4-C, Q5-B, Q5-C, R3/R45, VBAT_SENSE (R60/R61), R60-VS,
+  SWIN1–3 to R3/R4/R7, LED_K3 and SW1–4 between R38–R41 and D21–D23. These are short F.Cu links between closely
+  packed SOT-23 and 0402 parts. Route them as fixed F.Cu tracks.
+- **Three GND F.Cu islands** where no via fits: under U1 at D52/U1.64, D101 and J3. Each needs a fixed GND via or
+  a short track.
+- CAN side: CANH_BUS/CANH_XCVR at FL1/R71, outside the barrier. This is a local fixed route.
+
+**Safety.** The build cannot cut a power pour: every VS/VBAT/OUT outline is a keep-out for foreign nets, and every
+build checks the island count and area of each pour against the baseline. VS keeps its 1.0 mm (outer) and 0.5 mm
+(In2) clearance, because the zones are unchanged. The battery path and the outputs are unchanged by this stage. A
+competent person reviews the board before installation, in particular the battery path, the VS copper and the
+outputs.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
