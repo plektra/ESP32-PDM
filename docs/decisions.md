@@ -164,3 +164,7 @@ free number (`/handoff` adds them).
 | 156 | 2026-11-10 | pdm-4ch | C2 and R43 moved into the L1-U3 corridor (17.3/61.5 rot 90, 17.3/63.45 rot 270) so the bootstrap link stays on F.Cu without crossing SW (T-0207) | auto |
 | 157 | 2026-11-10 | pdm-4ch | R67 and R59 turned 180 degrees so the D8/D7 anode links are straight under the antenna strip and the +3V3/IO13 pads face outward (T-0207) | auto |
 | 158 | 2026-11-10 | pdm-4ch | Nine tented GND stitching vias under the ESP32 module (around pad 61 and under the top GND pin row) (T-0207) | auto |
+| 159 | 2026-11-10 | pdm-4ch | VS-B-spine and VS-In2 narrowed from x 61.0 to x 59.5 beside C31 (y 34.5-52.8): a side area with no VS pad or via, -27 mm2 B.Cu / -24 mm2 In2, drain rule met on F.Cu, heat budget unchanged; opens the U1-to-south corridor to x 59.5-67.5 (T-0208) | auto |
+| 160 | 2026-11-10 | pdm-4ch | Six GND stitching vias removed from the U1 corridor and fan-out lanes, two re-added west of U1 at (59.9, 10.2) and (59.9, 15.6); In1 stays one piece (T-0208) | auto |
+| 161 | 2026-11-10 | pdm-4ch | U1 fan-out vias sit under the module (tented, staggered at least 1.2 mm apart so In1 keeps webs) because the right pin column has only 1.3 mm to C50/C52/C53 (T-0208) | auto |
+| 162 | 2026-11-10 | pdm-4ch | J6 service lines routed on In2 (IO35/36/37/42 the whole way, TXD0/RXD0 with a 5 mm B.Cu hop at J6 because their order swaps between U1 and J6) (T-0208) | auto |
