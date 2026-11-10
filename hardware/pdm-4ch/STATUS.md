@@ -1,6 +1,28 @@
 # pdm-4ch status
 
-Updated: 2026-11-10 (T-0207 layout stage 6a)
+Updated: 2026-11-10 (T-0208 layout stage 6b)
+
+**2026-11-10 (T-0208, layout stage 6b – room in the U1 strip, U1 fan-out, unattended):** no part was moved.
+- **VS narrowed:** VS-B-spine and VS-In2 now end at x 59.5 instead of 61.0 next to C31. This is a side area with no
+  VS pad or via. About 2 % of the VS copper is gone (−27 mm² on B.Cu, −24 mm² on In2). The drain rule is met on
+  F.Cu, and the heat budget is unchanged.
+- **Stitching vias:** six removed from the corridor and the fan-out lanes, two re-added west of U1.
+- **U1 fan-out:**
+  - every used pin has a stub and a via, staggered under the module so that In1 keeps webs;
+  - IO3 has a stub only, since its parts sit beside U1 on F.Cu.
+- **J6 service lines:** routed on In2. IO35/36/37/42 are on In2 all the way. TXD0/RXD0 change to B.Cu for the last
+  5 mm, because their pin order swaps between U1 and J6.
+- **Result:**
+  - `kpcb drc`: 0 errors, 216 unconnected (from 222), parity 0. The 29 new warnings are the fan-out vias, which
+    are open until they are routed.
+  - Pours: In1 GND is one piece, and every VS/VBAT/OUT pour is one island.
+  - `fix_check`: OK.
+- **Left:** route from the fan-out vias. The corridor x 59.5–67.5 holds about 30 lanes (B.Cu + In2) for 21 nets.
+  - Nine nets go west to SW_BOOT1/SW_RESET1, U11/U14, J3 and TH1: IO0, EN, DEN, USB_DN/DP, IO2, IO5, NTC and
+    +3V3. They have no way across the VS block on In2 or B.Cu.
+  - The next stage first looks for an F.Cu gap between U12 and U13. Otherwise these nets also take the corridor,
+    and then the bottom edge.
+- Details: design-notes §8.15 and `docs/reviews/2026-11-10-fix-pdm-4ch-T-0208.md`.
 
 **2026-11-09 (decision 150):** the board is 4 layers (F.Cu/B.Cu 2 oz, In1/In2 0.5 oz, 1.6 mm, JLCPCB stack-up in the board file). Stages 1–4 stay; the 2-layer routing stage T-0201 is superseded. Queued: T-0205 (In1 GND plane split at the CAN barrier, In2 VS under the switches, stitching and thermal vias), T-0206 (routing on 4 layers), then T-0202 (silkscreen) and the EMC and validator reviews.
 
