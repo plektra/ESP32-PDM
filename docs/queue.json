@@ -6813,7 +6813,7 @@
       "id": "T-0209",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-10",
       "placed": true,
       "title": "Routing build script and the U1 strip",
@@ -6821,7 +6821,30 @@
       "items": [],
       "depends_on": [
         "T-0208"
-      ]
+      ],
+      "started": "2026-11-11T00:16:40",
+      "ran_model": "opus",
+      "session": "c013d788-0ccc-46fe-b3f9-022e1f980688",
+      "cost_usd": 3.5431,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-11",
+      "note": null,
+      "summary": "0 fixed, 0 blocked, merged 308b8eae; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0209.md"
     },
     {
       "id": "T-0210",
