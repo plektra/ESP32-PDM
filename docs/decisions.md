@@ -160,3 +160,7 @@ free number (`/handoff` adds them).
 | 152 | 2026-11-09 | pdm-4ch | In2.Cu: VS (12.2 cm², pads solid) under U11–U14, Q30 drain, C31 and D31's VS side, which takes every PROFET thermal via and every VS via at the drain; the rest GND, and GND_CAN under the CAN island (T-0205) | auto |
 | 153 | 2026-11-09 | pdm-4ch | Inner zones leave the hole (Ø 8.8 mm) and antenna areas out in their own outlines, because those rule areas cover only F.Cu/B.Cu (T-0205) | auto |
 | 154 | 2026-11-09 | pdm-4ch | 90 stitching vias 0.8/0.4 mm: 34 board edge (about 5 mm), 5 GND_CAN edge, 12 around the buck, 8 around U1, 30 open-area grid, 1 island tie; every outer GND/GND_CAN island tied to In1 (T-0205) | auto |
+| 155 | 2026-11-10 | pdm-4ch | Buck input loop closes on F.Cu through a 0.3 mm GND track from U3.2 under the SOT-23-6 body (between pins 3 and 4) to C19.2; FB stays on F.Cu and no via sits in the C1/C19/U3 loop (T-0207) | auto |
+| 156 | 2026-11-10 | pdm-4ch | C2 and R43 moved into the L1-U3 corridor (17.3/61.5 rot 90, 17.3/63.45 rot 270) so the bootstrap link stays on F.Cu without crossing SW (T-0207) | auto |
+| 157 | 2026-11-10 | pdm-4ch | R67 and R59 turned 180 degrees so the D8/D7 anode links are straight under the antenna strip and the +3V3/IO13 pads face outward (T-0207) | auto |
+| 158 | 2026-11-10 | pdm-4ch | Nine tented GND stitching vias under the ESP32 module (around pad 61 and under the top GND pin row) (T-0207) | auto |
