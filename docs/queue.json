@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 205,
+    "T": 212,
     "Q": 70
   },
   "tasks": [
@@ -6640,7 +6640,7 @@
       "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Silkscreen: BATTERY and polarity at J10, function labels and pin 1 at every connector, PANEL and CAN at J5/J4, the board name, version and date. References readable, nothing on pads. Refill zones; 0 DRC errors, 0 unconnected, then record in STATUS.md what the layout does and what the bring-up should check.",
       "items": [],
       "depends_on": [
-        "T-0206"
+        "T-0211"
       ],
       "placed": true,
       "final": true
@@ -6710,7 +6710,7 @@
       "id": "T-0206",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "failed",
+      "state": "done",
       "created": "2026-11-09",
       "placed": true,
       "final": true,
@@ -6727,8 +6727,79 @@
       "attempts": 2,
       "finished": "2026-11-10",
       "note": "repair 1: 253 unconnected items left; gates failed: DRC: 698 errors on the board (`kpcb.py pdm-4ch drc` lists them); 81 unconnected items left; report kept as docs/reviews/2026-11-10-fix-pdm-4ch-T-0206-rejected.md",
-      "summary": "failed",
+      "summary": "superseded: split into routing stages T-0207–T-0211 (too big for one 90-min run)",
       "interrupted": null
+    },
+    {
+      "id": "T-0207",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-10",
+      "placed": true,
+      "title": "Route the short local links and ground vias",
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Routing rules for every routing stage: no signal track on In1.Cu (solid GND/GND_CAN plane, EMC rule 3); signals on F.Cu, In2.Cu where free, and B.Cu; buck SW/CB/input loop on F.Cu with no via in the C1/C19/U3 loop; nothing across the CAN barrier on any layer; nothing in the antenna or hole keep-outs. Power pours (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) must stay whole: after every refill check that no pour splits and no thermal is starved, and protect pours by their outlines, not their fill shapes. An autorouter is allowed only inside these rules. Background and what failed before: docs/reviews/2026-11-10-fix-pdm-4ch-T-0206-rejected.md. This is one stage of several: you do NOT need 0 unconnected. Bank progress: commit only routing that leaves 0 DRC errors, parity 0 and whole pours; stop starting new router runs after about 60 minutes and hand in what is clean, listing in the report what is left. Route by script (`kpcb track`/`via`), not by autorouter: the buck links on F.Cu (R9/R10 FB, R43/U3.1 CB, U3.6/C2 SW, C1/JP1/D2 input), U30/Q30/C32 (C32/U30.4, U30.6/Q30.1), D7/R59 and D8/R67 around the IO13/+3V3 pad, C4/F2, R106 to OUT1, and a short via from every GND and GND_CAN pin that has no plane connection yet to In1.",
+      "items": [],
+      "depends_on": [
+        "T-0205"
+      ]
+    },
+    {
+      "id": "T-0208",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-10",
+      "placed": true,
+      "title": "Make room in the U1 strip and fan out U1",
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Routing rules for every routing stage: no signal track on In1.Cu (solid GND/GND_CAN plane, EMC rule 3); signals on F.Cu, In2.Cu where free, and B.Cu; buck SW/CB/input loop on F.Cu with no via in the C1/C19/U3 loop; nothing across the CAN barrier on any layer; nothing in the antenna or hole keep-outs. Power pours (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) must stay whole: after every refill check that no pour splits and no thermal is starved, and protect pours by their outlines, not their fill shapes. An autorouter is allowed only inside these rules. Background and what failed before: docs/reviews/2026-11-10-fix-pdm-4ch-T-0206-rejected.md. This is one stage of several: you do NOT need 0 unconnected. Bank progress: commit only routing that leaves 0 DRC errors, parity 0 and whole pours; stop starting new router runs after about 60 minutes and hand in what is clean, listing in the report what is left. Most open nets sit in the ~6 mm strip between the VS copper (x < 61) and the CAN barrier (x > 67.5) next to U1. Make room, preferring in this order: route the J6 service lines (TXD0, RXD0, IO35–IO42) on In2.Cu under the GND side; spread the analog block (Q3–Q6, R18–R24, R60/R61/C60) within the logic half; narrow VS-B-spine and VS-In2 at x 58–61 only after checking the VS current and heat path (design-notes §8.12/§8.13, heat budget at 40 °C). Record any part move or copper change as a decision (two-way door). Then fan out U1: a short stub and via from each used U1 pin toward its destination.",
+      "items": [],
+      "depends_on": [
+        "T-0207"
+      ]
+    },
+    {
+      "id": "T-0209",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-10",
+      "placed": true,
+      "title": "Route the U1 strip signals",
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Routing rules for every routing stage: no signal track on In1.Cu (solid GND/GND_CAN plane, EMC rule 3); signals on F.Cu, In2.Cu where free, and B.Cu; buck SW/CB/input loop on F.Cu with no via in the C1/C19/U3 loop; nothing across the CAN barrier on any layer; nothing in the antenna or hole keep-outs. Power pours (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) must stay whole: after every refill check that no pour splits and no thermal is starved, and protect pours by their outlines, not their fill shapes. An autorouter is allowed only inside these rules. Background and what failed before: docs/reviews/2026-11-10-fix-pdm-4ch-T-0206-rejected.md. This is one stage of several: you do NOT need 0 unconnected. Bank progress: commit only routing that leaves 0 DRC errors, parity 0 and whole pours; stop starting new router runs after about 60 minutes and hand in what is clean, listing in the report what is left. Route the nets through the U1 strip: IO4, IO6, IO17, IO18, IO39, IO42, TXD0, MOD_ID, SW1–4, SW_IN1–4, SW3_IO, VBAT_SENSE, DEN and the Q3–Q5 bases and collectors, plus the rest of the analog_sw network to J5.",
+      "items": [],
+      "depends_on": [
+        "T-0208"
+      ]
+    },
+    {
+      "id": "T-0210",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-10",
+      "placed": true,
+      "title": "Route the CAN and USB pairs and the remaining long links",
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Routing rules for every routing stage: no signal track on In1.Cu (solid GND/GND_CAN plane, EMC rule 3); signals on F.Cu, In2.Cu where free, and B.Cu; buck SW/CB/input loop on F.Cu with no via in the C1/C19/U3 loop; nothing across the CAN barrier on any layer; nothing in the antenna or hole keep-outs. Power pours (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) must stay whole: after every refill check that no pour splits and no thermal is starved, and protect pours by their outlines, not their fill shapes. An autorouter is allowed only inside these rules. Background and what failed before: docs/reviews/2026-11-10-fix-pdm-4ch-T-0206-rejected.md. This is one stage of several: you do NOT need 0 unconnected. Bank progress: commit only routing that leaves 0 DRC errors, parity 0 and whole pours; stop starting new router runs after about 60 minutes and hand in what is clean, listing in the report what is left. Route CAN H/L as a pair over GND_CAN, USB D+/D- as a pair from J3 with its ESD parts, then every other remaining connection that does not need a design change. An autorouter is fine for the leftovers inside the rules above.",
+      "items": [],
+      "depends_on": [
+        "T-0209"
+      ]
+    },
+    {
+      "id": "T-0211",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-10",
+      "placed": true,
+      "title": "Close the last connections",
+      "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Routing rules for every routing stage: no signal track on In1.Cu (solid GND/GND_CAN plane, EMC rule 3); signals on F.Cu, In2.Cu where free, and B.Cu; buck SW/CB/input loop on F.Cu with no via in the C1/C19/U3 loop; nothing across the CAN barrier on any layer; nothing in the antenna or hole keep-outs. Power pours (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) must stay whole: after every refill check that no pour splits and no thermal is starved, and protect pours by their outlines, not their fill shapes. An autorouter is allowed only inside these rules. Background and what failed before: docs/reviews/2026-11-10-fix-pdm-4ch-T-0206-rejected.md. This is one stage of several: you do NOT need 0 unconnected. Bank progress: commit only routing that leaves 0 DRC errors, parity 0 and whole pours; stop starting new router runs after about 60 minutes and hand in what is clean, listing in the report what is left. Route whatever is still open. If a connection cannot be made without breaking a rule, make the smallest two-way change (move a part, a via, a short In2 run) and record it; anything that is a one-way door goes to the owner. Finish with 0 unconnected and 0 DRC errors.",
+      "items": [],
+      "depends_on": [
+        "T-0210"
+      ],
+      "final": true
     }
   ],
   "board_size_start": {
