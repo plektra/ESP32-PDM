@@ -1,6 +1,38 @@
 # pdm-4ch status
 
-Updated: 2026-11-11 (T-0209 routing build script)
+Updated: 2026-11-11 (T-0210 CAN and USB pairs as fixed routes)
+
+**2026-11-11 (T-0210, CAN and USB pairs as fixed routes, rebuild – unattended):** the CAN H/L pair, USB D+/D− and
+J3 CC1 are now hand-made, locked copper. The board is the output of `build_routing.sh 3 3` with those routes as
+fixed input. No part was moved, and no zone outline changed.
+- **CAN:** H and L run side by side on F.Cu over GND_CAN.
+  - The two crossings forced by the pin order stay on the CAN side: CANL_XCVR runs on In2 under FL1, and CANH_BUS
+    reaches J4.3 on B.Cu.
+  - CANH (FL1/R71) is closed.
+  - CANL_XCVR has a 0.15 mm neck between the R71/R72 pads.
+- **USB:** J3 → D5/D6 (ESD at the connector) → U1. The pair crosses the VS block:
+  - on B.Cu in the free band at y 19–19.5;
+  - on F.Cu at y 20.5/21.15 through the gap between U12/D201 and U13;
+  - on In2 east of x 56.5, where In2 is the GND plane, to U1's fan-out vias.
+- **J3 end:** no via sits in OUT1-B. CC1 leaves above the pads to In2. Two fixed GND ties serve D5.1/D6.1 and
+  D4.1/R12.2.
+- **Result:**
+  - `kpcb drc`: 0 errors, 78 unconnected (T-0209: 75), parity 0.
+  - Every pour is whole. In1 has no signals. The buck is untouched.
+  - The pairs and CC1 are joined. The router's variance moved the rest: analog block, U1 strip legs, west-bound
+    nets.
+- **Held back:** the pcb-fixer gate admits only the board file and its notes. So the `fixed_routes.py` entries
+  for these routes, and `LAND_BEST=1` for `build_routing.sh`, are a patch in the T-0210 report, for a package
+  whose scope covers `scripts/`. Until then, the locked board copper is the record, and builds keep it.
+- **Left (78):**
+  - West-bound nets across the VS block: DEN, SW_IN1–4, +3V3, EN, IO0, IO2, IO3, IO5, NTC, U12/U14-IS. The USB
+    lane shows the way: B.Cu y 19–21 west of x 46.5, plus the F.Cu gap between U12 and U13.
+  - U1 strip legs: IO6/7/8/11/17/18/39/40, SW1–4_IO, SW_SENSE(_IO), MOD_ID. The USB In2 run under U1 (y 18.95/19.4)
+    closes In2 southward there, so these need B.Cu lanes.
+  - Analog-block short links: Q3–Q6, R3/R4, VBAT_SENSE, SWIN1–4, SW1/2/4.
+  - VBUS (F2-Pad1) at J3: A4–A9 and F2.1. Its via cannot go into OUT1-B, so it needs a fixed In2 route.
+  - D3-A, one GND island, one VS item.
+- Details: design-notes §8.17 and `docs/reviews/2026-11-11-fix-pdm-4ch-T-0210.md`.
 
 **2026-11-11 (T-0209, routing as a build, U1 strip – unattended):** routing is now a reproducible build
 (decision 163). No part was moved, and no zone outline changed.
