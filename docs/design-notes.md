@@ -1922,6 +1922,82 @@ The links were drawn by script with `kpcb track`/`via`, on F.Cu only (In1 stays 
   carry only buck input current. The battery and output paths are not changed by this stage. A competent person
   reviews the board, in particular the battery path and the outputs, before installation.
 
+### 8.15 pdm-4ch layout stage 6b: room in the U1 strip, U1 fan-out, J6 on In2 (T-0208, 2026-11-10, auto)
+
+Coordinates are mm from the top-left board corner. All edits went through `kpcb` (zone, delete, via, track). No part
+was moved.
+
+**The bottleneck.** Every net from U1 to the south of the board (J6, D12–D15, R30–R33, U5, the switch inputs) has to
+pass the corridor x 59.5–67.5, y 34.5–52.8. To its left is the VS copper (Q30 drain, C31). To its right is the CAN
+barrier (x 67.55–75.65 for y > 47.35). F.Cu is closed there by C31 (to x 66.2) and C14–C17, so only In2 and B.Cu
+are left. 27 nets cross it:
+- +3V3 and EN;
+- IO6, IO7, IO8, IO11, IO17, IO18;
+- the six J6 lines;
+- SW1–4_IO, SW1–4 and SWIN1–4;
+- SW_SENSE.
+
+**Room made.**
+
+- **VS-B-spine and VS-In2 are narrowed from x 61.0 to x 59.5**, between y 35 and 52.8 (B.Cu) and between y 34.5
+  and 50.5 (In2).
+  - This side area lies east of the drain vias at x 57.4 and carries no VS pad or via. The 16 A path runs north
+    from the drain vias (x 52–57.4) into the spine (x 45.5–55). It never uses the strip beyond x 59.5.
+  - Copper lost: 27 mm² on B.Cu (549 → 522 mm²) and 24 mm² on In2 (1218 → 1194 mm²). That is about 2 % of the
+    VS copper.
+  - The ≥ 2 cm² drain rule (decision 104) is met on F.Cu alone, which is unchanged.
+  - `heat_budget.py` at 40 °C is unchanged (4 × 4 A, Tj 101 °C; the model has no copper-shape term).
+  - Both zones keep their priority, clearance (1.0 / 0.5 mm) and solid pads, and both are still one island.
+- **Stitching vias:**
+  - Removed from the corridor: (65.54, 34.0), (63.04, 43.0), (63.04, 51.0). A via there blocks a lane on every
+    layer.
+  - Also removed: (77.9, 21.2), (60.35, 12.87) and (60.35, 17.92), which were in the fan-out lanes.
+  - Two GND vias are re-added west of U1 at (59.9, 10.2) and (59.9, 15.6).
+  - In1 GND is still one piece, and every GND island is still tied.
+
+**U1 fan-out.**
+
+- Each used pin has a 0.2 mm F.Cu stub to a 0.6/0.3 mm tented via. The module's right pin column has only a 1.3 mm
+  lane to C50/C52/C53, and a via column at the 0.85 mm pin pitch would cut a slot into the In1 plane (antipad
+  1.2 mm). So most vias sit under the module, staggered at ≥ 1.2 mm centre to centre, which leaves In1 webs between
+  them:
+  - left column x 63.4/64.6;
+  - bottom row at y 18.0/16.8;
+  - right column x 75.0/73.8.
+- Outward vias, toward the destination:
+  - IO2, IO4, IO5, NTC, IO11 at x 61.0/59.95, west of the module;
+  - SW_SENSE_IO at (63.0, 20.35);
+  - EN at (77.25, 6.35).
+- IO3 has a stub only: its destinations R204/D202 sit beside the module on F.Cu.
+
+**J6 on In2.**
+
+- IO35, IO36, IO37 and IO42 run entirely on In2: east of the via columns, one 45° run under the analog block,
+  down the corridor at x 60.2–61.7, and a second 45° run to J6's pads.
+- TXD0 and RXD0 run on In2 down lanes 62.2/62.7. They change to B.Cu for the last 5 mm, at (60.9, 58.3) and
+  (60.75, 59.75).
+- The B.Cu hop is needed because U1's pin order (RXD0 above TXD0) and J6's pin order (TXD0 above RXD0) cross. No
+  planar route on one layer avoids that.
+- Tracks are 0.2 mm with ≥ 0.2 mm clearance, ≥ 0.6 mm from VS-In2, and nothing is under the antenna or across the
+  barrier.
+
+**Capacity left for routing.**
+
+- In the corridor: B.Cu x 60.6–67.4, about 18 tracks at 0.2/0.2 mm; In2 x 63.0–67.4, about 12. That is about 30
+  for the 21 remaining corridor nets.
+- **Open problem for the next stage:** nine nets go from U1 to the west half: IO0 (SW_BOOT1), EN (SW_RESET1), DEN
+  (R102/R402), USB_DN/DP (J3), IO2, IO5, NTC (TH1) and +3V3 (D102/D402).
+  - Between y 1 and 59 they cannot cross the VS block on In2 (VS-In2) or on B.Cu (the VS spine).
+  - On F.Cu they meet the switches, the OUT2/OUT3 pours and the antenna strip at y < 4.5.
+  - If they all go through the corridor and then west along the bottom edge, the corridor is full: about 30 nets
+    for about 30 lanes.
+  - The routing stage should check for an F.Cu gap through the switch block first (between U12 and U13), and
+    otherwise use the bottom edge.
+
+**Safety.** The battery and output paths are unchanged except for the VS side area above. VS keeps ≥ 1.0 mm to every
+other net on the outer layers and ≥ 0.5 mm on In2. A competent person reviews the board, in particular the battery
+path and the outputs, before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
