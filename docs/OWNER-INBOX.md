@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
 - **Why it needs you:** layout stage T-0211: 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.
 
-**Answer:** 
+**Answer:** Option 3 + option 2. Signal vias (not tracks) may pass through VS-In2; each pour must stay one island and keep >= 95 % of its area. Also allow a placement stage that gives the U1 transistor/resistor block (Q3-Q6, R17-R24/R50/R51) and the channel signal columns room. Recheck the heat budget (decision 9) after the change. No corridor notch. The scripts gate (question 4) is already settled by decision 163.
 
 ---
 
