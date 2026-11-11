@@ -1,7 +1,7 @@
 {
   "next": {
-    "T": 218,
-    "Q": 70
+    "T": 220,
+    "Q": 71
   },
   "tasks": [
     {
@@ -6891,33 +6891,31 @@
       "id": "T-0211",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "running",
+      "state": "ready",
       "created": "2026-11-10",
       "placed": true,
       "title": "Close the last connections by build",
       "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Method (decision 163, owner): routing is a reproducible build, not hand edits. One command, `hardware/pdm-4ch/scripts/build_routing.sh [runs]`, run with KiCad closed under KiCad's own Python (pcbnew; it exports Specctra DSN and imports SES, kicad-cli cannot), works on a temp copy of the project and copies a board in only when it is better and clean. Steps: (1) fixed copper = every LOCKED track, via and zone: the stage 4–5 power copper and the scripted links of T-0207/T-0208 (lock them once, in the first build) plus the fixed tracks listed in `scripts/fixed_routes.py` (pairs, tight escapes; coordinates in mm, the place where hand-made routing lives); all UNLOCKED tracks and vias are removed before each build; (2) clear every zone fill, keep the power zone outlines (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) as keep-outs for foreign nets, In1 barred for signals, the antenna, CAN-barrier, JP30/JP1 and hole keep-outs on all layers; (3) Freerouting 2.5.0 headless (`~/.local/opt/jdk-25.0.4.1+1/Contents/Home/bin/java -Djava.awt.headless=true -jar ~/.local/opt/freerouting-2.5.0/freerouting-2.5.0.jar --gui.enabled=false -de in.dsn -do out.ses -mt 1`) routes the signals only; (4) import the SES, then pour: refill every zone, add GND stitching vias, remove dangling vias and stubs; (5) check: no power pour split, no starved thermal, `kpcb drc` with parity; (6) Freerouting differs per run: do several runs (up to 3 in parallel, in the background, each in its own folder) and keep the one with 0 DRC errors and the fewest unconnected. A problem the router leaves is fixed by adding fixed routes or a part move to the scripts and rebuilding, never by editing only the board. Each Freerouting run takes 15–20 min: start runs early and hand in within the 90-min limit. Record the method and the script usage in the board's STATUS.md and design-notes. Rules: no signal on In1.Cu; buck SW/CB/input loop on F.Cu with no via in the C1/C19/U3 loop; nothing across the CAN barrier; power pours stay whole. Earlier failures: docs/reviews/2026-11-10-fix-pdm-4ch-T-0206-rejected.md. Add fixed routes or the smallest two-way part move for every connection still open, rebuild until a run has 0 unconnected and 0 DRC errors, and commit the scripts with the board. A one-way door goes to the owner. Finish with 0 unconnected and 0 DRC errors.",
       "items": [],
       "depends_on": [
-        "T-0210"
+        "T-0210",
+        "T-0218",
+        "T-0219"
       ],
       "final": true,
       "started": "2026-11-11T04:12:00",
       "ran_model": "opus",
       "session": "5cd52528-ce69-4ba9-8b1a-75cb24d607f0",
-      "cost_usd": 0.0586,
-      "attempts": 1,
-      "resume": {
-        "session": "5cd52528-ce69-4ba9-8b1a-75cb24d607f0",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0211",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0211-w1tl_1ip",
-        "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0211.md",
-        "head": "78d53b6ef1e2d24b264cc8608c547212366db163",
-        "reason": "a usage limit"
-      },
+      "cost_usd": 10.3065,
+      "attempts": 2,
       "finished": "2026-11-11",
-      "note": "no report written (api_error): You've hit your 5-hour limit · resets 4:10am (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "note": "repair 1: 78 unconnected items left; repair 2: 78 unconnected items left; gates failed: 78 unconnected items left; report kept as docs/reviews/2026-11-11-fix-pdm-4ch-T-0211-rejected.md; waits for T-0218, T-0219",
+      "summary": "waits for T-0218, T-0219 (blocked items), then runs again",
+      "interrupted": null,
+      "waits_for": [
+        "T-0218",
+        "T-0219"
+      ]
     },
     {
       "id": "T-0212",
@@ -7017,6 +7015,56 @@
       "since": "0c3b8808957831a41962a0102c045f740265570d",
       "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
       "recheck": "emc"
+    },
+    {
+      "id": "T-0218",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-11",
+      "finding": {
+        "id": "T-0211",
+        "kind": "question",
+        "severity": "MAJOR",
+        "board": "pdm-4ch",
+        "location": "PCB layout (T-0211)",
+        "door": "one-way",
+        "summary": "0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a ",
+        "fix": "0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)",
+        "default": null
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0211.md",
+        "finding": "T-0211"
+      },
+      "door": "one-way",
+      "state": "blocked-owner",
+      "question": "Q-0070",
+      "why_big": [
+        "layout stage T-0211: 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46."
+      ]
+    },
+    {
+      "id": "T-0219",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-11",
+      "finding": {
+        "id": "T-0211-scripts",
+        "kind": "finding",
+        "severity": "MAJOR",
+        "board": "pdm-4ch",
+        "location": "PCB layout (T-0211)",
+        "door": "two-way",
+        "summary": "the pcb-fixer merge gate still rejects hardware/pdm-4ch/scripts/ (T-0210 finding), so fixed routes cannot be added to fixed_routes.py as decision 163 requires; needs a /system gate change or a package scoped to scripts/",
+        "fix": "the pcb-fixer merge gate still rejects hardware/pdm-4ch/scripts/ (T-0210 finding), so fixed routes cannot be added to fixed_routes.py as decision 163 requires; needs a /system gate change or a package scoped to scripts/",
+        "default": null
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0211.md",
+        "finding": "T-0211-scripts"
+      },
+      "door": "two-way",
+      "state": "parked"
     }
   ],
   "board_size_start": {

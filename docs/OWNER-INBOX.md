@@ -6,12 +6,24 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-No open questions.
+## Open (1)
 
-## Decided by agents (5) – two-way doors
+## Q-0070 · MAJOR · pdm-4ch · question
+
+- **From:** `docs/reviews/2026-11-11-fix-pdm-4ch-T-0211.md` T-0211 (PCB layout (T-0211)); task T-0218
+- **Summary:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a 
+- **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
+- **Why it needs you:** layout stage T-0211: 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.
+
+**Answer:** 
+
+---
+
+## Decided by agents (6) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0219 · MAJOR · pdm-4ch · the pcb-fixer merge gate still rejects hardware/pdm-4ch/scripts/ (T-0210 finding), so fixed routes cannot be added to fixed_routes.py as decision 163 requires; needs a /system gate change or a package scoped to scripts/ → the pcb-fixer merge gate still rejects hardware/pdm-4ch/scripts/ (T-0210 finding), so fixed routes cannot be added to fixed_routes.py as decision 163 requires; needs a /system gate change or a package scoped to scripts/
 - T-0212 · MAJOR · pdm-4ch · pcb-fixer merge gate admits only the board file and notes; the fixed_routes.py entries for the CAN/USB/CC1 routes and LAND_BEST=1 in build_routing.sh are held back as a patch in this report and need a package whose scope covers hardware/pdm-4ch/scripts/ (the routes themselves are locked copper on th → pcb-fixer merge gate admits only the board file and notes; the fixed_routes.py entries for the CAN/USB/CC1 routes and LAND_BEST=1 in build_routing.sh are held back as a patch in this report and need a package whose scope covers hardware/pdm-4ch/scripts/ (the routes themselves are locked copper on the board and survive every build)
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
