@@ -8,6 +8,8 @@
 # 5 checks: pours whole, `kpcb drc` with parity
 # 6 the best clean run (0 DRC errors, parity 0, pours whole, fewest unconnected) replaces the board only when it has
 #   fewer unconnected items than the board now has. Env KEEP_WORK=<dir> uses that folder instead of a temp one.
+#   Env LAND_BEST=1 lands the best clean run even without fewer unconnected: use it once after fixed_routes.py
+#   changed, so the board is again the output of the scripts (the old board's routing no longer matches them).
 set -u
 RUNS=${1:-3}; PASSES=${2:-25}
 [[ $RUNS -gt 3 ]] && RUNS=3
@@ -60,7 +62,7 @@ done
 mkdir -p $WORK/now; cp $PROJ/*.kicad_sch $PROJ/*.kicad_pro $PROJ/*-lib-table $BOARD $WORK/now/
 REF=$(drc $WORK/now/ESP32-PDM-4CH.kicad_pcb)
 REF_UNC=$(echo $REF | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d["unconnected"] if d["errors"]==0 else 999999)')
-if [[ -n $BEST && $BEST_UNC -lt $REF_UNC ]]; then
+if [[ -n $BEST && ( $BEST_UNC -lt $REF_UNC || ${LAND_BEST:-0} == 1 ) ]]; then
   cp $WORK/r$BEST/proj/ESP32-PDM-4CH.kicad_pcb $BOARD
   echo "KEPT r$BEST: $BEST_UNC unconnected (board had $REF_UNC)"
 else
