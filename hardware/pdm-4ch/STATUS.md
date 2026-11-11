@@ -1,6 +1,6 @@
 # pdm-4ch status
 
-Updated: 2026-11-11 (T-0214 fixed routes into the build scripts)
+Updated: 2026-11-11 (T-0221 scripts gate confirmed open)
 
 **2026-11-11 (T-0214, fixed routes into the build scripts – unattended):** the CAN, USB and CC1 routes from T-0210
 now live in `scripts/fixed_routes.py` (34 track entries, 16 vias), and `build_routing.sh` takes `LAND_BEST=1`. This is
@@ -27,8 +27,7 @@ fixed input. No part was moved, and no zone outline changed.
   - Every pour is whole. In1 has no signals. The buck is untouched.
   - The pairs and CC1 are joined. The router's variance moved the rest: analog block, U1 strip legs, west-bound
     nets.
-- **Held back:** the `fixed_routes.py` entries and `LAND_BEST=1` were a patch in the T-0210 report; landed in
-  T-0214 (above).
+- **Fixed routes:** in `scripts/fixed_routes.py`; the pcb-fixer gate admits `scripts/` (c9fa4fa, decision 163).
 - **Left (78):**
   - West-bound nets across the VS block: DEN, SW_IN1–4, +3V3, EN, IO0, IO2, IO3, IO5, NTC, U12/U14-IS. The USB
     lane shows the way: B.Cu y 19–21 west of x 46.5, plus the F.Cu gap between U12 and U13.
