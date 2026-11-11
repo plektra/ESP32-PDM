@@ -7085,7 +7085,7 @@
       ],
       "ruling": "Option 3 + option 2. Signal vias (not tracks) may pass through VS-In2; each pour must stay one island and keep >= 95 % of its area. Also allow a placement stage that gives the U1 transistor/resistor block (Q3-Q6, R17-R24/R50/R51) and the channel signal columns room. Recheck the heat budget (decision 9) after the change. No corridor notch. The scripts gate (question 4) is already settled by decision 163.",
       "answered": "2026-11-11",
-      "package": "T-0231"
+      "unfinished": 1
     },
     {
       "id": "T-0219",
@@ -7366,7 +7366,7 @@
       "id": "T-0231",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-11",
       "title": "pdm-4ch routing: signal vias through VS-In2 and placement room for the U1 block and channel columns (staged, time-boxed)",
       "brief": "Re-plan of T-0226, which timed out after 5400 s with no report and no repo change. This time work in stages, land after each clean stage, and stop on time.\n\nGoal: close as many of the 78 unconnected items as possible, ideally all. Sources:\n- docs/reviews/2026-11-11-fix-pdm-4ch-T-0211-rejected.md;\n- design-notes 8.17/8.18;\n- hardware/pdm-4ch/STATUS.md.\n\nOwner's ruling (Q-0070, decision 172), verbatim: \"Option 3 + option 2. Signal vias (not tracks) may pass through VS-In2; each pour must stay one island and keep >= 95 % of its area. Also allow a placement stage that gives the U1 transistor/resistor block (Q3-Q6, R17-R24/R50/R51) and the channel signal columns room. Recheck the heat budget (decision 9) after the change. No corridor notch. The scripts gate (question 4) is already settled by decision 163.\"\n\nMethod: decision 163. Fixes go into hardware/pdm-4ch/scripts/ (routing_build.py, fixed_routes.py, build_routing.sh), which the pcb-fixer gate admits, and the board is the build output. Placement moves use tools/kpcb.py on the board.\n\nTIME BOX:\n- Write the report file (with an empty fix block) within the first 10 minutes and update it after each stage.\n- One Freerouting run per input is enough (T-0211: parallel runs were identical), so do not run build_routing.sh with more than 1 run.\n- At most 4 builds in total.\n- After about 75 minutes of work, stop. Land the best clean state and report the rest.\n\nSTAGE A, build change (option 3), then build and land:\n1. routing_build.py:\n   - For the VS-In2 zone only, the keep-out exported to Freerouting bars tracks but not vias: SetDoNotAllowVias(False) on 'pour-VS-In2'.\n   - Every other pour keeps its full track+via keep-out (decision 164).\n   - So a via in VS-In2 must still be legal on F.Cu/In1/B.Cu: not in VS-B-spine/front/rear, OUT pours, the antenna strip, the CAN barrier, hole keep-outs or the edge strip.\n2. fixed_routes.py: POUR_LOSS_MAX = 0.05 (was 0.02).\n3. Pour acceptance: the island test stays 'no more islands than baseline'. Confirm that VS-In2's baseline is 1 island, so the ruling's 'one island' holds. Change nothing else in the acceptance rules: 0 DRC errors, parity 0, and replace the board only when it has fewer unconnected items (decision 166).\n4. Locked copper stays: PROFET thermal vias, VS vias, and the fixed CAN/USB/CC1 routes.\n5. Run build_routing.sh with 1 run.\n   - If it is better: land it (commit + python3 tools/land.py) with the scripts.\n   - If it is not better: land only the script change.\n6. Record the VS-In2 area before and after (routing_build.py islands) in the report.\n\nSTAGE B, placement (option 2), then build and land:\n1. Move the U1 transistor/resistor block (Q3-Q6, R17-R24, R50, R51) and the channel signal-column parts named in 8.18 toward U1 and away from the VS/OUT outlines. The parts are those on DEN, SW_IN1-4, +3V3 (D102/D202/D402), IO0/2/3/5, EN, NTC, U12/U14-IS and R60. Space the analog block so the short links and the U1 strip legs get lanes.\n2. Constraints:\n   - All SMT stays on top (decision 122); nothing goes into the hole keep-outs, the antenna strip or the CAN barrier; everything stays inside the outline.\n   - Do not move the PROFETs, Q30/U30/D31, the connectors, the buck or U1.\n   - Change no power-zone outline, and make no notch in VS-In2 or OUT3-F: the owner ruled that out.\n3. If a move leaves a locked link or a fixed-route entry dangling, fix it in scripts/fixed_routes.py, not by hand.\n4. Build with 1 run, and land if it is better.\n\nSTAGE C, only if time is left:\n- Fixed routes in fixed_routes.py for what the router leaves, using the new via freedom in VS-In2. One example is J3 VBUS A4/A9/B4/B9 -> F2.1 on In2, because no via may sit in OUT1-B.\n- Also fixed GND ties for the three GND F.Cu islands (U1.64/D52, D101, J3).\n\nAfter the last landed build:\n- Run python3 tools/heat_budget.py at 40 C (decision 9; pdm-4ch defaults, 4 x 4 A).\n- Report Tj and the VS-In2 area loss. heat_budget.py does not model the In2 area, so state that the RthJA estimate is unchanged, as long as every PROFET thermal via is still in VS-In2 and the loss is <= 5 %.\n- Update STATUS.md and design-notes (new 8.19).\n\nChecks: tools/fix_check.py --role pcb-fixer. That means the schematic is unchanged, parity 0, 0 DRC errors, outline and holes unchanged, and no bottom SMT.\n\nIf unconnected items remain when the time box ends:\n- Report them as a two-way blocked finding with the exact nets and the next step (more placement room or a fixed route), so they come back as a follow-up package.\n- Do not run past the time box.\n\nONE-WAY DOORS (stop and ask in the report): a corridor or notch in any power pour, a change to a power-zone outline, a pour split, more than 5 % area loss, a signal track (not a via) on VS-In2, moving a PROFET, Q30, a connector, a hole or the outline, a bottom-side part, a schematic change, or a heat-budget Tj above the limit.",
@@ -7374,7 +7374,30 @@
         "T-0218"
       ],
       "plan": "T-0230",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-11T06:30:16",
+      "ran_model": "opus",
+      "session": "e59164dd-6fff-4dd4-baee-b3a15072fc63",
+      "cost_usd": 0.9443,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-11",
+      "note": null,
+      "summary": "0 fixed, 0 blocked, merged 7627a725; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0231.md"
     },
     {
       "id": "T-0232",
