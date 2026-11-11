@@ -7297,7 +7297,7 @@
       "id": "T-0228",
       "role": "cost-controller",
       "scope": "system",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-11",
       "depends_on": [
         "T-0226"
@@ -7308,7 +7308,14 @@
       "recheck": "cost",
       "started": "2026-11-11T06:28:22",
       "ran_model": "sonnet",
-      "session": "cd53379a-b36a-47c5-8dea-085edb1c9261"
+      "session": "cd53379a-b36a-47c5-8dea-085edb1c9261",
+      "cost_usd": 0.1201,
+      "attempts": 1,
+      "finished": "2026-11-11",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-11-cost-system.md"
     },
     {
       "id": "T-0229",
