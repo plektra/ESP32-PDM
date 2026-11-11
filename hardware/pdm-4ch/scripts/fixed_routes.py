@@ -26,8 +26,8 @@ ESCAPE_MM = 0.5
 EDGE_STRIP_MM = 0.35
 
 # Pour check: a power pour fails when it has more islands than before routing or lost more than this share of its
-# area (tracks may only enter the small escapes around foreign pads).
-POUR_LOSS_MAX = 0.02
+# area (tracks may only enter the small escapes around foreign pads). 5 %: decision 172 (signal vias in VS-In2).
+POUR_LOSS_MAX = 0.05
 
 # GND/GND_CAN stitching grid (mm); a via is added only where all four layers are fill of that net.
 STITCH_PITCH_MM = 5.0
