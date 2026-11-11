@@ -7409,7 +7409,24 @@
         "T-0231"
       ],
       "verify": true,
-      "since": "16a7b88575e83e1e9353c767eed27ea14e33f0fe"
+      "since": "16a7b88575e83e1e9353c767eed27ea14e33f0fe",
+      "started": "2026-11-11T07:41:27",
+      "ran_model": "sonnet",
+      "session": "cce61fa1-70c4-4f45-86a2-38e99a82c137",
+      "cost_usd": 0.0,
+      "attempts": 1,
+      "resume": {
+        "session": "cce61fa1-70c4-4f45-86a2-38e99a82c137",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0232",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0232-kly9nv83",
+        "report": "docs/reviews/2026-11-11-validate-pdm-4ch-4.md",
+        "head": "681166b3cb36d822a83ad123d32f0c3cd7b31ab2",
+        "reason": "a usage limit"
+      },
+      "finished": "2026-11-11",
+      "note": "no report written (api_error): You've hit your 5-hour limit · resets 9:10am (Europe/Helsinki)",
+      "summary": "paused, API unavailable, resumes where it stopped",
+      "interrupted": null
     },
     {
       "id": "T-0233",

@@ -121,8 +121,8 @@ flowchart LR
   T0228["T-0228 · system<br/>re-check after its packages"]:::done
   T0229["T-0229 · system<br/>re-check after its packages"]:::done
   T0232["T-0232 · pdm-4ch<br/>re-check after its packages"]:::ready
-  T0233["T-0233 · system<br/>re-check after its packages"]:::ready
-  T0234["T-0234 · system<br/>re-check after its packages"]:::ready
+  T0233["T-0233 · system<br/>re-check after its packages"]:::done
+  T0234["T-0234 · system<br/>re-check after its packages"]:::done
   T0065 --> T0066
   T0065 --> T0067
   T0065 --> T0068
