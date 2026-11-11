@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 220,
+    "T": 225,
     "Q": 71
   },
   "tasks": [
@@ -6966,7 +6966,7 @@
       "id": "T-0214",
       "role": "board-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-11",
       "title": "pdm-4ch: CAN/USB/CC1 fixed routes and LAND_BEST into the routing build scripts",
       "brief": "Land the script patch that T-0210 held back. Change only hardware/pdm-4ch/scripts/ (plus STATUS.md / design-notes if a line is needed). No schematic, lib/ or board change.\n\nSteps:\n1. Extract the diff block under 'Held-back patch' in docs/reviews/2026-11-11-fix-pdm-4ch-T-0210.md into a scratch file. Run git apply --check, then git apply. The planner checked on 2026-11-11 that it applies cleanly.\n2. Check that hardware/pdm-4ch/scripts/fixed_routes.py imports and that its TRACKS/VIAS lists are non-empty: python3 -c with sys.path pointing at the scripts dir. Run bash -n on build_routing.sh.\n3. Optional, cheap: apply the fixed routes to a scratch copy of the board, the way the build's fixed-route step does, then refill and run kpcb DRC. Expect no new DRC errors and parity 0. The routes are already on the board as locked copper, so they must coincide. If they do not, report the difference and do not edit the board.\n4. Do NOT run build_routing.sh with LAND_BEST=1 and do not replace the board. The board in the repo is already the build output with these routes fixed (T-0210: 0 DRC errors, 78 unconnected, parity 0).\n5. In STATUS.md, note that the fixed routes now live in scripts/fixed_routes.py.\n6. Run python3 tools/fix_check.py --scope pdm-4ch with empty refs. The netlist and ERC must be unchanged on both boards.\n\nOne-way door (stop and ask): none expected. If the patch no longer applies, or the routes in the script disagree with the locked copper on the board, the change would move board copper. In that case report it as blocked (two-way, for the next routing stage) instead of editing the board.",
@@ -6974,7 +6974,10 @@
         "T-0212"
       ],
       "plan": "T-0213",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-11T04:52:35",
+      "ran_model": "opus",
+      "session": "275516fe-6c6d-4163-b300-2051cb1e77e5"
     },
     {
       "id": "T-0215",
@@ -7064,7 +7067,83 @@
         "finding": "T-0211-scripts"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0221"
+    },
+    {
+      "id": "T-0220",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-11",
+      "depends_on": [],
+      "items": [
+        "T-0219"
+      ],
+      "started": "2026-11-11T04:52:35",
+      "ran_model": "opus",
+      "session": "dc005176-ee4d-4c1f-ba4e-5ae9a69a7516",
+      "cost_usd": 0.4196,
+      "attempts": 1,
+      "finished": "2026-11-11",
+      "note": null,
+      "summary": "1 packages, 0 deferred, 0 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-11-plan-system-T-0220.md"
+    },
+    {
+      "id": "T-0221",
+      "role": "board-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-11",
+      "title": "pdm-4ch: confirm the routing scripts gate is open and the T-0210 fixed routes are in scripts/",
+      "brief": "Close T-0219: the T-0211 stage reported that the pcb-fixer merge gate rejects hardware/pdm-4ch/scripts/, so fixed routes cannot go into scripts/fixed_routes.py as decision 163 requires. Most of this is already done; this package verifies it and fills only a gap. Do not change tools/, the schematic, lib/ or the .kicad_pcb.\n\nSteps:\n1. Gate: read fix_allowed() in tools/orchestrate.py. Since commit c9fa4fa (2026-11-11), role 'pcb-fixer' admits paths under hardware/<scope>/scripts/. Confirm this with a one-line check in $CLAUDE_JOB_DIR (import orchestrate via importlib, assert fix_allowed('hardware/pdm-4ch/scripts/fixed_routes.py', 'pdm-4ch', 'pcb-fixer') is True). If it is False, change nothing. Report it as blocked (two-way, needs a /system tool change), because tools/ is outside this scope.\n2. Patch: package T-0214 (plan T-0213) applies the held-back patch from docs/reviews/2026-11-11-fix-pdm-4ch-T-0210.md, section 'Held-back patch': the CAN/USB/CC1 entries in scripts/fixed_routes.py and LAND_BEST=1 in scripts/build_routing.sh. Check whether it is on main already: git log -- hardware/pdm-4ch/scripts/, and grep fixed_routes.py for the CAN/USB/CC1 routes and build_routing.sh for LAND_BEST. If it is there, do not apply it again. If it is not, follow the T-0214 brief once (it is the same change, not a second one):\n   (a) extract the diff and run git apply --check, then git apply. The planner checked on 2026-11-11 that it applies cleanly.\n   (b) Check that fixed_routes.py imports with non-empty TRACKS/VIAS, and run bash -n build_routing.sh.\n   (c) Do NOT run build_routing.sh with LAND_BEST=1 and do not replace the board. The board is already the T-0210 build with these routes as locked copper (0 DRC errors, 78 unconnected, parity 0).\n3. STATUS.md: hardware/pdm-4ch/STATUS.md lines 24-25 say the fixed routes are 'held back' because the gate admits only the board file. If T-0214 or this package has landed the patch and the text still says so, replace it with one line: the routes are in scripts/fixed_routes.py, and the pcb-fixer gate admits scripts/ (c9fa4fa, decision 163). Add nothing else.\n4. Run python3 tools/fix_check.py --scope pdm-4ch with empty refs. Netlist and ERC must be unchanged on both boards.\n\nOne-way door (stop and ask): none expected. If the patch no longer applies, or its routes disagree with the locked copper on the board, applying it would move board copper. In that case report it as blocked (two-way, for the next routing stage) and leave the board as it is.",
+      "items": [
+        "T-0219"
+      ],
+      "plan": "T-0220",
+      "depends_on": []
+    },
+    {
+      "id": "T-0222",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-11",
+      "depends_on": [
+        "T-0221"
+      ],
+      "verify": true,
+      "since": "95b6c7b337f05608de3bc06776920f914e427a7a"
+    },
+    {
+      "id": "T-0223",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-11",
+      "depends_on": [
+        "T-0221"
+      ],
+      "verify": true,
+      "since": "95b6c7b337f05608de3bc06776920f914e427a7a",
+      "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
+      "recheck": "cost"
+    },
+    {
+      "id": "T-0224",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-11",
+      "depends_on": [
+        "T-0221"
+      ],
+      "verify": true,
+      "since": "95b6c7b337f05608de3bc06776920f914e427a7a",
+      "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
+      "recheck": "emc"
     }
   ],
   "board_size_start": {
