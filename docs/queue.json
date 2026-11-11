@@ -7078,11 +7078,13 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0070",
       "why_big": [
         "layout stage T-0211: 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46."
-      ]
+      ],
+      "ruling": "Option 3 + option 2. Signal vias (not tracks) may pass through VS-In2; each pour must stay one island and keep >= 95 % of its area. Also allow a placement stage that gives the U1 transistor/resistor block (Q3-Q6, R17-R24/R50/R51) and the channel signal columns room. Recheck the heat budget (decision 9) after the change. No corridor notch. The scripts gate (question 4) is already settled by decision 163.",
+      "answered": "2026-11-11"
     },
     {
       "id": "T-0219",
