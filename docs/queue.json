@@ -6938,8 +6938,10 @@
         "finding": "T-0210-scripts"
       },
       "door": "two-way",
-      "state": "parked",
-      "package": "T-0214"
+      "state": "done",
+      "package": "T-0214",
+      "fixed_by": "T-0214",
+      "merged": "746f38809693352182a30f74a7182d9cf045823f"
     },
     {
       "id": "T-0213",
@@ -6966,7 +6968,7 @@
       "id": "T-0214",
       "role": "board-fixer",
       "scope": "pdm-4ch",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-11",
       "title": "pdm-4ch: CAN/USB/CC1 fixed routes and LAND_BEST into the routing build scripts",
       "brief": "Land the script patch that T-0210 held back. Change only hardware/pdm-4ch/scripts/ (plus STATUS.md / design-notes if a line is needed). No schematic, lib/ or board change.\n\nSteps:\n1. Extract the diff block under 'Held-back patch' in docs/reviews/2026-11-11-fix-pdm-4ch-T-0210.md into a scratch file. Run git apply --check, then git apply. The planner checked on 2026-11-11 that it applies cleanly.\n2. Check that hardware/pdm-4ch/scripts/fixed_routes.py imports and that its TRACKS/VIAS lists are non-empty: python3 -c with sys.path pointing at the scripts dir. Run bash -n on build_routing.sh.\n3. Optional, cheap: apply the fixed routes to a scratch copy of the board, the way the build's fixed-route step does, then refill and run kpcb DRC. Expect no new DRC errors and parity 0. The routes are already on the board as locked copper, so they must coincide. If they do not, report the difference and do not edit the board.\n4. Do NOT run build_routing.sh with LAND_BEST=1 and do not replace the board. The board in the repo is already the build output with these routes fixed (T-0210: 0 DRC errors, 78 unconnected, parity 0).\n5. In STATUS.md, note that the fixed routes now live in scripts/fixed_routes.py.\n6. Run python3 tools/fix_check.py --scope pdm-4ch with empty refs. The netlist and ERC must be unchanged on both boards.\n\nOne-way door (stop and ask): none expected. If the patch no longer applies, or the routes in the script disagree with the locked copper on the board, the change would move board copper. In that case report it as blocked (two-way, for the next routing stage) instead of editing the board.",
@@ -6977,7 +6979,27 @@
       "depends_on": [],
       "started": "2026-11-11T04:52:35",
       "ran_model": "opus",
-      "session": "275516fe-6c6d-4163-b300-2051cb1e77e5"
+      "session": "275516fe-6c6d-4163-b300-2051cb1e77e5",
+      "cost_usd": 0.5722,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-11",
+      "note": null,
+      "summary": "1 fixed, 0 blocked, merged 746f3880; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-11-fix-pdm-4ch-T-0214.md"
     },
     {
       "id": "T-0215",
