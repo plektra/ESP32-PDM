@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 214,
+    "T": 218,
     "Q": 70
   },
   "tasks": [
@@ -6891,7 +6891,7 @@
       "id": "T-0211",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-10",
       "placed": true,
       "title": "Close the last connections by build",
@@ -6901,7 +6901,7 @@
         "T-0210"
       ],
       "final": true,
-      "started": "2026-11-11T01:28:26",
+      "started": "2026-11-11T04:12:00",
       "ran_model": "opus",
       "session": "5cd52528-ce69-4ba9-8b1a-75cb24d607f0",
       "cost_usd": 0.0586,
@@ -6940,35 +6940,83 @@
         "finding": "T-0210-scripts"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "parked",
+      "package": "T-0214"
     },
     {
       "id": "T-0213",
       "role": "planner",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-11",
       "depends_on": [],
       "items": [
         "T-0212"
       ],
-      "started": "2026-11-11T01:28:26",
+      "started": "2026-11-11T04:12:00",
       "ran_model": "opus",
       "session": "f4bc724b-ea49-4c43-8dfc-ef023b2e5421",
-      "cost_usd": 0.2093,
-      "attempts": 1,
-      "resume": {
-        "session": "f4bc724b-ea49-4c43-8dfc-ef023b2e5421",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0213",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0213-anzci35y",
-        "report": "docs/reviews/2026-11-11-plan-system-T-0213.md",
-        "head": "78d53b6ef1e2d24b264cc8608c547212366db163",
-        "reason": "a usage limit"
-      },
+      "cost_usd": 0.7584,
+      "attempts": 2,
       "finished": "2026-11-11",
-      "note": "no report written (api_error): You've hit your 5-hour limit · resets 4:10am (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "note": null,
+      "summary": "1 packages, 0 deferred, 0 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-11-plan-system-T-0213.md"
+    },
+    {
+      "id": "T-0214",
+      "role": "board-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-11",
+      "title": "pdm-4ch: CAN/USB/CC1 fixed routes and LAND_BEST into the routing build scripts",
+      "brief": "Land the script patch that T-0210 held back. Change only hardware/pdm-4ch/scripts/ (plus STATUS.md / design-notes if a line is needed). No schematic, lib/ or board change.\n\nSteps:\n1. Extract the diff block under 'Held-back patch' in docs/reviews/2026-11-11-fix-pdm-4ch-T-0210.md into a scratch file. Run git apply --check, then git apply. The planner checked on 2026-11-11 that it applies cleanly.\n2. Check that hardware/pdm-4ch/scripts/fixed_routes.py imports and that its TRACKS/VIAS lists are non-empty: python3 -c with sys.path pointing at the scripts dir. Run bash -n on build_routing.sh.\n3. Optional, cheap: apply the fixed routes to a scratch copy of the board, the way the build's fixed-route step does, then refill and run kpcb DRC. Expect no new DRC errors and parity 0. The routes are already on the board as locked copper, so they must coincide. If they do not, report the difference and do not edit the board.\n4. Do NOT run build_routing.sh with LAND_BEST=1 and do not replace the board. The board in the repo is already the build output with these routes fixed (T-0210: 0 DRC errors, 78 unconnected, parity 0).\n5. In STATUS.md, note that the fixed routes now live in scripts/fixed_routes.py.\n6. Run python3 tools/fix_check.py --scope pdm-4ch with empty refs. The netlist and ERC must be unchanged on both boards.\n\nOne-way door (stop and ask): none expected. If the patch no longer applies, or the routes in the script disagree with the locked copper on the board, the change would move board copper. In that case report it as blocked (two-way, for the next routing stage) instead of editing the board.",
+      "items": [
+        "T-0212"
+      ],
+      "plan": "T-0213",
+      "depends_on": []
+    },
+    {
+      "id": "T-0215",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-11",
+      "depends_on": [
+        "T-0214"
+      ],
+      "verify": true,
+      "since": "0c3b8808957831a41962a0102c045f740265570d"
+    },
+    {
+      "id": "T-0216",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-11",
+      "depends_on": [
+        "T-0214"
+      ],
+      "verify": true,
+      "since": "0c3b8808957831a41962a0102c045f740265570d",
+      "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
+      "recheck": "cost"
+    },
+    {
+      "id": "T-0217",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-11",
+      "depends_on": [
+        "T-0214"
+      ],
+      "verify": true,
+      "since": "0c3b8808957831a41962a0102c045f740265570d",
+      "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
+      "recheck": "emc"
     }
   ],
   "board_size_start": {
