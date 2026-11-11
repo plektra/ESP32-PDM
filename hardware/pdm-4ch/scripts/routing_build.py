@@ -38,6 +38,9 @@ P6 = {'Net-(D2-K)', 'Net-(D3-K)', 'Net-(F1-Pad2)', 'Net-(F4-Pad2)', '/Analog int
       'Net-(J4-Pin_2)', 'Net-(D11-K)', 'Net-(C22-Pad2)', '/OUT1', '/OUT2', '/OUT3', '/OUT4', '/VBAT_FL'}
 P4 = {'Net-(F2-Pad1)', 'Net-(C4-Pad1)', 'Net-(D3-A)', 'Net-(U5-VCC2)', 'Net-(Q30-G)', 'Net-(U30-VCAP)'}
 BUCK_TOP = {'Net-(U3-SW)', 'Net-(U3-CB)'}      # buck SW/CB on F.Cu only (no via in the loop)
+# Power pours whose router keep-out bars tracks only (decision 172, Q-0070): foreign-net vias may pass through; the
+# via must still be legal on the other layers. Every other pour keeps its track+via keep-out (decision 164).
+VIA_OK_POURS = {'VS-In2'}
 
 
 def origin(b):
@@ -185,6 +188,8 @@ def prep(board, work):
         # Freerouting lets foreign nets cross a plane; the same outline as a keep-out protects the pour
         k = pcbnew.ZONE(b); k.SetIsRuleArea(True)
         k.SetDoNotAllowTracks(True); k.SetDoNotAllowVias(True); k.SetDoNotAllowZoneFills(False)
+        if z.GetZoneName() in VIA_OK_POURS:
+            k.SetDoNotAllowVias(False)   # decision 172: signal vias (not tracks) may pass through this pour
         k.SetDoNotAllowPads(False); k.SetDoNotAllowFootprints(False)
         k.SetLayer(lay); ko.thisown = 0; k.SetOutline(ko); k.SetZoneName('pour-' + z.GetZoneName()); b.Add(k)
     for name, r in KEEPOUTS.items():
