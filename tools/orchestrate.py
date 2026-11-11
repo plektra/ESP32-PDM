@@ -824,10 +824,10 @@ def shared_sheets_equal(wt):
 
 
 def fix_allowed(path, scope, role='board-fixer'):
-    if role == 'pcb-fixer':  # the board file only, plus its notes; never the schematic or lib/
+    if role == 'pcb-fixer':  # the board file and its build scripts (decision 163), plus notes; never the schematic or lib/
         d = f'hardware/{scope}/'
         return (path.startswith(d) and path.endswith(('.kicad_pcb', '.kicad_pro', 'STATUS.md'))) or \
-            path == 'docs/design-notes.md'
+            path.startswith(f'{d}scripts/') or path == 'docs/design-notes.md'
     if scope == 'sync':
         return path in SYNC_FILES
     boards = BOARDS if scope == 'shared' else (scope,)
