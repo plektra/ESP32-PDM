@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 245,
-    "Q": 72
+    "Q": 73
   },
   "tasks": [
     {
@@ -7078,15 +7078,14 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "parked",
-      "question": "Q-0071",
+      "state": "blocked-owner",
+      "question": "Q-0072",
       "why_big": [
-        "2 work packages (last T-0236) returned it neither done nor blocked; check whether it is already done or say how to proceed"
+        "3 work packages (last T-0241) returned it neither done nor blocked; check whether it is already done or say how to proceed"
       ],
       "ruling": "In2 corridor. Allow signal tracks through the VS copper on In2.Cu only; F.Cu/B.Cu VS, the 16 A paths and the surge path stay unchanged. VS-In2 stays one piece and keeps every PROFET's thermal vias inside it, loses at most 15 % of its baseline area, and the heat budget at 40 °C must pass (tools/heat_budget.py). First fix the router export so the DSN has no built-in violations (T-0236 reports 722), and run several Freerouting runs per build so the run-to-run spread does not hide gains. Route mostly by script: the four output channels are identical, so design one channel's signal bus (sense, input, LED lines) through the In2 corridor once and generate the other three as the same pattern in scripts/fixed_routes.py; the J6 bundle, CAN, USB and the U1 fan-out stay fixed routes too. Freerouting only fills the remaining short links; if it still cannot close them after the export fix, drop it and script those links as well.",
       "answered": "2026-11-12",
-      "unfinished": 2,
-      "package": "T-0241"
+      "unfinished": 3
     },
     {
       "id": "T-0219",
@@ -7604,7 +7603,7 @@
       "id": "T-0241",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-12",
       "title": "pdm-4ch routing: clean router export, In2 signal corridor through VS-In2, scripted channel buses (Q-0071)",
       "brief": "Fourth attempt at T-0218. The board on main is the T-0236 build 2: 74 unconnected, 0 DRC errors, parity 0, VS-In2 1 island, 1185.4 of 1190.7 mm2. Start from main, and first confirm that state with kpcb drc.\n\nOwner's ruling (Q-0071, new decision row amending 172), verbatim: \"In2 corridor. Allow signal tracks through the VS copper on In2.Cu only; F.Cu/B.Cu VS, the 16 A paths and the surge path stay unchanged. VS-In2 stays one piece and keeps every PROFET's thermal vias inside it, loses at most 15 % of its baseline area, and the heat budget at 40 °C must pass (tools/heat_budget.py). First fix the router export so the DSN has no built-in violations (T-0236 reports 722), and run several Freerouting runs per build so the run-to-run spread does not hide gains. Route mostly by script: the four output channels are identical, so design one channel's signal bus (sense, input, LED lines) through the In2 corridor once and generate the other three as the same pattern in scripts/fixed_routes.py; the J6 bundle, CAN, USB and the U1 fan-out stay fixed routes too. Freerouting only fills the remaining short links; if it still cannot close them after the export fix, drop it and script those links as well.\"\n\nSources:\n- docs/reviews/2026-11-12-fix-pdm-4ch-T-0236.md: open items by group, the builds table, the next steps;\n- design-notes 8.16 (build method; the 500-700 'unfixable' violations), 8.17 and 8.18 (the west pocket geometry, J6 bundle v2 and the J3 VBUS route, both pre-checked at 0 DRC errors on fixed copper);\n- hardware/pdm-4ch/STATUS.md;\n- decisions 163-175.\n\nMethod (decision 163): fixes go into hardware/pdm-4ch/scripts/ (routing_build.py, fixed_routes.py, build_routing.sh), and the board is the build output. Placement moves, if any, use tools/kpcb.py.\n\nREPORT DISCIPLINE:\n- Write the report within the first 10 minutes. Its fix block lists T-0218 under 'blocked' (door two-way, reason 'in progress: <stage>').\n- Update the report after each stage.\n- Move T-0218 to 'done' only at 0 unconnected.\n- Never leave done and blocked both empty.\n- Do not commit; the orchestrator does. Leave the best clean state in the worktree, with the scripts reproducing that board. Use LAND_BEST=1 once after fixed_routes.py changes, if needed.\n\nTIME BOX:\n- Start each build in the background with a 25-min limit.\n- At most 5 builds.\n- Stop work at about 75 minutes, keep the best clean state, and finish the report.\n\nSTAGE 1 - clean router export (no board change):\n1. In routing_build.py prep, find what makes the 722 DSN violations. Suspects from 8.16: power copper inside its own pour keep-out, and pads near the 0.35 mm edge strip.\n2. Change the export so the DSN has 0 built-in violations (Freerouting log). Do not loosen any KiCad DRC rule or keep-out to get there.\n3. From then on, build with 3 runs (build_routing.sh 3 25). The script already gives each run its own strategy (FR_STRATS).\n4. Record the violations before and after, and the 3-run spread.\n\nSTAGE 2 - corridor rule (scripts only):\n1. Let signal tracks on In2.Cu pass inside the VS-In2 outline: VS-In2 is no longer a track keep-out for foreign nets on In2.\n2. Change nothing on F.Cu/B.Cu VS, the VBAT/OUT pours, the 16 A paths or the surge path. Their keep-outs stay exactly as they are.\n3. Make the pour check per pour: VS-In2 may lose up to 15 % of its 1190.7 mm2 baseline (so >= 1012 mm2) and must stay 1 island. Every other pour keeps its island count and >= 95 % of its area (decision 172).\n4. Add a check that every PROFET thermal via (U11-U14 exposed pad vias, VS) lies inside the filled VS-In2 and is connected to it.\n5. Leave the VS-In2 outline unchanged; the fill clears around the tracks.\n6. Run one 3-run build and keep it if it is better.\n\nSTAGE 3 - scripted channel bus:\n1. Before you script anything, check that the four channels' signal-side parts (the IS sense resistors/filters, the IN/DEN input parts, the LED drivers and their resistors) have the same relative placement and rotation. Report any differences.\n2. Design one channel's bus (IS sense, IN/DEN input, LED lines) from its signal-column parts through the In2 corridor to D12-D15/U1, as a function in fixed_routes.py.\n3. Generate the other three channels with that function, using per-channel offsets or a mirror. Where placement differs, use per-channel parameters rather than moving power parts.\n4. Keep J6 (v1 as on main, or v2 from 8.18 if it then builds better), CAN, USB and the U1 fan-out as fixed routes.\n5. Add the J3 VBUS route and a D3-A route (FB1.2 -> D3) from 8.18 together. They compete for In2 west of x 26.5.\n6. Pre-check the fixed copper at 0 DRC errors, then build.\n\nSTAGE 4 - short links:\n1. Let Freerouting fill what is left.\n2. If after the export fix it still leaves links open across builds, script those links in fixed_routes.py and build again.\n\nACCEPTANCE (every build):\n- 0 DRC errors and parity 0;\n- the pour rules from stage 2;\n- no signal on In1.Cu (EMC rule 3), buck SW/CB on F.Cu only, nothing across the CAN barrier or the antenna strip, no via in OUT1-B (decision 170);\n- fewer unconnected items than the board.\n\nAFTER THE LAST KEPT BUILD:\n1. Run python3 tools/heat_budget.py --ambient 40 --currents 4,4,4,4 (decision 9) and report Tj.\n2. heat_budget.py does not model the In2 area. State the VS-In2 area, the island count and that all thermal vias are inside it.\n3. Run python3 tools/fix_check.py --role pcb-fixer --scope pdm-4ch. It checks: schematic unchanged, parity 0, 0 DRC errors, outline and holes unchanged, no bottom SMT.\n4. Update STATUS.md and design-notes (new 8.19).\n5. Record your own layout choices (export fix, channel bus geometry) as auto decisions in the fix block.\n\nIf items stay open, list them under 'blocked' (two-way) with the exact nets and the next scripted route.\n\nONE-WAY DOORS (stop, do not do, ask in the report):\n- any change to F.Cu/B.Cu VS copper, the 16 A paths, the surge path or any other power-zone outline;\n- a signal track through any power pour other than VS-In2, or on a layer other than In2 inside VS copper;\n- VS-In2 split, losing more than 15 %, or a PROFET thermal via ending up outside it;\n- the heat budget failing at 40 C;\n- loosening a DRC rule or clearance to clear DSN violations;\n- moving a PROFET, Q30/U30/D31, a connector, a hole or the outline;\n- a bottom-side part;\n- any schematic change.",
@@ -7612,7 +7611,30 @@
         "T-0218"
       ],
       "plan": "T-0240",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-12T23:26:29",
+      "ran_model": "opus",
+      "session": "93f71649-27ec-4635-b1a4-2f07d56a6821",
+      "cost_usd": 7.1673,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-13",
+      "note": "1 tool calls denied (Bash); log T-0241-20261112-232635.json",
+      "summary": "0 fixed, 0 blocked, merged 7f006e83; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-12-fix-pdm-4ch-T-0241.md"
     },
     {
       "id": "T-0242",
