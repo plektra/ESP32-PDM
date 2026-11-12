@@ -7078,13 +7078,13 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0071",
       "why_big": [
         "2 work packages (last T-0236) returned it neither done nor blocked; check whether it is already done or say how to proceed"
       ],
-      "ruling": "Option 3 + option 2. Signal vias (not tracks) may pass through VS-In2; each pour must stay one island and keep >= 95 % of its area. Also allow a placement stage that gives the U1 transistor/resistor block (Q3-Q6, R17-R24/R50/R51) and the channel signal columns room. Recheck the heat budget (decision 9) after the change. No corridor notch. The scripts gate (question 4) is already settled by decision 163.",
-      "answered": "2026-11-11",
+      "ruling": "In2 corridor. Allow signal tracks through the VS copper on In2.Cu only; F.Cu/B.Cu VS, the 16 A paths and the surge path stay unchanged. VS-In2 stays one piece and keeps every PROFET's thermal vias inside it, loses at most 15 % of its baseline area, and the heat budget at 40 °C must pass (tools/heat_budget.py). First fix the router export so the DSN has no built-in violations (T-0236 reports 722), and run several Freerouting runs per build so the run-to-run spread does not hide gains. Route mostly by script: the four output channels are identical, so design one channel's signal bus (sense, input, LED lines) through the In2 corridor once and generate the other three as the same pattern in scripts/fixed_routes.py; the J6 bundle, CAN, USB and the U1 fan-out stay fixed routes too. Freerouting only fills the remaining short links; if it still cannot close them after the export fix, drop it and script those links as well.",
+      "answered": "2026-11-12",
       "unfinished": 2
     },
     {
