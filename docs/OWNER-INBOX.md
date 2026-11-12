@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
 - **Why it needs you:** 2 work packages (last T-0236) returned it neither done nor blocked; check whether it is already done or say how to proceed
 
-**Answer:** 
+**Answer:** In2 corridor. Allow signal tracks through the VS copper on In2.Cu only; F.Cu/B.Cu VS, the 16 A paths and the surge path stay unchanged. VS-In2 stays one piece and keeps every PROFET's thermal vias inside it, loses at most 15 % of its baseline area, and the heat budget at 40 °C must pass (tools/heat_budget.py). First fix the router export so the DSN has no built-in violations (T-0236 reports 722), and run several Freerouting runs per build so the run-to-run spread does not hide gains. Route mostly by script: the four output channels are identical, so design one channel's signal bus (sense, input, LED lines) through the In2 corridor once and generate the other three as the same pattern in scripts/fixed_routes.py; the J6 bundle, CAN, USB and the U1 fan-out stay fixed routes too. Freerouting only fills the remaining short links; if it still cannot close them after the export fix, drop it and script those links as well.
 
 ---
 
