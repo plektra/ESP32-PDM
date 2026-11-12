@@ -1,6 +1,25 @@
 # pdm-4ch status
 
-Updated: 2026-11-11 (T-0221 scripts gate confirmed open)
+Updated: 2026-11-12 (T-0236 signal vias through VS-In2, lanes in the U1 strip, J3 VBUS)
+
+**2026-11-12 (T-0236, decision 172 / Q-0070 – unattended):** builds with the VS-In2 via freedom from T-0231 (whose
+own run stopped before its first build ended).
+- **Stage A'** (vias may pass VS-In2): 79 unconnected against 78, so not landed. A via also needs F.Cu and B.Cu room,
+  and the west channel columns sit in a B.Cu pocket closed by VS-B-front, the VS-B spine and VS-B-rear (design-notes
+  §8.18).
+- **Stage B:** the J6 service bundle (TXD0/RXD0/IO35–37/IO42) on In2 had cut diagonally through the Q3–Q6 block.
+  - It now runs as nested L-routes in `scripts/fixed_routes.py`, round the block's east side and under it at
+    y 32.6–35.1.
+  - R60 moved into the VS-F-drain edge (58.3/41.4), so only VBAT_SENSE leaves the power area.
+  - Build: 74 unconnected (was 78), 0 errors, parity 0, pours whole.
+- **Builds 3 and 4** were not kept (77 and 75):
+  - build 3 added a J3 VBUS fixed route, which closed VBUS;
+  - build 4 added a J6 bundle v2 lane at x 77.8–80.3.
+- Both are written out in design-notes §8.18 for the next stage, and the scripts stay at the build-2 input.
+  Details: `docs/reviews/2026-11-12-fix-pdm-4ch-T-0236.md`.
+- VS-In2: 1 island, 1185 mm² of 1190.7 mm² (−0.4 %). Heat budget at 40 °C, 4 × 4 A: Tj 101 °C.
+- **Left:** the west channel nets (DEN, SW_IN1–4, IO0/2/3/5, EN, NTC, +3V3 to D102/D402) need the long B.Cu→In2 path
+  round the south (§8.18) as fixed routes, and the rest of the U1 strip/analog block.
 
 **2026-11-11 (T-0214, fixed routes into the build scripts – unattended):** the CAN, USB and CC1 routes from T-0210
 now live in `scripts/fixed_routes.py` (34 track entries, 16 vias), and `build_routing.sh` takes `LAND_BEST=1`. This is
