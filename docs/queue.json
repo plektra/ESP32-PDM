@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 240,
-    "Q": 71
+    "Q": 72
   },
   "tasks": [
     {
@@ -7078,15 +7078,14 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "parked",
-      "question": "Q-0070",
+      "state": "blocked-owner",
+      "question": "Q-0071",
       "why_big": [
-        "layout stage T-0211: 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46."
+        "2 work packages (last T-0236) returned it neither done nor blocked; check whether it is already done or say how to proceed"
       ],
       "ruling": "Option 3 + option 2. Signal vias (not tracks) may pass through VS-In2; each pour must stay one island and keep >= 95 % of its area. Also allow a placement stage that gives the U1 transistor/resistor block (Q3-Q6, R17-R24/R50/R51) and the channel signal columns room. Recheck the heat budget (decision 9) after the change. No corridor notch. The scripts gate (question 4) is already settled by decision 163.",
       "answered": "2026-11-11",
-      "unfinished": 1,
-      "package": "T-0236"
+      "unfinished": 2
     },
     {
       "id": "T-0219",
@@ -7481,7 +7480,7 @@
       "id": "T-0236",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-12",
       "title": "pdm-4ch routing: build with signal vias through VS-In2, placement room for the U1 block and channel columns (continue T-0231)",
       "brief": "Third attempt at T-0218. T-0226 timed out (90 min, no report). T-0231 landed only stage A and was cut off while its first build was running. Its report (docs/reviews/2026-11-11-fix-pdm-4ch-T-0231.md) is unfinished, with an empty fix block. Start from what is on main. Do NOT redo stage A.\n\nOwner's ruling (Q-0070, decision 172, amends 166), verbatim: \"Option 3 + option 2. Signal vias (not tracks) may pass through VS-In2; each pour must stay one island and keep >= 95 % of its area. Also allow a placement stage that gives the U1 transistor/resistor block (Q3-Q6, R17-R24/R50/R51) and the channel signal columns room. Recheck the heat budget (decision 9) after the change. No corridor notch. The scripts gate (question 4) is already settled by decision 163.\"\n\nSources:\n- docs/reviews/2026-11-11-fix-pdm-4ch-T-0211-rejected.md: the 78 open items, by group (west 27, U1 strip/analog 47, J3 4);\n- docs/reviews/2026-11-11-fix-pdm-4ch-T-0231.md;\n- design-notes 8.16/8.17. The 8.18 that the T-0211 report cites never landed, so write your notes as a new 8.18;\n- hardware/pdm-4ch/STATUS.md.\n\nMethod: decision 163. Fixes go into hardware/pdm-4ch/scripts/, and the board is the build output. Placement moves use tools/kpcb.py.\n\nState on main:\n- routing_build.py has VIA_OK_POURS = {'VS-In2'}: pour-VS-In2 is SetDoNotAllowVias(False), and it is exported as a wire_keepout;\n- fixed_routes.py has POUR_LOSS_MAX = 0.05;\n- the VS-In2 baseline is 1 island, 1190.7 mm2;\n- the board is the T-0210 build: 0 errors, 78 unconnected, parity 0.\nFirst, confirm with git log and grep that these lines are there.\n\nREPORT DISCIPLINE (this is what failed last time):\n- Write the report within the first 10 minutes.\n- From the start, its fix block lists T-0218 under 'blocked' (door two-way, reason 'in progress: <stage>').\n- Update it after each stage.\n- Move T-0218 to 'done' only at 0 unconnected.\n- Never leave done and blocked both empty.\n\nTIME BOX:\n- 1 run per build (build_routing.sh 1 25). Parallel runs were identical (T-0211).\n- A normal build takes about 5 min (T-0209). Start each build in the background with a 20-min limit.\n- If the via-freedom build has not ended by then, stop it and retry once with fewer passes (build_routing.sh 1 10). If that also hangs, report it as blocked (two-way: 'Freerouting does not converge with vias allowed in VS-In2') and go on to stage B, using the scripts as they are.\n- At most 4 builds in total.\n- Stop work at about 70 minutes. Land the best clean state, and finish the report.\n\nSTAGE A' – build with the via freedom (the change is already on main):\n1. Run build_routing.sh 1 25.\n2. The acceptance rules are unchanged (decision 166 as amended by 172): 0 DRC errors, parity 0, every pour at its baseline island count and >= 95 % of its baseline area, and fewer unconnected items than the board.\n3. If the build is better: commit the board and run python3 tools/land.py.\n4. Record the VS-In2 area and the island count before and after.\n\nSTAGE B – placement (option 2), then build and land:\n1. Move the U1 transistor/resistor block (Q3-Q6, R17-R24, R50, R51) and the channel signal-column parts toward U1 and away from the VS/OUT outlines. The channel signal-column parts are those on DEN, SW_IN1-4, +3V3 (D102/D202/D402), IO0/2/3/5, EN, NTC, U12/U14-IS and R60.\n2. Space the analog block so the U1 strip legs and the short links get lanes.\n3. Constraints:\n   - all SMT on top (decision 122);\n   - nothing in a hole keep-out, the antenna strip or the CAN barrier;\n   - everything inside the outline;\n   - do not move the PROFETs, Q30/U30/D31, the connectors, the buck or U1;\n   - change no power-zone outline.\n4. If a move leaves a locked link or a fixed route dangling, fix it in scripts/fixed_routes.py.\n5. Build with 1 run. Land if the build is better.\n\nSTAGE C – only if time is left:\n- add fixed routes in fixed_routes.py for what the router leaves, using vias through VS-In2;\n- for example J3 VBUS A4/A9/B4/B9 -> F2.1 on In2 (no via may sit in OUT1-B, decision 170);\n- add GND ties for the leftover GND F.Cu islands.\n\nAfter the last landed build:\n1. Run python3 tools/heat_budget.py at 40 C (decision 9; pdm-4ch defaults, 4 x 4 A).\n2. Report Tj. heat_budget.py does not model the In2 area. So state that the RthJA estimate is unchanged, provided every PROFET thermal via is still in VS-In2 and the VS-In2 loss is <= 5 %.\n3. Update STATUS.md (the T-0231 'in progress' state is stale) and design-notes (new 8.18).\n\nChecks: python3 tools/fix_check.py --role pcb-fixer --scope pdm-4ch:\n- schematic unchanged;\n- parity 0, 0 DRC errors;\n- outline and holes unchanged;\n- no bottom SMT.\n\nIf items stay unconnected at the end, list them under 'blocked' (two-way), with the exact nets and the next step (more room, or a named fixed route), so they come back as a follow-up.\n\nONE-WAY DOORS (stop and ask in the report, do not do):\n- a corridor or notch in any power pour, a change to a power-zone outline, or a pour split;\n- more than 5 % area loss;\n- a signal track (not a via) on VS-In2;\n- a via through any other power pour;\n- moving a PROFET, Q30, a connector, a hole or the outline;\n- a bottom-side part;\n- a schematic change;\n- a heat-budget Tj above the limit.",
@@ -7489,7 +7488,32 @@
         "T-0218"
       ],
       "plan": "T-0235",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-12T07:40:53",
+      "ran_model": "opus",
+      "session": "b5d07cb5-811e-4511-b6c9-8d1975d78ff2",
+      "cost_usd": 4.815,
+      "attempts": 1,
+      "refs": [
+        "R60"
+      ],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-12",
+      "note": "1 tool calls denied (Bash); log T-0236-20261112-074100.json",
+      "summary": "0 fixed, 0 blocked, merged 02fe24a6; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-12-fix-pdm-4ch-T-0236.md"
     },
     {
       "id": "T-0237",
