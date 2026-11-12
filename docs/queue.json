@@ -7519,19 +7519,22 @@
       "id": "T-0237",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-12",
       "depends_on": [
         "T-0236"
       ],
       "verify": true,
-      "since": "557048cfff2981dad9588a12dada6215acfededf"
+      "since": "557048cfff2981dad9588a12dada6215acfededf",
+      "started": "2026-11-12T08:33:31",
+      "ran_model": "sonnet",
+      "session": "f891b0f9-f5c1-4291-ab6f-2edfef57a7d2"
     },
     {
       "id": "T-0238",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-12",
       "depends_on": [
         "T-0236"
@@ -7539,7 +7542,17 @@
       "verify": true,
       "since": "557048cfff2981dad9588a12dada6215acfededf",
       "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
-      "recheck": "cost"
+      "recheck": "cost",
+      "started": "2026-11-12T08:33:31",
+      "ran_model": "sonnet",
+      "session": "31d22143-3460-4b45-8c25-869ff4cac56e",
+      "cost_usd": 0.1459,
+      "attempts": 1,
+      "finished": "2026-11-12",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-12-cost-system.md"
     },
     {
       "id": "T-0239",
