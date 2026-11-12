@@ -2253,6 +2253,91 @@ inside VS-In2, and VS-In2 lost 0.4 % of its area (limit 5 %).
 - R60 now sits at the VS pour edge. If it fails short, VS reaches the ADC divider node, just as before the move.
 - A competent person reviews the board before installation.
 
+### 8.19 pdm-4ch clean router export, In2 corridor through VS-In2, generated channel bus (T-0241, 2026-11-12, auto)
+
+**Clean export (Q-0071 step 1).** Freerouting reported 723 "unfixable" pre-existing violations on every DSN
+(§8.16). They came from three router-side mismatches, not from the board. All three are fixed in
+`routing_build.py`; no KiCad rule, zone or keep-out was changed. Since then the log has no design warning, and
+pass 1 ends at 0 violations.
+1. **598 fixed via/track vs ObstacleArea.**
+   - Cause: a DSN keep-out holds for every net. The pours' own vias and tracks sat inside their `pour-*` keep-outs,
+     and foreign vias had escapes smaller than their class clearance.
+   - Fix (`clear_fixed()`): a hole in each router keep-out around each fixed item, at the item's class
+     clearance + 0.05 mm. That size was wrong: Freerouting holds a signal wire only to its own 0.2 mm, so wires
+     ran inside VS outlines along the via fields. Build 1: VS-B-spine −11 %, VS-In2 −16 %.
+   - Final hole: **0.25 mm** (`KEEPOUT_HOLE_MM`), the smallest class clearance + 0.05. A signal wire needs 0.3 mm
+     from the item edge, so it cannot enter, and the DSN still loads with 0 violations.
+2. **125 pin-to-pin.**
+   - Cause: fixed pad pairs were measured against the net-class clearances (VS 1.0 mm, OUT 0.3, VBUS 0.25). These
+     classes are deliberately stricter than KiCad's 0.2 mm; the PROFET, VS-capacitor, J3, U30, F1 and R60 pad gaps
+     cannot meet them.
+   - Fix (`pin_classes()`): each placed pin gets clearance class `PIN<class>`.
+     - Pin↔wire/via keeps the class value.
+     - Pin↔pin is 190 µm. Only fixed pads are involved, and 190 covers Freerouting's polygon approximation of J3's
+       0.200 mm gaps.
+3. **6 fixed vias at a same-net SMD pad.**
+   - Which: R60.1's VS via column, and the GND vias at D6.1, D103.1, D203.1 and R106.2.
+   - Fix: class `FIXV<class>`, 0 against pins and other fixed vias, the class value against routed copper.
+
+**Run-to-run spread.** `build_routing.sh` gives each of its 3 runs its own `-is` strategy. On this DSN the three runs
+were identical pass for pass (build 1: 128 unrouted at every even pass). The passes alternate between a ~128 and a
+~225 unrouted state. The spread is 0, so a single run is representative; the earlier ±3 came from input changes.
+
+**In2 corridor (Q-0071).**
+- VS-In2 is no longer a track keep-out for the router (`CORRIDOR_POURS`). A keep-out remains over each PROFET's
+  thermal-via field + 1 mm.
+- A **1.5 mm band** along the VS-In2 outline stays a track keep-out (`CORRIDOR_BAND_MM`), so every In2 run inside
+  it is an internal slot. Without the band, build 2 crossed the pour edge to edge and split VS-In2 into 2 islands
+  (1083 mm²).
+- The pour check is per pour (`pour_check()`):
+  - VS-In2 must be 1 island and ≥ 1012.1 mm² (85 % of 1190.7);
+  - every other pour keeps its island count and ≥ 95 %.
+- `thermal_check()` requires all 40 PROFET thermal vias (pad 15 PTH, 10 per part) to lie inside the VS-In2 outline
+  and touch its fill.
+- F.Cu/B.Cu VS, VBAT, OUT, the 16 A paths and the surge path are unchanged.
+
+**Channel bus.**
+- **Placement.** Channels 1, 3 and 4 have the same signal-side placement relative to their PROFET. Channel 2 differs
+  (R203/R204/R207/D201/D202 are pushed in by the U1 block).
+- **Why it is generated, not copied.** The destinations (D12–D15 at x 59–63, y 56–72; U1 IO pins at x 62) and the
+  pours round the two west channels (a B.Cu pocket x 36–45.5) are not channel-symmetric, so one copied pattern does
+  not fit. The bus is generated per net instead:
+  - `geom_export.py` (KiCad Python) writes the copper geometry of the build's base board;
+  - `maze_route.py` (Pillow, A* on a 0.1 mm grid, F/In2/B) routes with class clearance + 0.06 mm;
+  - foreign pour outlines are blocked with their zone clearance;
+  - In2 runs inside VS-In2 must stay ≥ 1.5 mm inside its outline. Every corridor run is then an internal slot with a
+    via at each end, so it cannot split the pour;
+  - vias are allowed only where F, In2 and B are all free.
+- **Output.** The generated block at the end of `fixed_routes.py`, pre-checked at 0 DRC errors on fixed copper,
+  VS-In2 1 island, 1178.0 mm².
+- **The lane.** West pocket (B.Cu) → via strip x 45.2–46.2 / y 16–18 → In2 hop under the spine edge → F.Cu between
+  U12 and U13 → B.Cu lane x 56–61 east of the spine → D12–D15.
+- **Limit.** Next to USB, the strip takes only one more lane, so SW_IN1 and SW_IN4 cannot both pass (every order
+  closed 3 of 4). A second west exit needs either a via landing in VS-B-front/rear (one-way door: F/B VS copper) or a
+  moved west signal column.
+
+**Builds and outcome.** Five builds ran; none beat the board (74 unconnected), so the board on main is unchanged.
+
+| Build | Unconnected | DRC errors | Pours | Note |
+|---|---|---|---|---|
+| 1 | 69 | 0 | fail | spine −11 % (hole bug) |
+| 2 | 64 | 0 | fail | VS-In2 2 islands (no band) |
+| 3, 4 | – | – | – | stopped |
+| 5 | 77 | 1 | whole | final rules |
+
+- **Build 5 in detail.**
+  - The scripted lane closed SW_IN2/3/4.
+  - Freerouting then lost short links it used to close: U11–U14 IS/DEN/IN, IO2/IO4, VBUS, J3 CC2.
+  - It also left one starved GND thermal relief on In2 at J6 pad 1.
+- **Lesson.** The lower counts of builds 1–2 came only from signal tracks cutting VS copper. With the pours really
+  protected, the router plus the bus gives about 77.
+- **Where the scripts are.** The script changes are in `scripts/T-0241-next-build.patch` (`git apply`), so
+  `routing_build.py`/`fixed_routes.py` still reproduce the board. `geom_export.py`/`maze_route.py` regenerate the bus.
+- **Next.**
+  - Script the short links too: run the maze on the routed board's leftovers and add them as fixed routes, as
+    Q-0071 allows. Keep In2 off the GND THT pads (the maze already does).
+  - Order the bus legs after the local IS/DEN links, not before them.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
