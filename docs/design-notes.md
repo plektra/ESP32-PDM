@@ -2181,6 +2181,78 @@ A quick pre-check before a 15–20 min run is worth it: put the fixed routes on 
 unlocked copper of those nets removed, refill, and run DRC. Only errors against unlocked router copper may remain,
 because the build removes that copper.
 
+### 8.18 pdm-4ch signal vias through VS-In2, lanes in the U1 strip, J3 VBUS (T-0236, 2026-11-12, auto)
+
+Owner ruling Q-0070 (decision 172, amends 166):
+- signal vias, not tracks, may pass through VS-In2;
+- each pour stays one island and keeps ≥ 95 % of its area;
+- a placement stage may give the U1 transistor block and the channel signal columns room.
+
+The scripts (`VIA_OK_POURS = {'VS-In2'}`, `POUR_LOSS_MAX = 0.05`) landed with T-0231. This stage built with them.
+
+**Why via freedom alone gains nothing (build 1: 79 unconnected against 78).** A through via must also be legal on
+F.Cu and B.Cu.
+- The west channel columns (R10x/R40x and their parts, x 36–44) sit in a B.Cu pocket, x 36–45.5, y 6–30. It is closed
+  by VS-B-front (north), the VS-B spine (east, x 45.5–55 over y 5–58.7) and VS-B-rear (south). On F.Cu the pocket is
+  closed by OUT2-F, OUT3-F and the VS caps.
+- The pocket's only exit is on B.Cu, westward through the band y 13.8–21 at x 26.5–36 (the USB B.Cu run uses
+  y 19.0/19.5).
+- From there a net has to change to In2 west of x 26.5, pass J10 and the buck, and turn east along y 59–74 to
+  D12–D15 and up to U1. That is about 150 mm per net, and Freerouting does not find it.
+- VS-In2 itself is no longer the limit: 12 foreign vias, 1 island, 1185–1186 mm² of 1190.7 mm² (−0.4 %).
+
+**U1 strip: the J6 service bundle was a via wall.** Stage 6b had laid TXD0/RXD0/IO35–37/IO42 (J6, DNP service pads)
+on In2, as one diagonal from (78, 21) to (60, 36). It ran right through Q3–Q6 and their resistors, so no via fitted
+beside those pads, and almost every short link of the block stayed open.
+- This stage removed the six locked diagonals (`kpcb delete --track-at`).
+- `fixed_routes.py` now routes the bundle as nested L shapes on In2: down at x 75.6–78.1, west along y 32.6–35.1
+  (0.5 mm pitch), and onto the existing verticals at x 60.2–62.7. It stays on In2 over the solid In1 GND plane (EMC
+  rule 3). J6 stays inside the board and is never an external connector (§8.7).
+- R60, the VBAT_SENSE divider top resistor from VS, moved to (58.3, 41.4). Its VS pad lies inside the VS-F-drain outline,
+  on the existing VS via column at x 57.4. The 1 mm-clearance VS link through the analog block is gone, and only the
+  divided sense signal (VBAT_SENSE, to R61/C60 and U1) leaves the power area.
+- Result, build 2: 74 unconnected (was 78), 0 DRC errors, parity 0, every pour whole.
+
+**What is left in the block.** The new verticals at x 75.6–78.1 now sit under R17/R18/R20/R21 (y 20–24) and
+R24/R52/R27 (y 29–33). Q3-B, Q4-B, Q3-E, Q4-E, Q5-E, Q4-C and Q6-B stay open.
+- Next step: move the whole bundle off that column. Re-define the U1-side verticals too (today they are locked
+  stage-6b copper from y 10.6–18.25 down to 20.3–21.35), so that the bundle runs down x 77.8–80.3 under the
+  SMA/1206 LED-driver parts, which need no vias.
+- One constraint: the locked GND via at (81.04, 32.5) limits that lane to x ≤ 80.34.
+- Or re-place R17–R21/R24/R27/R52 west of x 75.
+- Build 4 tried that bundle (v2) and is not kept (75 unconnected against 74). It closed Q3-E/Q4-E/Q5-E and opened
+  Q3-C/Q5-B elsewhere. Its geometry, all on In2 at 0.2 mm, per net (U1 start xt/yt; jog yj; west turn yh; J6
+  vertical xb/yb):
+  - IO35: 75.6/18.25, 21.0, 32.6, 60.2/35.70.
+  - IO36: 76.1/17.4, 20.7, 33.1, 60.7/35.91.
+  - IO37: 76.6/16.55, 20.4, 33.6, 61.2/36.12.
+  - IO42: 77.1/12.3, 20.1, 34.1, 61.7/36.33.
+  - TXD0: 77.6/11.45, 19.8, 34.6, 62.2/36.54.
+  - RXD0: 78.1/10.6, 19.5, 35.1, 62.7/36.75.
+  - Path for each net: (xt, yt) → (xt, yj) → (xt + 2.2, yj + 2.2) → (xt + 2.2, yh) → (xb, yh) → (xb, yb).
+  - Before the build, delete the locked stage-6b In2 verticals from yt down, and the v1 L verticals.
+  - Pre-check: 0 DRC errors on fixed copper.
+- Use it together with a re-spaced Q block and a 2–3-run build. Single runs vary by about ±3 for small input changes.
+
+**J3 VBUS (fixed route).** A4/B9 and A9/B4 leave upwards on F.Cu (0.2 mm), past the NPTH pegs (≥ 0.27 mm). They go to
+vias at (17.4, 5.6) and (13.0, 5.6), join on In2 (0.4 mm) along y 5.6 west of VS-In2, come down at x 21.5, and reach
+a via at (25.2, 13.6). That via sits between OUT1-B (y ≤ 11.6) and OUT2-F (y ≥ 14.1), and from it a 0.4 mm F.Cu
+track goes to F2.1. No via sits in OUT1-B (decision 170) or in any other power outline. The route carries USB service
+power only.
+- Build 3 closed VBUS but ended at 77, so the route is **not in the scripts yet**.
+- D3-A (FB1.2 → D3, USB 5 V down to the buck OR diode) competes for the same In2 area west of x 26.5, so the next
+  stage should add both routes together.
+
+**Heat (decision 9).** `heat_budget.py`, 40 °C ambient, 4 × 4 A, BTT6050: Tj 101 °C, enclosure air 45.4 °C. The model
+does not include the In2 area. The RthJA estimate is unchanged, because every PROFET thermal via is still VS and
+inside VS-In2, and VS-In2 lost 0.4 % of its area (limit 5 %).
+
+**Safety.** No power-zone outline changed, no pour split, and no via sits in OUT/VBAT/VS-F/VS-B copper.
+- The only foreign vias in power copper are the existing ones in VS-In2.
+- The battery path, the reverse-battery blocker (Q30/U30) and the outputs are unchanged.
+- R60 now sits at the VS pour edge. If it fails short, VS reaches the ADC divider node, just as before the move.
+- A competent person reviews the board before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)

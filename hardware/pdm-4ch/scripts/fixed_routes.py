@@ -120,3 +120,12 @@ V(CC1, 16.7, 6.85)
 T(CC1, 'In2.Cu', (16.7, 6.85), (16.7, 9.0), (19.4, 11.7), (19.7, 12.0), (19.7, 13.95))
 V(CC1, 19.7, 13.95)
 T(CC1, 'F.Cu', (19.7, 13.95), (19.7, 13.01))
+
+# ---- J6 service bundle on In2 (T-0236, decision 172 placement stage): the stage-6b diagonal from U1's right-hand
+# pins to the J6 column cut In2 under the whole Q3-Q6/analog block, so no via fitted beside those pads. The bundle
+# now drops straight down beside the LED-driver column (x 75.6-78.1) and turns west below the block (y 32.6-35.1),
+# nested at 0.5 mm pitch, onto the existing verticals at x 60.2-62.7. In2 over the solid In1 GND plane (EMC rule 3).
+for _net, _xt, _yt, _xb, _yb, _yh in (('/IO35', 75.6, 20.30, 60.2, 35.70, 32.6), ('/IO36', 76.1, 20.51, 60.7, 35.91, 33.1),
+                                      ('/IO37', 76.6, 20.72, 61.2, 36.12, 33.6), ('/IO42', 77.1, 20.93, 61.7, 36.33, 34.1),
+                                      ('/TXD0', 77.6, 21.14, 62.2, 36.54, 34.6), ('/RXD0', 78.1, 21.35, 62.7, 36.75, 35.1)):
+    T(_net, 'In2.Cu', (_xt, _yt), (_xt, _yh), (_xb, _yh), (_xb, _yb))
