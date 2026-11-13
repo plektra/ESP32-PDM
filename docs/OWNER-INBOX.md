@@ -19,20 +19,20 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (5) – two-way doors
+## Decided by agents (4) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0257 · MINOR · pdm-4ch · Text says the +3V3 necks feed only clamp diodes and pull-ups, but +3V3 also feeds U5 VCC1, L1 output caps and later U1.3; topology behind the necks not traced → Reword the note to state the actual bound (3 squares of 0.2 mm copper, mOhm range, negligible drop even at 0.5 A)
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (73)
+## Applied by agents (74)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0257 · pdm-4ch · Text says the +3V3 necks feed only clamp diodes and pull-ups, but +3V3 also feeds U5 VCC1, L1 output caps and later U1.3; topology behind the necks not traced → T-0260 (`277a83e0`)
 - T-0251 · pdm-4ch · 160 mm of +3V3 at 0.2 mm, below 0.3 mm v3 class; currents <0.1 A so no failure, known to the fixer → T-0253 (`f6b7742b`)
 - T-0250 · pdm-4ch · Maze pass 1 left 13 dangling vias/track stubs (none in base); no short, 0 DRC errors → T-0253 (`f6b7742b`)
 - T-0219 · pdm-4ch · the pcb-fixer merge gate still rejects hardware/pdm-4ch/scripts/ (T-0210 finding), so fixed routes cannot be added to fixed_routes.py as decision 163 requires; needs a /system gate change or a package scoped to scripts/ → T-0221 (`1c5d7eb3`)
@@ -92,7 +92,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0026 · system · Four basic/preferred swaps remove 4 extended fees: FB->GZ2012D601TF C1017, F2->1812L050/60GR, PESD0402V05->H5VL10B C7420372, TPS7B91->L78M05ABDT C58069 → T-0065 (`e5fedd96`)
 - T-0022 · system · Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458 → T-0065 (`e5fedd96`)
 - T-0021 · system · 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn → T-0073 (`1939dfbc`)
-- T-0019 · system · Is IEC 60945 (marine) compliance a goal or only good practice, is a pre-compliance scan planned, and may the N2K shield stay unconnected at the node (4-pole J4)? This sets how far E3-E7 must go. → T-0067 (`5ffcfb6f`)
 
 ## Deferred (22)
 
