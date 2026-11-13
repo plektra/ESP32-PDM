@@ -34,7 +34,8 @@ Updated: 2026-11-13 (T-0259 maze merge fix, ch1/ch4 signal-part move: 46 unconne
 - **+3V3 class width (T-0251).** The maze-made +3V3 copper is now 0.3 mm, 196 mm in total. `prep` widens an identical
   locked track to its `fixed_routes.py` width and never narrows one. Two necks stay 0.2 mm because a GND via sits
   too close at 0.3 mm: In2 (65.7, 59.9)–(65.8, 59.7) and B.Cu (45.9, 68.1)–(46.2, 68.2), 0.6 mm in total.
-  Branch currents there are < 0.1 A. U1.3, the ESP32 3V3 pin, is not connected yet (T-0218).
+  The loads behind them were not traced; bound instead (T-0260): the necks are < 4 mΩ, < 2 mV at 0.5 A
+  (design-notes §8.20). U1.3, the ESP32 3V3 pin, is not connected yet (T-0218).
 - **maze_route.py** now emits each net's class width and sizes its keep-outs for that width. Legs start and end at
   least one grid cell inside their copper, so a leg no longer stops just short of its target.
 - **Dangling copper (T-0250).** Six legs that stopped 0.03–0.99 mm short of their own pad are finished with one
