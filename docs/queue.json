@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 250,
+    "T": 252,
     "Q": 74
   },
   "tasks": [
@@ -7754,13 +7754,23 @@
       "id": "T-0247",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-13",
       "depends_on": [
         "T-0246"
       ],
       "verify": true,
-      "since": "8304312d902d00e4f45871400e62aab8516aecb2"
+      "since": "8304312d902d00e4f45871400e62aab8516aecb2",
+      "started": "2026-11-13T09:40:55",
+      "ran_model": "sonnet",
+      "session": "b542dfea-7b2b-4a1c-bc32-3fa612d82bd9",
+      "cost_usd": 0.2637,
+      "attempts": 1,
+      "finished": "2026-11-13",
+      "note": null,
+      "summary": "2 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-13-validate-pdm-4ch-2.md"
     },
     {
       "id": "T-0248",
@@ -7795,6 +7805,56 @@
       "finished": "2026-11-13",
       "summary": "skipped: no connector, filter or protection part changed (refs: none)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0250",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-13",
+      "finding": {
+        "id": "V1",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-4ch",
+        "location": "ESP32-PDM-4CH.kicad_pcb: dangling vias/tracks on +3V3, SW4_IO, IO5/6/7/11/17/18, SW1_IO, SW2_IO, VBAT_SENSE",
+        "summary": "Maze pass 1 left 13 dangling vias/track stubs (none in base); no short, 0 DRC errors",
+        "fix": "Complete or remove them in the next routing pass (finish() clean-up)",
+        "door": "two-way",
+        "reason": "signal copper only, a git revert or a rebuild undoes it (policy: layout)",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-13-validate-pdm-4ch-2.md",
+        "finding": "V1"
+      },
+      "door": "two-way",
+      "state": "parked"
+    },
+    {
+      "id": "T-0251",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-13",
+      "finding": {
+        "id": "V2",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-4ch",
+        "location": "fixed_routes.py / maze_route.py: +3V3 branches 0.2 mm",
+        "summary": "160 mm of +3V3 at 0.2 mm, below 0.3 mm v3 class; currents <0.1 A so no failure, known to the fixer",
+        "fix": "Make maze_route.py emit the class width and widen in the next pass",
+        "door": "two-way",
+        "reason": "layout rule, reversible by rebuild",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-13-validate-pdm-4ch-2.md",
+        "finding": "V2"
+      },
+      "door": "two-way",
+      "state": "parked"
     }
   ],
   "board_size_start": {

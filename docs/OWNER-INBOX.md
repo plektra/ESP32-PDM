@@ -19,10 +19,12 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (6) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0251 · MINOR · pdm-4ch · 160 mm of +3V3 at 0.2 mm, below 0.3 mm v3 class; currents <0.1 A so no failure, known to the fixer → Make maze_route.py emit the class width and widen in the next pass
+- T-0250 · MINOR · pdm-4ch · Maze pass 1 left 13 dangling vias/track stubs (none in base); no short, 0 DRC errors → Complete or remove them in the next routing pass (finish() clean-up)
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
