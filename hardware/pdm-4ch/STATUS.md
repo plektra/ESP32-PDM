@@ -1,6 +1,21 @@
 # pdm-4ch status
 
-Updated: 2026-11-13 (T-0246 build without Freerouting, maze-routed fixed links: 52 unconnected)
+Updated: 2026-11-13 (T-0253 dangling maze copper removed, +3V3 at 0.3 mm: 48 unconnected)
+
+**2026-11-13 (T-0253: T-0250 + T-0251 – unattended):** the board is again the scripts' output (LAND_BEST build).
+- **+3V3 class width (T-0251).** The maze-made +3V3 copper is now 0.3 mm, 196 mm in total. `prep` widens an identical
+  locked track to its `fixed_routes.py` width and never narrows one. Two necks stay 0.2 mm because a GND via sits
+  too close at 0.3 mm: In2 (65.7, 59.9)–(65.8, 59.7) and B.Cu (45.9, 68.1)–(46.2, 68.2), 0.6 mm in total.
+  Branch currents there are < 0.1 A. U1.3, the ESP32 3V3 pin, is not connected yet (T-0218).
+- **maze_route.py** now emits each net's class width and sizes its keep-outs for that width. Legs start and end at
+  least one grid cell inside their copper, so a leg no longer stops just short of its target.
+- **Dangling copper (T-0250).** Six legs that stopped 0.03–0.99 mm short of their own pad are finished with one
+  segment each: J6.8 ×2, R403.1, Q6.1, R3.2 and R4.2. The new `prune()` step in `finish()` removes the rest
+  (32 items): the 15 dead U1 fan-out stubs and their vias, and a SW2_IO stub. One via_dangling stays on purpose:
+  the /IO13 via at (64.15, 16.80) joins two F.Cu tracks and carries the connection.
+- Board: **48 unconnected** (was 52), 0 errors, parity 0, and every pour at 1 island. VS-In2 is 1165.0 mm² with
+  40/40 thermal vias inside it. Tj is 101 °C at 40 °C ambient, 4 × 4 A. Left: 48 items for T-0218.
+  Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0253.md`.
 
 **2026-11-13 (T-0246, Q-0072 – unattended):** Freerouting is out of the build; the board is the scripts' output.
 - `build_routing.sh` runs prep → `routing_build.py apply <work> -` (refill, stitching, pour/thermal checks) → DRC.
