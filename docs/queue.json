@@ -8076,7 +8076,7 @@
       "id": "T-0260",
       "role": "board-fixer",
       "scope": "sync",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-13",
       "title": "pdm-4ch +3V3 neck wording in design-notes and STATUS",
       "brief": "T-0257 (MINOR, two-way, from docs/reviews/2026-11-13-validate-pdm-4ch-3.md M1). Text only: change docs/design-notes.md (T-0253 note in 8.20, '+3V3 width' bullet) and hardware/pdm-4ch/STATUS.md (T-0253 entry and any later entry that repeats the claim). Change no design, script or board file.\n\nPROBLEM: The note says the +3V3 path through the two 0.2 mm necks 'feeds clamp diodes and pull-ups only', and STATUS says 'branch currents < 0.1 A'. The +3V3 net also feeds L1.2 (buck output), C3/C8/C10, U5.1 (CA-IS3050G VCC1) and, once T-0218 routes it, U1.3. Which of these lie behind the necks was never traced.\n\nSTEPS:\n1. Read the board as P1 left it. Find out whether the 0.2 mm +3V3 necks still exist, and measure their lengths and layers. The T-0253 necks were In2 (65.7,59.9)-(65.8,59.7) and B.Cu (45.9,68.1)-(46.2,68.2), about 0.6 mm and about 3 squares in total.\n2. State the bound instead of the consumer claim, using the stackup in design-notes (In1/In2 0.5 oz, about 1 mOhm/sq; F/B 2 oz, about 0.25 mOhm/sq):\n   - the neck resistance (a few mOhm at most);\n   - the drop at 0.5 A, which covers the ESP32 peak plus U5 (well under 5 mV, negligible against the 3.3 V tolerance).\n3. Remove the claim that only clamp diodes and pull-ups lie behind the necks. Keep the sentence that the +3V3 copper is not in the battery input, reverse-battery or output path, and keep the competent-person reminder.\n4. If P1 removed or widened the necks, say so in one line instead.\n5. Do not edit decisions.md; its rows are a log.\n\nONE-WAY DOOR: none expected. If the measured neck copper gives more than about 50 mV drop at 0.5 A, do not reword it as negligible. Report it as a finding for the owner.",
@@ -8086,25 +8086,59 @@
       "plan": "T-0258",
       "depends_on": [
         "T-0259"
-      ]
+      ],
+      "started": "2026-11-13T14:22:00",
+      "ran_model": "opus",
+      "session": "dff486f0-0502-470d-8b1e-fad26a91508c",
+      "cost_usd": 0.0,
+      "attempts": 1,
+      "resume": {
+        "session": "dff486f0-0502-470d-8b1e-fad26a91508c",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0260",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0260-r2_8x16a",
+        "report": "docs/reviews/2026-11-13-fix-sync-T-0260.md",
+        "head": "13d7ef8802aea3ead0287b308bd2d645305280be",
+        "reason": "a usage limit"
+      },
+      "finished": "2026-11-13",
+      "note": "no report written (api_error): You've hit your 5-hour limit · resets 2:20pm (Europe/Helsinki)",
+      "summary": "paused, API unavailable, resumes where it stopped",
+      "interrupted": null
     },
     {
       "id": "T-0261",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "running",
       "created": "2026-11-13",
       "depends_on": [
         "T-0259"
       ],
       "verify": true,
-      "since": "2a3ae19655adc18765934ba9753929a626114188"
+      "since": "2a3ae19655adc18765934ba9753929a626114188",
+      "started": "2026-11-13T14:22:00",
+      "ran_model": "sonnet",
+      "session": "ce3d51f9-0639-41ff-81dd-e77161792deb",
+      "cost_usd": 0.0,
+      "attempts": 1,
+      "resume": {
+        "session": "ce3d51f9-0639-41ff-81dd-e77161792deb",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0261",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0261-ptrzvb5i",
+        "report": "docs/reviews/2026-11-13-validate-pdm-4ch-4.md",
+        "head": "13d7ef8802aea3ead0287b308bd2d645305280be",
+        "reason": "a usage limit"
+      },
+      "finished": "2026-11-13",
+      "note": "no report written (api_error): You've hit your 5-hour limit · resets 2:20pm (Europe/Helsinki)",
+      "summary": "paused, API unavailable, resumes where it stopped",
+      "interrupted": null
     },
     {
       "id": "T-0262",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-13",
       "depends_on": [
         "T-0259"
@@ -8112,7 +8146,17 @@
       "verify": true,
       "since": "2a3ae19655adc18765934ba9753929a626114188",
       "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
-      "recheck": "cost"
+      "recheck": "cost",
+      "started": "2026-11-13T14:22:00",
+      "ran_model": "sonnet",
+      "session": "e2c140d2-9e7a-487e-b5db-0051aacff064",
+      "cost_usd": 0.1894,
+      "attempts": 2,
+      "finished": "2026-11-13",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-13-cost-system.md"
     },
     {
       "id": "T-0263",
