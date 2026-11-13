@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 264,
+    "T": 265,
     "Q": 75
   },
   "tasks": [
@@ -8117,7 +8117,7 @@
       "id": "T-0261",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "running",
+      "state": "done",
       "created": "2026-11-13",
       "depends_on": [
         "T-0259"
@@ -8127,20 +8127,13 @@
       "started": "2026-11-13T14:22:00",
       "ran_model": "sonnet",
       "session": "ce3d51f9-0639-41ff-81dd-e77161792deb",
-      "cost_usd": 0.0,
-      "attempts": 1,
-      "resume": {
-        "session": "ce3d51f9-0639-41ff-81dd-e77161792deb",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0261",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0261-ptrzvb5i",
-        "report": "docs/reviews/2026-11-13-validate-pdm-4ch-4.md",
-        "head": "13d7ef8802aea3ead0287b308bd2d645305280be",
-        "reason": "a usage limit"
-      },
+      "cost_usd": 0.574,
+      "attempts": 2,
       "finished": "2026-11-13",
-      "note": "no report written (api_error): You've hit your 5-hour limit · resets 2:20pm (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "note": "1 tool calls denied (Bash); log T-0261-20261113-142200.json",
+      "summary": "1 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-13-validate-pdm-4ch-4.md"
     },
     {
       "id": "T-0262",
@@ -8182,6 +8175,31 @@
       "finished": "2026-11-13",
       "summary": "skipped: no connector, filter or protection part changed (refs: R101, R102, R103, R107, R401, R402, R403, R407)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0264",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-13",
+      "finding": {
+        "id": "M1",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-4ch",
+        "location": "PCB: DEN via (37.55, 24.25) inside pad R402.1",
+        "summary": "Open 0.3 mm via sits inside the 0402 pad R402.1; solder wicks away, risking an open joint and loss of ch4 DEN/diagnosis",
+        "fix": "Move that via and its stub at least 0.5 mm off the pad (copper-only change)",
+        "door": "two-way",
+        "reason": "copper-only move on a signal net before ordering; policy: layout copper changes are two-way",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-13-validate-pdm-4ch-4.md",
+        "finding": "M1"
+      },
+      "door": "two-way",
+      "state": "parked"
     }
   ],
   "board_size_start": {
