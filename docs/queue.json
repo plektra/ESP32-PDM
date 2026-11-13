@@ -8123,7 +8123,7 @@
       "id": "T-0262",
       "role": "cost-controller",
       "scope": "system",
-      "state": "running",
+      "state": "ready",
       "created": "2026-11-13",
       "depends_on": [
         "T-0259"
@@ -8134,7 +8134,21 @@
       "recheck": "cost",
       "started": "2026-11-13T12:49:42",
       "ran_model": "sonnet",
-      "session": "e2c140d2-9e7a-487e-b5db-0051aacff064"
+      "session": "e2c140d2-9e7a-487e-b5db-0051aacff064",
+      "cost_usd": 0.0,
+      "attempts": 1,
+      "resume": {
+        "session": "e2c140d2-9e7a-487e-b5db-0051aacff064",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0262",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0262-apo5p2qa",
+        "report": "docs/reviews/2026-11-13-cost-system.md",
+        "head": "13d7ef8802aea3ead0287b308bd2d645305280be",
+        "reason": "a usage limit"
+      },
+      "finished": "2026-11-13",
+      "note": "no report written (api_error): You've hit your 5-hour limit · resets 2:20pm (Europe/Helsinki)",
+      "summary": "paused, API unavailable, resumes where it stopped",
+      "interrupted": null
     },
     {
       "id": "T-0263",
