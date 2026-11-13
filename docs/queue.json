@@ -7078,13 +7078,13 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0072",
       "why_big": [
         "3 work packages (last T-0241) returned it neither done nor blocked; check whether it is already done or say how to proceed"
       ],
-      "ruling": "In2 corridor. Allow signal tracks through the VS copper on In2.Cu only; F.Cu/B.Cu VS, the 16 A paths and the surge path stay unchanged. VS-In2 stays one piece and keeps every PROFET's thermal vias inside it, loses at most 15 % of its baseline area, and the heat budget at 40 °C must pass (tools/heat_budget.py). First fix the router export so the DSN has no built-in violations (T-0236 reports 722), and run several Freerouting runs per build so the run-to-run spread does not hide gains. Route mostly by script: the four output channels are identical, so design one channel's signal bus (sense, input, LED lines) through the In2 corridor once and generate the other three as the same pattern in scripts/fixed_routes.py; the J6 bundle, CAN, USB and the U1 fan-out stay fixed routes too. Freerouting only fills the remaining short links; if it still cannot close them after the export fix, drop it and script those links as well.",
-      "answered": "2026-11-12",
+      "ruling": "Move the channel 1 and channel 4 small signal parts (their sense/input resistors, diodes and capacitors, not the PROFETs or any power part) out of the west B.Cu pocket toward U1 so SW_IN1 and SW_IN4 get their own exits; no via in VS-B-front/rear and no change to F.Cu/B.Cu power copper. Drop Freerouting (the Q-0071 condition is met: after the export fix it still left short links open): apply scripts/T-0241-next-build.patch, route every remaining connection with scripts/maze_route.py as fixed routes (short local links first, then IO2–IO5, then the SW_IN lanes), keep In2 runs >= 0.9 mm off GND THT pads, script the J3 VBUS/D3-A legs from design-notes §8.18, and land the board as the build output. Keep the pour, thermal-via and heat-budget checks.",
+      "answered": "2026-11-13",
       "unfinished": 3
     },
     {
