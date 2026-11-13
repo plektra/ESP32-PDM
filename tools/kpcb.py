@@ -515,4 +515,22 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # KiCad's Python bindings segfault in interpreter shutdown (Py_FinalizeEx) and in pcbnew's worker threads while
+    # the board is freed, after the work is done and saved; macOS then shows "Python quit unexpectedly". Leave with
+    # os._exit once output is flushed, keeping the exit code and messages of sys.exit and tracebacks.
+    code = 0
+    try:
+        main()
+    except SystemExit as e:
+        if isinstance(e.code, int) or e.code is None:
+            code = e.code or 0
+        else:
+            print(e.code, file=sys.stderr)
+            code = 1
+    except BaseException:
+        import traceback
+        traceback.print_exc()
+        code = 1
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(code)
