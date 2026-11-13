@@ -1,6 +1,16 @@
 # pdm-4ch status
 
-Updated: 2026-11-13 (T-0241 clean router export, In2 corridor rules, generated channel bus; board unchanged)
+Updated: 2026-11-13 (T-0246 build without Freerouting, maze-routed fixed links: 52 unconnected)
+
+**2026-11-13 (T-0246, Q-0072 – unattended):** Freerouting is out of the build; the board is the scripts' output.
+- `build_routing.sh` runs prep → `routing_build.py apply <work> -` (refill, stitching, pour/thermal checks) → DRC.
+- The T-0236 copper is now fixed data in `scripts/fixed_routes.py`; maze_route.py pass 1 added the short links and
+  some IO/Q-block links as fixed routes.
+- Board: **52 unconnected** (was 74), 0 errors, parity 0. VS-In2 is 1 island, 1165.5 mm²; 40/40 thermal vias are
+  inside it. Tj 101 °C at 40 °C, 4 × 4 A.
+- **Not done:** the ch1/ch4 signal-part move out of the west pocket. Pass 2 was dropped: it duplicated copper,
+  because maze_route.py doesn't merge a leg's copper into the source side.
+- **Left:** 52 items (design-notes §8.20). Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0246.md`.
 
 **2026-11-13 (T-0241, Q-0071 – unattended):** the board is unchanged (T-0236 build 2: 74 unconnected, 0 DRC
 errors, parity 0, VS-In2 1 island, 1185.4 mm²).

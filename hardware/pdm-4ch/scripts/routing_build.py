@@ -41,6 +41,18 @@ BUCK_TOP = {'Net-(U3-SW)', 'Net-(U3-CB)'}      # buck SW/CB on F.Cu only (no via
 # Power pours whose router keep-out bars tracks only (decision 172, Q-0070): foreign-net vias may pass through; the
 # via must still be legal on the other layers. Every other pour keeps its track+via keep-out (decision 164).
 VIA_OK_POURS = {'VS-In2'}
+# In2 signal corridor (Q-0071, T-0241): signal tracks may cross the VS copper on In2.Cu only. The router gets no
+# keep-out for these pours except over each PROFET's thermal-via field (+THERMAL_KEEP_MM), so the thermal vias stay
+# tied into solid copper; the pour check (CORRIDOR_MIN_MM2, one island) and thermal_check() guard the rest.
+# F.Cu/B.Cu VS, VBAT, OUT and every other pour keep their full keep-out.
+CORRIDOR_POURS = {'VS-In2'}
+PROFETS = ('U11', 'U12', 'U13', 'U14')
+
+
+def net_class(n):
+    """router net class of a net name (see fixed_routes.CLASSES)"""
+    return ('hv' if n in HV else 'buck' if n in BUCK_TOP else 'p6' if n in P6 else 'p4' if n in P4
+            else 'gnd' if n in GND_NETS else 'v3' if n == '+3V3' else 'sig')
 
 
 def origin(b):
@@ -183,6 +195,22 @@ def prep(board, work):
         if ol.OutlineCount() == 0:
             b.Remove(z); continue
         ko = pcbnew.SHAPE_POLY_SET(ol)
+        if z.GetZoneName() in CORRIDOR_POURS:   # Q-0071: keep-out only over the PROFET thermal-via fields
+            ko = pcbnew.SHAPE_POLY_SET()
+            k_ = M(fixed_routes.THERMAL_KEEP_MM)
+            for r in PROFETS:
+                vs = [p.GetPosition() for p in b.FindFootprintByReference(r).Pads()
+                      if p.GetNumber() == fixed_routes.THERMAL_PAD and p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
+                ko.Append(rect_poly(min(v.x for v in vs) - k_, min(v.y for v in vs) - k_,
+                                    max(v.x for v in vs) + k_, max(v.y for v in vs) + k_))
+            # a band along the outline stays a track keep-out: an In2 run can then only be an internal slot (via at
+            # each end) and can never cross the pour from edge to edge (T-0241 build 2 split VS-In2 into 2 islands)
+            inner = pcbnew.SHAPE_POLY_SET(z.Outline())
+            inner.Deflate(M(fixed_routes.CORRIDOR_BAND_MM), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.01))
+            band = pcbnew.SHAPE_POLY_SET(z.Outline())
+            band.BooleanSubtract(inner)
+            ko.Append(band)
+            ko.Simplify()
         ol.thisown = 0
         z.SetOutline(ol)
         # Freerouting lets foreign nets cross a plane; the same outline as a keep-out protects the pour
@@ -198,12 +226,85 @@ def prep(board, work):
     bb = b.GetBoardEdgesBoundingBox(); W = MM(bb.GetWidth()); H = MM(bb.GetHeight()); e = fixed_routes.EDGE_STRIP_MM
     for i, r in enumerate(((0, 0, W, e), (0, H - e, W, H), (0, 0, e, H), (W - e, 0, W, H))):
         keepout(b, 'edge%d' % i, *r)
+    nh = clear_fixed(b)
+    print('router keep-outs: holes around fixed copper', nh, flush=True)
     rp = os.path.join(work, 'route.kicad_pcb')
     pcbnew.SaveBoard(rp, b)
     raw = os.path.join(work, 'raw.dsn')
     ok = pcbnew.ExportSpecctraDSN(b, raw)
     print('dsn export', ok, flush=True)
     patch_classes(raw, os.path.join(work, 'route.dsn'))
+
+
+def clear_fixed(b):
+    """Clean export (T-0241): a DSN keep-out holds for every net, so fixed copper inside a router keep-out (a pour's
+    own vias and tracks, a foreign via in its escape, a fixed route near the edge strip) was a pre-existing violation
+    in Freerouting (598 of 723). Each router-made keep-out gets a hole around every fixed track/via it touches, sized
+    to that item's class clearance + 0.05 mm: inside such a hole no other net can be placed anyway (it must keep the
+    same clearance from the item), so the keep-out protects exactly as before. KiCad zones and rules are untouched."""
+    own = set(KEEPOUTS) | {'edge0', 'edge1', 'edge2', 'edge3'}
+    holes = 0
+    for k in b.Zones():
+        if not k.GetIsRuleArea() or not (k.GetZoneName() in own or k.GetZoneName().startswith('pour-')):
+            continue
+        ol = pcbnew.SHAPE_POLY_SET(k.Outline())
+        cut = pcbnew.SHAPE_POLY_SET()
+        for lay in k.GetLayerSet().Seq():
+            if lay not in ALL_CU:
+                continue
+            for t in b.GetTracks():
+                if not t.IsOnLayer(lay):
+                    continue
+                c = M(fixed_routes.KEEPOUT_HOLE_MM)
+                if not ol.Collide(t.GetEffectiveShape(lay), c):
+                    continue
+                t.TransformShapeToPolygon(cut, lay, c, M(0.005), pcbnew.ERROR_OUTSIDE)
+                holes += 1
+        if cut.OutlineCount():
+            cut.Simplify()
+            ol.BooleanSubtract(cut)
+            ol.Fracture()
+            ol.thisown = 0
+            k.SetOutline(ol)
+    return holes
+
+
+def pin_classes(t, groups):
+    """Clean export (T-0241): Freerouting checks fixed pad pairs against the net-class clearance (VS 1.0 mm, OUT 0.3,
+    VBUS 0.25), which the footprints' own pad gaps cannot meet (125 'pin-to-pin' violations: PROFET/VS capacitor/J3
+    pads, all >= 0.2 mm, KiCad DRC clean). Every placed pin gets the clearance class PIN<class>: pin<->wire/via keeps
+    the net-class value (max of both classes), only pin<->pin (two fixed pads, which the router never moves) is
+    PIN_PIN_UM. The 0.2 mm J3 gaps measure 200.001 um in KiCad; Freerouting's polygon pad approximation needs 190."""
+    cls = {n: g for g, ns in groups.items() for n in ns}
+    byref = {}
+    for m in re.finditer(r'\(net ("[^"]*"|\S+)\s*\n?\s*\(pins ([^)]*)\)', t):
+        for p in m.group(2).split():
+            ref, pin = p.strip('"').rsplit('-', 1)
+            byref.setdefault(ref, []).append((pin, cls.get(m.group(1).strip('"'), 'sig')))
+
+    def place(m):
+        add = ''.join(' (pin %s (clearance_class PIN%s))' % pc for pc in byref.get(m.group(2).strip('"'), []))
+        return m.group(1) + add + ')'
+    t = re.sub(r'(\(place ("[^"]*"|\S+) [^\n]*?)\)$', place, t, flags=re.M)
+    # fixed vias (locked board copper) get FIXV<class>: the six same-net vias at a pad edge (R60.1 VS column, D6.1,
+    # D103.1, D203.1, R106.2 GND) were Freerouting violations (via at SMD). Fixed via<->pin/fixed via = 0 (none of
+    # them moves; KiCad DRC checks them), fixed via<->routed wire/via keeps the class value.
+    def fixv(m):
+        return m.group(0)[:-1] + '(clearance_class FIXV%s))' % cls.get(m.group(1).strip('"'), 'sig')
+    t = re.sub(r'\(via "[^"]*"\s+-?\d+ -?\d+ \(net ("[^"]*"|[^)\s]+)\)\(type fix\)\)', fixv, t)
+    C = fixed_routes.CLASSES
+    rules = []
+    for a in C:
+        for c in C:
+            rules.append('      (clearance %d (type PIN%s_%s))' % (max(C[a][1], C[c][1]), a, c))
+            rules.append('      (clearance %d (type FIXV%s_%s))' % (max(C[a][1], C[c][1]), a, c))
+            rules.append('      (clearance 0 (type FIXV%s_PIN%s))' % (a, c))
+            if a <= c:
+                rules.append('      (clearance %d (type PIN%s_PIN%s))' % (fixed_routes.PIN_PIN_UM, a, c))
+                rules.append('      (clearance 0 (type FIXV%s_FIXV%s))' % (a, c))
+    key = '      (clearance 50 (type smd_smd))\n'
+    assert key in t
+    return t.replace(key, key + '\n'.join(rules) + '\n', 1), sum(len(v) for v in byref.values())
 
 
 def patch_classes(src, dst):
@@ -213,8 +314,7 @@ def patch_classes(src, dst):
     via = re.search(r'\(use_via\s+"?([^")\s]+)', t[m.start():]).group(1)
     groups = {}
     for n in nets:
-        g = ('hv' if n in HV else 'buck' if n in BUCK_TOP else 'p6' if n in P6 else 'p4' if n in P4
-             else 'gnd' if n in GND_NETS else 'v3' if n == '+3V3' else 'sig')
+        g = net_class(n)
         groups.setdefault(g, []).append(n)
     rules = fixed_routes.CLASSES
     out = []
@@ -225,8 +325,10 @@ def patch_classes(src, dst):
         out.append(f'    (class {g} {q}\n      (circuit\n        (use_via "{via}"){lay}\n      )\n'
                    f'      (rule\n        (width {w})\n        (clearance {c})\n      )\n    )')
     rb = t.index('(rule', m.end()); rc = t.index('\n      )', rb); ce = t.index('\n    )', rc + 1) + len('\n    )')
-    open(dst, 'w').write(t[:m.start()] + '\n' + '\n'.join(out) + t[ce:])
-    print('classes', {g: len(v) for g, v in groups.items()}, flush=True)
+    t = t[:m.start()] + '\n' + '\n'.join(out) + t[ce:]
+    t, npin = pin_classes(t, groups)
+    open(dst, 'w').write(t)
+    print('classes', {g: len(v) for g, v in groups.items()}, '| pins with clearance class', npin, flush=True)
 
 
 # ---------------------------------------------------------------- SES apply
@@ -256,6 +358,9 @@ def apply(work, ses, out):
         else:
             have.add(('t', b.GetLayerName(t.GetLayer()), *sorted([(round(MM(t.GetStart().x), 2), round(MM(t.GetStart().y), 2)),
                                                                    (round(MM(t.GetEnd().x), 2), round(MM(t.GetEnd().y), 2))])))
+    nw = nv = 0
+    if ses == '-':   # Q-0072: no router; the board is base (locked copper + fixed_routes.py) refilled and stitched
+        return finish(b, work, out, nw, nv)
     S = sexp(open(ses).read())
     routes = kids(S, 'routes')[0]
     res = kids(routes, 'resolution')[0]
@@ -263,7 +368,6 @@ def apply(work, ses, out):
 
     def pt(x, y):   # SES -> KiCad internal (SES y is up)
         return pcbnew.VECTOR2I(M(float(x) / div), M(-float(y) / div))
-    nw = nv = 0
     for net in kids(kids(routes, 'network_out')[0], 'net'):
         n = b.FindNet(net[1])
         for w in net[2:]:
@@ -287,6 +391,11 @@ def apply(work, ses, out):
                 v.SetWidth(M(int(m.group(1)) / 1000)); v.SetDrill(M(int(m.group(2)) / 1000)); v.SetNet(n)
                 b.Add(v); nv += 1
     print('apply: tracks', nw, 'vias', nv, flush=True)
+    return finish(b, work, out, nw, nv)
+
+
+def finish(b, work, out, nw, nv):
+    """refill, dangling clean-up, GND stitching, pour and thermal checks; saves <out>.kicad_pcb and <out>.json"""
     fill(b)
     rs = clean(b)
     fill(b)
@@ -296,12 +405,45 @@ def apply(work, ses, out):
     fill(b)
     base = json.load(open(os.path.join(work, 'baseline.json')))
     now = islands(b)
-    split = {k: (base[k], now.get(k)) for k in base
-             if k.split('|')[0].split('-')[0] in ('VS', 'VBAT_IN', 'VBAT_FL', 'OUT1', 'OUT2', 'OUT3', 'OUT4')
-             and (now.get(k, [0])[0] > base[k][0] or now.get(k, [0, 0])[1] < base[k][1] * (1 - fixed_routes.POUR_LOSS_MAX))}
+    split = pour_check(base, now)
+    th = thermal_check(b)
+    if th:
+        split['thermal'] = th
     pcbnew.SaveBoard(out + '.kicad_pcb', b)
     json.dump({'split': split, 'stitch': st, 'removed': rs, 'tracks': nw, 'vias': nv}, open(out + '.json', 'w'), indent=1)
     print('pours:', 'whole' if not split else 'SPLIT %s' % split, '| stitch vias', st, '| cleaned', rs, flush=True)
+
+
+def pour_check(base, now):
+    """power pours that fail (decision 172 / Q-0071): more islands than the baseline (VS-In2: more than 1), or less
+    area than CORRIDOR_MIN_MM2 (VS-In2) / (1 - POUR_LOSS_MAX) x baseline (every other pour)"""
+    bad = {}
+    for k in base:
+        name = k.split('|')[0]
+        if name.split('-')[0] not in ('VS', 'VBAT_IN', 'VBAT_FL', 'OUT1', 'OUT2', 'OUT3', 'OUT4'):
+            continue
+        n, a = now.get(k, [0, 0])
+        if name in CORRIDOR_POURS:
+            if n != 1 or a < fixed_routes.CORRIDOR_MIN_MM2[name]:
+                bad[k] = (base[k], [n, a])
+        elif n > base[k][0] or a < base[k][1] * (1 - fixed_routes.POUR_LOSS_MAX):
+            bad[k] = (base[k], [n, a])
+    return bad
+
+
+def thermal_check(b):
+    """every PROFET thermal via (exposed-pad PTH pads, VS) inside the VS-In2 outline and touching its fill;
+    returns the failing pads"""
+    z = [z for z in b.Zones() if z.GetZoneName() == 'VS-In2' and not z.GetIsRuleArea()][0]
+    f = z.GetFilledPolysList(pcbnew.In2_Cu)
+    bad = []
+    for r in PROFETS:
+        for p in b.FindFootprintByReference(r).Pads():
+            if p.GetNumber() != fixed_routes.THERMAL_PAD or p.GetAttribute() != pcbnew.PAD_ATTRIB_PTH:
+                continue
+            if not (z.Outline().Contains(p.GetPosition()) and f.Collide(p.GetEffectiveShape(pcbnew.In2_Cu), 0)):
+                bad.append('%s.%s@%.2f,%.2f' % (r, p.GetNumber(), MM(p.GetPosition().x), MM(p.GetPosition().y)))
+    return bad
 
 
 def clean(b):
@@ -481,3 +623,6 @@ if __name__ == '__main__':
         apply(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == 'islands':
         b = pcbnew.LoadBoard(sys.argv[2]); fill(b); print(json.dumps(islands(b), indent=0))
+        n = sum(1 for r in PROFETS for p in b.FindFootprintByReference(r).Pads()
+                if p.GetNumber() == fixed_routes.THERMAL_PAD and p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH)
+        print('thermal vias', n, 'failing', thermal_check(b))
