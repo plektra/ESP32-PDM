@@ -8266,13 +8266,23 @@
       "id": "T-0267",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-13",
       "depends_on": [
         "T-0266"
       ],
       "verify": true,
-      "since": "0599ea8290883ff76ec84fce1f42a545aacfdc8a"
+      "since": "0599ea8290883ff76ec84fce1f42a545aacfdc8a",
+      "started": "2026-11-13T14:33:57",
+      "ran_model": "sonnet",
+      "session": "8feb9e51-e251-42f8-ba09-5d0a9bf7cd99",
+      "cost_usd": 0.1429,
+      "attempts": 1,
+      "finished": "2026-11-13",
+      "note": null,
+      "summary": "0 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-13-validate-pdm-4ch-5.md"
     },
     {
       "id": "T-0268",
