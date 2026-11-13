@@ -8039,7 +8039,24 @@
         "T-0218"
       ],
       "plan": "T-0258",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-13T11:31:08",
+      "ran_model": "opus",
+      "session": "d823694a-2d1e-4fb1-ab4f-7799d6640f4c",
+      "cost_usd": 3.7849,
+      "attempts": 1,
+      "resume": {
+        "session": "d823694a-2d1e-4fb1-ab4f-7799d6640f4c",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0259",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0259-60ix43e1",
+        "report": "docs/reviews/2026-11-13-fix-pdm-4ch-T-0259.md",
+        "head": "eb32b4cb8fe22d87d6268895fb2c527280cdc47e",
+        "reason": "a usage limit"
+      },
+      "finished": "2026-11-13",
+      "note": "no report written (api_error): Failed to authenticate. API Error: 403 Attention Required! | Cloudflare",
+      "summary": "paused, API unavailable, resumes where it stopped",
+      "interrupted": null
     },
     {
       "id": "T-0260",
