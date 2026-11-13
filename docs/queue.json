@@ -7078,12 +7078,12 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0074",
       "why_big": [
         "5 work packages (last T-0259) returned it neither done nor blocked; check whether it is already done or say how to proceed"
       ],
-      "ruling": "Keep going on T-0218 within the Q-0070 limits (decision 172). Next: fix maze_route.py so a net's later legs start from the copper already laid (no duplicate copper), move the ch1/ch4 signal parts (R101/R102/R103/R104/R107/C101/D102 and the 4xx twins) toward U1, then more maze passes, one build per pass. R105/D101 (PROFET GND return), the OUT parts and the VS parts stay. \"In progress\" with fewer unconnected items is progress, not a question. Return to the owner only if a stage gains nothing or needs a one-way door: power copper outlines, connectors, the board outline or the schematic.",
+      "ruling": "Trim the VS-In2 east edge (T-0259 finding): pull it back about 2-3 mm at y 5-20 for one In2 -> B.Cu via column at x 55-57, the exit for SW_IN1/SW_IN4, IO2, IO5 and DEN to U1. The VS-B spine, the other VS outlines and the 16 A path stay unchanged. VS-In2 stays one island, >= 1012.1 mm2 (decision 178), with all 40 thermal vias inside. Recheck the heat budget (decision 9). The corridor stays >= 1.5 mm inside the new edge. Then keep going on T-0218 as ruled in Q-0073: the two-way next steps (ch2/ch3 IN/DEN links, U1.28, the DEN via off R402.1) need no question. Return only when a stage gains nothing or needs another one-way door.",
       "answered": "2026-11-13",
       "unfinished": 5
     },
