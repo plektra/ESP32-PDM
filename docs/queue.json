@@ -8118,7 +8118,7 @@
       "id": "T-0263",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-13",
       "depends_on": [
         "T-0259"
@@ -8126,7 +8126,10 @@
       "verify": true,
       "since": "2a3ae19655adc18765934ba9753929a626114188",
       "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
-      "recheck": "emc"
+      "recheck": "emc",
+      "finished": "2026-11-13",
+      "summary": "skipped: no connector, filter or protection part changed (refs: R101, R102, R103, R107, R401, R402, R403, R407)",
+      "cost_usd": 0.0
     }
   ],
   "board_size_start": {
