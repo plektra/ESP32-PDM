@@ -1,6 +1,14 @@
 # pdm-4ch status
 
-Updated: 2026-11-13 (T-0259 maze merge fix, ch1/ch4 signal-part move: 46 unconnected)
+Updated: 2026-11-13 (T-0266 ch4 DEN via off pad R402.1: 46 unconnected)
+
+**2026-11-13 (T-0266: T-0264 – unattended):** the ch4 DEN via that sat on pad R402.1 (37.60/24.30) now sits at
+(38.60, 25.42), 0.60 mm from the pad, with a 45° F.Cu link to R402.1. The B.Cu stub from (37.30, 21.50) ends there.
+The change is in `scripts/fixed_routes.py`, and `/DEN` is added to `DROP_NETS` so the rebuild drops the old via. The
+board is again the build output (LAND_BEST). Results: 0 DRC errors, parity 0, 46 unconnected (DEN 0), no new
+dangling copper, every pour at its baseline island count, VS-In2 1 island at 1156.4 mm² with 40/40 thermal vias,
+Tj 101 °C. No via touches an R401/R402/R403/R407 pad. No part moved. Left: the boxed-in pads listed below.
+Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0266.md`.
 
 **2026-11-13 (T-0259: T-0218 per Q-0073 – unattended):** the board is again the scripts' output.
 - **maze_route.py merge fix (decision 185).** A routed leg's cells now join the source side, so the next leg of the
@@ -25,8 +33,7 @@ Updated: 2026-11-13 (T-0259 maze merge fix, ch1/ch4 signal-part move: 46 unconne
   U1. On In2 the corridor ends 1.5 mm inside the VS-In2 east edge (x 55.0, while the U1 side starts at x 58.1), and
   a via at x ≤ 55 lands in the B.Cu VS spine. The F.Cu gap at y 19–20 carries the USB pair. Opening it needs a
   power-outline change, which is a one-way door (see the report).
-- **Open:** the DEN via at (37.60, 24.30) overlaps R402.1 (same net, DRC clean, but solder can wick into it). Move
-  it when DEN is touched again. Boxed-in pads outside the move: R201.1/R202.1/R301.1/R302.1 (ch2/ch3, the same
+- **Open:** boxed-in pads outside the move: R201.1/R202.1/R301.1/R302.1 (ch2/ch3, the same
   wrap-around pattern), U1.28, D12.3, U5.2/U5.3, R70.2, R60.2, FB1.2, the J3 VBUS pins and the Q block.
   Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0259.md`.
 

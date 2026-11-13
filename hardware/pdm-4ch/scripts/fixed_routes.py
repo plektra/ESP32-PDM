@@ -1317,7 +1317,8 @@ T('+3V3', 'F.Cu', (10.30, 59.40), (10.30, 59.30), (10.20, 59.20), w=0.30)
 # on the old top GND pads) before the fixed routes go in, so the build reproduces the move.
 PLACE = {'R101': (37.2, 9.2, 180), 'R102': (37.2, 7.93, 180), 'R103': (40.3, 8.7, 270), 'R107': (42.9, 8.7, 270),
          'R401': (37.2, 25.8, 180), 'R402': (37.2, 24.53, 180), 'R403': (40.3, 25.3, 270), 'R407': (42.9, 25.3, 270)}
-DROP_NETS = {'Net-(U11-IN)', 'Net-(U11-DEN)', 'Net-(U11-IS)', 'Net-(U14-IN)', 'Net-(U14-DEN)', 'Net-(U14-IS)'}
+DROP_NETS = {'Net-(U11-IN)', 'Net-(U11-DEN)', 'Net-(U11-IS)', 'Net-(U14-IN)', 'Net-(U14-DEN)', 'Net-(U14-IS)',
+             '/DEN'}   # T-0266: all /DEN copper is in this file (T-0259 maze pass 2 block)
 DROP_GND = [  # (layer, (x1, y1), (x2, y2)) of the removed GND segments
     ('F.Cu', (40.300000, 23.837500), (38.317500, 23.837500)),
     ('F.Cu', (40.300000, 7.237500), (42.900000, 7.237500)),
@@ -1344,5 +1345,9 @@ T('/DEN', 'In2.Cu', (35.90, 17.90), (36.10, 18.10), (36.10, 20.90))
 V('/DEN', 36.10, 20.90)
 T('/DEN', 'F.Cu', (36.10, 20.90), (36.70, 21.50), (37.30, 21.50))
 V('/DEN', 37.30, 21.50)
-T('/DEN', 'B.Cu', (37.30, 21.50), (37.30, 23.90), (37.40, 24.00), (37.40, 24.10), (37.60, 24.30))
-V('/DEN', 37.60, 24.30)
+# T-0266 (T-0264): the via sat on pad R402.1; moved to (38.60, 25.42): 0.54 mm off R402.1, 0.32 mm off R401.1, 1.0 mm off
+# R403.1, so the GND-F neck between R402.1 and R403.1 stays open (a via at 38.80/24.95 cut off a GND-F island). One
+# 45-degree F.Cu link back to the pad. '/DEN' is in DROP_NETS so the build drops the old on-pad via and stub.
+T('/DEN', 'B.Cu', (37.30, 21.50), (37.30, 24.12), (38.60, 25.42))
+V('/DEN', 38.60, 25.42)
+T('/DEN', 'F.Cu', (38.60, 25.42), (37.71, 24.53))   # via -> R402.1
