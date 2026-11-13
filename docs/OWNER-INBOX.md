@@ -19,21 +19,21 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (6) – two-way doors
+## Decided by agents (4) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0251 · MINOR · pdm-4ch · 160 mm of +3V3 at 0.2 mm, below 0.3 mm v3 class; currents <0.1 A so no failure, known to the fixer → Make maze_route.py emit the class width and widen in the next pass
-- T-0250 · MINOR · pdm-4ch · Maze pass 1 left 13 dangling vias/track stubs (none in base); no short, 0 DRC errors → Complete or remove them in the next routing pass (finish() clean-up)
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
 - T-0100 · INFO · system · Does the JLCPCB quote page offer Economic PCBA with 2 oz copper (Q-0026 is still open)? → assumed Assume Economic PCBA; if only Standard, per board at 10 add 6.2 USD (4-ch) / 7.4 USD (HC2)
 
-## Applied by agents (71)
+## Applied by agents (73)
 
 Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work package.
 
+- T-0251 · pdm-4ch · 160 mm of +3V3 at 0.2 mm, below 0.3 mm v3 class; currents <0.1 A so no failure, known to the fixer → T-0253 (`f6b7742b`)
+- T-0250 · pdm-4ch · Maze pass 1 left 13 dangling vias/track stubs (none in base); no short, 0 DRC errors → T-0253 (`f6b7742b`)
 - T-0219 · pdm-4ch · the pcb-fixer merge gate still rejects hardware/pdm-4ch/scripts/ (T-0210 finding), so fixed routes cannot be added to fixed_routes.py as decision 163 requires; needs a /system gate change or a package scoped to scripts/ → T-0221 (`1c5d7eb3`)
 - T-0212 · pdm-4ch · pcb-fixer merge gate admits only the board file and notes; the fixed_routes.py entries for the CAN/USB/CC1 routes and LAND_BEST=1 in build_routing.sh are held back as a patch in this report and need a package whose scope covers hardware/pdm-4ch/scripts/ (the routes themselves are locked copper on th → T-0214 (`746f3880`)
 - T-0188 · pdm-hc2 · R105/R205 to C17927 1M 1206 (already R13) removes C26083 from the HC2 BOM: 1.53 USD per order, higher voltage rating on VS → T-0191 (`93a72d3b`)
@@ -92,8 +92,6 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0022 · system · Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458 → T-0065 (`e5fedd96`)
 - T-0021 · system · 22 BOM lines have no LCSC field, so JLCPCB cannot place them as drawn → T-0073 (`1939dfbc`)
 - T-0019 · system · Is IEC 60945 (marine) compliance a goal or only good practice, is a pre-compliance scan planned, and may the N2K shield stay unconnected at the node (4-pole J4)? This sets how far E3-E7 must go. → T-0067 (`5ffcfb6f`)
-- T-0018 · system · Is the interrupt rating (Imax at 60 V) of the 1812L050/60GR PTC enough for the prospective current of a direct battery short at J5.5 (F4 is fed from VS) or on NET-S? I could not read the datasheet. → T-0118 (`3b24acd6`)
-- T-0017 · pdm-4ch · SMCJ30CA clamps at 48.4 V at 31 A, the BTT6050 absolute maximum is 48 V, but VS(LD) is 65 V (ISO 7637-1), so short clamp excursions are covered; recorded only. → T-0064 (`dbc672cd`)
 
 ## Deferred (22)
 

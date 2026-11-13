@@ -7829,8 +7829,10 @@
         "finding": "V1"
       },
       "door": "two-way",
-      "state": "parked",
-      "package": "T-0253"
+      "state": "done",
+      "package": "T-0253",
+      "fixed_by": "T-0253",
+      "merged": "f6b7742bd4c284c09c3bfc23ec1e1a6b8795c97d"
     },
     {
       "id": "T-0251",
@@ -7855,8 +7857,10 @@
         "finding": "V2"
       },
       "door": "two-way",
-      "state": "parked",
-      "package": "T-0253"
+      "state": "done",
+      "package": "T-0253",
+      "fixed_by": "T-0253",
+      "merged": "f6b7742bd4c284c09c3bfc23ec1e1a6b8795c97d"
     },
     {
       "id": "T-0252",
@@ -7884,7 +7888,7 @@
       "id": "T-0253",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-13",
       "title": "pdm-4ch routing scripts: remove dangling maze copper and emit net-class widths (+3V3 at 0.3 mm)",
       "brief": "Two MINOR layout findings from docs/reviews/2026-11-13-validate-pdm-4ch-2.md (M1, M2). Both come from maze_route.py pass 1 in the T-0246 build. There is no owner ruling; both are two-way doors. Layout only: no schematic, symbol, footprint or part change.\n\nSTART STATE (confirm first with python3 tools/kpcb.py pdm-4ch drc):\n- 0 errors, 427 warnings, 52 unconnected, parity 0;\n- VS-In2 1 island, 1165.5 mm2, 40/40 thermal vias inside it;\n- 13 via_dangling/track_dangling warnings on +3V3, SW4_IO, IO5, IO6, IO7, IO11, IO17, IO18, SW1_IO, SW2_IO and VBAT_SENSE. One of them is a 5.8 mm +3V3 B.Cu track ending short of J6.8.\nSources: hardware/pdm-4ch/STATUS.md, design-notes 8.20, docs/reviews/2026-11-13-fix-pdm-4ch-T-0246.md, decisions 163, 176-185.\n\nREPORT DISCIPLINE:\n- Write the report early and list both tasks under 'blocked' (two-way, 'in progress: <stage>') until they are met.\n- Do not commit; the orchestrator does.\n- Run builds in the background with a 25-min limit. Stop at about 60 minutes and keep the best clean state.\n\nSTEP 1 - T-0251, class width (do this first, so the clean-up runs on the final copper):\n1. Make maze_route.py emit each net's class width instead of a fixed 0.2 mm. +3V3 is 0.3 mm (v3 class). Other signal nets keep their class width. Clearance and the keep-out map must use the emitted width.\n2. In fixed_routes.py, widen the maze-generated +3V3 segments (about 160 mm, all 0.2 mm) to 0.3 mm. This is only the copper that maze pass 1 added; the locked T-0236 copper stays as it is.\n3. Where a segment cannot be widened at 0.3 mm with full clearance, re-run maze_route.py for that leg at 0.3 mm. If it still finds no path, leave that leg at 0.2 mm and list it in the report.\n   - This is allowed because branch currents are < 0.1 A (clamp diodes, pull-ups).\n   - The +3V3 feeds to U1/U5/L1 must already be on the pour or >= 0.3 mm. Confirm that they are; do not change them.\n4. Leave the locked-width histogram unchanged: 232x0.4, 55x0.6, 51x0.3, 12x0.5, 10x0.8, 8x0.25, 1x1.2, plus only the added 0.3 mm +3V3 segments.\n\nSTEP 2 - T-0250, dangling copper:\n1. Add a finish() clean-up step to routing_build.py (after apply, before refill/DRC), or have maze_route.py drop any leg that does not reach its target. Either way, no via or track ends unconnected in the build output.\n2. Prefer to complete a stub only when it is a one-segment link to its own pad (for example, the +3V3 track that ends short of J6.8). Remove the rest. Routing the open nets is not part of this package; that stays with T-0218.\n3. Do not delete copper that carries a connection. The unconnected count must not go up from 52.\n\nSTEP 3 - land:\n1. Run one build (LAND_BEST=1) so that the board is the script output.\n2. Accept it only with:\n   - 0 DRC errors, parity 0, unconnected <= 52;\n   - 0 via_dangling/track_dangling warnings, or each one left explained;\n   - VS-In2 1 island and >= 1012.1 mm2, all 40 thermal vias inside it;\n   - every other pour at its island count and >= 95 % (decisions 172/178).\n3. Run python3 tools/heat_budget.py --ambient 40 --currents 4,4,4,4 (decision 9). Expect Tj about 101 C; output copper is unchanged.\n4. Run python3 tools/fix_check.py --role pcb-fixer --scope pdm-4ch.\n5. Update STATUS.md and design-notes 8.20 with a short note.\n\nONE-WAY DOORS (stop and ask in the report, do not do):\n- any change to F.Cu/B.Cu power copper, a power-zone outline, the 16 A paths, the surge path or any locked 0.3-1.2 mm track;\n- signal copper or a via in VS-B-front/rear or the VS-B spine;\n- VS-In2 split, below 1012.1 mm2, or a thermal via outside it;\n- loosening a DRC rule, a clearance or a net-class width (lowering the v3 class to 0.2 mm is not a fix);\n- moving any part;\n- any schematic change;\n- the heat budget failing at 40 C;\n- bringing Freerouting back.",
@@ -7893,7 +7897,30 @@
         "T-0251"
       ],
       "plan": "T-0252",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-13T09:43:26",
+      "ran_model": "opus",
+      "session": "fc294855-4f6e-4fe0-bef8-3646f5c0138f",
+      "cost_usd": 3.8102,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-13",
+      "note": null,
+      "summary": "2 fixed, 0 blocked, merged f6b7742b; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-13-fix-pdm-4ch-T-0253.md"
     },
     {
       "id": "T-0254",
