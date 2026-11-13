@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
 - **Why it needs you:** 4 work packages (last T-0246) returned it neither done nor blocked; check whether it is already done or say how to proceed
 
-**Answer:** 
+**Answer:** Keep going on T-0218 within the Q-0070 limits (decision 172). Next: fix maze_route.py so a net's later legs start from the copper already laid (no duplicate copper), move the ch1/ch4 signal parts (R101/R102/R103/R104/R107/C101/D102 and the 4xx twins) toward U1, then more maze passes, one build per pass. R105/D101 (PROFET GND return), the OUT parts and the VS parts stay. "In progress" with fewer unconnected items is progress, not a question. Return to the owner only if a stage gains nothing or needs a one-way door: power copper outlines, connectors, the board outline or the schematic.
 
 ---
 
