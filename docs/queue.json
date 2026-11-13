@@ -8199,8 +8199,10 @@
         "finding": "M1"
       },
       "door": "two-way",
-      "state": "parked",
-      "package": "T-0266"
+      "state": "done",
+      "package": "T-0266",
+      "fixed_by": "T-0266",
+      "merged": "64f4ea02157120c790fe2b2b982e060cc9f14e05"
     },
     {
       "id": "T-0265",
@@ -8227,7 +8229,7 @@
       "id": "T-0266",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-13",
       "title": "pdm-4ch: move the ch4 DEN via off pad R402.1",
       "brief": "T-0264 (MINOR, two-way, from docs/reviews/2026-11-13-validate-pdm-4ch-4.md M1). There is no owner ruling. The fix is copper only: move the open 0.6/0.3 mm /DEN via that sits on the 0402 pad R402.1 (pad at 37.66/24.53, 0.54 x 0.64 mm). Also move its B.Cu stub. The via must end up at least 0.5 mm from the pad.\n\nWHERE THE COPPER COMES FROM: the board is the output of the build (decision 163). The via and its stub are in hardware/pdm-4ch/scripts/fixed_routes.py:\n- line 1347: T('/DEN', 'B.Cu', (37.30, 21.50), ..., (37.60, 24.30));\n- line 1348: V('/DEN', 37.60, 24.30).\nThe board shows this via at (37.55, 24.25). Edit the script, not the board by hand. The edit must survive the next rebuild.\n\nSTEPS:\n1. Confirm the start state with python3 tools/kpcb.py pdm-4ch drc. Expect: 0 errors, 46 unconnected, parity 0 (FL30 DNP warning only), one explained via_dangling /IO13, VS-In2 1 island at 1156.4 mm2 with 40/40 thermal vias.\n2. In fixed_routes.py, end the B.Cu stub at a new via position. The via edge must be at least 0.5 mm from the R402.1 pad edge and clear of R401/R403/R407 and the other pads nearby. The pads of the moved parts are in fixed_routes.PLACE (decision 191).\n3. Add a short F.Cu track (DEN class width) from the new via to the R402.1 pad. Keep the via out of every other pad, out of VS-In2's thermal-via field + 1 mm, and out of every hole keep-out.\n4. Rebuild with hardware/pdm-4ch/scripts/build_routing.sh (KiCad closed). The rebuild is accepted only if all of these hold:\n   - 0 DRC errors and parity 0;\n   - unconnected not above 46, and DEN not above its current count;\n   - no new dangling copper;\n   - VS-In2 still 1 island, >= 1012.1 mm2, with 40/40 thermal vias;\n   - every other pour at its island count and >= 95 % of baseline (decision 172).\n5. Check with a pad scan (KiCad Python) that no via overlaps any SMD pad of R401/R402/R403/R407. Fix any other via of this DEN leg that does.\n6. Run python3 tools/heat_budget.py --ambient 40 --currents 4,4,4,4 (decision 9). Expect it unchanged: Tj 101 C. Then run python3 tools/fix_check.py --role pcb-fixer --scope pdm-4ch.\n7. Update hardware/pdm-4ch/STATUS.md and remove the 'Open: the DEN via at (37.60, 24.30) overlaps R402.1' line. Add one line to design-notes 8.20.\n\nIf no clean spot exists within about 1 mm, re-route only the last DEN leg (R402.1 side) with the same layers. Do not move R402 or any other part.\n\nONE-WAY DOORS (stop and ask, do not do):\n- a schematic change;\n- moving a part, including R402;\n- a change to a power pour outline, F.Cu/B.Cu power copper, the 16 A or surge paths;\n- a VS-In2 split, an area below 1012.1 mm2, or a thermal via outside it;\n- a board outline, hole or connector change;\n- loosening a DRC rule, a clearance or a net-class width;\n- a plugged or filled via, or any other fab option that changes the order (tenting a via is fine);\n- the heat budget failing at 40 C.",
@@ -8235,7 +8237,30 @@
         "T-0264"
       ],
       "plan": "T-0265",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-13T14:25:57",
+      "ran_model": "opus",
+      "session": "e182fd6b-3b3d-44d0-b1bf-847801358ccf",
+      "cost_usd": 1.5428,
+      "attempts": 1,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "finished": "2026-11-13",
+      "note": "1 tool calls denied (Bash); log T-0266-20261113-142602.json",
+      "summary": "1 fixed, 0 blocked, merged 64f4ea02; no part changes",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-13-fix-pdm-4ch-T-0266.md"
     },
     {
       "id": "T-0267",
