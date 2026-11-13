@@ -103,6 +103,8 @@ for z in b.Zones():
         else:
             out['zones'].append({'net': net, 'layers': [ln], 'poly': polys(z.Outline()), 'kind': 'pour',
                                  'zc': MM(z.GetLocalClearance() or M(0.2))})
+# T-0251: net-class track width per net (mm); maze_route.py emits it and sizes its keep-outs with it
+out['width'] = {e['net']: fr.CLASSES[rb.net_class(e['net'])][0] / 1000 for e in out['items'] if e['net']}
 for name, r in rb.KEEPOUTS.items():
     x1, y1, x2, y2 = r
     out['zones'].append({'net': '', 'layers': list(LAY), 'poly': [[(x1, y1), (x2, y1), (x2, y2), (x1, y2)]], 'kind': name})

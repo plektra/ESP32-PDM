@@ -4,14 +4,16 @@ maze_route.py <geom.json> <nets (comma list) | @file> [out.py]: A* on a 0.1 mm g
 Connects the clusters of each net (cluster 1 = the one with the first item, joined to every other cluster one by
 one), avoiding foreign copper (class clearance), foreign power-pour outlines, rule areas/router keep-outs, the
 VS-In2 thermal fields and the 0.5 mm edge rule. In2 inside VS-In2 (the Q-0071 corridor) costs extra. Prints
-fixed_routes.py lines (T/V)."""
+fixed_routes.py lines (T/V) at each net's class width (geo['width'], T-0251: +3V3 0.3 mm), keep-outs sized for it;
+legs start and end at least one grid cell inside their copper (T-0250)."""
 import heapq, json, math, sys
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 G = 0.1
 L = ['F.Cu', 'In2.Cu', 'B.Cu']
 geo = json.load(open(sys.argv[1]))
 W, H = int(geo['size'][0] / G) + 1, int(geo['size'][1] / G) + 1
+WIDTH = geo.get('width', {})   # net -> class width mm (T-0251); geom_export inflates foreign copper for 0.2 mm
 VIA_COST = 25.0
 CORRIDOR_COST = 3.0
 CORRIDOR_BAND = 1.5
@@ -82,11 +84,13 @@ def masks(net):
                     td[l].line([px(p) for p in pl] + [px(pl[0])], fill=1, width=w)
         if z['kind'] != 'pour' or z['layers'] != ['In2.Cu'] or True:
             draw_polys(vd, z['poly'], outline_w=5)
-    for (n, kind, l, pts) in added:
+    for (n, kind, l, pts, wf) in added:
         if n == net:
             continue
         if kind == 't':
-            for d, wmm in ((td[l], 1.0), (vd, 1.4)):   # round joins: a disc at every vertex
+            # foreign routed track of width wf: + 0.2 clearance + 0.1 own half width + 0.1 margin each side (track),
+            # + 0.2 clearance + 0.3 via radius + 0.1 margin (via)
+            for d, wmm in ((td[l], wf + 0.8), (vd, wf + 1.2)):   # round joins: a disc at every vertex
                 d.line([px(p) for p in pts], fill=1, width=int(round(wmm / G)))
                 for p in pts:
                     x, y = px(p); r = wmm / 2 / G
@@ -101,6 +105,12 @@ def masks(net):
     for l in L:
         edge_mask(tm[l], EDGE)
     edge_mask(vm, EDGE_V)
+    # T-0251: the track masks are inflated for a 0.2 mm track; a wider class (+3V3 0.3 mm) grows them by the extra
+    # half width, rounded up to whole cells, so clearance holds at the emitted width
+    k = int(math.ceil((WIDTH.get(net, 0.2) / 2 - 0.1) / G - 1e-9))
+    if k > 0:
+        for l in L:
+            tm[l] = tm[l].convert('L').filter(ImageFilter.MaxFilter(2 * k + 1)).convert('1')
     return ({l: bytearray(tm[l].tobytes('raw', '1;I') if False else tm[l].convert('L').tobytes()) for l in L},
             bytearray(vm.convert('L').tobytes()), bytearray(cor.convert('L').tobytes()))
 
@@ -120,6 +130,14 @@ def cells_of(polys):
     return s
 
 
+def erode(cells):
+    """T-0250: cells whose 8 neighbours are copper too: a leg then ends >= one cell inside the target, never on
+    the rasterised edge (legs that stopped up to 0.1 mm outside a pad left dangling vias and stubs). Thin copper
+    with no inner cell keeps its raw cells."""
+    inner = {c for c in cells if all(c + d in cells for d in (1, -1, W, -W, W + 1, W - 1, -W + 1, -W - 1))}
+    return inner or cells
+
+
 def route(net, src_cl, dst_cl, tm, vm, cor):
     own = [it for it in geo['items'] if it['net'] == net]
     start = {l: set() for l in L}; goal = {l: set() for l in L}
@@ -127,13 +145,11 @@ def route(net, src_cl, dst_cl, tm, vm, cor):
         for l in it['layers']:
             if l not in start:
                 continue
-            c = cells_of(it['raw'][l])
+            c = erode(cells_of(it['raw'][l]))
             if it['cl'] in src_cl:
                 start[l] |= c
             elif it['cl'] in dst_cl:
                 goal[l] |= c
-    for (n, kind, l, pts) in added:      # copper routed earlier for this net belongs to the source side
-        pass
     gpts = [(c % W, c // W) for l in L for c in goal[l]]
     if not gpts or not any(start.values()):
         return None
@@ -189,6 +205,8 @@ def route(net, src_cl, dst_cl, tm, vm, cor):
 
 
 def emit(net, path):
+    wn = WIDTH.get(net, 0.2)
+    wtxt = ', w=%.2f' % wn if abs(wn - 0.2) > 1e-6 else ''
     lines = []
     segs = []; cur = [path[0]]
     for st in path[1:]:
@@ -208,12 +226,12 @@ def emit(net, path):
         keep.append(pts[-1])
         keep = [(round(x, 2), round(y, 2)) for x, y in keep]
         if len(keep) >= 2 and keep[0] != keep[-1]:
-            lines.append("T(%r, %r, %s)" % (net, L[s[0][0]], ', '.join('(%.2f, %.2f)' % p for p in keep)))
-            added.append((net, 't', L[s[0][0]], keep))
+            lines.append("T(%r, %r, %s%s)" % (net, L[s[0][0]], ', '.join('(%.2f, %.2f)' % p for p in keep), wtxt))
+            added.append((net, 't', L[s[0][0]], keep, wn))
         if i + 1 < len(segs):
             p = keep[-1] if keep else pts[-1]
             lines.append("V(%r, %.2f, %.2f)" % (net, p[0], p[1]))
-            added.append((net, 'v', None, [p]))
+            added.append((net, 'v', None, [p], wn))
     return lines
 
 

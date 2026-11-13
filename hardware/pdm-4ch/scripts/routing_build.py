@@ -83,14 +83,17 @@ def islands(b):
     return out
 
 
+WIDENED = []   # locked tracks widened by add_fixed (T-0253)
+
+
 def add_fixed(b):
     """fixed tracks/vias from fixed_routes.py, locked; skipped when an identical item is already there"""
-    have = set()
+    have = {}
     for t in b.GetTracks():
         if t.GetClass() == 'PCB_VIA':
-            have.add(('v', t.GetPosition().x, t.GetPosition().y))
+            have[('v', t.GetPosition().x, t.GetPosition().y)] = t
         else:
-            have.add(('t', t.GetLayer(), *sorted([(t.GetStart().x, t.GetStart().y), (t.GetEnd().x, t.GetEnd().y)])))
+            have[('t', t.GetLayer(), *sorted([(t.GetStart().x, t.GetStart().y), (t.GetEnd().x, t.GetEnd().y)]))] = t
     n = 0
     for r in fixed_routes.TRACKS:
         net = b.FindNet(r['net']); lay = b.GetLayerID(r['layer'])
@@ -98,9 +101,15 @@ def add_fixed(b):
         for a, e in zip(pts, pts[1:]):
             key = ('t', lay, *sorted([(a.x, a.y), (e.x, e.y)]))
             if key in have:
+                # T-0253: a fixed route widened in fixed_routes.py (net-class width, e.g. +3V3 0.3 mm) widens the
+                # identical locked track already on the board; never narrows one
+                o = have[key]
+                if o.GetNetname() == r['net'] and o.GetWidth() < M(r.get('width', 0.2)):
+                    o.SetWidth(M(r.get('width', 0.2)))
+                    WIDENED.append(o)
                 continue
             t = pcbnew.PCB_TRACK(b); t.SetStart(a); t.SetEnd(e); t.SetWidth(M(r.get('width', 0.2)))
-            t.SetLayer(lay); t.SetNet(net); t.SetLocked(True); b.Add(t); have.add(key); n += 1
+            t.SetLayer(lay); t.SetNet(net); t.SetLocked(True); b.Add(t); have[key] = t; n += 1
     for r in fixed_routes.VIAS:
         p = P(b, *r['at'])
         if ('v', p.x, p.y) in have:
@@ -151,7 +160,7 @@ def prep(board, work):
         z.UnFill()
     pcbnew.SaveBoard(os.path.join(work, 'base.kicad_pcb'), b)
     print('prep: first build (locked existing copper)' if first else 'prep: locked copper kept',
-          '| removed unlocked', removed, '| fixed routes added', nfix, flush=True)
+          '| removed unlocked', removed, '| fixed routes added', nfix, '| widened', len(WIDENED), flush=True)
 
     # ---- router copy
     for z in list(b.Zones()):
@@ -397,6 +406,7 @@ def apply(work, ses, out):
 def finish(b, work, out, nw, nv):
     """refill, dangling clean-up, GND stitching, pour and thermal checks; saves <out>.kicad_pcb and <out>.json"""
     fill(b)
+    pr = prune(b)
     rs = clean(b)
     fill(b)
     st = stitch(b)
@@ -410,8 +420,63 @@ def finish(b, work, out, nw, nv):
     if th:
         split['thermal'] = th
     pcbnew.SaveBoard(out + '.kicad_pcb', b)
-    json.dump({'split': split, 'stitch': st, 'removed': rs, 'tracks': nw, 'vias': nv}, open(out + '.json', 'w'), indent=1)
-    print('pours:', 'whole' if not split else 'SPLIT %s' % split, '| stitch vias', st, '| cleaned', rs, flush=True)
+    json.dump({'split': split, 'stitch': st, 'removed': rs, 'pruned': pr, 'tracks': nw, 'vias': nv},
+              open(out + '.json', 'w'), indent=1)
+    print('pours:', 'whole' if not split else 'SPLIT %s' % split, '| stitch vias', st, '| cleaned', rs,
+          '| pruned', len(pr), flush=True)
+
+
+def via_touches(b, v):
+    """same-net tracks with an end on via v plus same-net pads under it"""
+    p = v.GetPosition(); r = v.GetWidth(pcbnew.F_Cu) // 2; n = 0
+    for o in b.GetTracks():
+        if o is v or o.GetNetCode() != v.GetNetCode() or o.GetClass() == 'PCB_VIA':
+            continue
+        if min((o.GetStart() - p).EuclideanNorm(), (o.GetEnd() - p).EuclideanNorm()) <= r + o.GetWidth() // 2:
+            n += 1
+    for fp in b.GetFootprints():
+        for pad in fp.Pads():
+            if pad.GetNetCode() == v.GetNetCode() and pad.HitTest(p):
+                n += 1
+    return n
+
+
+def prune(b):
+    """T-0250: remove dangling signal copper, locked or not (maze legs that stopped short of their target, fan-out
+    stubs whose continuation was dropped), repeated until stable. KiCad's own connectivity decides: a via is dangling
+    when IsConnectedOnLayer() holds on fewer than two copper layers, a track when TestTrackEndpointDangling() finds a
+    free end (KiCad's via_dangling/track_dangling DRC). Power and GND nets are never touched: their copper is fixed
+    (one-way door) and GND stitching vias are tied in by the fills. Such copper carries no connection, so the
+    unconnected count cannot rise. Returns the removed items (net, kind, layer, mm board-relative)."""
+    ox, oy = origin(b)
+    out = []
+    # KiCad 10 pcbnew: BOARD::Remove() of a held track breaks the SWIG track list, and reusing a connectivity object
+    # after a via was deleted segfaults; so items are deleted (BOARD::Delete) and connectivity is rebuilt per pass
+    for _ in range(20):
+        b.BuildConnectivity()
+        conn = b.GetConnectivity()
+        gone = []
+        for t in b.GetTracks():
+            n = t.GetNetname()
+            if n in POWER_NETS or n in GND_NETS or t.GetNetCode() <= 0:
+                continue
+            if t.GetClass() == 'PCB_VIA':   # via_dangling: joined on fewer than two copper layers ...
+                # ... and touching at most one item: a via joining two tracks on one layer is a (flagged) junction that
+                # carries the connection (the /IO13 U1 fan-out via), so it stays
+                if sum(1 for l in ALL_CU if conn.IsConnectedOnLayer(t, l)) < 2 and via_touches(b, t) <= 1:
+                    gone.append(t)
+            elif conn.TestTrackEndpointDangling(t, True):   # track_dangling: a free end
+                gone.append(t)
+        if not gone:
+            break
+        for t in gone:
+            p = t.GetPosition() if t.GetClass() == 'PCB_VIA' else t.GetStart()
+            q = t.GetPosition() if t.GetClass() == 'PCB_VIA' else t.GetEnd()
+            out.append([t.GetNetname(), 'via' if t.GetClass() == 'PCB_VIA' else 't', b.GetLayerName(t.GetLayer()),
+                        round(MM(p.x - ox), 3), round(MM(p.y - oy), 3), round(MM(q.x - ox), 3), round(MM(q.y - oy), 3)])
+            b.Delete(t)
+        del conn, gone
+    return out
 
 
 def pour_check(base, now):
