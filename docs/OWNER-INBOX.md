@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
 - **Why it needs you:** 3 work packages (last T-0241) returned it neither done nor blocked; check whether it is already done or say how to proceed
 
-**Answer:** 
+**Answer:** Move the channel 1 and channel 4 small signal parts (their sense/input resistors, diodes and capacitors, not the PROFETs or any power part) out of the west B.Cu pocket toward U1 so SW_IN1 and SW_IN4 get their own exits; no via in VS-B-front/rear and no change to F.Cu/B.Cu power copper. Drop Freerouting (the Q-0071 condition is met: after the export fix it still left short links open): apply scripts/T-0241-next-build.patch, route every remaining connection with scripts/maze_route.py as fixed routes (short local links first, then IO2–IO5, then the SW_IN lanes), keep In2 runs >= 0.9 mm off GND THT pads, script the J3 VBUS/D3-A legs from design-notes §8.18, and land the board as the build output. Keep the pour, thermal-via and heat-budget checks.
 
 ---
 
