@@ -138,9 +138,11 @@ def erode(cells):
     return inner or cells
 
 
-def route(net, src_cl, dst_cl, tm, vm, cor):
+def route(net, src_cl, dst_cl, tm, vm, cor, laid=None):
+    """laid: layer -> cells of this net's copper already emitted in this run (T-0259): they are source cells, so a
+    later leg starts from any copper of the joined cluster and never duplicates an earlier leg."""
     own = [it for it in geo['items'] if it['net'] == net]
-    start = {l: set() for l in L}; goal = {l: set() for l in L}
+    start = {l: set(laid[l]) if laid else set() for l in L}; goal = {l: set() for l in L}
     for it in own:
         for l in it['layers']:
             if l not in start:
@@ -173,7 +175,7 @@ def route(net, src_cl, dst_cl, tm, vm, cor):
         if g > dist.get((li, c), 1e18):
             continue
         n += 1
-        if n > 3000000:
+        if n > 6000000:
             return None
         if c in goal[L[li]]:
             path = [(li, c)]
@@ -237,32 +239,44 @@ def emit(net, path):
 
 if __name__ == '__main__':
     arg = sys.argv[2]
-    nets = open(arg[1:]).read().split() if arg.startswith('@') else arg.split(',')
+    nets = [n.strip() for n in open(arg[1:]) if n.strip()] if arg.startswith('@') else arg.split(',')
     out = []
     for net in nets:
         cls = sorted({it['cl'] for it in geo['items'] if it['net'] == net})
         if len(cls) < 2:
             print('#', net, 'already one cluster', file=sys.stderr); continue
-        tm, vm, cor = masks(net)
-        done = {cls[0]}
-        rest = set(cls[1:])
+        tm, vm, cor = masks(net)   # foreign copper only: own legs never block, so one mask set per net
+        # T-0259: a cluster that cannot be left (a boxed-in pad) must not stop the net: when a leg fails, the clusters
+        # still open are tried as new seeds, so every group that can be joined is joined (fewer unconnected items)
+        rest = set(cls)
         ok = True
+        tried = set()
         while rest:
-            best = None
-            path = route(net, done, rest, tm, vm, cor)
-            if not path:
-                print('#', net, 'FAILED clusters', sorted(rest), file=sys.stderr); ok = False; break
-            # which cluster did we reach
-            li, c = path[-1]
-            hit = [it['cl'] for it in geo['items'] if it['net'] == net and it['cl'] in rest and L[li] in it['layers']
-                   and c in cells_of(it['raw'][L[li]])]
-            lines = emit(net, path)
-            out.append('# %s: clusters %s -> %s' % (net, sorted(done), hit[:1]))
-            out += lines
-            done |= set(hit[:1]); rest -= set(hit[:1])
-            for it in geo['items']:   # new copper joins the source side for the next leg
-                pass
-            tm, vm, cor = masks(net)
+            seed = min(c for c in rest if c not in tried) if any(c not in tried for c in rest) else None
+            if seed is None:
+                break
+            tried.add(seed)
+            done = {seed}; rest.discard(seed)
+            laid = {l: set() for l in L}
+            while rest:
+                path = route(net, done, rest, tm, vm, cor, laid)
+                if not path:
+                    print('#', net, 'FAILED from', sorted(done), 'to', sorted(rest), file=sys.stderr); ok = False
+                    break
+                # which cluster did the leg reach: the item whose goal cells hold the end cell
+                li, c = path[-1]
+                hit = [it['cl'] for it in geo['items'] if it['net'] == net and it['cl'] in rest and L[li] in it['layers']
+                       and c in erode(cells_of(it['raw'][L[li]]))]
+                if not hit:
+                    print('#', net, 'leg end not on a target cluster, stop', file=sys.stderr); ok = False; rest = set(); break
+                lines = emit(net, path)
+                out.append('# %s: clusters %s -> %s' % (net, sorted(done), hit[:1]))
+                out += lines
+                done |= set(hit[:1]); rest -= set(hit[:1])
+                # T-0259 (decision 185): the leg's copper joins the source side for the next leg
+                for lj, cj in path:
+                    laid[L[lj]].add(cj)
+                tried |= done
         print('#', net, 'ok' if ok else 'partial', file=sys.stderr)
     txt = '\n'.join(out)
     print(txt)
