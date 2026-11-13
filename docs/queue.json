@@ -8352,7 +8352,24 @@
         "T-0218"
       ],
       "plan": "T-0270",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-13T14:56:47",
+      "ran_model": "opus",
+      "session": "24d06f4f-5380-4f79-b479-adb34fd4b17d",
+      "cost_usd": 1.8406,
+      "attempts": 1,
+      "resume": {
+        "session": "24d06f4f-5380-4f79-b479-adb34fd4b17d",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0271",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0271-4osj3efs",
+        "report": "docs/reviews/2026-11-13-fix-pdm-4ch-T-0271.md",
+        "head": "cbd2ec7ee07e99be97c72679fdec025b80ee732a",
+        "reason": "a usage limit"
+      },
+      "finished": "2026-11-13",
+      "note": "no report written (api_error): You've hit your weekly limit · resets 4am (Europe/Helsinki)",
+      "summary": "paused, API unavailable, resumes where it stopped",
+      "interrupted": null
     },
     {
       "id": "T-0272",
