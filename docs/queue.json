@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 257,
+    "T": 258,
     "Q": 74
   },
   "tasks": [
@@ -7926,13 +7926,23 @@
       "id": "T-0254",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-13",
       "depends_on": [
         "T-0253"
       ],
       "verify": true,
-      "since": "478ce84e52d5b2f6e76a3d3058eea55661a9b223"
+      "since": "478ce84e52d5b2f6e76a3d3058eea55661a9b223",
+      "started": "2026-11-13T09:58:36",
+      "ran_model": "sonnet",
+      "session": "6a5f00de-f19b-49fa-8c7a-0198fdcc108d",
+      "cost_usd": 0.2598,
+      "attempts": 1,
+      "finished": "2026-11-13",
+      "note": null,
+      "summary": "1 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-13-validate-pdm-4ch-3.md"
     },
     {
       "id": "T-0255",
@@ -7967,6 +7977,31 @@
       "finished": "2026-11-13",
       "summary": "skipped: no connector, filter or protection part changed (refs: none)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0257",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-13",
+      "finding": {
+        "id": "M1",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-4ch",
+        "location": "docs/design-notes.md T-0253 +3V3 width note; STATUS.md",
+        "summary": "Text says the +3V3 necks feed only clamp diodes and pull-ups, but +3V3 also feeds U5 VCC1, L1 output caps and later U1.3; topology behind the necks not traced",
+        "fix": "Reword the note to state the actual bound (3 squares of 0.2 mm copper, mOhm range, negligible drop even at 0.5 A)",
+        "door": "two-way",
+        "reason": "documentation only; policy: documentation is a two-way door",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-13-validate-pdm-4ch-3.md",
+        "finding": "M1"
+      },
+      "door": "two-way",
+      "state": "parked"
     }
   ],
   "board_size_start": {

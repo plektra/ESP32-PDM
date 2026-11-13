@@ -19,10 +19,11 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (5) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0257 · MINOR · pdm-4ch · Text says the +3V3 necks feed only clamp diodes and pull-ups, but +3V3 also feeds U5 VCC1, L1 output caps and later U1.3; topology behind the necks not traced → Reword the note to state the actual bound (3 squares of 0.2 mm copper, mOhm range, negligible drop even at 0.5 A)
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
