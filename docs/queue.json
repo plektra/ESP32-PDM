@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 270,
+    "T": 275,
     "Q": 75
   },
   "tasks": [
@@ -7085,7 +7085,8 @@
       ],
       "ruling": "Trim the VS-In2 east edge (T-0259 finding): pull it back about 2-3 mm at y 5-20 for one In2 -> B.Cu via column at x 55-57, the exit for SW_IN1/SW_IN4, IO2, IO5 and DEN to U1. The VS-B spine, the other VS outlines and the 16 A path stay unchanged. VS-In2 stays one island, >= 1012.1 mm2 (decision 178), with all 40 thermal vias inside. Recheck the heat budget (decision 9). The corridor stays >= 1.5 mm inside the new edge. Then keep going on T-0218 as ruled in Q-0073: the two-way next steps (ch2/ch3 IN/DEN links, U1.28, the DEN via off R402.1) need no question. Return only when a stage gains nothing or needs another one-way door.",
       "answered": "2026-11-13",
-      "unfinished": 5
+      "unfinished": 5,
+      "package": "T-0271"
     },
     {
       "id": "T-0219",
@@ -8317,6 +8318,81 @@
       "finished": "2026-11-13",
       "summary": "skipped: no connector, filter or protection part changed (refs: none)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0270",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-13",
+      "depends_on": [],
+      "items": [
+        "T-0218"
+      ],
+      "started": "2026-11-13T14:55:37",
+      "ran_model": "opus",
+      "session": "3550d23e-22f6-41ce-b834-deca088ef451",
+      "cost_usd": 0.4147,
+      "attempts": 1,
+      "finished": "2026-11-13",
+      "note": null,
+      "summary": "1 packages, 0 deferred, 1 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-13-plan-system-T-0270.md"
+    },
+    {
+      "id": "T-0271",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-13",
+      "title": "pdm-4ch: trim VS-In2 east edge for the west-pocket exit to U1, then continue routing",
+      "brief": "T-0218 (MAJOR). Owner ruling Q-0074, verbatim: \"Trim the VS-In2 east edge (T-0259 finding): pull it back about 2-3 mm at y 5-20 for one In2 -> B.Cu via column at x 55-57, the exit for SW_IN1/SW_IN4, IO2, IO5 and DEN to U1. The VS-B spine, the other VS outlines and the 16 A path stay unchanged. VS-In2 stays one island, >= 1012.1 mm2 (decision 178), with all 40 thermal vias inside. Recheck the heat budget (decision 9). The corridor stays >= 1.5 mm inside the new edge. Then keep going on T-0218 as ruled in Q-0073: the two-way next steps (ch2/ch3 IN/DEN links, U1.28, the DEN via off R402.1) need no question. Return only when a stage gains nothing or needs another one-way door.\"\n\nBACKGROUND: see docs/reviews/2026-11-13-fix-pdm-4ch-T-0259.md, the MAJOR finding and the open points. The In2 corridor from the west pocket ends at x 55.0, which is the 1.5 mm band inside the VS-In2 east edge. The U1 side of In2 starts at x 58.1. The B.Cu VS spine covers x 45.5-55. The only F.Cu gap (U12/U13, y 19-20) carries the USB pair. Decisions in force: 163 (the board is the build output), 172/176/178/181 (In2 corridor rules), 189 (Q-0073 steps), 190-193 (maze and move results).\n\nSTEPS:\n1. Confirm the start state with python3 tools/kpcb.py pdm-4ch drc. Expect: 0 errors, 46 unconnected, parity 0 (FL30 DNP warning only), the explained /IO13 via_dangling, VS-In2 1 island at 1156.4 mm2 with 40/40 thermal vias. Then run heat_budget at 40 C, 4x4 A: Tj 101 C.\n2. Find where the VS-In2 zone outline comes from: the board file, or prep in hardware/pdm-4ch/scripts/routing_build.py / fixed_routes.py. Change it at that source so that a rebuild keeps the change (decision 163). Pull ONLY the VS-In2 east edge back by about 2-3 mm, over y 5-20. Make it just enough that one In2 -> B.Cu via column at x 55-57 clears VS-In2 by its class clearance, keeping the corridor band (CORRIDOR_BAND, 1.5 mm) measured from the new edge. The rest of the VS-In2 outline stays as it is. These stay untouched: the VS-B spine, VS-B-front/rear, the VS F.Cu pours, OUT*, VBAT* and every 16 A or surge track. The freed In2 area fills as the existing In2 pours already do. Add no new pour, keep-out or option.\n3. Check the via column: at x 55-57, y 5-20, a through via must clear all F.Cu and B.Cu power copper without moving it. Use it as the exit for SW_IN1, SW_IN4, IO2, IO5 and DEN toward U1. Route with maze_route.py passes as fixed routes in fixed_routes.py, one build per pass (hardware/pdm-4ch/scripts/build_routing.sh, KiCad closed).\n4. Then do the Q-0073 two-way steps: re-route the ch2/ch3 U12/U13 IN/DEN links with copper only, so that R201.1/R202.1/R301.1/R302.1 are no longer boxed in; then free U1.28 (DEN) by moving the Q-net track under the U1 bottom row; then run more maze passes. The DEN via off R402.1 is already done (T-0266, decision 193). Only check that it stays off the pad, at least 0.5 mm.\n5. GATES for every kept build:\n   - 0 DRC errors and parity 0;\n   - unconnected below the previous kept build, otherwise the stage gains nothing;\n   - no new dangling copper;\n   - VS-In2: 1 island, >= 1012.1 mm2, all 40 thermal vias inside (thermal_check);\n   - every other pour keeps its island count and >= 95 % of its baseline (decision 172);\n   - no via in VS-B-front/rear;\n   - In2 runs >= 0.9 mm off GND THT pads (decision 181).\n6. Run python3 tools/heat_budget.py --ambient 40 --currents 4,4,4,4 after the trim and at the end (decision 9). Report Tj; it must not exceed the limit. Then run python3 tools/fix_check.py --role pcb-fixer --scope pdm-4ch.\n7. Update hardware/pdm-4ch/STATUS.md with the new VS-In2 area, the unconnected count per net, and the open items. Add a design-notes 8.20 entry with the new edge coordinates and the via column. Record auto decisions for your own choices. Add safety: no 16 A/surge path changed, and a competent person reviews the board before installation.\n\nONE-WAY DOORS (stop and ask, do not do):\n- a VS-In2 change beyond the east edge at y 5-20 (about 2-3 mm), or one that leaves VS-In2 split, below 1012.1 mm2 or with a thermal via outside it;\n- any change to the VS-B spine, VS-B-front/rear, other VS/OUT/VBAT outlines, F.Cu/B.Cu power copper, or the 16 A or surge paths;\n- a via column that needs any of those changes to fit;\n- a corridor run closer than 1.5 mm to the new edge;\n- a schematic change, a connector, outline or hole change, or a bottom-side SMT part;\n- moving a part outside the decision 189/191 move list;\n- loosening a DRC rule, clearance or net-class width;\n- the heat budget failing at 40 C.\nWhen a stage gains nothing, return with the per-net unconnected list and name the next one-way door.",
+      "items": [
+        "T-0218"
+      ],
+      "plan": "T-0270",
+      "depends_on": []
+    },
+    {
+      "id": "T-0272",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-13",
+      "depends_on": [
+        "T-0271"
+      ],
+      "verify": true,
+      "since": "5fba4c29136fdd54730fdb88cfd51b428de728e7"
+    },
+    {
+      "id": "T-0273",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-13",
+      "depends_on": [
+        "T-0271"
+      ],
+      "verify": true,
+      "since": "5fba4c29136fdd54730fdb88cfd51b428de728e7",
+      "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
+      "recheck": "cost"
+    },
+    {
+      "id": "T-0274",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-13",
+      "depends_on": [
+        "T-0271"
+      ],
+      "verify": true,
+      "since": "5fba4c29136fdd54730fdb88cfd51b428de728e7",
+      "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
+      "recheck": "emc"
     }
   ],
   "board_size_start": {
