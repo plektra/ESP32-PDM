@@ -42,6 +42,7 @@ ok = d['errors'] == 0 and d['parity'] == 0 and not p['split'] and not d['bottom_
 print(d['unconnected'] if ok else -1)
 PY
 )
+  OK=${OK:--1}   # T-0259: a crashed prep/apply leaves no result: never "kept"
   if [[ $OK -ge 0 && $OK -lt $BEST_UNC ]]; then BEST=$i; BEST_UNC=$OK; fi
 done
 # compare with the board as it is now (another build may have landed meanwhile)

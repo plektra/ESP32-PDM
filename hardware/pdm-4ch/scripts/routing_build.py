@@ -86,6 +86,32 @@ def islands(b):
 WIDENED = []   # locked tracks widened by add_fixed (T-0253)
 
 
+def move_parts(b, tracks):
+    """T-0259 (Q-0073): the scripted placement move (fixed_routes.PLACE, ref -> x, y, rot; mm from the outline
+    corner) and the copper it obsoletes: every track/via of fixed_routes.DROP_NETS and the DROP_GND segments are
+    removed, so only the fixed routes of those nets are added back. Idempotent: a part already in place stays."""
+    moved = 0
+    for ref, (x, y, rot) in getattr(fixed_routes, 'PLACE', {}).items():
+        fp = b.FindFootprintByReference(ref)
+        assert fp and not fp.IsFlipped(), ref
+        pos = P(b, x, y)
+        if fp.GetPosition() != pos or abs(fp.GetOrientationDegrees() - rot) % 360 > 1e-6:
+            fp.SetPosition(pos); fp.SetOrientationDegrees(rot); moved += 1
+    drop = set(getattr(fixed_routes, 'DROP_NETS', ()))
+    segs = set()
+    for lay, a, e in getattr(fixed_routes, 'DROP_GND', ()):
+        pa, pe = P(b, *a), P(b, *e)
+        segs.add((b.GetLayerID(lay), *sorted([(pa.x, pa.y), (pe.x, pe.y)])))
+    gone = []   # tracks to remove (prep removes them in its one pass over the board's tracks: a second
+    for t in tracks:  # GetTracks() after b.Remove() breaks KiCad's SWIG layer)
+        if t.GetNetname() in drop:
+            gone.append(t)
+        elif t.GetNetname() == 'GND' and t.GetClass() != 'PCB_VIA' and \
+                (t.GetLayer(), *sorted([(t.GetStart().x, t.GetStart().y), (t.GetEnd().x, t.GetEnd().y)])) in segs:
+            gone.append(t)
+    return moved, gone
+
+
 def add_fixed(b):
     """fixed tracks/vias from fixed_routes.py, locked; skipped when an identical item is already there"""
     have = {}
@@ -149,10 +175,13 @@ def prep(board, work):
             t.SetLocked(True)
         for z in b.Zones():
             z.SetLocked(True)
+    moved, gone = move_parts(b, tracks)
+    gone = {id(t) for t in gone}
     removed = 0
     for t in tracks:
-        if not t.IsLocked():
+        if not t.IsLocked() or id(t) in gone:
             b.Remove(t); removed += 1
+    print('prep: placement moved', moved, '| obsolete copper removed', len(gone), flush=True)
     nfix = add_fixed(b)
     fill(b)
     json.dump(islands(b), open(os.path.join(work, 'baseline.json'), 'w'), indent=0)

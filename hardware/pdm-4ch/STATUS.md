@@ -1,6 +1,34 @@
 # pdm-4ch status
 
-Updated: 2026-11-13 (T-0253 dangling maze copper removed, +3V3 at 0.3 mm: 48 unconnected)
+Updated: 2026-11-13 (T-0259 maze merge fix, ch1/ch4 signal-part move: 46 unconnected)
+
+**2026-11-13 (T-0259: T-0218 per Q-0073 – unattended):** the board is again the scripts' output.
+- **maze_route.py merge fix (decision 185).** A routed leg's cells now join the source side, so the next leg of the
+  net starts from any copper already laid. The full open-net pass gave 87 lines (pass 2 of T-0246: 314) and no
+  duplicate legs. When a leg fails, the open clusters are tried as new seeds, so one boxed-in pad no longer stops
+  the whole net. The `@file` net list is now one net per line (net names with spaces).
+- **Placement move (scripted: `fixed_routes.PLACE`, applied by `routing_build.prep` → `move_parts()`).** R101/R102
+  and R401/R402 turned 180°, so the U11/U14 IN/DEN pad faces its PROFET pin (straight link) and the SW_IN/DEN pad
+  faces east. R103/R107 and R403/R407 turned to 270°, so the IS pads are on top next to R104/R404, and the IS
+  track no longer runs down x 38.9 across the pocket. Positions are unchanged except R101 (y 9.4 → 9.2), R102
+  (8.0 → 7.93), R401 (26.0 → 25.8) and R402 (24.6 → 24.53), which now line up with their pins. The bottom GND pads
+  of R103/R107 and R403/R407 get a 0.4 mm link and one GND via each (42.9, 11.6) and (42.9, 28.2). The copper this
+  replaces (`DROP_NETS`, `DROP_GND`) is removed in prep. R105/D101, R405/D401, OUT, VS and every other part did not
+  move. All parts are on top.
+- **Passes.** Build 1 (pass 1): 47 unconnected, but 2 errors from a 3 µm NTC clearance, so it was not kept and the
+  line was dropped. Build 2 (move + pass 1): **47**, kept. Build 3 (pass 2: DEN R102.1 → R402.1 over B.Cu/In2):
+  **46**, kept. All three ran with 0 errors, parity 0 and no new dangling copper.
+- Board: **46 unconnected** (was 48): MOD_ID 1 → 0 and DEN 4 → 3. VS-In2 is 1 island, 1156.4 mm² (≥ 1012.1), with
+  40/40 thermal vias inside it. No power pour lost an island or more than 5 %. Tj is 101 °C at 40 °C ambient,
+  4 × 4 A.
+- **Wall still in place.** The pocket nets (SW_IN1/4, IO2, IO5, DEN) now leave their pads, but they cannot reach
+  U1. On In2 the corridor ends 1.5 mm inside the VS-In2 east edge (x 55.0, while the U1 side starts at x 58.1), and
+  a via at x ≤ 55 lands in the B.Cu VS spine. The F.Cu gap at y 19–20 carries the USB pair. Opening it needs a
+  power-outline change, which is a one-way door (see the report).
+- **Open:** the DEN via at (37.60, 24.30) overlaps R402.1 (same net, DRC clean, but solder can wick into it). Move
+  it when DEN is touched again. Boxed-in pads outside the move: R201.1/R202.1/R301.1/R302.1 (ch2/ch3, the same
+  wrap-around pattern), U1.28, D12.3, U5.2/U5.3, R70.2, R60.2, FB1.2, the J3 VBUS pins and the Q block.
+  Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0259.md`.
 
 **2026-11-13 (T-0253: T-0250 + T-0251 – unattended):** the board is again the scripts' output (LAND_BEST build).
 - **+3V3 class width (T-0251).** The maze-made +3V3 copper is now 0.3 mm, 196 mm in total. `prep` widens an identical
