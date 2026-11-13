@@ -7078,12 +7078,12 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0073",
       "why_big": [
         "4 work packages (last T-0246) returned it neither done nor blocked; check whether it is already done or say how to proceed"
       ],
-      "ruling": "Move the channel 1 and channel 4 small signal parts (their sense/input resistors, diodes and capacitors, not the PROFETs or any power part) out of the west B.Cu pocket toward U1 so SW_IN1 and SW_IN4 get their own exits; no via in VS-B-front/rear and no change to F.Cu/B.Cu power copper. Drop Freerouting (the Q-0071 condition is met: after the export fix it still left short links open): apply scripts/T-0241-next-build.patch, route every remaining connection with scripts/maze_route.py as fixed routes (short local links first, then IO2–IO5, then the SW_IN lanes), keep In2 runs >= 0.9 mm off GND THT pads, script the J3 VBUS/D3-A legs from design-notes §8.18, and land the board as the build output. Keep the pour, thermal-via and heat-budget checks.",
+      "ruling": "Keep going on T-0218 within the Q-0070 limits (decision 172). Next: fix maze_route.py so a net's later legs start from the copper already laid (no duplicate copper), move the ch1/ch4 signal parts (R101/R102/R103/R104/R107/C101/D102 and the 4xx twins) toward U1, then more maze passes, one build per pass. R105/D101 (PROFET GND return), the OUT parts and the VS parts stay. \"In progress\" with fewer unconnected items is progress, not a question. Return to the owner only if a stage gains nothing or needs a one-way door: power copper outlines, connectors, the board outline or the schematic.",
       "answered": "2026-11-13",
       "unfinished": 4
     },
