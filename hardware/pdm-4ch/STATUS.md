@@ -1,6 +1,15 @@
 # pdm-4ch status
 
-Updated: 2026-11-14 (T-0281 stitched GND-F/B fragments, IO2/IO5 through the exit, +3V3 under U1: 37 unconnected)
+Updated: 2026-11-14 (Quilter trial export; T-0281 stitched GND-F/B fragments, IO2/IO5 through the exit, +3V3 under U1: 37 unconnected)
+
+**2026-11-14 (Quilter trial – owner):** the owner is trying Quilter's free tier on the 37 open connections
+(decision 213). `scripts/quilter_export.py <out_dir>` (KiCad Python) writes a locked copy of the board plus
+`UPLOAD.md`: all parts, tracks, vias and zones locked; dangling signal copper pruned (none); In1 named GND;
+export-only rule areas for no tracks on In1 and no tracks/vias under the antenna on In1/In2. The export copy has
+0 DRC errors, parity 0, 37 unconnected. Quilter keeps parts inside the outline and pre-routed copper. It keeps pours
+only when they are ticked, so the power pours and the In1 planes are ticked and the outer and In2 GND pours are left
+to it. The stackup comes from the file, so the In2 routes survive. Next: upload, then an import step that takes only
+the candidate's new tracks/vias into `fixed_routes.py` and runs the normal build gates. The repo board is unchanged.
 
 **2026-11-14 (T-0281: T-0218 per Q-0076/Q-0073 – unattended):** the build gate now follows Q-0076.
 `routing_build.py` (`gnd_fragments`, `ref_check`) compares each build with the board as it was before the build.
