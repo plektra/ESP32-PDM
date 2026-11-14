@@ -1,6 +1,36 @@
 # pdm-4ch status
 
-Updated: 2026-11-14 (T-0271 VS-In2 trim checked, not applied; ch2 DEN to U1.28: 45 unconnected)
+Updated: 2026-11-14 (T-0276 marked In2 exit, DEN complete, SW4 join: 42 unconnected)
+
+**2026-11-14 (T-0276: T-0218 per Q-0075/Q-0073 – unattended):** the marked In2 exit is in place. `maze_route.py`
+has one named window, `EXIT_WINDOW` x 55.0–57.0 / y 6.45–20 (constant `EXIT_WINDOW_MM` and `EXIT_NETS` in
+`fixed_routes.py`; `routing_build.py` cuts the same window out of its router-copy band). Only SW_IN1/SW_IN4/IO2/IO5/DEN
+may cross the band there; everywhere else the 1.5 mm band stays. The maze's via mask now keeps a via a zone clearance
+plus a via radius outside every foreign power-pour outline (before, the margin was only 0.25 mm). **VS-In2 notch:**
+x 55.6–56.5, y 14.9–16.5 (`VS_IN2_NOTCH`, cut by `prep`, idempotent), i.e. the column via plus the 0.5 mm zone
+clearance. The rest of the outline is unchanged and the Q-0074 trim is dropped. **VS-In2: 1 island, 1133.4 mm²
+(≥ 1012.1), 40/40 thermal vias; Tj 101 °C at 40 °C, 4 × 4 A.** **Via column:** one via, /DEN at (56.45, 15.70). On F the
+column has room only at y 15.3–17.7 (three via spots). DEN: pocket via (42.20, 8.90) → In2 around the U12 thermal field
+→ column → B north along x 56.36 → its In2 drop at (59.40, 10.60). The pocket DEN and the ch2/U1.28 DEN are now one net.
+ch3 (Q-0073 step): the U13-DEN link moved to the middle gap and U13-IN to the south gap. The C301.2 GND via moved
+0.16 mm up to (56.78, 25.30). R302.1 now leaves north to a via at (57.45, 25.95) and runs on B along x 56.36 into the
+column via. **DEN 2 → 0.** A maze pass on the U1 strip and analog block joined /SW4 by J6 (2 → 1).
+Not kept: **IO2 and IO5** routed through the column (vias at y 16.6 and 17.5) cut the only GND-B link east of the
+spine (x 56.4 to the IO4 track at x 61, y 12–17.6) and split GND-B 19 → 20. IO2's F leg also cuts the pocket's only
+GND-F passage (x 43.8–45.2 between R107.1 and C202/the VS track) and isolates GND-F by R203.2: GND-F 37 → 39. No other
+IO2 path exists, and IO4 cannot move (no via spot past the VBAT_SENSE/NTC copper). **+3V3** (5 → 1 in the maze) needs B runs under U1
+(y 5.4–20) that split GND-B 19 → 24, and with B blocked there the maze finds no leg. **SW_IN1–4**: the diode pads
+D12.3/D13.3/D14.3/D15.3 by J6 are walled in by their own links and the In2 bundle at x 57.8–59.3 (no via spot), so the
+exit does not help them.
+
+Board = build output. Results: 0 DRC errors, 407 warnings, parity 0, **42 unconnected** (was 45), only the /IO13
+via_dangling, every pour at its baseline island count (GND-F 37, GND-B 19, GND-In2 18, GND-In1 1; losses ≤ 0.62 %).
+New vias: (56.45, 15.70), (57.45, 25.95), (57.70, 73.00); none in VS-B-front/rear or the x 46.15 strip. The new In2
+run is 37 mm from the nearest GND THT pad. Unconnected per net: +3V3 5, GND 3, IO6/IO11/IO17 2 each, SW1 2, F2-Pad1 2,
+Q4-B 2, and 1 each for SW4, SW_IN1–4, SWIN2–4, SW1_IO/SW2_IO/SW4_IO, IO0/IO2/IO5/IO7/IO18, EN, NTC, VBAT_SENSE,
+D3-A, Q4-E, Q5-E. Open (one-way doors for the owner): allow a stitched GND-B/GND-F fragment for IO2/IO5 (or move
+signal copper away from the GND-B link), and the same for the +3V3 B run under U1. Safety: no 16 A or surge path
+changed; a competent person reviews the board before installation. Details: `docs/reviews/2026-11-14-fix-pdm-4ch-T-0276.md`.
 
 **2026-11-14 (T-0271: T-0218 per Q-0074/Q-0073 – unattended):** the VS-In2 east-edge trim was **not** made. The
 1.5 mm corridor band straddles the VS-In2 outline, so an In2 run can never cross a trimmed edge, and any via ≥ 1.5 mm
