@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 287,
+    "T": 292,
     "Q": 78
   },
   "tasks": [
@@ -7085,7 +7085,8 @@
       ],
       "ruling": "Standing rule for the rest of T-0218 (replaces case-by-case questions). Agents may, without asking: (1) move any small signal part (resistors, capacitors, small-signal diodes incl. D12-D15/D102-D402, the Q3-Q6 block, R60 and similar), including the ch2/ch3 blocks R201/R202 and R301/R302, and reroute any signal copper; (2) grow the In2 exit window and its VS-In2 notch as the runs need, if VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9); (3) leave GND fragments on F.Cu, B.Cu and In2 when each is tied to GND-In1 by >= 2 vias (no floating copper; GND-In1 stays one island). Fixed, owner only: connectors, PROFETs U11-U14, U1, Q30/U30/D30/D31, the buck, the 16 A/battery/surge paths, all other power-pour outlines, holes, board outline, schematic. Keep going until 0 unconnected; return only when a stage gains nothing or needs one of the fixed items.",
       "answered": "2026-11-14",
-      "unfinished": 8
+      "unfinished": 8,
+      "package": "T-0288"
     },
     {
       "id": "T-0219",
@@ -8707,6 +8708,81 @@
       "summary": "0 packages, 1 deferred, 0 decisions",
       "interrupted": null,
       "report": "docs/reviews/2026-11-14-plan-system-T-0286.md"
+    },
+    {
+      "id": "T-0287",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-14",
+      "depends_on": [],
+      "items": [
+        "T-0218"
+      ],
+      "started": "2026-11-14T20:33:21",
+      "ran_model": "opus",
+      "session": "0c39972c-038f-43b5-955f-4596ca3400aa",
+      "cost_usd": 0.3572,
+      "attempts": 1,
+      "finished": "2026-11-14",
+      "note": null,
+      "summary": "1 packages, 0 deferred, 1 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-14-plan-system-T-0287.md"
+    },
+    {
+      "id": "T-0288",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-14",
+      "title": "pdm-4ch routing to 0 unconnected under the Q-0077 standing rule",
+      "brief": "Layout only (board file via tools/kpcb.py and the routing scripts; plus STATUS.md and design-notes). Start from the current board: T-0281 build b6, 37 unconnected, 0 DRC errors, parity 0. Owner ruling Q-0077, verbatim: \"Standing rule for the rest of T-0218 (replaces case-by-case questions). Agents may, without asking: (1) move any small signal part (resistors, capacitors, small-signal diodes incl. D12-D15/D102-D402, the Q3-Q6 block, R60 and similar), including the ch2/ch3 blocks R201/R202 and R301/R302, and reroute any signal copper; (2) grow the In2 exit window and its VS-In2 notch as the runs need, if VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9); (3) leave GND fragments on F.Cu, B.Cu and In2 when each is tied to GND-In1 by >= 2 vias (no floating copper; GND-In1 stays one island). Fixed, owner only: connectors, PROFETs U11-U14, U1, Q30/U30/D30/D31, the buck, the 16 A/battery/surge paths, all other power-pour outlines, holes, board outline, schematic. Keep going until 0 unconnected; return only when a stage gains nothing or needs one of the fixed items.\" Order: (a) Update the routing_build.py gate to the ruling. GND fragments are now allowed on In2 as well as F/B when each has >= 2 ties to GND-In1, so the GND-In2 'keep island count' check becomes the same >= 2-tie check (this lifts the T-0281 b2/b4/b5 rejection only if the cut-off GND-In2 under U1 gets 2 stitching vias). GND-In1 stays exactly 1 island. No floating copper. Every power pour other than VS-In2 keeps its outline unchanged. VS-In2 gate: 1 island, >= 1012.1 mm2, 40/40 thermal vias. (b) Move the ch2/ch3 resistor blocks R201/R202 and R301/R302 (and nearby small parts as needed) to free the R201.1/R301.1 exits. Route SW_IN2/SW_IN3 and ch3 R302.1 /DEN (this also clears T-0285). (c) Grow EXIT_WINDOW/VS_IN2_NOTCH (fixed_routes.py) only as far as SW_IN1/SW_IN4 need, or move D12-D15 to give them via spots. The VS-B spine and the x 45.5-46.8 strip stay untouched, because they are 'other power-pour outlines'. (d) Run maze passes on the U1 strip and the analog block (GND, Q4-B/Q4-E/Q5-E, F2-Pad1, IO*, EN, NTC, VBAT_SENSE, D3-A, SW*, +3V3), moving Q3-Q6, R60 and other small parts where that helps. Build once per pass and keep only builds that reduce unconnected. Checks after every kept build: kpcb drc with 0 errors and parity 0; fix_check --role pcb-fixer; pour gates as above; no SMT part on the bottom; no part in a hole keep-out. After any VS-In2 change, run tools/heat_budget.py at 40 C (Tj report as in T-0281). Record each step's auto decisions. Stop and return (one-way door) if the next gain needs any fixed item: a connector, U11-U14, U1, Q30/U30/D30/D31, the buck, a 16 A/battery/surge path, a power-pour outline other than the VS-In2 notch, a hole, the outline, the schematic, or a bottom-side part. Also stop if VS-In2 would fall below 1012.1 mm2, lose a thermal via or split, if GND-In1 would split, or if the heat budget fails. Return as well when a whole stage gains nothing. Safety: 16 A and surge paths stay unchanged, and a competent person reviews the board before installation.",
+      "items": [
+        "T-0218"
+      ],
+      "plan": "T-0287",
+      "depends_on": []
+    },
+    {
+      "id": "T-0289",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-14",
+      "depends_on": [
+        "T-0288"
+      ],
+      "verify": true,
+      "since": "9bd106c07e17f556f0d94ecdef5a96a0639dc519"
+    },
+    {
+      "id": "T-0290",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-14",
+      "depends_on": [
+        "T-0288"
+      ],
+      "verify": true,
+      "since": "9bd106c07e17f556f0d94ecdef5a96a0639dc519",
+      "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
+      "recheck": "cost"
+    },
+    {
+      "id": "T-0291",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-14",
+      "depends_on": [
+        "T-0288"
+      ],
+      "verify": true,
+      "since": "9bd106c07e17f556f0d94ecdef5a96a0639dc519",
+      "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
+      "recheck": "emc"
     }
   ],
   "board_size_start": {
