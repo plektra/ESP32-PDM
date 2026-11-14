@@ -63,23 +63,35 @@ capacitors, crystal oscillators, switching converters), plus upload / prepare in
   for training; Terms restrict sharing Output with third parties. **Check that before Quilter copper goes into the
   MIT repo.**
 
-**Not documented – ask with the MCP's `askQuestion` before or while uploading:**
-1. KiCad 10 file support (format 20260206); the KiCad docs page is empty.
-2. What Quilter does with pre-routed copper that breaks its minimums, and with keep-outs that have holes or overlap
-   existing copper/pours.
-3. Whether a fully pre-routed net is skipped, and whether it widens existing narrow tracks.
-4. Whether placement constraints (bypass, crystal, buck) can override pre-placed parts.
-5. Whether Net Widths or Power Nets wins on a collision.
+**Asked with the MCP's `askQuestion` (2026-11-14), answers checked against the cited pages:**
+1. KiCad 10 file support (format 20260206): **not documented.** The docs say only "KiCad"; the CAD compatibility
+   overview page is a stub. Only the upload can tell; `UPLOAD.md` says to stop and note it if the parser refuses.
+2. Pre-routed copper that breaks the minimums, keep-outs with holes or over copper: **not documented.** Moot for the
+   minimums: the export copy passes DRC with clearance 0.2 / track 0.15 mm (0 errors besides the 37 unconnected).
+   The holed keep-outs stay a risk only the upload shows (watch for refused or ignored keep-outs in the preview).
+3. Fully routed nets / widening narrow locked tracks: Quilter routes what is "not already routed" and never changes
+   a pre-routed trace's path or position; **whether it may change a locked track's width is not documented.**
+   Consequence for the import: match locked copper by net, layer and endpoints and ignore width, and keep our own
+   widths; take only geometry that is new.
+4. Placement constraints vs pre-placed parts: **answered.** Pre-placed parts are never moved or rotated, even if the
+   layout then cannot complete. `UPLOAD.md` still says to remove the bypass/crystal/converter entries (they would
+   only add failing checks).
+5. Net Widths vs Power Nets: **precedence not documented**; Net Widths "are not always respected". Net Widths are
+   checked by the Invalid Width Span PRC (±10 % of nominal). The import gate (reject tracks narrower than their
+   `fixed_routes.CLASSES` width) already covers this; `UPLOAD.md` now says so.
 
-Docs bugs seen (could go to the MCP's `sendFeedback`, ask the owner first): net-widths page "How to specify" says
-"To specify a preserved pour"; the KiCad compatibility page is empty.
+Docs bugs seen (could go to the MCP's `sendFeedback`, ask the owner first; not sent): net-widths page "How to
+specify" says "To specify a preserved pour"; the CAD compatibility overview page is a two-line stub ("overview of
+status", "link to view/vote on cad tool support") and no page lists supported KiCad versions.
 
 ## Next steps
 
-1. (Optional) `askQuestion` on the five open points; adjust the export or `UPLOAD.md` if an answer changes things.
+1. Done: open points asked (see above); `UPLOAD.md` updated, upload folder regenerated (37 unconnected, DRC errors
+   only the 37 unconnected, same warnings as the repo board plus the 9 `lib_footprint_issues`).
 2. Owner uploads per `UPLOAD.md` and downloads the best candidates (fewest unrouted) into one folder.
 3. Write `hardware/pdm-4ch/scripts/quilter_import.py`: load candidate and export copy, take only new tracks/vias
-   (geometric diff against the locked copper; ignore Quilter pours and its stackup edits), reject tracks narrower
+   (geometric diff against the locked copper by net, layer and endpoints, ignoring width; ignore Quilter pours
+   and its stackup edits), reject tracks narrower
    than their net's `fixed_routes.CLASSES` width or on In1, emit them as a generated block for `fixed_routes.py`.
 4. Run `hardware/pdm-4ch/scripts/build_routing.sh`; accept only with 0 DRC errors, parity 0, fewer unconnected,
    pour gates (decisions 166, 172, 212), GND fragments with >= 2 ties, VS-In2 one island >= 1012.1 mm² with 40/40
