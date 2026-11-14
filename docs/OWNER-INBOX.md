@@ -19,10 +19,11 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (4) – two-way doors
+## Decided by agents (5) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
+- T-0285 · MINOR · pdm-4ch · ch3 /DEN link (routed in T-0276) is open again after the IO2/IO5 column took its lane; ch3 DEN pin would float if built as is → route R302.1 in a later stage (e.g. after the ch2/ch3 resistor block move already named in STATUS); no extra action now
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order

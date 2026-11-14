@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 285,
+    "T": 286,
     "Q": 78
   },
   "tasks": [
@@ -8608,13 +8608,23 @@
       "id": "T-0282",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-14",
       "depends_on": [
         "T-0281"
       ],
       "verify": true,
-      "since": "dfe3e43d8d385d97a37562da69b95e6e6b749d4b"
+      "since": "dfe3e43d8d385d97a37562da69b95e6e6b749d4b",
+      "started": "2026-11-14T13:25:04",
+      "ran_model": "sonnet",
+      "session": "531a0c2e-b2ea-41b8-819f-89771ab4c233",
+      "cost_usd": 0.2778,
+      "attempts": 1,
+      "finished": "2026-11-14",
+      "note": null,
+      "summary": "1 decided by agents, 0 for the owner, 0 duplicates",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-14-validate-pdm-4ch-3.md"
     },
     {
       "id": "T-0283",
@@ -8649,6 +8659,31 @@
       "finished": "2026-11-14",
       "summary": "skipped: no connector, filter or protection part changed (refs: none)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0285",
+      "role": "board-fix",
+      "scope": "pdm-4ch",
+      "created": "2026-11-14",
+      "finding": {
+        "id": "V1",
+        "kind": "finding",
+        "severity": "MINOR",
+        "board": "pdm-4ch",
+        "location": "ESP32-PDM-4CH.kicad_pcb: ch3 R302.1 /DEN",
+        "summary": "ch3 /DEN link (routed in T-0276) is open again after the IO2/IO5 column took its lane; ch3 DEN pin would float if built as is",
+        "fix": "route R302.1 in a later stage (e.g. after the ch2/ch3 resistor block move already named in STATUS); no extra action now",
+        "door": "two-way",
+        "reason": "signal copper only, rerouting is allowed under decision 206; board is not ordered",
+        "touches": [],
+        "cost_delta_usd": 0.0
+      },
+      "source": {
+        "report": "docs/reviews/2026-11-14-validate-pdm-4ch-3.md",
+        "finding": "V1"
+      },
+      "door": "two-way",
+      "state": "parked"
     }
   ],
   "board_size_start": {
