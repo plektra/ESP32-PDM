@@ -44,6 +44,18 @@ THERMAL_PAD = '15'
 THERMAL_KEEP_MM = 1.0
 # corridor runs stay this far inside the VS-In2 outline (router keep-out band; maze_route.py CORRIDOR_BAND)
 CORRIDOR_BAND_MM = 1.5
+# The one marked exit (owner ruling Q-0075, T-0276): inside this window (x0, y0, x1, y1 mm) the band does not block the
+# west-pocket In2 runs of EXIT_NETS, so they may cross the VS-In2 east edge (x 56.5) into a via column at x 56.3-57.
+# The window covers only the east-edge band: x from the band's inner edge (56.5 - 1.5) to 57.0 (the via column limit;
+# the band still blocks In2 at x 57-58, so a run must drop to a via there), y from the north-edge band (4.95 + 1.5) to
+# 20. Every other place keeps the 1.5 mm band. The notch in the VS-In2 outline is VS_IN2_NOTCH (routing_build.prep).
+EXIT_WINDOW_MM = (55.0, 6.45, 57.0, 20.0)
+EXIT_NETS = ('/SW_IN1', '/SW_IN4', '/IO2', '/IO5', '/DEN')
+# The notch (x0, y0, x1, y1 mm) cut from the VS-In2 outline by routing_build.prep (idempotent): the three column vias at
+# x 56.45, y 15.7/16.6/17.5 (r 0.3) and the In2 runs into them (y 15.7-17.9, w 0.2) plus the 0.5 mm VS-In2 zone
+# clearance: x 56.45 - 0.3 - 0.5 = 55.65 -> 55.6, y 15.7 - 0.8 = 14.9 to 17.9 + 0.1 + 0.5 = 18.5. The fill cannot use
+# this copper anyway; x1 56.6 lies past the edge (x 56.5) so the cut is clean. Nothing else of the outline changes.
+VS_IN2_NOTCH = (55.6, 14.9, 56.6, 16.5)
 
 # GND/GND_CAN stitching grid (mm); a via is added only where all four layers are fill of that net.
 STITCH_PITCH_MM = 5.0
@@ -377,7 +389,7 @@ V('GND', 59.527000, 73.492700, size=0.600, drill=0.300)
 V('GND', 43.610500, 70.921200, size=0.600, drill=0.300)
 V('GND', 67.600000, 15.120400, size=0.600, drill=0.300)
 V('GND', 67.075400, 9.648300, size=0.600, drill=0.300)
-V('GND', 56.776978, 25.458200, size=0.600, drill=0.300)
+V('GND', 56.776978, 25.300000, size=0.600, drill=0.300)   # T-0276: C301.2 GND via up 0.16 mm (was y 25.4582) so R302.1 leaves through the north gap
 V('GND', 64.242300, 62.292300, size=0.600, drill=0.300)
 V('GND', 77.500000, 36.103400, size=0.600, drill=0.300)
 V('GND', 85.600000, 21.824000, size=0.600, drill=0.300)
@@ -467,13 +479,12 @@ T('/Analog interface/SWIN1', 'In2.Cu', (68.262300, 46.100000), (63.642100, 50.72
 T('/Analog interface/SWIN1', 'In2.Cu', (93.300000, 46.100000), (68.262300, 46.100000), w=0.200)
 T('Net-(U13-GND)', 'F.Cu', (55.690000, 29.400000), (53.930000, 29.400000), w=0.200)
 T('Net-(U13-GND)', 'F.Cu', (53.930000, 29.400000), (53.600000, 29.070000), w=0.200)
-# T-0271 (Q-0073 step): U13.4 -> R301.2 through the middle gap (y 27.3) between R302 and R301, into R301.2 from
-# above; the south gap (y 28.7) is then free for R301.1 (/SW_IN3). The ch3 north gap holds the C301.2 GND via, so
-# ch3 frees SW_IN3, not DEN.
-T('Net-(U13-IN)', 'F.Cu', (53.60, 27.80), (54.30, 27.80), (54.80, 27.30), (56.71, 27.30), (56.71, 28.00))
-T('Net-(U13-DEN)', 'F.Cu', (56.710000, 26.600000), (56.074400, 25.964400), w=0.200)
-T('Net-(U13-DEN)', 'F.Cu', (56.074400, 25.964400), (54.165600, 25.964400), w=0.200)
-T('Net-(U13-DEN)', 'F.Cu', (54.165600, 25.964400), (53.600000, 26.530000), w=0.200)
+# T-0276 (Q-0073 step, supersedes T-0271): the ch3 links shift one gap south so the north gap (y 25.95) is free for
+# R302.1 (/DEN), whose far end (the DEN lane at x 56.36, T-0276 exit) is now reachable; SW_IN3's D14.3 is walled in
+# near J6 (no route), so freeing R301.1 gained nothing. U13.5 -> middle gap (y 27.3) -> R302.2 from below;
+# U13.4 -> south gap (y 28.7) -> R301.2 from below. Clearances >= 0.28 mm to R301.1/R302.1/R305 and U13.3.
+T('Net-(U13-DEN)', 'F.Cu', (53.60, 26.53), (54.37, 26.53), (55.14, 27.30), (56.71, 27.30), (56.71, 26.60))
+T('Net-(U13-IN)', 'F.Cu', (53.60, 27.80), (54.60, 27.80), (54.60, 28.30), (55.00, 28.70), (56.71, 28.70), (56.71, 28.00))
 T('Net-(U13-IS)', 'F.Cu', (58.088600, 25.672400), (58.088600, 27.551100), w=0.200)
 T('Net-(U13-IS)', 'F.Cu', (61.900000, 28.762500), (59.300000, 28.762500), w=0.200)
 T('Net-(U13-IS)', 'F.Cu', (53.660000, 25.200000), (53.600000, 25.260000), w=0.200)
@@ -1318,7 +1329,8 @@ T('+3V3', 'F.Cu', (10.30, 59.40), (10.30, 59.30), (10.20, 59.20), w=0.30)
 PLACE = {'R101': (37.2, 9.2, 180), 'R102': (37.2, 7.93, 180), 'R103': (40.3, 8.7, 270), 'R107': (42.9, 8.7, 270),
          'R401': (37.2, 25.8, 180), 'R402': (37.2, 24.53, 180), 'R403': (40.3, 25.3, 270), 'R407': (42.9, 25.3, 270)}
 DROP_NETS = {'Net-(U11-IN)', 'Net-(U11-DEN)', 'Net-(U11-IS)', 'Net-(U14-IN)', 'Net-(U14-DEN)', 'Net-(U14-IS)',
-             '/DEN', 'Net-(U12-DEN)', 'Net-(U13-IN)'}   # T-0271: U12 DEN and U13 IN links rerouted; T-0266: all /DEN copper is in this file (T-0259 maze pass 2 block)
+             '/DEN', 'Net-(U12-DEN)', 'Net-(U13-IN)', 'Net-(U13-DEN)'}   # T-0271: U12 DEN and U13 IN links rerouted; T-0266: all /DEN copper is in this file (T-0259 maze pass 2 block)
+DROP_GND_VIAS = [(56.776978, 25.4582)]   # T-0276: old C301.2 GND via, moved to y 25.30
 DROP_GND = [  # (layer, (x1, y1), (x2, y2)) of the removed GND segments
     ('F.Cu', (40.300000, 23.837500), (38.317500, 23.837500)),
     ('F.Cu', (40.300000, 7.237500), (42.900000, 7.237500)),
@@ -1369,3 +1381,29 @@ V('/DEN', 72.50, 17.50)
 T('/DEN', 'F.Cu', (58.90, 10.30), (59.40, 10.60))
 V('/DEN', 59.40, 10.60)
 T('/DEN', 'In2.Cu', (59.40, 10.60), (59.50, 10.50), (64.90, 10.50), (65.70, 11.30), (65.80, 11.30), (65.90, 11.40), (66.30, 11.40), (72.30, 17.40))
+
+# ---- T-0276 (Q-0075): the marked In2 exit. Three west-pocket runs cross the VS-In2 east edge at y 15.7-17.9 (notch
+# VS_IN2_NOTCH) into a via column at x 56.45 (B spine edge x 55.0 + 1.0 zone clearance + 0.3 via radius = 56.3; on F
+# the only free stretch at x 56.3-57 is y 15.3-17.7, between the D201-A via and the GND track at y 18.38). Column top
+# to bottom: DEN, IO2, IO5, in the order the runs arrive from the pocket, so no In2 run crosses another. In2 runs keep
+# out of the U12 thermal-via field (box x 49.4-52.6, y 8.4-15.2). East of the column on B: DEN north along x 56.36
+# (0.25 mm off the D201-A via, 1.26 mm off the spine) and east between the U12-IS vias at y 12.1 to its In2 drop at
+# (59.40, 10.60); IO2 and IO5 east under the U12-IS via (57.70, 16.50) at y 17.15 / 17.60 and north at x 58.33 / 58.78
+# to F vias at (60.20, 12.80) / (60.20, 14.00); the F legs to U1.6 / U1.9 are maze_route.py legs.
+# DEN: pocket via (42.20, 8.90) -> In2 north-east of the IO2 via -> column top
+T('/DEN', 'In2.Cu', (42.20, 8.90), (42.90, 8.20), (45.00, 8.20), (48.60, 11.80), (48.60, 15.10), (49.20, 15.70), (56.45, 15.70))
+V('/DEN', 56.45, 15.70)
+T('/DEN', 'B.Cu', (56.45, 15.70), (56.36, 15.61), (56.36, 12.50), (56.76, 12.10), (57.90, 12.10), (58.70, 11.30), (59.40, 10.60))
+# R302.1 (/DEN, ch3): north gap -> via (57.45, 25.95) between R302.2, the U13-IS loop (0.24 mm) and R303.2 -> B north,
+# east of the moved C301.2 GND via, then x 56.36 (0.27 mm off the GND vias at x 57.03, 1.26 mm off the spine) into
+# the DEN column via (56.45, 15.70).
+T('/DEN', 'F.Cu', (55.69, 26.60), (55.69, 25.95), (57.45, 25.95))
+V('/DEN', 57.45, 25.95)
+T('/DEN', 'B.Cu', (57.45, 25.95), (57.45, 24.60), (56.36, 23.51), (56.36, 16.00), (56.45, 15.70))
+
+# ---- T-0276 maze pass 1 (geometry exported from the T-0276 DEN build), /SW4 legs only: R41.1 cluster -> the SW4 copper
+# by J6 on B (y 72.7-73.3) and a short F join at (66.3, 38.9). The pass's +3V3 legs (B under U1, y 5.4-20) were not
+# kept: they split GND-B 19 -> 24 islands; the /IO7 and /NTC legs gained nothing; the other /SW4 legs were pruned.
+T('/SW4', 'F.Cu', (66.50, 39.20), (66.40, 39.20), (66.20, 39.00), (66.30, 38.90))
+T('/SW4', 'B.Cu', (64.70, 73.30), (63.90, 73.30), (63.30, 72.70), (58.40, 72.70), (58.30, 72.80), (58.20, 72.80), (58.10, 72.90), (58.00, 72.90), (57.90, 73.00), (57.70, 73.00))
+V('/SW4', 57.70, 73.00)

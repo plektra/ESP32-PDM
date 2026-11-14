@@ -102,9 +102,16 @@ def move_parts(b, tracks):
     for lay, a, e in getattr(fixed_routes, 'DROP_GND', ()):
         pa, pe = P(b, *a), P(b, *e)
         segs.add((b.GetLayerID(lay), *sorted([(pa.x, pa.y), (pe.x, pe.y)])))
+    # T-0276: GND vias moved in fixed_routes.py (old position listed in DROP_GND_VIAS, mm): the locked board via goes
+    vdrop = set()
+    for x, y in getattr(fixed_routes, 'DROP_GND_VIAS', ()):
+        p = P(b, x, y); vdrop.add((p.x, p.y))
     gone = []   # tracks to remove (prep removes them in its one pass over the board's tracks: a second
     for t in tracks:  # GetTracks() after b.Remove() breaks KiCad's SWIG layer)
         if t.GetNetname() in drop:
+            gone.append(t)
+        elif t.GetNetname() == 'GND' and t.GetClass() == 'PCB_VIA' and \
+                any(abs(t.GetPosition().x - vx) < 2000 and abs(t.GetPosition().y - vy) < 2000 for vx, vy in vdrop):
             gone.append(t)
         elif t.GetNetname() == 'GND' and t.GetClass() != 'PCB_VIA' and \
                 (t.GetLayer(), *sorted([(t.GetStart().x, t.GetStart().y), (t.GetEnd().x, t.GetEnd().y)])) in segs:
@@ -146,6 +153,24 @@ def add_fixed(b):
     return n
 
 
+def notch_vs_in2(b):
+    """T-0276 (Q-0075): cut fixed_routes.VS_IN2_NOTCH (x0, y0, x1, y1 mm) out of the VS-In2 zone outline, the marked
+    exit at its east edge. Idempotent: an outline already clear of the notch is left as it is."""
+    z = [z for z in b.Zones() if z.GetZoneName() == 'VS-In2' and not z.GetIsRuleArea()][0]
+    x0, y0, x1, y1 = fixed_routes.VS_IN2_NOTCH
+    a, e = P(b, x0, y0), P(b, x1, y1)
+    cut = rect_poly(a.x, a.y, e.x, e.y)
+    ol = pcbnew.SHAPE_POLY_SET(z.Outline())
+    probe = pcbnew.SHAPE_POLY_SET(ol); probe.BooleanIntersection(cut)
+    if probe.Area() < M(0.01) * M(0.01):
+        return 'already cut'
+    ol.BooleanSubtract(cut)
+    assert ol.OutlineCount() == 1, 'notch would split the VS-In2 outline'
+    ol.thisown = 0
+    z.SetOutline(ol)
+    return 'cut %.2f mm2' % (probe.Area() / 1e12)
+
+
 def rect_poly(x1, y1, x2, y2):
     ps = pcbnew.SHAPE_POLY_SET(); ps.NewOutline()
     for x, y in ((x1, y1), (x2, y1), (x2, y2), (x1, y2)):
@@ -177,6 +202,7 @@ def prep(board, work):
             z.SetLocked(True)
     moved, gone = move_parts(b, tracks)
     gone = {id(t) for t in gone}
+    print('prep: VS-In2 exit notch', notch_vs_in2(b), flush=True)
     removed = 0
     for t in tracks:
         if not t.IsLocked() or id(t) in gone:
@@ -247,6 +273,12 @@ def prep(board, work):
             inner.Deflate(M(fixed_routes.CORRIDOR_BAND_MM), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.01))
             band = pcbnew.SHAPE_POLY_SET(z.Outline())
             band.BooleanSubtract(inner)
+            # T-0276 (Q-0075): the one marked exit window is cut out of the band (east edge, y 6.45-20). This router
+            # copy is not used by the Q-0072 build (no Freerouting); the per-net limit (EXIT_NETS only) is enforced
+            # where routes are made, in maze_route.py
+            x0, y0, x1, y1 = fixed_routes.EXIT_WINDOW_MM
+            a, e = P(b, x0, y0), P(b, x1, y1)
+            band.BooleanSubtract(rect_poly(a.x, a.y, e.x, e.y))
             ko.Append(band)
             ko.Simplify()
         ol.thisown = 0

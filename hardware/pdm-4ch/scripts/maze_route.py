@@ -7,7 +7,7 @@ VS-In2 thermal fields and the 0.5 mm edge rule. In2 inside VS-In2 (the Q-0071 co
 fixed_routes.py lines (T/V) at each net's class width (geo['width'], T-0251: +3V3 0.3 mm), keep-outs sized for it;
 legs start and end at least one grid cell inside their copper (T-0250)."""
 import heapq, json, math, sys
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 G = 0.1
 L = ['F.Cu', 'In2.Cu', 'B.Cu']
@@ -17,6 +17,9 @@ WIDTH = geo.get('width', {})   # net -> class width mm (T-0251); geom_export inf
 VIA_COST = 25.0
 CORRIDOR_COST = 3.0
 CORRIDOR_BAND = 1.5
+# the one marked exit (Q-0075, T-0276): same values as fixed_routes.EXIT_WINDOW_MM / EXIT_NETS
+EXIT_WINDOW = (55.0, 6.45, 57.0, 20.0)
+EXIT_NETS = ('/SW_IN1', '/SW_IN4', '/IO2', '/IO5', '/DEN')
 IN2_COST = 1.3
 EDGE = 0.5 + 0.1 + 0.06
 EDGE_V = 0.5 + 0.3 + 0.06
@@ -65,6 +68,7 @@ def masks(net):
             for l in L:
                 draw_polys(td[l], it['hole'])
             draw_polys(vd, it['hole'])
+    band = blank()
     for z in geo['zones']:
         if z['kind'] == 'corridor':
             if z['net'] != net:
@@ -72,7 +76,7 @@ def masks(net):
                 # In2 slots only >= CORRIDOR_BAND inside the outline: a track never reaches the pour edge, so the
                 # pour cannot be split (every corridor run is an internal slot with a via at each end)
                 for pl in z['poly']:
-                    td['In2.Cu'].line([px(p) for p in pl] + [px(pl[0])], fill=1, width=int(2 * CORRIDOR_BAND / G))
+                    ImageDraw.Draw(band).line([px(p) for p in pl] + [px(pl[0])], fill=1, width=int(2 * CORRIDOR_BAND / G))
             continue
         if z['net'] == net and net:
             continue
@@ -84,6 +88,12 @@ def masks(net):
                     td[l].line([px(p) for p in pl] + [px(pl[0])], fill=1, width=w)
         if z['kind'] != 'pour' or z['layers'] != ['In2.Cu'] or True:
             draw_polys(vd, z['poly'], outline_w=5)
+        if z['kind'] == 'pour':
+            # T-0276: a via is on every layer; its centre stays a zone clearance + via radius + margin outside a
+            # foreign power-pour outline, so it never pulls that fill back (the outline-only ring was 0.25 mm)
+            for pl in z['poly']:
+                vd.line([px(p) for p in pl] + [px(pl[0])], fill=1,
+                        width=int(math.ceil(2 * (z.get('zc', 0) + 0.3 + 0.06) / G)))
     for (n, kind, l, pts, wf) in added:
         if n == net:
             continue
@@ -102,6 +112,12 @@ def masks(net):
                 td[l2].ellipse([x - r, y - r, x + r, y + r], fill=1)
             r = 0.86 / G
             vd.ellipse([x - r, y - r, x + r, y + r], fill=1)
+    # T-0276 (Q-0075): the one marked exit. Inside EXIT_WINDOW the band does not block the EXIT_NETS (west-pocket runs
+    # across the VS-In2 east edge into the via column at x 56.3-57); everywhere else and for every other net it stays.
+    if net in EXIT_NETS:
+        x0, y0, x1, y1 = EXIT_WINDOW
+        ImageDraw.Draw(band).rectangle([x0 / G, y0 / G, x1 / G, y1 / G], fill=0)
+    tm['In2.Cu'] = ImageChops.logical_or(tm['In2.Cu'], band)
     for l in L:
         edge_mask(tm[l], EDGE)
     edge_mask(vm, EDGE_V)
