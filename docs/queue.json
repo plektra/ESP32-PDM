@@ -1,7 +1,7 @@
 {
   "next": {
     "T": 285,
-    "Q": 77
+    "Q": 78
   },
   "tasks": [
     {
@@ -7078,15 +7078,14 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "parked",
-      "question": "Q-0076",
+      "state": "blocked-owner",
+      "question": "Q-0077",
       "why_big": [
-        "7 work packages (last T-0276) returned it neither done nor blocked; check whether it is already done or say how to proceed"
+        "8 work packages (last T-0281) returned it neither done nor blocked; check whether it is already done or say how to proceed"
       ],
       "ruling": "Both, stitched (T-0276 open points). (1) Agents may reroute any signal copper without asking: IO4/NTC/VBAT_SENSE by U1, the J6 In2 service bundle and other signal links. This is a two-way door from now on. (2) Where a signal route still splits a GND pour on F.Cu or B.Cu (IO2, IO5, +3V3 under U1), the new GND fragment is allowed if at least 2 vias tie it to the GND-In1 plane. Unstitched slivers are removed, so no floating copper. GND-In1 itself stays one piece. (3) D12-D15 may move a few mm if rerouting the J6 bundle is not enough. Power copper stays as ruled (decision 172, Q-0075 notch only), the heat budget is rechecked, and connectors, the outline and the schematic stay unchanged. Then keep going on T-0218 as ruled in Q-0073. Return only when a stage gains nothing or needs another one-way door.",
       "answered": "2026-11-14",
-      "unfinished": 7,
-      "package": "T-0281"
+      "unfinished": 8
     },
     {
       "id": "T-0219",
@@ -8572,7 +8571,7 @@
       "id": "T-0281",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-14",
       "title": "pdm-4ch: stitched GND-F/B fragments, free signal rerouting, D12-D15 nudge; continue routing to fewer unconnected",
       "brief": "T-0218 (MAJOR). Owner ruling Q-0076, verbatim: \"Both, stitched (T-0276 open points). (1) Agents may reroute any signal copper without asking: IO4/NTC/VBAT_SENSE by U1, the J6 In2 service bundle and other signal links. This is a two-way door from now on. (2) Where a signal route still splits a GND pour on F.Cu or B.Cu (IO2, IO5, +3V3 under U1), the new GND fragment is allowed if at least 2 vias tie it to the GND-In1 plane. Unstitched slivers are removed, so no floating copper. GND-In1 itself stays one piece. (3) D12-D15 may move a few mm if rerouting the J6 bundle is not enough. Power copper stays as ruled (decision 172, Q-0075 notch only), the heat budget is rechecked, and connectors, the outline and the schematic stay unchanged. Then keep going on T-0218 as ruled in Q-0073. Return only when a stage gains nothing or needs another one-way door.\"\n\nBACKGROUND: read docs/reviews/2026-11-14-fix-pdm-4ch-T-0276.md (open points) and design-notes 8.20-8.22. Start state after T-0276: 0 DRC errors, parity 0, 42 unconnected, only the /IO13 via_dangling; pours GND-F 37, GND-B 19, GND-In2 18, GND-In1 1 island; VS-In2 1 island, 1133.4 mm2, 40/40 thermal vias, notch x 55.6-56.5 / y 14.9-16.5 (VS_IN2_NOTCH); EXIT_WINDOW x 55.0-57.0 / y 6.45-20 for SW_IN1/SW_IN4/IO2/IO5/DEN; Tj 101 C at 40 C, 4 x 4 A. Decisions in force: 163 (board = build output; fixes go into the scripts, not hand edits), 166/172/176/178/181 (pour and corridor rules, amended for GND-F/B fragments by this ruling), 173 (J6 bundle route, now reroutable), 189/199 (Q-0073/Q-0075), 200-205 (T-0276 results). No part fact or schematic check is needed: this is layout only.\n\nSTEPS:\n1. Confirm the start state: python3 tools/kpcb.py pdm-4ch drc and the pour check; heat budget python3 tools/heat_budget.py --ambient 40 --currents 4,4,4,4.\n2. Change the build gate (routing_build.py / pour-integrity check), and only for GND-F and GND-B: a new GND island is accepted when at least 2 vias tie it to GND-In1 (count real GND vias inside the fragment). Every unstitched GND sliver is removed by the build (no floating copper, no dangling via). GND-In1 stays exactly 1 island; GND-In2 and every power pour keep the existing gates (island count, >= 95 % area, VS-In2 >= 1012.1 mm2 with 40/40 thermal vias). Record the new gate as an auto decision quoting Q-0076.\n3. Re-run the T-0276 routes that were dropped only for the island gate: IO2 and IO5 through the exit column, and the +3V3 B runs under U1. Keep them when each new GND fragment is stitched by >= 2 vias to In1 (add stitching vias where needed, outside power outlines and the x 46.15 strip).\n4. Signal copper by U1 (IO4, NTC, VBAT_SENSE and other signal links) may be rerouted (two-way now) where that keeps a GND link open or frees a via spot; prefer that over making new fragments when it costs nothing.\n5. SW_IN1-4 to D12.3-D15.3: first reroute the J6 In2 service bundle (fixed_routes.py, decision 173 route) to free via spots by the diode pads. Only if that is not enough, move D12-D15 by a few mm (same side, no rotation that changes the connector edge); record the move.\n6. Then continue on the remaining nets as ruled in Q-0073 (maze passes, one build per pass with hardware/pdm-4ch/scripts/build_routing.sh, KiCad closed).\n7. GATES for every kept build: 0 DRC errors; parity 0; unconnected below the previous kept build (42 at start), else the stage gains nothing; no new dangling copper; GND-F/GND-B fragments only as allowed in step 2; GND-In1 1 island; VS-In2 1 island, >= 1012.1 mm2, 40/40 thermal vias; other pours unchanged island count and >= 95 %; no via in VS-B-front/rear or the x 46.15 strip; In2 runs >= 0.9 mm off GND THT pads (decision 181).\n8. Heat budget at 40 C at the end (decision 9) and report Tj; python3 tools/fix_check.py --role pcb-fixer --scope pdm-4ch.\n9. Update hardware/pdm-4ch/STATUS.md (gate change, fragments with their via count, moved parts, per-net unconnected), add design-notes 8.23, record auto decisions. Safety: no 16 A or surge path changed; a competent person reviews the board before installation.\n\nONE-WAY DOORS (stop and ask, do not do):\n- any power copper change beyond decision 172 and the Q-0075 notch (VS/VBAT/OUT outlines, VS-B spine, F/B power copper, 16 A or surge paths), vias in the x 46.15 strip;\n- a GND-In1 split, or a GND-F/B fragment with fewer than 2 vias to In1 kept on the board;\n- moving D12-D15 more than a few mm, or moving any other part outside the decision 189 list;\n- a schematic, connector, outline or hole change, or a bottom-side SMT part;\n- loosening a DRC rule, clearance or net-class width;\n- the heat budget failing at 40 C.\nWhen a stage gains nothing, return with the per-net unconnected list and name the next one-way door.",
@@ -8581,23 +8580,29 @@
       ],
       "plan": "T-0280",
       "depends_on": [],
-      "started": "2026-11-14T09:52:44",
+      "started": "2026-11-14T13:12:00",
       "ran_model": "opus",
       "session": "b9a90ceb-b0cd-4b74-ade8-795dcbe5dca4",
-      "cost_usd": 2.7717,
-      "attempts": 1,
-      "resume": {
-        "session": "b9a90ceb-b0cd-4b74-ade8-795dcbe5dca4",
-        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0281",
-        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0281-ih5falbo",
-        "report": "docs/reviews/2026-11-14-fix-pdm-4ch-T-0281.md",
-        "head": "f5ac029e9be2b931dc345ef150fb46f3fa95bcee",
-        "reason": "a usage limit"
-      },
+      "cost_usd": 9.6337,
+      "attempts": 2,
       "finished": "2026-11-14",
-      "note": "no report written (api_error): You've hit your 5-hour limit · resets 1:10pm (Europe/Helsinki)",
-      "summary": "paused, API unavailable, resumes where it stopped",
-      "interrupted": null
+      "note": null,
+      "summary": "0 fixed, 0 blocked, merged 6d1d90eb; no part changes",
+      "interrupted": null,
+      "refs": [],
+      "growth": {
+        "pdm-4ch": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        },
+        "pdm-hc2": {
+          "parts": 0,
+          "dnp": 0,
+          "unique": 0
+        }
+      },
+      "report": "docs/reviews/2026-11-14-fix-pdm-4ch-T-0281.md"
     },
     {
       "id": "T-0282",
