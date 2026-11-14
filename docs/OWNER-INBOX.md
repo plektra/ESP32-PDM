@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
 - **Why it needs you:** 6 work packages (last T-0271) returned it neither done nor blocked; check whether it is already done or say how to proceed
 
-**Answer:** 
+**Answer:** Option (a) of T-0271 / design-notes 8.21: one marked exit at y 5-20 where the west-pocket In2 runs (SW_IN1/SW_IN4, IO2, IO5, DEN R102.1/R402.1) may cross the VS-In2 east edge into a via column at x 56.3-57. Notch VS-In2 there only as much as the runs need. VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9). The east-edge trim from Q-0074 is dropped (not needed). The VS-B spine and every other power outline stay unchanged; no spine notch, no vias in the x 46.15 strip. Then keep going on T-0218 as ruled in Q-0073. Return only when a stage gains nothing or needs another one-way door.
 
 ---
 
