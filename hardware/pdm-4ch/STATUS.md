@@ -9,7 +9,10 @@ export-only rule areas for no tracks on In1 and no tracks/vias under the antenna
 0 DRC errors, parity 0, 37 unconnected. Quilter keeps parts inside the outline and pre-routed copper. It keeps pours
 only when they are ticked, so the power pours and the In1 planes are ticked and the outer and In2 GND pours are left
 to it. The stackup comes from the file, so the In2 routes survive. Next: upload, then an import step that takes only
-the candidate's new tracks/vias into `fixed_routes.py` and runs the normal build gates. The repo board is unchanged.
+the candidate's new tracks/vias into `fixed_routes.py` and runs the normal build gates. The repo board is unchanged. After reading Quilter's physics-constraints docs (no isolation or creepage rule),
+the export also carries the build's router keep-outs on all layers (antenna, CAN barrier band, JP30, JP1, edge
+strip, with holes round the fixed copper already inside them) and preserves the GND_CAN pours, so the CAN side is
+sealed. `UPLOAD.md` says which Circuit Comprehension constraints to remove. Export DRC: 0 errors, parity 0, 37 open.
 
 **2026-11-14 (T-0281: T-0218 per Q-0076/Q-0073 – unattended):** the build gate now follows Q-0076.
 `routing_build.py` (`gnd_fragments`, `ref_check`) compares each build with the board as it was before the build.
