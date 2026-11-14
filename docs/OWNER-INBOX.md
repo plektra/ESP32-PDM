@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
 - **Why it needs you:** 7 work packages (last T-0276) returned it neither done nor blocked; check whether it is already done or say how to proceed
 
-**Answer:** 
+**Answer:** Both, stitched (T-0276 open points). (1) Agents may reroute any signal copper without asking: IO4/NTC/VBAT_SENSE by U1, the J6 In2 service bundle and other signal links. This is a two-way door from now on. (2) Where a signal route still splits a GND pour on F.Cu or B.Cu (IO2, IO5, +3V3 under U1), the new GND fragment is allowed if at least 2 vias tie it to the GND-In1 plane. Unstitched slivers are removed, so no floating copper. GND-In1 itself stays one piece. (3) D12-D15 may move a few mm if rerouting the J6 bundle is not enough. Power copper stays as ruled (decision 172, Q-0075 notch only), the heat budget is rechecked, and connectors, the outline and the schematic stay unchanged. Then keep going on T-0218 as ruled in Q-0073. Return only when a stage gains nothing or needs another one-way door.
 
 ---
 
