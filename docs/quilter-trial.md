@@ -9,8 +9,16 @@ Quilter copper into the board amends 163/181 and needs the owner's ruling.
 - **Done:** `hardware/pdm-4ch/scripts/quilter_export.py` writes a locked upload copy plus `UPLOAD.md` (step-by-step
   upload settings, preserved pours, net widths, the 37 open items). Last export: `~/Downloads/pdm-4ch-quilter-upload`,
   DRC 0 errors, parity 0, 37 unconnected. Repo board unchanged (0 errors, 37 unconnected).
-- **Not done:** the owner has not uploaded yet. No candidate exists. The import step (`quilter_import.py`) is not
-  written.
+- **Uploaded and submitted 2026-11-14 22:08** (Quilter UI/API 1.51, project "pdm-4ch trial", job
+  `6af8bcc35e1a5ebf382790ec`, Full layout): the seven files from the 21:30 export (unchanged since; copied to a
+  scratch folder only because the browser upload cannot read `~/Downloads`). KiCad 10 parsed. Settings as in
+  `UPLOAD.md`: stackup from the file with "Preserve copper on internal layers" on; minimums 0.15/0.2/0.5/0.3 mm,
+  margin 0.5 mm read from the file; USB diff pair, 72 bypass entries removed (no crystals/converters detected);
+  power pour off on all 5 power nets; GND primary; 20 preserved pours; 12 net-width rows (4 nets x F/In2/B).
+  Review page: 226 parts, 0 to place, 237 pins to route. Preview showed the keep-outs (antenna, holes, CAN barrier
+  L-band, edge band, pour keep-outs). `UPLOAD.md` text in `quilter_export.py` updated for the 1.51 wizard (internal
+  copper toggle, Floorplan "Optimize", per-layer net widths, pre-filled pour list).
+- **Not done:** no candidate yet (Quilter emails when ready). The import step (`quilter_import.py`) is not written.
 - Commits: 9ceed23 (export, decision 213), 0447e22 (CAN barrier, physics constraints), faf4efc (pour keep-outs,
   minimums, net widths; `routing_build.pour_keepout()` extracted from `prep`, output verified identical).
 
@@ -88,7 +96,8 @@ status", "link to view/vote on cad tool support") and no page lists supported Ki
 
 1. Done: open points asked (see above); `UPLOAD.md` updated, upload folder regenerated (37 unconnected, DRC errors
    only the 37 unconnected, same warnings as the repo board plus the 9 `lib_footprint_issues`).
-2. Owner uploads per `UPLOAD.md` and downloads the best candidates (fewest unrouted) into one folder.
+2. Done: uploaded and submitted (job `6af8bcc35e1a5ebf382790ec`). Next: when Quilter's email arrives, download the
+   best candidates (fewest unrouted) as KiCad files into one folder.
 3. Write `hardware/pdm-4ch/scripts/quilter_import.py`: load candidate and export copy, take only new tracks/vias
    (geometric diff against the locked copper by net, layer and endpoints, ignoring width; ignore Quilter pours
    and its stackup edits), reject tracks narrower
