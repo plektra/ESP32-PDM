@@ -1,6 +1,25 @@
 # pdm-4ch status
 
-Updated: 2026-11-13 (T-0266 ch4 DEN via off pad R402.1: 46 unconnected)
+Updated: 2026-11-14 (T-0271 VS-In2 trim checked, not applied; ch2 DEN to U1.28: 45 unconnected)
+
+**2026-11-14 (T-0271: T-0218 per Q-0074/Q-0073 – unattended):** the VS-In2 east-edge trim was **not** made. The
+1.5 mm corridor band straddles the VS-In2 outline, so an In2 run can never cross a trimmed edge, and any via ≥ 1.5 mm
+inside the pour is in the B spine (x ≤ 55.0 vs ≥ 56.3 needed). The trim alone gains nothing, and the build gate
+would reject it (design-notes 8.21 gives the geometry and the three one-way options). **VS-In2 unchanged: 1 island,
+1156.4 mm², 40/40 thermal vias; Tj 101 °C.** Two-way steps done in `scripts/fixed_routes.py`:
+- the U12-DEN link now runs through the middle gap, so R202.1 (/DEN) leaves north and reaches U1.28 over In2 under U1;
+- U1.28 leaves north on F to a via at (72.50, 17.50), and the Q3-B track stays;
+- the U13-IN link moved to the middle gap, so R301.1 (/SW_IN3) is open but not yet routed;
+- R302.1 stays boxed (the C301.2 GND via fills its gap), and R201.1 likewise (only one pad per channel can be freed).
+
+Board = build output. Results: 0 DRC errors, 407 warnings, parity 0, **45 unconnected** (was 46), only the /IO13
+via_dangling, every pour at its baseline island count. A full maze pass over all 31 open nets gained nothing.
+Unconnected per net: +3V3 5, GND 3, DEN 2, IO6/IO11/IO17 2 each, SW1/SW4 2 each, F2-Pad1 2, Q4-B 2, and 1 each for
+SW_IN1–4, SWIN2–4, SW1_IO/SW2_IO/SW4_IO, IO0/IO2/IO5/IO7/IO18, EN, NTC, VBAT_SENSE, D3-A, Q4-E, Q5-E.
+Open: the pocket exit (SW_IN1/4, IO2, IO5, pocket DEN) still needs a one-way ruling. The options are an In2 exit
+across the VS-In2 east edge inside the band, a spine notch, or signal vias in the x 46.15 strip. Then come
+SW_IN3 R301.1 → D14.3, R201.1/R302.1, the U1 strip and the analog block. Details:
+`docs/reviews/2026-11-13-fix-pdm-4ch-T-0271.md`.
 
 **2026-11-13 (T-0266: T-0264 – unattended):** the ch4 DEN via that sat on pad R402.1 (37.60/24.30) now sits at
 (38.60, 25.42), 0.60 mm from the pad, with a 45° F.Cu link to R402.1. The B.Cu stub from (37.30, 21.50) ends there.

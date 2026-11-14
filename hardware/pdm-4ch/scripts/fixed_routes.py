@@ -467,10 +467,10 @@ T('/Analog interface/SWIN1', 'In2.Cu', (68.262300, 46.100000), (63.642100, 50.72
 T('/Analog interface/SWIN1', 'In2.Cu', (93.300000, 46.100000), (68.262300, 46.100000), w=0.200)
 T('Net-(U13-GND)', 'F.Cu', (55.690000, 29.400000), (53.930000, 29.400000), w=0.200)
 T('Net-(U13-GND)', 'F.Cu', (53.930000, 29.400000), (53.600000, 29.070000), w=0.200)
-T('Net-(U13-IN)', 'F.Cu', (55.067000, 28.651100), (54.215900, 27.800000), w=0.200)
-T('Net-(U13-IN)', 'F.Cu', (56.058900, 28.651100), (55.067000, 28.651100), w=0.200)
-T('Net-(U13-IN)', 'F.Cu', (56.710000, 28.000000), (56.058900, 28.651100), w=0.200)
-T('Net-(U13-IN)', 'F.Cu', (54.215900, 27.800000), (53.600000, 27.800000), w=0.200)
+# T-0271 (Q-0073 step): U13.4 -> R301.2 through the middle gap (y 27.3) between R302 and R301, into R301.2 from
+# above; the south gap (y 28.7) is then free for R301.1 (/SW_IN3). The ch3 north gap holds the C301.2 GND via, so
+# ch3 frees SW_IN3, not DEN.
+T('Net-(U13-IN)', 'F.Cu', (53.60, 27.80), (54.30, 27.80), (54.80, 27.30), (56.71, 27.30), (56.71, 28.00))
 T('Net-(U13-DEN)', 'F.Cu', (56.710000, 26.600000), (56.074400, 25.964400), w=0.200)
 T('Net-(U13-DEN)', 'F.Cu', (56.074400, 25.964400), (54.165600, 25.964400), w=0.200)
 T('Net-(U13-DEN)', 'F.Cu', (54.165600, 25.964400), (53.600000, 26.530000), w=0.200)
@@ -815,9 +815,9 @@ T('Net-(U12-IN)', 'F.Cu', (54.215900, 11.800000), (53.600000, 11.800000), w=0.20
 T('Net-(U12-IN)', 'F.Cu', (56.710000, 12.000000), (56.010800, 12.699200), w=0.200)
 T('Net-(U12-IN)', 'F.Cu', (56.010800, 12.699200), (55.115100, 12.699200), w=0.200)
 T('Net-(U12-IN)', 'F.Cu', (55.115100, 12.699200), (54.215900, 11.800000), w=0.200)
-T('Net-(U12-DEN)', 'F.Cu', (54.176500, 9.953500), (53.600000, 10.530000), w=0.200)
-T('Net-(U12-DEN)', 'F.Cu', (56.063500, 9.953500), (54.176500, 9.953500), w=0.200)
-T('Net-(U12-DEN)', 'F.Cu', (56.710000, 10.600000), (56.063500, 9.953500), w=0.200)
+# T-0271 (Q-0073 step): U12.5 -> R202.2 through the middle gap (y 11.3) between R202 and R201, into R202.2 from below;
+# the north gap (y 9.9) is then free for R202.1 (/DEN) to leave toward U1 (was the wrap above R202).
+T('Net-(U12-DEN)', 'F.Cu', (53.60, 10.53), (54.20, 10.53), (54.97, 11.30), (56.71, 11.30), (56.71, 10.60))
 T('Net-(U12-IS)', 'F.Cu', (55.720000, 8.790000), (56.710000, 7.800000), w=0.200)
 T('Net-(U12-IS)', 'F.Cu', (55.720000, 9.200000), (53.660000, 9.200000), w=0.200)
 T('Net-(U12-IS)', 'F.Cu', (53.660000, 9.200000), (53.600000, 9.260000), w=0.200)
@@ -1318,7 +1318,7 @@ T('+3V3', 'F.Cu', (10.30, 59.40), (10.30, 59.30), (10.20, 59.20), w=0.30)
 PLACE = {'R101': (37.2, 9.2, 180), 'R102': (37.2, 7.93, 180), 'R103': (40.3, 8.7, 270), 'R107': (42.9, 8.7, 270),
          'R401': (37.2, 25.8, 180), 'R402': (37.2, 24.53, 180), 'R403': (40.3, 25.3, 270), 'R407': (42.9, 25.3, 270)}
 DROP_NETS = {'Net-(U11-IN)', 'Net-(U11-DEN)', 'Net-(U11-IS)', 'Net-(U14-IN)', 'Net-(U14-DEN)', 'Net-(U14-IS)',
-             '/DEN'}   # T-0266: all /DEN copper is in this file (T-0259 maze pass 2 block)
+             '/DEN', 'Net-(U12-DEN)', 'Net-(U13-IN)'}   # T-0271: U12 DEN and U13 IN links rerouted; T-0266: all /DEN copper is in this file (T-0259 maze pass 2 block)
 DROP_GND = [  # (layer, (x1, y1), (x2, y2)) of the removed GND segments
     ('F.Cu', (40.300000, 23.837500), (38.317500, 23.837500)),
     ('F.Cu', (40.300000, 7.237500), (42.900000, 7.237500)),
@@ -1351,3 +1351,21 @@ V('/DEN', 37.30, 21.50)
 T('/DEN', 'B.Cu', (37.30, 21.50), (37.30, 24.12), (38.60, 25.42))
 V('/DEN', 38.60, 25.42)
 T('/DEN', 'F.Cu', (38.60, 25.42), (37.71, 24.53))   # via -> R402.1
+
+# ---- T-0271 (T-0218, Q-0073 two-way step): escape from R202.1 (/DEN) through the gap that the
+# rerouted U12-DEN and U13-IN links left free (the 0.77 mm gap is below the maze grid's resolution, so these stubs are drawn
+# by hand; clearances >= 0.25 mm checked against C201/C301, R202/R302, R203.2 and the U13-IS loop).
+T('/DEN', 'F.Cu', (55.69, 10.60), (55.69, 9.90), (57.10, 9.90), (57.50, 10.30), (58.90, 10.30))   # R202.1 -> east
+# R301.1 (/SW_IN3) is open through the south gap now, but no route to D14.3 was found (maze pass 1); its stub stays
+# out of this file until one is, so no dangling copper is built.
+# U1.28 (/DEN) is boxed on F by its row neighbours and the Q3-B track under the bottom row (y 20.35); it leaves north,
+# past the IO35 fan-out via, to a via under the module (In2 IO40 0.23 mm, B Q3-C 0.24 mm), so Q3-B stays as it is.
+T('/DEN', 'F.Cu', (73.50, 19.30), (73.50, 19.00), (72.90, 18.40), (72.50, 18.00), (72.50, 17.50))
+V('/DEN', 72.50, 17.50)
+# T-0271 maze pass 1 (maze_route.py on the build base with the stubs above): R202.1 stub -> U1.28 stub, In2 under U1
+# (GND-In2 side, outside VS-In2; In1 stays the solid reference).
+# The In2 drop sits at (59.40, 10.60), right after the stub: with the maze's F leg on to (60.90, 10.50) the GND-F
+# fill around C201.2/R203.2 lost its link past the U1 pad column (GND-F 37 -> 38 islands).
+T('/DEN', 'F.Cu', (58.90, 10.30), (59.40, 10.60))
+V('/DEN', 59.40, 10.60)
+T('/DEN', 'In2.Cu', (59.40, 10.60), (59.50, 10.50), (64.90, 10.50), (65.70, 11.30), (65.80, 11.30), (65.90, 11.40), (66.30, 11.40), (72.30, 17.40))
