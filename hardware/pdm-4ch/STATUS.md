@@ -2,7 +2,7 @@
 
 Updated: 2026-11-14 (Quilter trial export; T-0281 stitched GND-F/B fragments, IO2/IO5 through the exit, +3V3 under U1: 37 unconnected)
 
-**2026-11-14 (Quilter trial – owner):** the owner is trying Quilter's free tier on the 37 open connections
+**2026-11-14 (Quilter trial – owner; handoff `docs/quilter-trial.md`):** the owner is trying Quilter's free tier on the 37 open connections
 (decision 213). `scripts/quilter_export.py <out_dir>` (KiCad Python) writes a locked copy of the board plus
 `UPLOAD.md`: all parts, tracks, vias and zones locked; dangling signal copper pruned (none); In1 named GND;
 export-only rule areas for no tracks on In1 and no tracks/vias under the antenna on In1/In2. The export copy has
