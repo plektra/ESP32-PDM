@@ -7078,12 +7078,12 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "blocked-owner",
+      "state": "parked",
       "question": "Q-0077",
       "why_big": [
         "8 work packages (last T-0281) returned it neither done nor blocked; check whether it is already done or say how to proceed"
       ],
-      "ruling": "Both, stitched (T-0276 open points). (1) Agents may reroute any signal copper without asking: IO4/NTC/VBAT_SENSE by U1, the J6 In2 service bundle and other signal links. This is a two-way door from now on. (2) Where a signal route still splits a GND pour on F.Cu or B.Cu (IO2, IO5, +3V3 under U1), the new GND fragment is allowed if at least 2 vias tie it to the GND-In1 plane. Unstitched slivers are removed, so no floating copper. GND-In1 itself stays one piece. (3) D12-D15 may move a few mm if rerouting the J6 bundle is not enough. Power copper stays as ruled (decision 172, Q-0075 notch only), the heat budget is rechecked, and connectors, the outline and the schematic stay unchanged. Then keep going on T-0218 as ruled in Q-0073. Return only when a stage gains nothing or needs another one-way door.",
+      "ruling": "Standing rule for the rest of T-0218 (replaces case-by-case questions). Agents may, without asking: (1) move any small signal part (resistors, capacitors, small-signal diodes incl. D12-D15/D102-D402, the Q3-Q6 block, R60 and similar), including the ch2/ch3 blocks R201/R202 and R301/R302, and reroute any signal copper; (2) grow the In2 exit window and its VS-In2 notch as the runs need, if VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9); (3) leave GND fragments on F.Cu, B.Cu and In2 when each is tied to GND-In1 by >= 2 vias (no floating copper; GND-In1 stays one island). Fixed, owner only: connectors, PROFETs U11-U14, U1, Q30/U30/D30/D31, the buck, the 16 A/battery/surge paths, all other power-pour outlines, holes, board outline, schematic. Keep going until 0 unconnected; return only when a stage gains nothing or needs one of the fixed items.",
       "answered": "2026-11-14",
       "unfinished": 8
     },
