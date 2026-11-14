@@ -6,7 +6,18 @@ The next `tools/orchestrate.py run` (or `inbox`) applies the answers. Below the 
 (two-way doors), each with its undo command. This file is regenerated from `docs/queue.json`: only the Answer
 lines are read; other edits are lost.
 
-No open questions.
+## Open (1)
+
+## Q-0075 · MAJOR · pdm-4ch · question
+
+- **From:** `docs/reviews/2026-11-11-fix-pdm-4ch-T-0211.md` T-0211 (PCB layout (T-0211)); task T-0218
+- **Summary:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a 
+- **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
+- **Why it needs you:** 6 work packages (last T-0271) returned it neither done nor blocked; check whether it is already done or say how to proceed
+
+**Answer:** 
+
+---
 
 ## Decided by agents (4) – two-way doors
 
@@ -107,7 +118,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0154 · system · SH-ESP32 uses the same 60 V PTC without a series resistor; removing R54-R56 would save one line, about 2-3 USD per order → until prototype: kept until measured
 - T-0155 · system · SH-ESP32 fits standard 100 x 68 x 50 mm waterproof enclosures; pdm-4ch at about 100 x 65 mm is close, which could replace a printed MVP enclosure → until system-mechanical: needs a heat check
 
-## Answered (62)
+## Answered (61)
 
 - Q-0050 (pdm-hc2): MOSFET gate drive is not slew-limited (about 400-800 V/us estimated, PD direct), so switching clicks reach the VHF receiver and cable emissions rise; PROFET channels switch at 0.8 V/us. → **covered by Q-0049: short EMC-only gate slew within the MOSFET SOA** (done)
 - Q-0002 (system): Battery input has only an SMCJ30CA: no bulk or HF capacitance and no filter, so short-circuit turn-off spikes, switched-current steps and RF go straight onto the cable and the rails. → **yes - bulk capacitor rated >=63 V (not 50 V, TVS clamps up to ~48 V), basic part preferred, plus 1-2.2 uF/100 V ceramic at J10 and 1 uF/100 V at each BTT6050 VS tab; ferrite/CMC as a DNP footprint** (done)
@@ -170,4 +181,3 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - Q-0067 (pdm-4ch): A negative transient clamped by D30 at about -48.4 V while VS is charged puts about 77 V across Q30 (60 V rated, avalanche); design-notes states VDS <= 48.4 V. → **A: fit SMDJ40CA C42371557 (preferred, 0.22 USD) across Q30 (drain VS to source VBAT_FL). Accept VDS 59.4 V worst case and VS down to about -4 V only for the 31 A bounding spike; record this as a residual risk in design-notes 8.6 (C31 briefly reverse-biased) and add a prototype check of Q30 VDS and VS during a negative pulse.** (done)
 - Q-0068 (pdm-4ch): C577772 shows stock 0 (MOQ 18) on 2026-11-07; STATUS says 40, and pdm-hc2 J11 uses the same code → **Keep C577772 + C577752 (no design change). Sockets are hand-soldered (decision 85), so buy them from any seller (LCSC restock, AliExpress Kefa, other distributors); if none can be bought by order time, the order waits. A flange-less socket without the lock (C577767, C7422678) is not acceptable.** (done)
 - Q-0069 (pdm-4ch): May C577772 be bought when it is back in stock, with C577767 as fallback after a footprint check? → **no – see Q-0068: buy C577772 + C577752 from any seller; no C577767 fallback (no lock); the order waits if none can be bought.** (done)
-- Q-0074 (pdm-4ch): 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a  → **Trim the VS-In2 east edge (T-0259 finding): pull it back about 2-3 mm at y 5-20 for one In2 -> B.Cu via column at x 55-57, the exit for SW_IN1/SW_IN4, IO2, IO5 and DEN to U1. The VS-B spine, the other VS outlines and the 16 A path stay unchanged. VS-In2 stays one island, >= 1012.1 mm2 (decision 178), with all 40 thermal vias inside. Recheck the heat budget (decision 9). The corridor stays >= 1.5 mm inside the new edge. Then keep going on T-0218 as ruled in Q-0073: the two-way next steps (ch2/ch3 IN/DEN links, U1.28, the DEN via off R402.1) need no question. Return only when a stage gains nothing or needs another one-way door.** (parked)
