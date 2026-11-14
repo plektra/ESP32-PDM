@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 275,
+    "T": 280,
     "Q": 76
   },
   "tasks": [
@@ -7085,7 +7085,8 @@
       ],
       "ruling": "Option (a) of T-0271 / design-notes 8.21: one marked exit at y 5-20 where the west-pocket In2 runs (SW_IN1/SW_IN4, IO2, IO5, DEN R102.1/R402.1) may cross the VS-In2 east edge into a via column at x 56.3-57. Notch VS-In2 there only as much as the runs need. VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9). The east-edge trim from Q-0074 is dropped (not needed). The VS-B spine and every other power outline stay unchanged; no spine notch, no vias in the x 46.15 strip. Then keep going on T-0218 as ruled in Q-0073. Return only when a stage gains nothing or needs another one-way door.",
       "answered": "2026-11-14",
-      "unfinished": 6
+      "unfinished": 6,
+      "package": "T-0276"
     },
     {
       "id": "T-0219",
@@ -8431,6 +8432,81 @@
       "finished": "2026-11-14",
       "summary": "skipped: no connector, filter or protection part changed (refs: none)",
       "cost_usd": 0.0
+    },
+    {
+      "id": "T-0275",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-14",
+      "depends_on": [],
+      "items": [
+        "T-0218"
+      ],
+      "started": "2026-11-14T08:46:55",
+      "ran_model": "opus",
+      "session": "1bb52eab-416c-48c6-832d-deb2cf5cb8e7",
+      "cost_usd": 0.3759,
+      "attempts": 1,
+      "finished": "2026-11-14",
+      "note": null,
+      "summary": "1 packages, 0 deferred, 1 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-14-plan-system-T-0275.md"
+    },
+    {
+      "id": "T-0276",
+      "role": "pcb-fixer",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-14",
+      "title": "pdm-4ch: marked In2 exit across the VS-In2 east edge (y 5-20) to a via column at x 56.3-57, then continue routing",
+      "brief": "T-0218 (MAJOR). Owner ruling Q-0075, verbatim: \"Option (a) of T-0271 / design-notes 8.21: one marked exit at y 5-20 where the west-pocket In2 runs (SW_IN1/SW_IN4, IO2, IO5, DEN R102.1/R402.1) may cross the VS-In2 east edge into a via column at x 56.3-57. Notch VS-In2 there only as much as the runs need. VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9). The east-edge trim from Q-0074 is dropped (not needed). The VS-B spine and every other power outline stay unchanged; no spine notch, no vias in the x 46.15 strip. Then keep going on T-0218 as ruled in Q-0073. Return only when a stage gains nothing or needs another one-way door.\"\n\nBACKGROUND: read docs/reviews/2026-11-13-fix-pdm-4ch-T-0271.md and design-notes 8.21. VS-In2 is x 26.5-56.5, y 4.95-34.5; its outline lives only in the board file. The B spine is x 45.5/46.5-55.0 at y 5-35 with 1.0 mm zone clearance, so the first through via clear of it is at x >= 56.3. The corridor band (CORRIDOR_BAND 1.5 in maze_route.py, CORRIDOR_BAND_MM 1.5 in fixed_routes.py) is drawn centred on the VS-In2 outline: maze_route.py draws a 3.0 mm line, and routing_build.py builds the outline minus the deflated outline. That is why no In2 run can cross the edge today. Decisions in force: 163 (the board is the build output), 172/176/178/181 (pour and corridor rules), 189 and 194 as amended by this ruling, 195-198 (T-0271 results).\n\nSTEPS:\n1. Confirm the start state with python3 tools/kpcb.py pdm-4ch drc. Expect: 0 errors, 45 unconnected, parity 0 (FL30 DNP warning only), the known /IO13 via_dangling. VS-In2: 1 island, 1156.4 mm2, 40/40 thermal vias. Then run python3 tools/heat_budget.py --ambient 40 --currents 4,4,4,4: Tj 101 C.\n2. Make the marked exit. In maze_route.py and routing_build.py (and the constant in fixed_routes.py), add one named exception, e.g. an EXIT window: the VS-In2 east edge at y 5-20, x up to 57. Inside it, the corridor band does not block the listed pocket nets: SW_IN1, SW_IN4, IO2, IO5, and /DEN from R102.1/R402.1. Every other place keeps the 1.5 mm band unchanged. Do not change CORRIDOR_BAND globally.\n3. Notch the VS-In2 zone outline at the east edge, only inside y 5-20, and only as deep and wide as the actual crossing runs and their clearance need. Make the change at its source (the board file, or prep in routing_build.py if you move it there) so that a rebuild keeps it (decision 163). Do NOT pull back the whole east edge: the Q-0074 trim is dropped. After the notch, check that VS-In2 is 1 island, >= 1012.1 mm2, with all 40 thermal vias inside (thermal_check).\n4. Place the via column at x 56.3-57, y 5-20, outside VS-In2 (in the notch or east of the edge). Each through via must clear the B spine, VS-B-front/rear, OUT2-F/OUT3-F and the other F/B power copper by its class clearance, without moving any of it. Route the pocket nets through it toward U1 with maze_route.py passes as fixed routes in fixed_routes.py. Run one build per pass with hardware/pdm-4ch/scripts/build_routing.sh, with KiCad closed. Keep In2 runs >= 0.9 mm off GND THT pads (decision 181).\n5. Continue with the Q-0073 two-way steps (T-0271 open points): route R301.1 (/SW_IN3) to D14.3; free R302.1 by moving the C301.2 GND via if a spot inside the IS loop interior works; work on the U1 strip and analog block (+3V3, IO6/11/17/18, SW*_IO, EN, IO0, NTC, VBAT_SENSE, Q4/Q5). Only move parts on the decision 189 list.\n6. GATES for every kept build:\n   - 0 DRC errors and parity 0;\n   - unconnected below the previous kept build (45 at start), otherwise the stage gains nothing;\n   - no new dangling copper;\n   - VS-In2: 1 island, >= 1012.1 mm2, 40/40 thermal vias inside;\n   - every other pour keeps its island count and >= 95 % of its baseline (decision 172);\n   - no via in VS-B-front/rear or in the x 46.15 strip;\n   - In2 runs >= 0.9 mm off GND THT pads.\n7. Run python3 tools/heat_budget.py --ambient 40 --currents 4,4,4,4 after the notch and at the end (decision 9). Report Tj; it must not exceed the limit. Then run python3 tools/fix_check.py --role pcb-fixer --scope pdm-4ch.\n8. Update hardware/pdm-4ch/STATUS.md with the notch coordinates, the VS-In2 area, the via column and the per-net unconnected count. Add a design-notes 8.22 entry. Record auto decisions for your own choices. Add safety: no 16 A or surge path changed, and a competent person reviews the board before installation.\n\nONE-WAY DOORS (stop and ask, do not do):\n- a VS-In2 change outside the east edge at y 5-20, a notch deeper or wider than the crossing runs need, or a notch that leaves VS-In2 split, below 1012.1 mm2, or with a thermal via outside it;\n- any change to the VS-B spine (no spine notch), VS-B-front/rear, other VS/OUT/VBAT outlines, F.Cu/B.Cu power copper, or the 16 A or surge paths;\n- vias in the x 46.15 strip;\n- a via column that needs any of those changes to fit, or that does not fit at x 56.3-57;\n- relaxing the corridor band anywhere except the one marked exit;\n- a schematic change, a connector, outline or hole change, or a bottom-side SMT part;\n- moving a part outside the decision 189 move list;\n- loosening a DRC rule, clearance or net-class width;\n- the heat budget failing at 40 C.\nWhen a stage gains nothing, return with the per-net unconnected list and name the next one-way door.",
+      "items": [
+        "T-0218"
+      ],
+      "plan": "T-0275",
+      "depends_on": []
+    },
+    {
+      "id": "T-0277",
+      "role": "validator",
+      "scope": "pdm-4ch",
+      "state": "ready",
+      "created": "2026-11-14",
+      "depends_on": [
+        "T-0276"
+      ],
+      "verify": true,
+      "since": "e85bc36a62735df436d10f5f69634939c589f154"
+    },
+    {
+      "id": "T-0278",
+      "role": "cost-controller",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-14",
+      "depends_on": [
+        "T-0276"
+      ],
+      "verify": true,
+      "since": "e85bc36a62735df436d10f5f69634939c589f154",
+      "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
+      "recheck": "cost"
+    },
+    {
+      "id": "T-0279",
+      "role": "emc-reviewer",
+      "scope": "system",
+      "state": "ready",
+      "created": "2026-11-14",
+      "depends_on": [
+        "T-0276"
+      ],
+      "verify": true,
+      "since": "e85bc36a62735df436d10f5f69634939c589f154",
+      "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
+      "recheck": "emc"
     }
   ],
   "board_size_start": {
