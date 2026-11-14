@@ -239,66 +239,12 @@ def prep(board, work):
             if z.GetLayer() != pcbnew.In1_Cu:
                 b.Remove(z)              # GND pours on F/In2/B are refilled after routing
             continue
-        # power outline = keep-out for foreign nets, minus a small escape around each foreign pad/via/track end
-        lay = z.GetLayer()
-        ol = pcbnew.SHAPE_POLY_SET(z.Outline())
-        cut = pcbnew.SHAPE_POLY_SET()
-        esc = M(fixed_routes.ESCAPE_MM)
-        for fp in b.GetFootprints():
-            for pad in fp.Pads():
-                if pad.GetNetname() == net or not pad.IsOnLayer(lay):
-                    continue
-                bb = pad.GetBoundingBox()
-                cut.Append(rect_poly(bb.GetLeft() - esc, bb.GetTop() - esc, bb.GetRight() + esc, bb.GetBottom() + esc))
-        for t in b.GetTracks():
-            if t.GetNetname() == net:
-                continue
-            if t.GetClass() == 'PCB_VIA':
-                pts = [t.GetPosition()]
-            elif t.GetLayer() == lay:
-                pts = [t.GetStart(), t.GetEnd()]
-            else:
-                continue
-            for p in pts:
-                cut.Append(rect_poly(p.x - esc - M(0.3), p.y - esc - M(0.3), p.x + esc + M(0.3), p.y + esc + M(0.3)))
-        if cut.OutlineCount():
-            cut.Simplify()
-            ol.BooleanSubtract(cut)
-        ol.Fracture()
-        if ol.OutlineCount() == 0:
+        ol, ko = pour_keepout(b, z)
+        if ol is None:
             b.Remove(z); continue
-        ko = pcbnew.SHAPE_POLY_SET(ol)
-        if z.GetZoneName() in CORRIDOR_POURS:   # Q-0071: keep-out only over the PROFET thermal-via fields
-            ko = pcbnew.SHAPE_POLY_SET()
-            k_ = M(fixed_routes.THERMAL_KEEP_MM)
-            for r in PROFETS:
-                vs = [p.GetPosition() for p in b.FindFootprintByReference(r).Pads()
-                      if p.GetNumber() == fixed_routes.THERMAL_PAD and p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
-                ko.Append(rect_poly(min(v.x for v in vs) - k_, min(v.y for v in vs) - k_,
-                                    max(v.x for v in vs) + k_, max(v.y for v in vs) + k_))
-            # a band along the outline stays a track keep-out: an In2 run can then only be an internal slot (via at
-            # each end) and can never cross the pour from edge to edge (T-0241 build 2 split VS-In2 into 2 islands)
-            inner = pcbnew.SHAPE_POLY_SET(z.Outline())
-            inner.Deflate(M(fixed_routes.CORRIDOR_BAND_MM), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.01))
-            band = pcbnew.SHAPE_POLY_SET(z.Outline())
-            band.BooleanSubtract(inner)
-            # T-0276 (Q-0075): the one marked exit window is cut out of the band (east edge, y 6.45-20). This router
-            # copy is not used by the Q-0072 build (no Freerouting); the per-net limit (EXIT_NETS only) is enforced
-            # where routes are made, in maze_route.py
-            x0, y0, x1, y1 = fixed_routes.EXIT_WINDOW_MM
-            a, e = P(b, x0, y0), P(b, x1, y1)
-            band.BooleanSubtract(rect_poly(a.x, a.y, e.x, e.y))
-            ko.Append(band)
-            ko.Simplify()
         ol.thisown = 0
         z.SetOutline(ol)
-        # Freerouting lets foreign nets cross a plane; the same outline as a keep-out protects the pour
-        k = pcbnew.ZONE(b); k.SetIsRuleArea(True)
-        k.SetDoNotAllowTracks(True); k.SetDoNotAllowVias(True); k.SetDoNotAllowZoneFills(False)
-        if z.GetZoneName() in VIA_OK_POURS:
-            k.SetDoNotAllowVias(False)   # decision 172: signal vias (not tracks) may pass through this pour
-        k.SetDoNotAllowPads(False); k.SetDoNotAllowFootprints(False)
-        k.SetLayer(lay); ko.thisown = 0; k.SetOutline(ko); k.SetZoneName('pour-' + z.GetZoneName()); b.Add(k)
+        add_pour_keepout(b, z, ko)
     for name, r in KEEPOUTS.items():
         keepout(b, name, *r)
     # board-edge strip: the router does not know the 0.5 mm copper-to-edge rule
@@ -313,6 +259,76 @@ def prep(board, work):
     ok = pcbnew.ExportSpecctraDSN(b, raw)
     print('dsn export', ok, flush=True)
     patch_classes(raw, os.path.join(work, 'route.dsn'))
+
+
+def pour_keepout(b, z):
+    """(escaped outline, keep-out) of a power pour for a router (decisions 164, 172, Q-0071, Q-0075), or (None, None)
+    when nothing is left. Shared by prep's router copy and quilter_export.py; the zone itself is not changed."""
+    net = z.GetNetname()
+    # power outline = keep-out for foreign nets, minus a small escape around each foreign pad/via/track end
+    lay = z.GetLayer()
+    ol = pcbnew.SHAPE_POLY_SET(z.Outline())
+    cut = pcbnew.SHAPE_POLY_SET()
+    esc = M(fixed_routes.ESCAPE_MM)
+    for fp in b.GetFootprints():
+        for pad in fp.Pads():
+            if pad.GetNetname() == net or not pad.IsOnLayer(lay):
+                continue
+            bb = pad.GetBoundingBox()
+            cut.Append(rect_poly(bb.GetLeft() - esc, bb.GetTop() - esc, bb.GetRight() + esc, bb.GetBottom() + esc))
+    for t in b.GetTracks():
+        if t.GetNetname() == net:
+            continue
+        if t.GetClass() == 'PCB_VIA':
+            pts = [t.GetPosition()]
+        elif t.GetLayer() == lay:
+            pts = [t.GetStart(), t.GetEnd()]
+        else:
+            continue
+        for p in pts:
+            cut.Append(rect_poly(p.x - esc - M(0.3), p.y - esc - M(0.3), p.x + esc + M(0.3), p.y + esc + M(0.3)))
+    if cut.OutlineCount():
+        cut.Simplify()
+        ol.BooleanSubtract(cut)
+    ol.Fracture()
+    if ol.OutlineCount() == 0:
+        return None, None
+    ko = pcbnew.SHAPE_POLY_SET(ol)
+    if z.GetZoneName() in CORRIDOR_POURS:   # Q-0071: keep-out only over the PROFET thermal-via fields
+        ko = pcbnew.SHAPE_POLY_SET()
+        k_ = M(fixed_routes.THERMAL_KEEP_MM)
+        for r in PROFETS:
+            vs = [p.GetPosition() for p in b.FindFootprintByReference(r).Pads()
+                  if p.GetNumber() == fixed_routes.THERMAL_PAD and p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
+            ko.Append(rect_poly(min(v.x for v in vs) - k_, min(v.y for v in vs) - k_,
+                                max(v.x for v in vs) + k_, max(v.y for v in vs) + k_))
+        # a band along the outline stays a track keep-out: an In2 run can then only be an internal slot (via at
+        # each end) and can never cross the pour from edge to edge (T-0241 build 2 split VS-In2 into 2 islands)
+        inner = pcbnew.SHAPE_POLY_SET(z.Outline())
+        inner.Deflate(M(fixed_routes.CORRIDOR_BAND_MM), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.01))
+        band = pcbnew.SHAPE_POLY_SET(z.Outline())
+        band.BooleanSubtract(inner)
+        # T-0276 (Q-0075): the one marked exit window is cut out of the band (east edge, y 6.45-20). This router
+        # copy is not used by the Q-0072 build (no Freerouting); the per-net limit (EXIT_NETS only) is enforced
+        # where routes are made, in maze_route.py
+        x0, y0, x1, y1 = fixed_routes.EXIT_WINDOW_MM
+        a, e = P(b, x0, y0), P(b, x1, y1)
+        band.BooleanSubtract(rect_poly(a.x, a.y, e.x, e.y))
+        ko.Append(band)
+        ko.Simplify()
+    return ol, ko
+
+
+def add_pour_keepout(b, z, ko):
+    """rule area 'pour-<name>' over keep-out ko (tracks and vias barred; vias allowed in VIA_OK_POURS)"""
+    lay = z.GetLayer()
+    # Freerouting lets foreign nets cross a plane; the same outline as a keep-out protects the pour
+    k = pcbnew.ZONE(b); k.SetIsRuleArea(True)
+    k.SetDoNotAllowTracks(True); k.SetDoNotAllowVias(True); k.SetDoNotAllowZoneFills(False)
+    if z.GetZoneName() in VIA_OK_POURS:
+        k.SetDoNotAllowVias(False)   # decision 172: signal vias (not tracks) may pass through this pour
+    k.SetDoNotAllowPads(False); k.SetDoNotAllowFootprints(False)
+    k.SetLayer(lay); ko.thisown = 0; k.SetOutline(ko); k.SetZoneName('pour-' + z.GetZoneName()); b.Add(k)
 
 
 def clear_fixed(b):

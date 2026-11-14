@@ -12,7 +12,11 @@ to it. The stackup comes from the file, so the In2 routes survive. Next: upload,
 the candidate's new tracks/vias into `fixed_routes.py` and runs the normal build gates. The repo board is unchanged. After reading Quilter's physics-constraints docs (no isolation or creepage rule),
 the export also carries the build's router keep-outs on all layers (antenna, CAN barrier band, JP30, JP1, edge
 strip, with holes round the fixed copper already inside them) and preserves the GND_CAN pours, so the CAN side is
-sealed. `UPLOAD.md` says which Circuit Comprehension constraints to remove. Export DRC: 0 errors, parity 0, 37 open.
+sealed. `UPLOAD.md` says which Circuit Comprehension constraints to remove. After the design-parameters docs (Quilter
+reads only board-wide minimums, keeps a preserved pour's fill but not its outline): the copy also gets the build's
+power-pour keep-outs (`routing_build.pour_keepout()`, now shared with `prep`, whose output is unchanged), board
+minimums clearance 0.2 mm / track 0.15 mm (the repo board has 0 there), and `UPLOAD.md` lists Net Widths for the
+open nets wider than 0.2 mm (+3V3, GND, D3-A, F2-Pad1). Export DRC: 0 errors, parity 0, 37 open.
 
 **2026-11-14 (T-0281: T-0218 per Q-0076/Q-0073 – unattended):** the build gate now follows Q-0076.
 `routing_build.py` (`gnd_fragments`, `ref_check`) compares each build with the board as it was before the build.
