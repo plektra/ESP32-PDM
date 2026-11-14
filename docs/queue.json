@@ -1,6 +1,6 @@
 {
   "next": {
-    "T": 286,
+    "T": 287,
     "Q": 78
   },
   "tasks": [
@@ -8683,7 +8683,30 @@
         "finding": "V1"
       },
       "door": "two-way",
-      "state": "parked"
+      "state": "deferred",
+      "until": "owner",
+      "reason": "ch3 R302.1 /DEN has no free route under the current rules: its B lane went to the IO2/IO5 exit column (decision 209) and the only alternative, an In2 leg from the DEN drop (59.40, 10.60), isolates the GND-In2 under U1 (T-0281 builds b2/b4/b5). Signal rerouting (decision 206) was already tried in T-0281. The finding's fix routes it after the ch2/ch3 resistor-block move (R201/R202, R301/R302), which is the next one-way door in STATUS and is pending in owner question Q-0077 (T-0218). Route R302.1 in the first T-0218 pcb-fixer package after that ruling."
+    },
+    {
+      "id": "T-0286",
+      "role": "planner",
+      "scope": "system",
+      "state": "done",
+      "created": "2026-11-14",
+      "depends_on": [],
+      "items": [
+        "T-0285"
+      ],
+      "started": "2026-11-14T13:28:19",
+      "ran_model": "opus",
+      "session": "5b6c0a1a-5c2d-479f-8074-9e3a144b536a",
+      "cost_usd": 0.305,
+      "attempts": 1,
+      "finished": "2026-11-14",
+      "note": null,
+      "summary": "0 packages, 1 deferred, 0 decisions",
+      "interrupted": null,
+      "report": "docs/reviews/2026-11-14-plan-system-T-0286.md"
     }
   ],
   "board_size_start": {

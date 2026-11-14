@@ -19,11 +19,10 @@ lines are read; other edits are lost.
 
 ---
 
-## Decided by agents (5) – two-way doors
+## Decided by agents (4) – two-way doors
 
 Undo any of them with `python3 tools/orchestrate.py undo <task>`: it comes back above as a question.
 
-- T-0285 · MINOR · pdm-4ch · ch3 /DEN link (routed in T-0276) is open again after the IO2/IO5 column took its lane; ch3 DEN pin would float if built as is → route R302.1 in a later stage (e.g. after the ch2/ch3 resistor block move already named in STATUS); no extra action now
 - T-0130 · INFO · system · Do negative supply transients below -30 V occur on the Vega battery bus (inductive loads switched on the same bus)? → assumed No; treat E18 as documentation only and take no hardware action
 - T-0128 · INFO · pdm-4ch · Accept a Q30 with 1.25 mΩ instead of 0.75 mΩ if the heat budget passes (L1)? → assumed yes, if Tj stays within the existing margin
 - T-0101 · INFO · system · What does JLCPCB quote for the real board outline in 2 oz at 5, 10 and 30 pieces once layout exists? → assumed Keep the estimate of 15 / 20 / 38 USD per order
@@ -94,7 +93,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0026 · system · Four basic/preferred swaps remove 4 extended fees: FB->GZ2012D601TF C1017, F2->1812L050/60GR, PESD0402V05->H5VL10B C7420372, TPS7B91->L78M05ABDT C58069 → T-0065 (`e5fedd96`)
 - T-0022 · system · Nothing is below 500 in stock, but TPS48110A (999), L1 SWPA6045S8R2MT (1231) and BTT6050 (1748) are thin and single-source; the EMC option LMR51610YF has only 458 → T-0065 (`e5fedd96`)
 
-## Deferred (22)
+## Deferred (23)
 
 - T-0016 · system · Board ground reaches the battery negative through one terminal pole that carries TVS surge current and, on HC2, motor freewheel current (up to 25 A per channel); its rating is not defined. → until system-mechanical: Q-0010: GND pole(s) at J10 rated like the VS input are chosen with the terminal blocks in /system mechanical; wide GND copper to J10.2 is a PCB-phase rule
 - T-0020 · system · LMR51610YF (FPWM, same 1.1 MHz) would avoid PFM noise below 350 kHz; E7 asks for a scan first. → until prototype: Q-0013: swap to LMR51610YF only if the pre-compliance scan of the first prototypes shows PFM noise; check price and stock then
@@ -118,6 +117,7 @@ Undo with `python3 tools/orchestrate.py undo <task>`: reverts the whole work pac
 - T-0127 · pdm-4ch · C170101 instead of C13832 saves the loading fee only below about 14 boards per order; above that C13832 is cheaper → until order: The item only asks to revisit C13832 vs C170101 at order time, once the run size is known. The first run is 5 boards (decision 33), below the break-even of about 14 boards, so nothing changes now. Decision 84 says revisit past about 12 boards; reprice at a run of 12 or more.
 - T-0154 · system · SH-ESP32 uses the same 60 V PTC without a series resistor; removing R54-R56 would save one line, about 2-3 USD per order → until prototype: kept until measured
 - T-0155 · system · SH-ESP32 fits standard 100 x 68 x 50 mm waterproof enclosures; pdm-4ch at about 100 x 65 mm is close, which could replace a printed MVP enclosure → until system-mechanical: needs a heat check
+- T-0285 · pdm-4ch · ch3 /DEN link (routed in T-0276) is open again after the IO2/IO5 column took its lane; ch3 DEN pin would float if built as is → until owner: ch3 R302.1 /DEN has no free route under the current rules: its B lane went to the IO2/IO5 exit column (decision 209) and the only alternative, an In2 leg from the DEN drop (59.40, 10.60), isolates the GND-In2 under U1 (T-0281 builds b2/b4/b5). Signal rerouting (decision 206) was already tried in T-0281. The finding's fix routes it after the ch2/ch3 resistor-block move (R201/R202, R301/R302), which is the next one-way door in STATUS and is pending in owner question Q-0077 (T-0218). Route R302.1 in the first T-0218 pcb-fixer package after that ruling.
 
 ## Answered (61)
 
