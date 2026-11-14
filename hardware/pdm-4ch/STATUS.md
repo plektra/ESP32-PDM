@@ -1,6 +1,49 @@
 # pdm-4ch status
 
-Updated: 2026-11-14 (T-0276 marked In2 exit, DEN complete, SW4 join: 42 unconnected)
+Updated: 2026-11-14 (T-0281 stitched GND-F/B fragments, IO2/IO5 through the exit, +3V3 under U1: 37 unconnected)
+
+**2026-11-14 (T-0281: T-0218 per Q-0076/Q-0073 – unattended):** the build gate now follows Q-0076.
+`routing_build.py` (`gnd_fragments`, `ref_check`) compares each build with the board as it was before the build.
+A GND-F/GND-B island with fewer than 2 ties to GND-In1 (GND vias or THT pads inside it, centred in the In1 fill) is
+"weak". A weak island is accepted only where it lies on a weak island of that reference, or on one of the start board
+of this stage (`scripts/gnd_weak_q0076.json`, the fragments that existed when Q-0076 was ruled). Every new weak island
+gets stitching vias up to 2 (outside foreign pour outlines and the x 45.5–46.8 strip), and the build fails when one
+stays weak. Floating copper is removed by the fills (island removal "always"). GND-In1 must stay exactly 1 island.
+GND-In2 and every other pour keep their island count and ≥ 95 % of their area against that reference. VS-In2 keeps its
+gate (1 island, ≥ 1012.1 mm², 40/40 thermal vias).
+Routed and kept:
+- **IO2 and IO5** go through the marked exit. The column vias are at x 56.50, y 16.60 / 17.50, and `VS_IN2_NOTCH`
+  grows to y 18.3 (decision 199: only as much as the runs need). East of the column they run as nested B lanes under
+  the D201-A via to F vias at (60.2, 12.8) / (60.2, 14.0).
+- **+3V3** is down to 1 open item, with 4 maze legs: B under U1, a short In2 hop at y 17.7, and a B run to (82.1, 5.4).
+- New fragments, each with 2 ties to In1: GND-F 3.1 mm² (x 56–58, y 25–29), 4.8 mm² (x 65–70, y 20–22) and
+  11.6 mm² (x 57–62, y 13–18); GND-B 6.6 mm² (x 64–65, y 21–29) and 5.2 mm² (x 75–83, y 6–8). The build added
+  5 stitching vias for them.
+- GND-F 37 → 41 islands, GND-B 19 → 24. Weak islands: GND-F 23 → 22, GND-B 11 → 11. The one changed 1-via island is
+  the old GND-F fragment at x 36–43, y 20–21, cut from 7.4 to 6.7 mm².
+- GND-In1 1 island, GND-In2 18. VS-In2 1 island, 1093.8 mm² (the IO2/IO5 In2 slots), 40/40 thermal vias.
+  Tj 101 °C at 40 °C, 4 × 4 A.
+
+Given up:
+- **ch3 R302.1 (/DEN)** had its B lane into the column. The lane had to make way for the IO2/IO5 column, so DEN is
+  1 open item again. Its only other path, an In2 leg down from the DEN drop (59.40, 10.60), isolates the 78 mm² of
+  GND-In2 under U1 (builds b2/b4/b5).
+
+Not routable within the ruling:
+- **SW_IN2/SW_IN3** are blocked at the source. R201.1/R301.1 are boxed by the U12/U13 IN and DEN links: 4 links
+  but only 3 gaps in the 2-column resistor block, and no via is possible next to it (VS-B spine). Rerouting the J6
+  bundle does not help (tried: D13.3 then reaches the whole east half, but R201.1/R301.1 still cannot get out), so
+  D12–D15 were not moved.
+- **SW_IN1/SW_IN4** would need a 4th and 5th exit-column via, but F has room for only three (y 15.3–17.7).
+- The other analog-block nets found no path in a maze pass.
+
+No part moved, no power copper outside the notch, no schematic change. Builds: b3 41 kept, b6 37 kept, three
+rejected (GND-In2 split, R207 short). 42 → 37 unconnected. Open (37): GND 3; Q4-B, F2-Pad1, SW1, IO6, IO17, IO11 2 each;
+Q5-E, Q4-E, D3-A, VBAT_SENSE, SW_IN1–4, SW4_IO, SW4, SW2_IO, SW1_IO, NTC, IO7, IO18, IO0, EN, DEN, SWIN2–4, +3V3 1 each.
+Next one-way door: moving the ch2/ch3 resistor blocks (R201/R202, R301/R302) or a wider exit for SW_IN1/SW_IN4.
+Safety: no 16 A or surge path changed, and all new copper is 0.2/0.3 mm signal copper and GND stitching vias. A
+competent person reviews the board before installation. Details: `docs/reviews/2026-11-14-fix-pdm-4ch-T-0281.md`,
+design-notes 8.23.
 
 **2026-11-14 (T-0276: T-0218 per Q-0075/Q-0073 – unattended):** the marked In2 exit is in place. `maze_route.py`
 has one named window, `EXIT_WINDOW` x 55.0–57.0 / y 6.45–20 (constant `EXIT_WINDOW_MM` and `EXIT_NETS` in

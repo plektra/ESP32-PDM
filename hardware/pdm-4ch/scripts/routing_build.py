@@ -193,6 +193,15 @@ def keepout(b, name, x1, y1, x2, y2):
 
 def prep(board, work):
     b = pcbnew.LoadBoard(board)
+    # T-0281 (Q-0076): the board as it is now is the reference for the GND fragment gate and the pour gates
+    fill(b)
+    weak = gnd_weak(b)
+    # fragments that existed when Q-0076 was ruled (T-0281 start board) stay known even after a build changed them
+    known = os.path.join(HERE, 'gnd_weak_q0076.json')
+    if os.path.exists(known):
+        for k, v in json.load(open(known)).items():
+            weak.setdefault(k, []).extend(v)
+    json.dump({'islands': islands(b), 'weak': weak}, open(os.path.join(work, 'gnd_ref.json'), 'w'))
     tracks = list(b.GetTracks())
     first = not any(t.IsLocked() for t in tracks)
     if first:   # first build: the stage 4-5 power copper and the T-0207/T-0208 links become fixed copper
@@ -474,14 +483,23 @@ def finish(b, work, out, nw, nv):
     fill(b)
     rs += clean(b)
     fill(b)
+    gf0 = gnd_fragments(b, work)
+    if gf0['stitched']:
+        fill(b)
     base = json.load(open(os.path.join(work, 'baseline.json')))
     now = islands(b)
     split = pour_check(base, now)
+    ref = json.load(open(os.path.join(work, 'gnd_ref.json')))
+    split.update(ref_check(ref['islands'], now))
+    gf = gnd_fragments(b, work, add=False)
+    if gf['new_weak']:
+        split['gnd-fragment'] = gf['new_weak']
     th = thermal_check(b)
     if th:
         split['thermal'] = th
     pcbnew.SaveBoard(out + '.kicad_pcb', b)
-    json.dump({'split': split, 'stitch': st, 'removed': rs, 'pruned': pr, 'tracks': nw, 'vias': nv},
+    json.dump({'split': split, 'stitch': st, 'removed': rs, 'pruned': pr, 'tracks': nw, 'vias': nv,
+               'gnd_new': gf0['new'], 'frag_vias': gf0['vias_added'], 'islands': now},
               open(out + '.json', 'w'), indent=1)
     print('pours:', 'whole' if not split else 'SPLIT %s' % split, '| stitch vias', st, '| cleaned', rs,
           '| pruned', len(pr), flush=True)
@@ -741,12 +759,166 @@ def tie_islands(b, net, fills, vias):
     return added
 
 
+# ---- T-0281 (owner ruling Q-0076): stitched GND-F/GND-B fragments.
+# "Where a signal route still splits a GND pour on F.Cu or B.Cu, the new GND fragment is allowed if at least 2 vias tie
+# it to the GND-In1 plane. Unstitched slivers are removed, so no floating copper. GND-In1 itself stays one piece."
+# A tie is a GND plated hole (via or THT pad) inside the island whose centre lies in the GND-In1 fill. An island with
+# fewer than FRAG_MIN_TIES ties is "weak"; the board as it was before the build (gnd_ref.json, written by prep) may have
+# weak islands, and a weak island of the build is accepted only where it lies on a weak island of that reference
+# (an old fragment, unchanged or cut smaller). Every other weak island is new: finish() adds stitching vias into it up
+# to FRAG_MIN_TIES, and the build fails the gate when one stays weak. Floating copper (an island with no pad or via)
+# is removed by the fill itself (GND-F/GND-B island removal "always").
+FRAG_ZONES = {'GND-F': pcbnew.F_Cu, 'GND-B': pcbnew.B_Cu}
+FRAG_MIN_TIES = 2
+NO_VIA_X = (45.5, 46.8)   # the x 46.15 USB via strip: never a stitching via (decision 172 / Q-0076)
+
+
+def _gnd_ties(b):
+    gnd = b.FindNet('GND').GetNetCode()
+    in1 = [z for z in b.Zones() if z.GetZoneName() == 'GND-In1' and not z.GetIsRuleArea()][0].GetFilledPolysList(pcbnew.In1_Cu)
+    pts = [t.GetPosition() for t in b.GetTracks() if t.GetClass() == 'PCB_VIA' and t.GetNetCode() == gnd]
+    pts += [p.GetPosition() for fp in b.GetFootprints() for p in fp.Pads()
+            if p.GetNetCode() == gnd and p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
+    return [p for p in pts if in1.Contains(p)]
+
+
+def _islands_of(b, name):
+    z = [z for z in b.Zones() if z.GetZoneName() == name and not z.GetIsRuleArea()][0]
+    ps = z.GetFilledPolysList(FRAG_ZONES[name])
+    for i in range(ps.OutlineCount()):
+        s = pcbnew.SHAPE_POLY_SET(); s.AddOutline(ps.COutline(i))
+        for h in range(ps.HoleCount(i)):
+            s.AddHole(ps.CHole(i, h))
+        yield s
+
+
+def _bbox_mm(b, s):
+    ox, oy = origin(b); bb = s.BBox()
+    return [round(MM(bb.GetX() - ox), 2), round(MM(bb.GetY() - oy), 2), round(MM(bb.GetRight() - ox), 2),
+            round(MM(bb.GetBottom() - oy), 2)]
+
+
+def gnd_weak(b):
+    """weak GND-F/B islands of a filled board: zone -> [outline points (nm)] (outer outline only)"""
+    ties = _gnd_ties(b)
+    out = {}
+    for name in FRAG_ZONES:
+        out[name] = []
+        for s in _islands_of(b, name):
+            if sum(1 for p in ties if s.Contains(p)) < FRAG_MIN_TIES:
+                o = s.COutline(0)
+                out[name].append([(o.CPoint(j).x, o.CPoint(j).y) for j in range(o.PointCount())])
+    return out
+
+
+def _poly(pts):
+    s = pcbnew.SHAPE_POLY_SET(); s.NewOutline()
+    for x, y in pts:
+        s.Append(int(x), int(y))
+    return s
+
+
+def _via_spot(b, isl, lay, ties):
+    """a stitching via spot inside island isl (layer lay): inside the island and the GND-In1 fill (both shrunk by the
+    via radius), on the other signal layers inside GND fill or free of copper and outside every foreign pour outline,
+    >= 0.8 mm from every via, not in NO_VIA_X; None when there is none (0.1 mm grid)"""
+    gnd = b.FindNet('GND').GetNetCode()
+    ox, oy = origin(b)
+    f = {}
+    for z in b.Zones():
+        if z.GetIsRuleArea() or z.GetNetCode() != gnd:
+            continue
+        for l in z.GetLayerSet().Seq():
+            if l in ALL_CU:
+                f.setdefault(l, pcbnew.SHAPE_POLY_SET()).Append(z.GetFilledPolysList(l))
+    for l in f:
+        f[l].Simplify(); f[l].Deflate(M(0.31), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.01))
+    me = pcbnew.SHAPE_POLY_SET(isl); me.Deflate(M(0.31), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.01))
+    foreign = [z for z in b.Zones() if not z.GetIsRuleArea() and z.GetNetCode() != gnd]
+    vias = [t.GetPosition() for t in b.GetTracks() if t.GetClass() == 'PCB_VIA'] + list(ties)
+    bb = me.BBox(); step = M(0.1)
+    y = bb.GetY()
+    while y <= bb.GetBottom():
+        x = bb.GetX()
+        while x <= bb.GetRight():
+            p = pcbnew.VECTOR2I(x, y)
+            xm = MM(x - ox)
+            if (not NO_VIA_X[0] <= xm <= NO_VIA_X[1] and me.Contains(p) and pcbnew.In1_Cu in f and f[pcbnew.In1_Cu].Contains(p)
+                    and all((p - q).EuclideanNorm() > M(0.8) for q in vias)
+                    and all((l in f and f[l].Contains(p))
+                            or (layer_free(b, p, l, M(0.55))
+                                and not any(z.IsOnLayer(l) and z.Outline().Collide(p, z.GetLocalClearance() + M(0.31))
+                                            for z in foreign))
+                            for l in ALL_CU if l not in (lay, pcbnew.In1_Cu))):
+                return p
+            x += step
+        y += step
+    return None
+
+
+def gnd_fragments(b, work, add=True):
+    """the Q-0076 gate on a filled board: new weak GND-F/B islands (see above). add: stitch each with vias up to
+    FRAG_MIN_TIES first (fill again afterwards). Returns new (every new island: zone, bbox, area, ties),
+    new_weak (those still below FRAG_MIN_TIES), stitched/vias_added."""
+    ref = json.load(open(os.path.join(work, 'gnd_ref.json')))['weak']
+    gnd = b.FindNet('GND')
+    ties = _gnd_ties(b)
+    new, new_weak, added = [], [], []
+    for name, lay in FRAG_ZONES.items():
+        old = [_poly(o) for o in ref.get(name, [])]
+        for s in _islands_of(b, name):
+            n = sum(1 for p in ties if s.Contains(p))
+            if n >= FRAG_MIN_TIES:
+                continue
+            hit = False
+            for o in old:
+                c = pcbnew.SHAPE_POLY_SET(s); c.BooleanIntersection(o)
+                if c.Area() > 0.9 * s.Area():
+                    hit = True; break
+            if hit:
+                continue
+            while add and n < FRAG_MIN_TIES:
+                p = _via_spot(b, s, lay, ties)
+                if p is None:
+                    break
+                v = pcbnew.PCB_VIA(b); v.SetPosition(p); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+                v.SetWidth(M(0.6)); v.SetDrill(M(0.3)); v.SetNet(gnd); b.Add(v)
+                ties.append(p); n += 1
+                ox, oy = origin(b); added.append([name, round(MM(p.x - ox), 2), round(MM(p.y - oy), 2)])
+            rec = [name, _bbox_mm(b, s), round(s.Area() / 1e12, 2), n]
+            new.append(rec)   # a new fragment and its ties after stitching
+            if n < FRAG_MIN_TIES:
+                new_weak.append(rec)
+    return {'new': new, 'new_weak': new_weak, 'stitched': bool(added), 'vias_added': added}
+
+
+def ref_check(ref, now):
+    """T-0281: every pour except GND-F/GND-B against the board before the build: GND-In1 exactly one island; every
+    other pour no more islands than before and >= (1 - POUR_LOSS_MAX) of its area (VS-In2 keeps its own gate)"""
+    bad = {}
+    for k, (n0, a0) in ref.items():
+        name = k.split('|')[0]
+        if name in FRAG_ZONES:
+            continue
+        n, a = now.get(k, [0, 0])
+        if name == 'GND-In1':
+            if n != 1:
+                bad[k] = ([n0, a0], [n, a])
+        elif name in CORRIDOR_POURS:
+            continue
+        elif n > n0 or a < a0 * (1 - fixed_routes.POUR_LOSS_MAX):
+            bad[k] = ([n0, a0], [n, a])
+    return bad
+
+
 if __name__ == '__main__':
     cmd = sys.argv[1]
     if cmd == 'prep':
         prep(sys.argv[2], sys.argv[3])
     elif cmd == 'apply':
         apply(sys.argv[2], sys.argv[3], sys.argv[4])
+    elif cmd == 'weak':   # weak GND-F/B islands of a board -> json (gnd_weak_q0076.json from the T-0281 start board)
+        b = pcbnew.LoadBoard(sys.argv[2]); fill(b); json.dump(gnd_weak(b), open(sys.argv[3], 'w'))
     elif cmd == 'islands':
         b = pcbnew.LoadBoard(sys.argv[2]); fill(b); print(json.dumps(islands(b), indent=0))
         n = sum(1 for r in PROFETS for p in b.FindFootprintByReference(r).Pads()

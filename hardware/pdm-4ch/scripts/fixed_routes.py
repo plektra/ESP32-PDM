@@ -55,7 +55,7 @@ EXIT_NETS = ('/SW_IN1', '/SW_IN4', '/IO2', '/IO5', '/DEN')
 # x 56.45, y 15.7/16.6/17.5 (r 0.3) and the In2 runs into them (y 15.7-17.9, w 0.2) plus the 0.5 mm VS-In2 zone
 # clearance: x 56.45 - 0.3 - 0.5 = 55.65 -> 55.6, y 15.7 - 0.8 = 14.9 to 17.9 + 0.1 + 0.5 = 18.5. The fill cannot use
 # this copper anyway; x1 56.6 lies past the edge (x 56.5) so the cut is clean. Nothing else of the outline changes.
-VS_IN2_NOTCH = (55.6, 14.9, 56.6, 16.5)
+VS_IN2_NOTCH = (55.6, 14.9, 56.6, 18.3)   # T-0281: grown for the IO2/IO5 column vias (y 16.6/17.5 + 0.8)
 
 # GND/GND_CAN stitching grid (mm); a via is added only where all four layers are fill of that net.
 STITCH_PITCH_MM = 5.0
@@ -1397,9 +1397,7 @@ T('/DEN', 'B.Cu', (56.45, 15.70), (56.36, 15.61), (56.36, 12.50), (56.76, 12.10)
 # R302.1 (/DEN, ch3): north gap -> via (57.45, 25.95) between R302.2, the U13-IS loop (0.24 mm) and R303.2 -> B north,
 # east of the moved C301.2 GND via, then x 56.36 (0.27 mm off the GND vias at x 57.03, 1.26 mm off the spine) into
 # the DEN column via (56.45, 15.70).
-T('/DEN', 'F.Cu', (55.69, 26.60), (55.69, 25.95), (57.45, 25.95))
-V('/DEN', 57.45, 25.95)
-T('/DEN', 'B.Cu', (57.45, 25.95), (57.45, 24.60), (56.36, 23.51), (56.36, 16.00), (56.45, 15.70))
+# (T-0281: the R302.1 B lane along x 56.36 into the column is replaced; see the T-0281 block at the end.)
 
 # ---- T-0276 maze pass 1 (geometry exported from the T-0276 DEN build), /SW4 legs only: R41.1 cluster -> the SW4 copper
 # by J6 on B (y 72.7-73.3) and a short F join at (66.3, 38.9). The pass's +3V3 legs (B under U1, y 5.4-20) were not
@@ -1407,3 +1405,59 @@ T('/DEN', 'B.Cu', (57.45, 25.95), (57.45, 24.60), (56.36, 23.51), (56.36, 16.00)
 T('/SW4', 'F.Cu', (66.50, 39.20), (66.40, 39.20), (66.20, 39.00), (66.30, 38.90))
 T('/SW4', 'B.Cu', (64.70, 73.30), (63.90, 73.30), (63.30, 72.70), (58.40, 72.70), (58.30, 72.80), (58.20, 72.80), (58.10, 72.90), (58.00, 72.90), (57.90, 73.00), (57.70, 73.00))
 V('/SW4', 57.70, 73.00)
+
+# ---- T-0281 (Q-0076, decision 206): IO2 and IO5 through the marked exit. Column vias at x 56.50: IO2 y 16.60, IO5
+# y 17.50 (DEN keeps 15.70; 0.9 mm pitch; IO5 0.38 mm off the GND track at y 18.38 and the GND via (57.0, 18.35)).
+# VS_IN2_NOTCH grows to y 18.3 for them (decision 199: only as much as the runs need). East of the column on B, nested:
+# IO2 under the U12-IS via (57.70, 16.50) at y 17.10, north at x 58.40 (0.3 mm off the U12-IS via at (57.70, 13.0)),
+# east at y 12.80 to an F via (60.20, 12.80); IO5 at y 17.55, north at x 58.85, east at y 14.00 to (60.20, 14.00).
+# The pocket legs (F from D102.3 / D402.3, pocket via, In2 to the column) and the F legs to U1.6 / U1.9 are
+# maze_route.py legs. These runs split GND-F/GND-B; the new fragments are stitched to GND-In1 by >= 2 vias
+# (routing_build.gnd_fragments, Q-0076).
+V('/IO2', 56.50, 16.60)
+T('/IO2', 'B.Cu', (56.50, 16.60), (57.00, 17.10), (58.10, 17.10), (58.40, 16.80), (58.40, 13.10), (58.70, 12.80), (60.20, 12.80))
+V('/IO2', 60.20, 12.80)
+V('/IO5', 56.50, 17.50)
+T('/IO5', 'B.Cu', (56.50, 17.50), (56.55, 17.55), (58.60, 17.55), (58.85, 17.30), (58.85, 14.25), (59.10, 14.00), (60.20, 14.00))
+V('/IO5', 60.20, 14.00)
+T('/IO2', 'F.Cu', (61.90, 10.50), (61.20, 10.50), (60.30, 11.40), (60.30, 12.00), (60.20, 12.10), (60.20, 12.60))
+T('/IO2', 'In2.Cu', (56.30, 16.40), (55.10, 16.40), (54.90, 16.60), (50.00, 16.60), (49.60, 16.20), (49.00, 16.20), (44.70, 11.90), (44.70, 9.30), (44.50, 9.10))
+V('/IO2', 44.50, 9.10)
+T('/IO2', 'F.Cu', (44.50, 9.10), (44.50, 6.70), (44.40, 6.60), (44.40, 6.40), (44.30, 6.30), (44.30, 5.80), (44.20, 5.70), (44.20, 5.60), (44.10, 5.50), (44.10, 5.40), (44.00, 5.30), (44.00, 4.50), (43.90, 4.40))
+T('/IO5', 'F.Cu', (61.90, 13.20), (61.20, 13.20), (60.80, 13.60), (60.70, 13.60), (60.50, 13.80), (60.30, 13.80))
+T('/IO5', 'In2.Cu', (56.30, 17.60), (52.70, 17.60), (50.60, 19.70), (44.70, 19.70), (44.20, 20.20), (43.30, 20.20))
+V('/IO5', 43.30, 20.20)
+T('/IO5', 'F.Cu', (43.30, 20.20), (43.30, 20.60))
+# R302.1 (/DEN, ch3) is open again (1 unconnected): its B lane into the column is gone (the IO2/IO5 column sits there),
+# and the only other way, an In2 leg down from the DEN drop via (59.40, 10.60) under U1, isolates the GND-In2 under U1
+# (x 59-73, y 11-26, 78 mm2): that area joins the rest of GND-In2 only through the x 59-60 strip west of the drop
+# (T-0281 builds b2/b4/b5: GND-In2 18 -> 19). No F/B path exists (IO5/GND via/IO4 wall at y 14-17). Tried copper:
+#   # R302.1 (/DEN, ch3): the north-gap stub and via (57.45, 25.95) stay (T-0276); its B lane into the column is gone (the
+#   # IO2/IO5 column sits there). It now joins the DEN In2 drop via (59.40, 10.60) under U1: In2 south along x 59.15
+#   # (0.25 mm off the D201-A In2 track at x 58.7 and the GND via (59.9, 15.6)) to a via (59.45, 16.90), B to (59.60, 18.10),
+#   # maze B leg south-west to the R302.1 via. The In2 leg leaves from the drop via itself and ends 1.6 mm above the USB
+#   # In2 pair (y 19), so GND-In2 flows round both ends (a leg from the DEN run at x 62.2, or one ending at y 18.1 beside
+#   # the USB pair, cut off the GND-In2 under U1: 18 -> 19 islands, T-0281 builds b2/b4).
+#   T('/DEN', 'F.Cu', (55.69, 26.60), (55.69, 25.95), (57.45, 25.95))
+#   V('/DEN', 57.45, 25.95)
+#   T('/DEN', 'In2.Cu', (59.40, 10.60), (59.15, 10.85), (59.15, 16.40), (59.45, 16.70), (59.45, 16.90))
+#   V('/DEN', 59.45, 16.90)
+#   T('/DEN', 'B.Cu', (59.45, 16.90), (59.60, 17.05), (59.60, 18.10))
+#   T('/DEN', 'B.Cu', (59.60, 18.10), (59.60, 21.40), (59.50, 21.50), (59.50, 21.60), (59.40, 21.70), (59.40, 21.80), (59.30, 21.90), (59.30, 22.00), (59.20, 22.10), (59.20, 22.20), (59.10, 22.30), (59.10, 22.50), (59.00, 22.60), (59.00, 22.70), (58.90, 22.80), (58.90, 22.90), (58.80, 23.00), (58.80, 23.10), (58.70, 23.20), (58.70, 23.30), (58.60, 23.40), (58.60, 23.60), (58.50, 23.70), (58.50, 23.80), (58.40, 23.90), (58.40, 24.00), (58.30, 24.10), (58.30, 24.20), (58.20, 24.30), (58.20, 24.40), (58.10, 24.50), (58.10, 24.70), (58.00, 24.80), (58.00, 24.90), (57.90, 25.00), (57.90, 25.10), (57.80, 25.20), (57.80, 25.30), (57.40, 25.70))
+
+# ---- T-0281 maze pass (geometry of build b3): +3V3 legs (5 -> 1 unconnected). They run on B under U1 and split GND-B;
+# Q-0076: the new GND-B fragments are kept only when stitched to GND-In1 by >= 2 vias (routing_build.gnd_fragments).
+T('+3V3', 'F.Cu', (58.90, 7.40), (59.30, 7.40), w=0.30)
+V('+3V3', 59.30, 7.40)
+T('+3V3', 'B.Cu', (59.30, 7.40), (59.80, 6.90), (59.90, 6.90), (60.00, 6.80), (60.70, 6.80), (61.90, 8.00), w=0.30)
+V('+3V3', 61.90, 8.00)
+T('+3V3', 'B.Cu', (61.90, 8.00), (61.90, 8.90), (62.00, 9.00), (62.00, 9.20), (62.20, 9.40), (62.20, 10.10), (62.30, 10.20), (62.30, 16.90), (64.60, 19.20), (64.60, 19.30), (64.70, 19.40), (64.70, 20.20), (64.80, 20.30), w=0.30)
+V('+3V3', 64.80, 20.30)
+T('+3V3', 'F.Cu', (64.80, 20.30), (64.80, 20.40), (64.90, 20.50), (64.90, 20.70), w=0.30)
+T('+3V3', 'B.Cu', (63.10, 17.70), (63.20, 17.70), w=0.30)
+V('+3V3', 63.20, 17.70)
+T('+3V3', 'In2.Cu', (63.20, 17.70), (60.00, 17.70), (59.60, 18.10), w=0.30)
+V('+3V3', 59.60, 18.10)
+T('+3V3', 'B.Cu', (59.60, 18.10), (59.60, 24.40), w=0.30)
+T('+3V3', 'B.Cu', (61.90, 8.00), (74.10, 8.00), (74.50, 7.60), (74.60, 7.60), (76.70, 5.50), (76.90, 5.50), (77.00, 5.40), (82.10, 5.40), w=0.30)
+V('+3V3', 82.10, 5.40)

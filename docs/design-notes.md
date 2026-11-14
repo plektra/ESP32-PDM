@@ -2495,6 +2495,49 @@ edge at y 5–20 into a via column at x 56.3–57.
   the 0.9 mm deep notch at the column, and VS-In2 stays one island with every thermal via inside. The new copper is
   0.2 mm signal copper on DEN (diagnosis enable) and SW4. A competent person reviews the board before installation.
 
+### 8.23 pdm-4ch: stitched GND-F/B fragments, IO2/IO5 through the exit, +3V3 under U1 (T-0281, 2026-11-14, auto)
+
+Owner ruling Q-0076 (decision 206):
+- Signal copper may be rerouted.
+- A new GND-F/GND-B fragment is allowed when ≥ 2 vias tie it to GND-In1, and unstitched slivers are removed.
+- GND-In1 stays one piece.
+- D12–D15 may move a few mm.
+
+- **Gate (routing_build.py).** `prep` stores the reference board's pour islands and its weak GND-F/B islands
+  (< 2 ties) in `gnd_ref.json`, plus the stage-start fragments from `scripts/gnd_weak_q0076.json`. A tie is a GND via
+  or THT pad inside the island whose centre lies in the GND-In1 fill. `finish`:
+  - stitches every new weak island up to 2 vias (`_via_spot`: inside the island and In1 fill, GND fill or free copper
+    on the other layers, outside every foreign pour outline + clearance, ≥ 0.8 mm from other vias, not in x 45.5–46.8);
+  - fails the build when one stays weak;
+  - checks GND-In1 = 1 island and every other pour (except VS-In2, which keeps its own gate) for no more islands and
+    ≥ 95 % area against the reference.
+
+  The earlier pour check compared with a baseline that already held the fixed routes, so a fixed route that cut a pour
+  went unseen. The reference check closes that gap. Floating copper cannot appear: the GND zones remove unconnected
+  islands.
+- **Column.** The ch3 R302.1 DEN B lane along x 56.36 (T-0276) blocked the column spots, so it was removed. IO2 and
+  IO5 now use x 56.50, y 16.60 / 17.50:
+  - 0.9 mm pitch;
+  - IO5 0.38 mm off the GND track at y 18.38 and the GND via (57.0, 18.35).
+
+  `VS_IN2_NOTCH` grows to y 18.3. The B lanes are nested: IO2 at y 17.10 → x 58.40 → y 12.80, IO5 at y 17.55 → x 58.85
+  → y 14.00. IO2 keeps 0.28 mm to the D201-A via (57.7, 13.0). The pocket legs (F from D102.3/D402.3 to pocket vias
+  (44.5, 9.1) / (43.3, 20.2), In2 to the column) and the F legs to U1.6/U1.9 are maze legs. The VS-In2 slots cost
+  39.6 mm² (1133.4 → 1093.8 mm², gate 1012.1). VS-In2 stays one island with all 40 thermal vias. Tj is unchanged at
+  101 °C (heat_budget.py is a board-level model; the PROFET thermal vias keep their solid In2 link).
+- **GND-In2 under U1.** The 78 mm² of GND-In2 at x 59–73, y 11–26 joins the rest of the plane only through the
+  x 59–60 strip west of the DEN drop (59.40, 10.60). The y 10.5 DEN run, the D201-A In2 track and the y 19 USB pair
+  close it off everywhere else. Any In2 run down that strip isolates it, so R302.1 (/DEN) stays open.
+- **SW_IN2/SW_IN3.** R201.1 (R301.1) sits in the left column of a 2 × 3 resistor block beside U12 (U13). Left-column
+  pads must leave east and right-column pads must be fed from the west, each through one of three 0.76 mm row gaps.
+  Four links (SW_IN out, DEN out, U12-IN in, U12-DEN in) do not fit in three gaps, and no via fits west of x 56.36
+  (VS-B spine). With the J6 bundle removed as a trial, D13.3 reaches the whole east half, so the bundle is not the
+  limit. Rerouting the bundle or moving D12–D15 gains nothing. The next door is a placement change of R201/R202 and
+  R301/R302 (not on the decision 189/206 list).
+- **SW_IN1/SW_IN4.** The exit column holds three through vias (F y 15.3–17.7), and DEN, IO2 and IO5 use them.
+- **Safety.** No 16 A or surge path changed and no power outline changed except the notch. The new copper is signal
+  copper and GND stitching. A competent person reviews the board before installation.
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
