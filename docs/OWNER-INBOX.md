@@ -15,7 +15,7 @@ lines are read; other edits are lost.
 - **Proposed:** 0 unconnected is not reachable under the stage rules: the west channel signals (27 items) are walled in by the VS-In2, VS spine/front/rear and OUT2/OUT3-F outlines (only the 0.65 mm via strip at x 46.15, used by USB), and the U1 strip/analog block (47 items) is congested; needs an owner ruling on a VS-In2/OUT3-F signal corridor, moving the channel signal columns, or signal vias through VS-In2 (design-notes 8.18)
 - **Why it needs you:** 8 work packages (last T-0281) returned it neither done nor blocked; check whether it is already done or say how to proceed
 
-**Answer:** 
+**Answer:** Standing rule for the rest of T-0218 (replaces case-by-case questions). Agents may, without asking: (1) move any small signal part (resistors, capacitors, small-signal diodes incl. D12-D15/D102-D402, the Q3-Q6 block, R60 and similar), including the ch2/ch3 blocks R201/R202 and R301/R302, and reroute any signal copper; (2) grow the In2 exit window and its VS-In2 notch as the runs need, if VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9); (3) leave GND fragments on F.Cu, B.Cu and In2 when each is tied to GND-In1 by >= 2 vias (no floating copper; GND-In1 stays one island). Fixed, owner only: connectors, PROFETs U11-U14, U1, Q30/U30/D30/D31, the buck, the 16 A/battery/surge paths, all other power-pour outlines, holes, board outline, schematic. Keep going until 0 unconnected; return only when a stage gains nothing or needs one of the fixed items.
 
 ---
 
