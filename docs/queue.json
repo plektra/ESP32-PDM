@@ -8742,7 +8742,24 @@
         "T-0218"
       ],
       "plan": "T-0287",
-      "depends_on": []
+      "depends_on": [],
+      "started": "2026-11-14T20:34:19",
+      "ran_model": "opus",
+      "session": "5d3aeb1a-8ac9-46b6-a166-645aa30c62a1",
+      "cost_usd": 5.5513,
+      "attempts": 0,
+      "resume": {
+        "session": "5d3aeb1a-8ac9-46b6-a166-645aa30c62a1",
+        "worktree": "/Users/lari/src/plektra/vega/ESP32-PDM-auto-T-0288",
+        "scratch": "/var/folders/xx/l_kgmrl16jz7r1dk74cj1g1c0000gn/T/pdm-T-0288-rfagguki",
+        "report": "docs/reviews/2026-11-14-fix-pdm-4ch-T-0288.md",
+        "head": "cf0031006660ba6b61cf2ddd8b8ad2d3c1aaa0b0",
+        "reason": "an interruption"
+      },
+      "finished": "2026-11-14",
+      "note": "no report written (aborted_streaming): ",
+      "summary": "interrupted, queued again, resumes where it stopped",
+      "interrupted": true
     },
     {
       "id": "T-0289",
