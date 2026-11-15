@@ -154,15 +154,29 @@ mask bridges. Not usable; wait for the finished candidates.
 - The export's 9 extra `lib_footprint_issues` warnings come from the copied `fp-lib-table` pointing at `../../lib`;
   harmless (footprints are embedded in the board).
 
-## What blocks the last 37 (analysis 2026-11-15)
+## What blocks the last 37 (analysis 2026-11-15, corrected)
 
-Rasterised the upload-2 board at 0.1 mm (copper inflated by 0.3 mm = 0.2 clearance + half a 0.2 track; power pours
-and track keep-outs blocked; GND pours counted free) and searched each open link alone over F/In2/B, vias only where
-all three layers are free:
-- Free area: F.Cu 37 %, In2 58 %, B.Cu 54 % of 7518 mm2; most of In2/B "free" is GND plane (pour gates apply).
-- With the board as it is: 22 of 34 links have no path at all, even alone. At 0.15 mm tracks: still 21. Width is not it.
-- With every track removed (pads, pours, keep-outs kept): 32 of 34 have a path (only /IO11 not, maybe a model
-  artefact; Quilter routed IO11 clean at 0.2).
-So neither board size nor placement is the wall: the already-laid tracks (built net by net, never moved) seal the pads
-in. Next: find which tracks close each pocket (scripted legs vs locked power/USB/CAN copper) and let the maze router
-rip up and redo its own legs. The test is per link, not all at once, and ignores GND-fragment gates.
+A first pass (0.2 mm clearance to everything, vias allowed in pads) said "22 of 34 blocked, 32 free with all tracks
+removed". Wrong: it allowed via-in-pad and ignored the router's real rules. Redone on `maze_route.py`'s own masks
+(geometry from `geom_export.py` on the board; pads, pour outlines + zone-clearance rings, keep-outs, class
+clearances hard; every foreign track/via crossable at a penalty; scripts in the session scratchpad, not in the repo):
+
+- **14 links are sealed even with every track removed.** 12 of them join a part west of a wall to one east of it:
+  the VS block (pours on F/In2/B, their keep-out rings, and the 1.0 mm VS/VBAT_IN clearance of EMC rule 7 round
+  every VS pad, track and via) plus the J6 pin column (x 54-56, y 57-75) run edge to edge at x ~46-56. West of it sit
+  logic parts: the analog/switch dividers R2, R4, R7, R8, R31, R33, R38, D23 (x 44-53, y 61-73), SW_RESET1, SW_BOOT1
+  and TH1. Their partners (U1, R35-R37, D15-D19, J5) are east. Links: SW1 (R38), SW2_IO, SW4_IO, SW4, SWIN2, SWIN3,
+  SWIN4, IO11 x2, EN, IO0, NTC. With the item clearances at 0.2 mm (no 1.0 mm rule) these get a path, but every one
+  squeezes through the same gap in the VS block across a VS via: not a real gate. The other three: VBAT_SENSE (R60
+  sits inside VS-F-drain, decision 174; R60.2 is also within 1.0 mm of R60.1 by construction) and F2-Pad1 x2 (J3).
+- **20 links are blocked by tracks only** (each tested alone): D3-A (C4-Pad1 power copper), SW_IN1-4, +3V3, IO6 x2,
+  IO7, IO17 x2, IO18, Q4-B x2, Q4-E, Q5-E, SW1 (track end), SW1_IO, DEN. Recurring blockers: the J6 In2 verticals
+  /IO42, /RXD0, /IO37 (x 60-63, earlier-stage locked copper) in 7 links; harvested T-0236 copper (/SW2 B, /IO8 B,
+  /SW3_IO B/via, /R3-Pad2 B, the U12/U13 IN/DEN/IS links) in most; Q3-C/Q3-B/Q5-B/Q5-C round the Q3-Q6 block;
+  /IO3 and /IO39 (T-0271). USB_DP In2 once.
+- Quilter never got the 1.0 mm rule (only the pours' zone clearance). Trial-1 1_1's new tracks come within 1.0 mm of
+  VS/VBAT_IN copper on F/B for +3V3, SW4_IO, VBAT_SENSE and GND: KiCad DRC does not see it; any import must check it.
+
+So the wall is the floorplan: about a dozen logic parts are on the power side of a VS/J6 wall that has no free gate.
+Rip-up helps only the 20 track-blocked links. The 12 wall links need a gate (a part move, a planned crossing of the
+VS block, a J6 move) or a ruling on where the 1.0 mm rule applies: one-way doors for the owner.
