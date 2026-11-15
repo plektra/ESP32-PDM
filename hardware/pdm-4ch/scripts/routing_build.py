@@ -212,9 +212,13 @@ def keepout(b, name, x1, y1, x2, y2):
 
 def prep(board, work):
     b = pcbnew.LoadBoard(board)
-    for z in list(b.Zones()):   # decision 214: each build decides its own slivers again
-        if z.GetIsRuleArea() and z.GetZoneName().startswith(SLIVER):
+    old = [z for z in b.Zones() if z.GetIsRuleArea() and z.GetZoneName().startswith(SLIVER)]
+    if old:   # decision 214: each build decides its own slivers again; reload after b.Remove() (KiCad's SWIG layer
+        for z in old:   # breaks on the next lookup otherwise)
             b.Remove(z)
+        tmp = os.path.join(work, 'nosliver.kicad_pcb')
+        pcbnew.SaveBoard(tmp, b)
+        b = pcbnew.LoadBoard(tmp)
     # T-0281 (Q-0076): the board as it is now is the reference for the GND fragment gate and the pour gates
     fill(b)
     weak = gnd_weak(b)

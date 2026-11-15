@@ -654,8 +654,6 @@ T('/SW2_IO', 'F.Cu', (52.040300, 61.630300), (52.040300, 59.730400), w=0.200)
 T('/SW2_IO', 'F.Cu', (52.700000, 62.290000), (52.040300, 61.630300), w=0.200)
 T('Net-(F4-Pad2)', 'F.Cu', (61.635000, 36.562500), (59.937500, 38.260000), w=0.600)
 T('Net-(F4-Pad2)', 'F.Cu', (63.500000, 36.562500), (61.635000, 36.562500), w=0.600)
-T('Net-(Q6-B)', 'F.Cu', (71.862500, 29.950000), (74.012500, 32.100000), w=0.200)
-T('Net-(Q6-B)', 'F.Cu', (74.012500, 32.100000), (75.690000, 32.100000), w=0.200)
 T('/IO38', 'F.Cu', (74.469100, 21.079100), (75.300000, 21.910000), w=0.200)
 V('/IO38', 74.469100, 21.079100, size=0.600, drill=0.300)
 T('/IO38', 'B.Cu', (75.603500, 19.944700), (74.469100, 21.079100), w=0.200)
@@ -1008,11 +1006,6 @@ T('Net-(Q4-C)', 'B.Cu', (72.70, 27.30), (72.70, 28.60), (72.60, 28.70), (72.60, 
 # Net-(Q4-C): clusters [147, 149, 1425, 1427, 1428, 1429, 1430, 1431, 1432] -> [327]
 # Net-(Q4-C): clusters [147, 149, 327, 1425, 1427, 1428, 1429, 1430, 1431, 1432] -> [1426]
 # Net-(Q6-B): clusters [113] -> [126]
-T('Net-(Q6-B)', 'F.Cu', (66.90, 25.30), (66.80, 25.30))
-V('Net-(Q6-B)', 66.80, 25.30)
-T('Net-(Q6-B)', 'In2.Cu', (66.80, 25.30), (70.20, 28.70), (70.20, 29.30))
-V('Net-(Q6-B)', 70.20, 29.30)
-T('Net-(Q6-B)', 'F.Cu', (70.20, 29.30), (70.50, 29.30), (70.70, 29.50), (70.80, 29.50), (70.90, 29.60), (71.20, 29.60))
 # Net-(Q6-B): clusters [113, 126] -> [1285]
 # Net-(Q6-B): clusters [113, 126, 1285] -> [1286]
 # Net-(Q6-B): clusters [113, 126, 1285, 1286] -> [330]
@@ -1290,7 +1283,6 @@ V('/IO3', 61.50, 11.30)
 # maze/harvest copper is removed by routing_build.py prune() in finish(). +3V3 maze copper above is 0.3 mm (v3 class).
 T('+3V3', 'B.Cu', (54.40, 72.30), (55.20, 72.88), w=0.3)   # -> J6.8
 T('+3V3', 'B.Cu', (55.90, 72.30), (55.20, 72.88), w=0.3)   # J6.8 ->
-T('Net-(Q6-B)', 'F.Cu', (71.20, 29.60), (71.45, 29.85))     # -> Q6.1
 T('Net-(R3-Pad2)', 'F.Cu', (57.60, 59.30), (57.80, 59.60))   # -> R3.2
 T('Net-(R4-Pad2)', 'F.Cu', (51.70, 65.90), (52.00, 65.90))   # -> R4.2
 
@@ -1465,12 +1457,12 @@ V('+3V3', 82.10, 5.40)
 # ---- Decision 214 (owner, 2026-11-15): targeted rip-up. A net in REROUTED_NETS keeps only the copper this file lists
 # (routing_build.prep drops the rest of its board copper); scripts/ripup.py removes a few movable nets that block an
 # open link, routes the link first and then the removed nets again, and keeps the change only when fewer items stay open.
-REROUTED_NETS = []
+REROUTED_NETS = ['Net-(Q5-E)', 'Net-(Q6-B)']
 
 # R60.2 (/VBAT_SENSE) escape: R60.2 lies just outside the VS-F-drain outline (x 58.3) but inside the router's
 # zone-clearance ring round it, so no router leg can leave the pad. A straight stub east to x 59.6 is never nearer the
 # pour than the pad itself (the fill keeps its 1.0 mm from both); the router starts from its end.
-T('/VBAT_SENSE', 'F.Cu', (58.81, 41.40), (59.60, 41.40))
+T('/VBAT_SENSE', 'F.Cu', (58.81, 41.40), (59.60, 41.40))   # keep
 
 # ---- Decision 214 maze pass 1 (hole keep-out from the drill, UUID clusters, margin 0.08, R60.2 stub; open nets)
 # /SW1: clusters [52] -> [101]
@@ -1505,3 +1497,18 @@ T('/SW_IN4', 'F.Cu', (53.40, 74.00), (54.60, 74.00), (54.70, 74.10), (54.90, 74.
 V('/SW_IN4', 61.10, 73.40)
 T('/SW_IN4', 'In2.Cu', (61.10, 73.40), (61.20, 73.30), (61.30, 73.30), (61.50, 73.10), (61.60, 73.10), (62.80, 71.90))
 V('/SW_IN4', 62.80, 71.90)
+
+# ---- Decision 214 rip-up: Net-(Q5-E) (with Net-(Q6-B)), open clusters 1 -> 0
+# Net-(Q5-E) leg
+T('Net-(Q5-E)', 'F.Cu', (75.50, 31.00), (74.70, 31.80))
+V('Net-(Q5-E)', 74.70, 31.80)
+T('Net-(Q5-E)', 'B.Cu', (74.70, 31.80), (74.10, 31.20), (73.90, 31.20), (72.90, 30.20), (72.70, 30.20), (72.10, 29.60), (72.10, 29.50), (72.00, 29.40), (72.00, 28.40), (71.90, 28.30))
+V('Net-(Q5-E)', 71.90, 28.30)
+# Net-(Q6-B) leg
+T('Net-(Q6-B)', 'F.Cu', (67.00, 25.20), (66.80, 25.20))
+V('Net-(Q6-B)', 66.80, 25.20)
+T('Net-(Q6-B)', 'In2.Cu', (66.80, 25.20), (70.20, 28.60), (70.20, 29.30))
+V('Net-(Q6-B)', 70.20, 29.30)
+T('Net-(Q6-B)', 'F.Cu', (70.20, 29.30), (70.40, 29.30), (70.70, 29.60), (71.10, 29.60), (71.20, 29.70), (71.30, 29.70))
+# Net-(Q6-B) leg
+T('Net-(Q6-B)', 'F.Cu', (72.30, 30.10), (72.60, 30.40), (72.60, 30.70), (72.90, 31.00), (72.90, 31.10), (73.10, 31.30), (73.10, 31.40), (73.20, 31.50), (73.30, 31.50), (73.40, 31.60), (73.50, 31.60), (74.30, 32.40), (74.40, 32.40), (74.50, 32.50), (75.10, 32.50), (75.20, 32.40), (75.30, 32.40), (75.50, 32.20))

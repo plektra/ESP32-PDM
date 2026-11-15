@@ -74,6 +74,12 @@ for it in items:
             it.TransformShapeToPolygon(ps, LAY[ln], M(inf), M(0.02), pcbnew.ERROR_OUTSIDE)
             d[ln] = polys(ps)
         e[key] = d
+    if it.GetClass() == 'PCB_VIA':   # decision 214 (ripup.py): positions to match fixed_routes.py lines
+        e['at'] = [MM(it.GetPosition().x - ox), MM(it.GetPosition().y - oy)]
+        e['size'] = MM(it.GetWidth(pcbnew.F_Cu)); e['drill'] = MM(it.GetDrillValue())
+    elif it.GetClass() != 'PAD':
+        e['seg'] = [MM(it.GetStart().x - ox), MM(it.GetStart().y - oy), MM(it.GetEnd().x - ox), MM(it.GetEnd().y - oy)]
+        e['layer'] = b.GetLayerName(it.GetLayer()); e['w'] = MM(it.GetWidth())
     if it.GetClass() == 'PAD' and it.HasHole():   # drilled hole blocks every layer
         ps = pcbnew.SHAPE_POLY_SET()
         # decision 214: the hole keep-out is the drill + hole clearance + half a track (was the pad outline + 0.55 mm,

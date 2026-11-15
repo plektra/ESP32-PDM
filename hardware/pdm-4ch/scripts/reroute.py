@@ -10,10 +10,10 @@ after the iteration limit. Then a legalization pass commits the nets one by one,
 obstacle and the history costs steering each net away from the contested cells: every emitted leg is legal, and a leg
 that finds no room stays open. Writes fixed_routes.py lines (T/V) like maze_route.py.
 Cells inside a net's own fixed copper (pads, stubs) never count as conflicts: that copper is fixed already."""
-import heapq, json, math, sys, time
+import heapq, json, math, os, sys, time
 from array import array
 
-GEO = sys.argv[1]
+GEO = os.environ.get('REROUTE_GEO') or sys.argv[1]
 _argv = sys.argv
 sys.argv = [sys.argv[0], GEO, 'x']
 import importlib.util, os
@@ -152,14 +152,14 @@ def route_leg(net, start, goal, occ_t, occ_v, hist, histv, pres, hard=False):
 
 
 def route_net(net, occ_t, occ_v, hist, histv, pres, hard=False):
-    net.paths = []; net.failed = []
+    net.paths = []; net.failed = []; net.comps = 0
     rest = set(net.cls)
     tried = set()
     while rest:
         seeds = [c for c in sorted(rest) if c not in tried]
         if not seeds:
             break
-        seed = seeds[0]; tried.add(seed)
+        seed = seeds[0]; tried.add(seed); net.comps += 1
         done = {seed}; rest.discard(seed)
         start = {l: set(net.cells[seed][l]) for l in L}
         while rest:
@@ -209,14 +209,8 @@ def conflicts(net, occ_t, occ_v):
     return bad
 
 
-def main():
-    arg = sys.argv[2]
-    if arg.startswith('@'):
-        txt = open(arg[1:]).read()
-        names = json.loads(txt) if txt.lstrip().startswith('[') else [n.strip() for n in txt.split('\n') if n.strip()]
-    else:
-        names = arg.split(',')
-    iters = int(sys.argv[4]) if len(sys.argv) > 4 else 40
+def negotiate(names, iters, log=True):
+    """negotiated congestion over the named nets on mz.geo, then legalization. Returns (lines, open clusters)"""
     t0 = time.time()
     nets = []
     for n in names:
@@ -261,7 +255,7 @@ def main():
                                 pairs[(nm, o, L[li], (c % W) // 10, (c // W) // 10)] += 1
             print('#   top', pairs.most_common(8), file=sys.stderr)
         ncells = sum(len(v) for v in bad.values())
-        print('# round %d: %d nets conflict (%d cells), %d legs unrouted, pres %.2f, %.0f s'
+        (print if log else (lambda *a, **k: None))('# round %d: %d nets conflict (%d cells), %d legs unrouted, pres %.2f, %.0f s'
               % (it, len(bad), ncells, nfail, pres, time.time() - t0), file=sys.stderr, flush=True)
         if not bad:
             break
@@ -286,9 +280,22 @@ def main():
         for p in nt.paths:
             out.append('# %s leg' % nt.name)
             out += mz.emit(nt.name, p)
-        print('#', nt.name, 'ok' if not nt.failed else 'partial %s' % nt.failed, file=sys.stderr, flush=True)
-    print('# legal: %d nets complete, %d legs open' % (sum(1 for nt in nets if not nt.failed),
-          sum(len(nt.failed) for nt in nets)), file=sys.stderr)
+        if log:
+            print('#', nt.name, 'ok' if not nt.failed else 'partial %s' % nt.failed, file=sys.stderr, flush=True)
+    opn = sum(nt.comps - 1 for nt in nets)
+    print('# legal: %d nets complete, %d clusters open' % (sum(1 for nt in nets if not nt.failed), opn), file=sys.stderr)
+    return out, opn
+
+
+def main():
+    arg = sys.argv[2]
+    if arg.startswith('@'):
+        txt = open(arg[1:]).read()
+        names = json.loads(txt) if txt.lstrip().startswith('[') else [n.strip() for n in txt.split('\n') if n.strip()]
+    else:
+        names = arg.split(',')
+    lines, _ = negotiate(names, int(sys.argv[4]) if len(sys.argv) > 4 else 40)
+    out = lines
     txt = '\n'.join(out)
     open(sys.argv[3], 'w').write(txt + '\n')
     print('# wrote', sys.argv[3], len(out), 'lines', file=sys.stderr)
