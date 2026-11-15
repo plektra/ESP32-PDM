@@ -119,6 +119,13 @@ FL30 DNP warning, as before). Quilter parsed it without complaint and showed tra
 trial 1. Job "pdm-4ch trial 2 (min track 0.2)", `6af9577205fb4066882662d9`, in the same project. Download the
 candidates to a new folder (e.g. `~/Downloads/pdm-4ch-quilter-candidates-2/`), outside the repo.
 
+First candidate (1_2, downloaded 2026-11-15 12:46 while the router was at 14/18 steps; Quilter showed 96 % routed,
+15 incomplete nets, 206 padstack collisions, 9 boundary violations). Locked copper intact (2000 kept, 0 gone); 710
+new items, none on In1. Widths: 347 at 0.2 mm, 266 at 0.4 mm (GND, Net-(D3-A), Net-(F2-Pad1) Net Widths honoured), 2
+at 0.32 mm. After a zone refill: 18 unconnected (from 37), but 27 shorts (+3V3–GND, VS–GND, IO17/IO39/IO0/SW4–GND,
+signal–signal), 10 tracks_crossing, 43 keep-out hits (36 GND), 98 clearance, 6 hole clearance, 2 copper-to-edge, 7
+mask bridges. Not usable; wait for the finished candidates.
+
 ## Next steps
 
 1. Done: open points asked (see above); `UPLOAD.md` updated, upload folder regenerated (37 unconnected, DRC errors
