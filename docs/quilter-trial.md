@@ -177,6 +177,11 @@ clearances hard; every foreign track/via crossable at a penalty; scripts in the 
 - Quilter never got the 1.0 mm rule (only the pours' zone clearance). Trial-1 1_1's new tracks come within 1.0 mm of
   VS/VBAT_IN copper on F/B for +3V3, SW4_IO, VBAT_SENSE and GND: KiCad DRC does not see it; any import must check it.
 
+Rule sensitivity (same search): VS/VBAT_IN item clearance 0.6 mm instead of 1.0, with or without the VS pour zone
+clearance also at 0.6: still 15 sealed, none opened. The 1.0 mm only on F/B (0.2 on In2): no gain either. Only at
+0.2 mm do the 12 wall links pass, and then through the VS block across a VS via. Relaxing the creepage rule does not
+open the wall.
+
 So the wall is the floorplan: about a dozen logic parts are on the power side of a VS/J6 wall that has no free gate.
 Rip-up helps only the 20 track-blocked links. The 12 wall links need a gate (a part move, a planned crossing of the
 VS block, a J6 move) or a ruling on where the 1.0 mm rule applies: one-way doors for the owner.
