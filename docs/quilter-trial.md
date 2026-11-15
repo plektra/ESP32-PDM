@@ -111,6 +111,14 @@ Checked in a scratch copy only; nothing is imported.
 - Lesson: Quilter routes at the board-wide minimum and does not honour Net Widths reliably. The 0.15 mm board
   minimum (chosen for the locked CANL_XCVR neck, `fixed_routes.py` line 89) is what made the candidates too narrow.
 
+## Trial 2 (submitted 2026-11-15 09:03)
+
+Owner: rerun with a 0.2 mm board track minimum. `quilter_export.py` now sets track min = clearance min = 0.2 mm
+(`MIN_MM`); the copy has 1 DRC error, the locked 0.15 mm CANL_XCVR neck, and 37 unconnected (parity: only the
+FL30 DNP warning, as before). Quilter parsed it without complaint and showed trace min 0.2 mm. Same settings as
+trial 1. Job "pdm-4ch trial 2 (min track 0.2)", `6af9577205fb4066882662d9`, in the same project. Download the
+candidates to a new folder (e.g. `~/Downloads/pdm-4ch-quilter-candidates-2/`), outside the repo.
+
 ## Next steps
 
 1. Done: open points asked (see above); `UPLOAD.md` updated, upload folder regenerated (37 unconnected, DRC errors
