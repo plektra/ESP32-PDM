@@ -153,3 +153,16 @@ mask bridges. Not usable; wait for the finished candidates.
 - `routing_build.prep` writes segments in a different order each run: compare outputs as sorted lines.
 - The export's 9 extra `lib_footprint_issues` warnings come from the copied `fp-lib-table` pointing at `../../lib`;
   harmless (footprints are embedded in the board).
+
+## What blocks the last 37 (analysis 2026-11-15)
+
+Rasterised the upload-2 board at 0.1 mm (copper inflated by 0.3 mm = 0.2 clearance + half a 0.2 track; power pours
+and track keep-outs blocked; GND pours counted free) and searched each open link alone over F/In2/B, vias only where
+all three layers are free:
+- Free area: F.Cu 37 %, In2 58 %, B.Cu 54 % of 7518 mm2; most of In2/B "free" is GND plane (pour gates apply).
+- With the board as it is: 22 of 34 links have no path at all, even alone. At 0.15 mm tracks: still 21. Width is not it.
+- With every track removed (pads, pours, keep-outs kept): 32 of 34 have a path (only /IO11 not, maybe a model
+  artefact; Quilter routed IO11 clean at 0.2).
+So neither board size nor placement is the wall: the already-laid tracks (built net by net, never moved) seal the pads
+in. Next: find which tracks close each pocket (scripted legs vs locked power/USB/CAN copper) and let the maze router
+rip up and redo its own legs. The test is per link, not all at once, and ignores GND-fragment gates.
