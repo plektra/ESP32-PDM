@@ -784,7 +784,9 @@ def tie_islands(b, net, fills, vias):
 # (an old fragment, unchanged or cut smaller). Every other weak island is new: finish() adds stitching vias into it up
 # to FRAG_MIN_TIES, and the build fails the gate when one stays weak. Floating copper (an island with no pad or via)
 # is removed by the fill itself (GND-F/GND-B island removal "always").
-FRAG_ZONES = {'GND-F': pcbnew.F_Cu, 'GND-B': pcbnew.B_Cu}
+# decision 212 (3) / 214: GND-In2 follows the GND-F/B fragment rule (a new island needs >= 2 ties to GND-In1); its
+# island count is no longer gated (In1 is the solid reference plane, In2 GND is fill)
+FRAG_ZONES = {'GND-F': pcbnew.F_Cu, 'GND-B': pcbnew.B_Cu, 'GND-In2': pcbnew.In2_Cu}
 FRAG_MIN_TIES = 2
 NO_VIA_X = (45.5, 46.8)   # the x 46.15 USB via strip: never a stitching via (decision 172 / Q-0076)
 
@@ -815,7 +817,7 @@ def _bbox_mm(b, s):
 
 
 def gnd_weak(b):
-    """weak GND-F/B islands of a filled board: zone -> [outline points (nm)] (outer outline only)"""
+    """weak GND-F/B/In2 islands of a filled board: zone -> [outline points (nm)] (outer outline only)"""
     ties = _gnd_ties(b)
     out = {}
     for name in FRAG_ZONES:
@@ -909,7 +911,7 @@ def gnd_fragments(b, work, add=True):
 
 
 def ref_check(ref, now):
-    """T-0281: every pour except GND-F/GND-B against the board before the build: GND-In1 exactly one island; every
+    """T-0281: every pour except GND-F/GND-B/GND-In2 (decision 214) against the board before the build: GND-In1 exactly one island; every
     other pour no more islands than before and >= (1 - POUR_LOSS_MAX) of its area (VS-In2 keeps its own gate)"""
     bad = {}
     for k, (n0, a0) in ref.items():

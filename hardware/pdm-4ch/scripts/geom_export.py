@@ -14,6 +14,7 @@ ox, oy = rb.origin(b)
 M, MM = pcbnew.FromMM, pcbnew.ToMM
 LAY = {'F.Cu': pcbnew.F_Cu, 'In2.Cu': pcbnew.In2_Cu, 'B.Cu': pcbnew.B_Cu}
 MARGIN = 0.06
+HOLE_CLR = 0.25   # board hole clearance (drill edge to copper)
 
 
 def polys(ps):
@@ -70,7 +71,9 @@ for it in items:
         e[key] = d
     if it.GetClass() == 'PAD' and it.HasHole():   # drilled hole blocks every layer
         ps = pcbnew.SHAPE_POLY_SET()
-        it.TransformShapeToPolygon(ps, pcbnew.F_Cu, M(0.25 + 0.3), M(0.02), pcbnew.ERROR_OUTSIDE)
+        # decision 214: the hole keep-out is the drill + hole clearance + half a track (was the pad outline + 0.55 mm,
+        # which closed every 2.54 mm header gap, e.g. J6, although a 0.2 mm track fits there with 0.32 mm each side)
+        it.TransformHoleToPolygon(ps, M(HOLE_CLR + 0.1 + MARGIN), M(0.02), pcbnew.ERROR_OUTSIDE)
         e['hole'] = polys(ps)
         if net in rb.GND_NETS:      # keep In2 tracks off GND THT pads (starved thermal relief on the In2 plane)
             ps = pcbnew.SHAPE_POLY_SET()
