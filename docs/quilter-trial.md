@@ -92,6 +92,25 @@ Docs bugs seen (could go to the MCP's `sendFeedback`, ask the owner first; not s
 specify" says "To specify a preserved pour"; the CAD compatibility overview page is a two-line stub ("overview of
 status", "link to view/vote on cad tool support") and no page lists supported KiCad versions.
 
+## Candidates (first look, 2026-11-15)
+
+Two candidates, 1_1 and 1_2 (board + stripped project file each), kept outside the repo in the owner's downloads.
+Checked in a scratch copy only; nothing is imported.
+
+- Output format: space-indented; locked copper keeps its UUIDs; new tracks/vias have **no UUID** (KiCad assigns
+  fresh ones on load), so "new" = any track/via whose UUID is not in the export copy. GND-F/B/In2 are dropped (66 ->
+  63 zones), so raw unconnected counts include GND links our build's refill restores.
+- Both: all 2000 locked tracks/vias kept, none changed; nothing new on In1.
+- **1_2: out.** 491 new items; after refill still 6 shorts, 4 track crossings, 47 keep-out violations, 18
+  copper-to-edge, 50 clearance errors.
+- **1_1: clean but too narrow.** 595 new items (342 F.Cu, 110 B.Cu, 94 In2, 49 vias). Raw DRC 361 errors; after a
+  zone refill only the 199 track-width errors remain (no clearance, no keep-out, no short). New signal tracks are
+  0.150 mm (the board minimum we gave it), +3V3 0.158 mm: the 0.3 mm Net Width was ignored. Only the 0.4 mm widths
+  (GND, D3-A, F2) were kept. Widening every new track to its class (0.2; +3V3 0.3) and refilling leaves 44 errors
+  (32 clearance, 11 keep-out, 1 old width) spread over ~15 net pairs.
+- Lesson: Quilter routes at the board-wide minimum and does not honour Net Widths reliably. The 0.15 mm board
+  minimum (chosen for the locked CANL_XCVR neck, `fixed_routes.py` line 89) is what made the candidates too narrow.
+
 ## Next steps
 
 1. Done: open points asked (see above); `UPLOAD.md` updated, upload folder regenerated (37 unconnected, DRC errors
