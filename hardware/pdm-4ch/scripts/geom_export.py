@@ -13,7 +13,7 @@ rb.fill(b)
 ox, oy = rb.origin(b)
 M, MM = pcbnew.FromMM, pcbnew.ToMM
 LAY = {'F.Cu': pcbnew.F_Cu, 'In2.Cu': pcbnew.In2_Cu, 'B.Cu': pcbnew.B_Cu}
-MARGIN = 0.06
+MARGIN = 0.08   # decision 214: 0.06 left 2-3 um clearance misses after grid rounding (maze pass 1)
 HOLE_CLR = 0.25   # board hole clearance (drill edge to copper)
 
 
@@ -37,20 +37,25 @@ for fp in b.GetFootprints():
     for p in fp.Pads():
         items.append(p)
 items += list(b.GetTracks())
+# decision 214: items are keyed by UUID. KiCad hands out a new SWIG wrapper on every call, so the former id() keys
+# never matched across GetConnectedItems() and every track became its own cluster (the router then spent legs, and
+# sometimes clearance, joining copper that was already joined).
 cid = {}
+uid = lambda x: x.m_Uuid.AsString()
+k = 0
 for it in items:
     n = it.GetNetCode()
-    if n <= 0 or id(it) in cid or it.GetNetname() in rb.GND_NETS or it.GetNetname() in rb.POWER_NETS:
+    if n <= 0 or uid(it) in cid or it.GetNetname() in rb.GND_NETS or it.GetNetname() in rb.POWER_NETS:
         continue
-    k = len(cid) + 1
+    k += 1
     stack = [it]
     while stack:
         x = stack.pop()
-        if id(x) in cid:
+        if uid(x) in cid:
             continue
-        cid[id(x)] = k
+        cid[uid(x)] = k
         for y in conn.GetConnectedItems(x):
-            if y.GetNetCode() == n and id(y) not in cid and y.GetClass() != 'ZONE':
+            if y.GetNetCode() == n and uid(y) not in cid and y.GetClass() != 'ZONE':
                 stack.append(y)
 
 out = {'items': [], 'zones': [], 'size': [MM(b.GetBoardEdgesBoundingBox().GetWidth()), MM(b.GetBoardEdgesBoundingBox().GetHeight())]}
@@ -60,7 +65,7 @@ for it in items:
     if not lays:
         continue
     c = clr(net) if net else 0.2
-    e = {'net': net, 'layers': lays, 'cl': cid.get(id(it), 0), 'via': it.GetClass() == 'PCB_VIA',
+    e = {'net': net, 'layers': lays, 'cl': cid.get(uid(it), 0), 'via': it.GetClass() == 'PCB_VIA',
          'ref': it.GetParentFootprint().GetReference() + '.' + it.GetNumber() if it.GetClass() == 'PAD' else ''}
     for key, inf in (('t', c + 0.1 + MARGIN), ('v', c + 0.3 + MARGIN), ('raw', 0)):
         d = {}

@@ -106,9 +106,28 @@ def move_parts(b, tracks):
     vdrop = set()
     for x, y in getattr(fixed_routes, 'DROP_GND_VIAS', ()):
         p = P(b, x, y); vdrop.add((p.x, p.y))
+    # decision 214: a rerouted net keeps only the copper fixed_routes.py lists (2 um grid match); the rest goes
+    rer = set(getattr(fixed_routes, 'REROUTED_NETS', ()))
+    listed = set()
+    for r in fixed_routes.TRACKS:
+        if r['net'] in rer:
+            pts = [P(b, *p) for p in r['pts']]
+            for a, e in zip(pts, pts[1:]):
+                listed.add(('t', r['net'], b.GetLayerID(r['layer']), *sorted([(a.x // 2000, a.y // 2000), (e.x // 2000, e.y // 2000)])))
+    for r in fixed_routes.VIAS:
+        if r['net'] in rer:
+            p = P(b, *r['at']); listed.add(('v', r['net'], p.x // 2000, p.y // 2000))
     gone = []   # tracks to remove (prep removes them in its one pass over the board's tracks: a second
     for t in tracks:  # GetTracks() after b.Remove() breaks KiCad's SWIG layer)
-        if t.GetNetname() in drop:
+        if t.GetNetname() in rer:
+            if t.GetClass() == 'PCB_VIA':
+                k = ('v', t.GetNetname(), t.GetPosition().x // 2000, t.GetPosition().y // 2000)
+            else:
+                a, e = t.GetStart(), t.GetEnd()
+                k = ('t', t.GetNetname(), t.GetLayer(), *sorted([(a.x // 2000, a.y // 2000), (e.x // 2000, e.y // 2000)]))
+            if k not in listed:
+                gone.append(t)
+        elif t.GetNetname() in drop:
             gone.append(t)
         elif t.GetNetname() == 'GND' and t.GetClass() == 'PCB_VIA' and \
                 any(abs(t.GetPosition().x - vx) < 2000 and abs(t.GetPosition().y - vy) < 2000 for vx, vy in vdrop):
@@ -193,6 +212,9 @@ def keepout(b, name, x1, y1, x2, y2):
 
 def prep(board, work):
     b = pcbnew.LoadBoard(board)
+    for z in list(b.Zones()):   # decision 214: each build decides its own slivers again
+        if z.GetIsRuleArea() and z.GetZoneName().startswith(SLIVER):
+            b.Remove(z)
     # T-0281 (Q-0076): the board as it is now is the reference for the GND fragment gate and the pour gates
     fill(b)
     weak = gnd_weak(b)
@@ -502,6 +524,9 @@ def finish(b, work, out, nw, nv):
     gf0 = gnd_fragments(b, work)
     if gf0['stitched']:
         fill(b)
+    sl = drop_slivers(b, work)   # decision 206/214: new GND fragments that cannot get 2 ties are not filled
+    if sl:
+        fill(b)
     base = json.load(open(os.path.join(work, 'baseline.json')))
     now = islands(b)
     split = pour_check(base, now)
@@ -514,7 +539,7 @@ def finish(b, work, out, nw, nv):
     if th:
         split['thermal'] = th
     pcbnew.SaveBoard(out + '.kicad_pcb', b)
-    json.dump({'split': split, 'stitch': st, 'removed': rs, 'pruned': pr, 'tracks': nw, 'vias': nv,
+    json.dump({'split': split, 'stitch': st, 'slivers': sl, 'removed': rs, 'pruned': pr, 'tracks': nw, 'vias': nv,
                'gnd_new': gf0['new'], 'frag_vias': gf0['vias_added'], 'islands': now},
               open(out + '.json', 'w'), indent=1)
     print('pours:', 'whole' if not split else 'SPLIT %s' % split, '| stitch vias', st, '| cleaned', rs,
@@ -908,6 +933,34 @@ def gnd_fragments(b, work, add=True):
             if n < FRAG_MIN_TIES:
                 new_weak.append(rec)
     return {'new': new, 'new_weak': new_weak, 'stitched': bool(added), 'vias_added': added}
+
+
+SLIVER = 'sliver-'   # fill keep-outs over unstitched new GND fragments (decision 214); prep removes the old ones
+
+
+def drop_slivers(b, work):
+    """new weak GND-F/B/In2 fragments that the stitcher could not tie twice get a fill keep-out on their layer (rule
+    area: no zone fill, tracks/vias/pads allowed) over the island itself, so they are not filled (decision 206:
+    unstitched slivers are removed). Returns [[zone, bbox, area]]. A sliver that carried a connection shows up as an
+    unconnected item, and the build then keeps the board it has."""
+    ref = json.load(open(os.path.join(work, 'gnd_ref.json')))['weak']
+    ties = _gnd_ties(b)
+    out = []
+    for name, lay in FRAG_ZONES.items():
+        old = [_poly(o) for o in ref.get(name, [])]
+        for s in list(_islands_of(b, name)):
+            if sum(1 for p in ties if s.Contains(p)) >= FRAG_MIN_TIES:
+                continue
+            if any((lambda c: (c.BooleanIntersection(o), c.Area() > 0.9 * s.Area())[1])(pcbnew.SHAPE_POLY_SET(s)) for o in old):
+                continue
+            k = pcbnew.SHAPE_POLY_SET(s)
+            k.Inflate(M(0.02), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.01)); k.thisown = 0
+            z = pcbnew.ZONE(b); z.SetIsRuleArea(True)
+            z.SetDoNotAllowTracks(False); z.SetDoNotAllowVias(False); z.SetDoNotAllowZoneFills(True)
+            z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
+            z.SetLayer(lay); z.SetOutline(k); z.SetZoneName('%s%d' % (SLIVER, len(out))); b.Add(z)
+            out.append([name, _bbox_mm(b, s), round(s.Area() / 1e12, 2)])
+    return out
 
 
 def ref_check(ref, now):
