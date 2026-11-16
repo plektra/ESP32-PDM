@@ -1,6 +1,18 @@
 # pdm-4ch status
 
-Updated: 2026-11-16 (decision 214: router fixes, GND-In2 fragment gate, sliver removal, maze pass + rip-up: 37 -> 32 unconnected)
+Updated: 2026-11-16 (decision 214: router fixes, west divider block moved east, maze passes + rip-up: 37 -> 29 unconnected)
+
+**2026-11-16 (decision 214 part move, owner – interactive):** 32 -> 29 unconnected, 0 DRC errors, parity 0, every pour
+whole. The west divider block moved east (decision 212 (1), `PLACE.update` in `fixed_routes.py`): the SWIN2-4 load
+pairs R4/R46, R7/R47, R8/R48 (their midpoints join nothing else) next to the SWIN rows by D16-D19, and R1, R2, R31,
+R33, R38 into the strip x 65-67 west of the CAN barrier. D23 stays (no SOD-123 spot east; SW4 is routed). Copper the
+move made illegal (SWIN1/2/4 row tracks, an SW3_IO via, a +3V3 via) or dangling was removed from `fixed_routes.py`
+and rerouted; R2.1 got a GND via. Maze pass 2 (pruned geometry) closed SWIN2-4 and IO7; rip-up closed +3V3 (with
+SW4) and IO11 (with IO8). The rip-up loop then found no further improving trial.
+- Pipeline lessons: the router geometry must be pruned of dangling copper, and that copper deleted from
+  `fixed_routes.py` too (else the build re-adds it over the new routes); `KEEP_TRACKS` protects the R60.2 stub.
+- Open (29): GND 3; IO6, IO17, Q4-B, F2-Pad1 2 each; DEN, EN, IO0, IO11, IO18, NTC, SW1_IO, SW2, SW2_IO, SW3_IO, SW4,
+  SW4_IO, SW_IN1-3, VBAT_SENSE, D3-A, Q4-E 1 each.
 
 **2026-11-15/16 (decision 214, owner – interactive):** the routing method is reworked; 37 -> 32 unconnected, 0 DRC
 errors, parity 0, every pour whole (VS-In2 untouched). What changed and why:
