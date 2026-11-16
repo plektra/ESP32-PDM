@@ -63,6 +63,90 @@ def rule_area(b, name, layers, poly, tracks=True, vias=True):
     b.Add(z)
 
 
+CREEP_MM = 1.0        # EMC rule 7: >= 1.0 mm from VS/VBAT_IN to every other net on the outer layers
+CREEP_ESCAPE_MM = 0.5 # foreign pads inside that band stay reachable (as the pour escapes, decision 164)
+
+
+def creepage_keepouts(b):
+    """Trial 3 (decision 214): Quilter has no creepage rule, and the trial-1 candidate ran +3V3, SW4_IO, VBAT_SENSE
+    and GND tracks within 1.0 mm of VS copper (KiCad DRC does not see it). Per outer layer one keep-out (no tracks,
+    no vias): every VS/VBAT_IN pad, track, via and pour outline grown by CREEP_MM, minus CREEP_ESCAPE_MM round every
+    foreign pad. Named 'pour-creepage-*' so clear_fixed() cuts holes round the fixed copper already inside it."""
+    hv = ('VS', '/VBAT_IN')
+    M = pcbnew.FromMM
+    n = 0
+    for lay in (pcbnew.F_Cu, pcbnew.B_Cu):
+        s = pcbnew.SHAPE_POLY_SET()
+        esc = pcbnew.SHAPE_POLY_SET()
+        for fp in b.GetFootprints():
+            for p in fp.Pads():
+                if not p.IsOnLayer(lay):
+                    continue
+                if p.GetNetname() in hv:
+                    p.TransformShapeToPolygon(s, lay, M(CREEP_MM), M(0.02), pcbnew.ERROR_OUTSIDE)
+                else:
+                    p.TransformShapeToPolygon(esc, lay, M(CREEP_ESCAPE_MM), M(0.02), pcbnew.ERROR_OUTSIDE)
+        for t in b.GetTracks():
+            if t.GetNetname() in hv and t.IsOnLayer(lay):
+                t.TransformShapeToPolygon(s, lay, M(CREEP_MM), M(0.02), pcbnew.ERROR_OUTSIDE)
+        for z in b.Zones():
+            if not z.GetIsRuleArea() and z.GetNetname() in hv and z.IsOnLayer(lay):
+                o = pcbnew.SHAPE_POLY_SET(z.Outline())
+                o.Inflate(M(CREEP_MM), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.02))
+                s.Append(o)
+        s.Simplify()
+        esc.Simplify()
+        s.BooleanSubtract(esc)
+        s.Fracture()
+        if not s.OutlineCount():
+            continue
+        z = pcbnew.ZONE(b)
+        z.SetIsRuleArea(True)
+        z.SetZoneName('pour-creepage-%s' % b.GetLayerName(lay))
+        z.SetLayer(lay)
+        z.SetDoNotAllowTracks(True); z.SetDoNotAllowVias(True); z.SetDoNotAllowZoneFills(False)
+        z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
+        s.thisown = 0
+        z.SetOutline(s)
+        z.SetLocked(True)
+        b.Add(z)
+        n += 1
+    return n
+
+
+def split_rule_areas(b):
+    """KiCad saves only the first outline of a zone. clear_fixed() leaves several outlines in some keep-outs
+    (pour-VS-F-drain, pour-VS-B-spine and the creepage areas fell apart into pieces), and the saved file then kept a
+    0.7 mm diamond of each: trials 1 and 2 ran without those keep-outs. Each outline becomes its own rule area."""
+    split = []
+    for z in b.Zones():
+        if z.GetIsRuleArea() and z.Outline().OutlineCount() > 1:
+            split.append(z)
+    n = 0
+    for z in split:
+        o = z.Outline()
+        for i in range(o.OutlineCount()):
+            s = pcbnew.SHAPE_POLY_SET()
+            s.AddOutline(o.COutline(i))
+            for h in range(o.HoleCount(i)):
+                s.AddHole(o.CHole(i, h))
+            nz = pcbnew.ZONE(b)
+            nz.SetIsRuleArea(True)
+            nz.SetZoneName('%s#%d' % (z.GetZoneName(), i))
+            nz.SetLayerSet(z.GetLayerSet())
+            nz.SetDoNotAllowTracks(z.GetDoNotAllowTracks()); nz.SetDoNotAllowVias(z.GetDoNotAllowVias())
+            nz.SetDoNotAllowZoneFills(z.GetDoNotAllowZoneFills())
+            nz.SetDoNotAllowPads(False); nz.SetDoNotAllowFootprints(False)
+            s.thisown = 0
+            nz.SetOutline(s)
+            nz.SetLocked(True)
+            b.Add(nz)
+            n += 1
+    for z in split:
+        b.Remove(z)
+    return len(split), n
+
+
 def main(out):
     os.makedirs(out, exist_ok=True)
     for f in os.listdir(PROJ):
@@ -114,13 +198,14 @@ def main(out):
         if ko is not None:
             rb.add_pour_keepout(b, z, ko)
             npk += 1
+    ncr = creepage_keepouts(b)
     holes = rb.clear_fixed(b)   # holes round the fixed copper already inside them (as the build's router export)
     own = set(rb.KEEPOUTS) | {'edge0', 'edge1', 'edge2', 'edge3'}
     for z in b.Zones():
         if z.GetIsRuleArea() and (z.GetZoneName() in own or z.GetZoneName().startswith('pour-')):
             z.SetDoNotAllowZoneFills(False)   # existing pours stay; only new tracks/vias are barred
             z.SetLocked(True)
-    print('pour keep-outs', npk, '| router keep-outs, holes round fixed copper:', holes)
+    print('pour keep-outs', npk, '| creepage keep-outs', ncr, '| router keep-outs, holes round fixed copper:', holes)
     # Quilter takes the file's board-wide minimums as absolute limits; ours are 0 (the Default class 0.2/0.2 rules)
     ds = b.GetDesignSettings()
     ds.m_MinClearance = pcbnew.FromMM(MIN_MM)
@@ -131,6 +216,7 @@ def main(out):
     print('locked tracks below %.2f mm:' % MIN_MM, [(t.GetNetname(), pcbnew.ToMM(t.GetWidth())) for t in narrow])
     ds.m_TrackMinWidth = pcbnew.FromMM(MIN_MM)
     print('board minimums: clearance %.2f mm, track width %.2f mm' % (MIN_MM, pcbnew.ToMM(ds.m_TrackMinWidth)))
+    print('rule areas split into one zone per outline (zones, pieces):', split_rule_areas(b))
     pcbnew.SaveBoard(os.path.join(out, NAME + '.kicad_pcb'), b)
     ox, oy = rb.origin(b)
     json.dump({'tracks': sum(1 for t in b.GetTracks() if t.GetClass() != 'PCB_VIA'),
@@ -189,7 +275,8 @@ Generated by `hardware/pdm-4ch/scripts/quilter_export.py`. Do not edit; re-run t
    keep-outs, the module antenna keep-out, and the build's router keep-outs on all four layers – `antenna`,
    `can-barrier`, `can-barrier-top` (together they seal the GND_CAN side: Quilter has no isolation or creepage rule),
    `jp30`, `jp1`, `edge0`–`edge3` – plus no tracks on In1, no tracks/vias on In1/In2 under the antenna, and a
-   `pour-<name>` keep-out over every power pour (so new tracks cannot cut a pour; VS-In2 only over the PROFET
+   `pour-<name>` keep-out over every power pour, and `pour-creepage-F.Cu`/`-B.Cu` (trial 3: 1.0 mm creepage
+   round all VS/VBAT_IN copper on the outer layers, EMC rule 7, with 0.5 mm escapes round foreign pads) (so new tracks cannot cut a pour; VS-In2 only over the PROFET
    thermal-via fields and its edge band, with the marked exit window open). Toggle the "Pours" layer in the preview to
    confirm the preserved pours were parsed.
 6. **Circuit Comprehension (physics constraints):**
