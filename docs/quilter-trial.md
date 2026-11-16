@@ -185,3 +185,20 @@ open the wall.
 So the wall is the floorplan: about a dozen logic parts are on the power side of a VS/J6 wall that has no free gate.
 Rip-up helps only the 20 track-blocked links. The 12 wall links need a gate (a part move, a planned crossing of the
 VS block, a J6 move) or a ruling on where the 1.0 mm rule applies: one-way doors for the owner.
+
+## Trial 3 (submitted 2026-11-16 22:19)
+
+Trial 2 ended with the one candidate checked above (not usable). Both trials ran without two keep-outs they were
+meant to have: KiCad saves only a zone's first outline, and after `clear_fixed()` punched holes the VS-F-drain,
+VS-B-spine and VS-In2 pour keep-outs had several outlines, so the files held a 0.7 mm diamond instead
+(`split_rule_areas()` in `quilter_export.py` now writes one zone per outline). That likely explains trial 2's VS-GND
+shorts and keep-out hits.
+
+Trial 3 starts from the decision 214 board (29 unconnected: router fixes, the west divider block moved east, rip-up).
+New in the export: `pour-creepage-F.Cu`/`-B.Cu`, 1.0 mm round all VS/VBAT_IN copper on the outer layers (EMC rule 7,
+which trial 1 broke on 4 nets), with 0.5 mm escapes round foreign pads. Settings as before: stackup from the file,
+internal copper preserved, minimums 0.2/0.2, diff pair and the 72 bypass entries removed, no power pour, GND primary,
+20 preserved pours, Net Widths 0.4 mm for GND, D3-A, F2-Pad1 on every layer (12 rows). 223 pins to route.
+Job "pdm-4ch trial 3 (moved parts, creepage keep-outs)", `6afb63a9dfae511781423da6`, same project. Export in
+`~/Downloads/pdm-4ch-quilter-upload-3`. Download candidates to `~/Downloads/pdm-4ch-quilter-candidates-3/`; any import
+must still pass `build_routing.sh` and amends 163/181 (owner).
