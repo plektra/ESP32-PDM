@@ -574,6 +574,10 @@ def prune(b):
     unconnected count cannot rise. Returns the removed items (net, kind, layer, mm board-relative)."""
     ox, oy = origin(b)
     out = []
+    keep = set()   # decision 214: deliberate escape stubs (fixed_routes.KEEP_TRACKS) stay even while dangling
+    for n, a, e in getattr(fixed_routes, 'KEEP_TRACKS', ()):
+        pa, pe = P(b, *a), P(b, *e)
+        keep.add((n, *sorted([(pa.x // 2000, pa.y // 2000), (pe.x // 2000, pe.y // 2000)])))
     # KiCad 10 pcbnew: BOARD::Remove() of a held track breaks the SWIG track list, and reusing a connectivity object
     # after a via was deleted segfaults; so items are deleted (BOARD::Delete) and connectivity is rebuilt per pass
     for _ in range(20):
@@ -590,6 +594,8 @@ def prune(b):
                 if sum(1 for l in ALL_CU if conn.IsConnectedOnLayer(t, l)) < 2 and via_touches(b, t) <= 1:
                     gone.append(t)
             elif conn.TestTrackEndpointDangling(t, True):   # track_dangling: a free end
+                if (n, *sorted([(t.GetStart().x // 2000, t.GetStart().y // 2000), (t.GetEnd().x // 2000, t.GetEnd().y // 2000)])) in keep:
+                    continue
                 gone.append(t)
         if not gone:
             break

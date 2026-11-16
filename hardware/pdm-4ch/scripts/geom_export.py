@@ -65,7 +65,7 @@ for it in items:
     if not lays:
         continue
     c = clr(net) if net else 0.2
-    e = {'net': net, 'layers': lays, 'cl': cid.get(uid(it), 0), 'via': it.GetClass() == 'PCB_VIA',
+    e = {'net': net, 'layers': lays, 'cl': cid.get(uid(it), 0), 'via': it.GetClass() == 'PCB_VIA', 'uuid': uid(it),
          'ref': it.GetParentFootprint().GetReference() + '.' + it.GetNumber() if it.GetClass() == 'PAD' else ''}
     for key, inf in (('t', c + 0.1 + MARGIN), ('v', c + 0.3 + MARGIN), ('raw', 0)):
         d = {}
