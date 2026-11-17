@@ -13,3 +13,4 @@ __pycache__/
 # Agent worktrees and local settings
 .claude/worktrees/
 .claude/settings.local.json
+hardware/pdm-4ch/scripts/pf_core.so

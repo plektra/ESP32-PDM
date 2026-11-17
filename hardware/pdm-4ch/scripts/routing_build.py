@@ -26,7 +26,12 @@ ALL_CU = (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.B_Cu)
 # keep-outs on all copper layers for the router (mm, board-relative): antenna strip, CAN barrier, JP30, JP1
 KEEPOUTS = {
     'antenna': (45.85, 0.0, 92.5, 4.5),
-    'can-barrier': (67.5, 47.3, 75.7, 75.1),
+    # decision 215: PCB rule 9 needs 8.1 mm only across the U5 body (y >= 53.3) and 4.0 mm elsewhere. Above the body
+    # the band is 4.05 mm wide (GND_CAN starts at x 75.65), so x 67.5-71.6, y 47.3-53.2 is open to logic copper.
+    # South of U5 the same holds from y 66.6 (4.0 mm from C70's GND_CAN pad). barrier_gnd() extends the GND pours.
+    'can-barrier': (67.5, 53.2, 75.7, 66.6),
+    'can-barrier-n': (71.6, 47.3, 75.7, 53.2),
+    'can-barrier-s': (71.6, 66.6, 75.7, 75.1),
     'can-barrier-top': (75.7, 47.3, 100.1, 51.4),
     'jp30': (35.1, 46.0, 41.1, 48.0),
     'jp1': (29.05, 60.6, 29.55, 61.8),
@@ -190,6 +195,33 @@ def notch_vs_in2(b):
     return 'cut %.2f mm2' % (probe.Area() / 1e12)
 
 
+BARRIER_GND = ((47.4, 53.2), (66.6, 74.0))   # y ranges where the GND pours come 4.05 mm closer to the CAN island
+
+
+def barrier_gnd(b):
+    """Decision 215: the GND pours on all four layers stopped 8.1 mm short of the GND_CAN island along its whole
+    west side. PCB rule 9 needs that only across the U5 body; elsewhere 4.0 mm. Extend each GND outline by 4.05 mm
+    (to x 71.65 outside, 71.60 inside) for the BARRIER_GND y ranges. Idempotent."""
+    done = 0
+    for z in b.Zones():
+        if z.GetIsRuleArea() or z.GetNetname() != 'GND' or z.GetZoneName() not in ('GND-F', 'GND-B', 'GND-In1', 'GND-In2'):
+            continue
+        ol = pcbnew.SHAPE_POLY_SET(z.Outline())
+        xi = 67.55 if 'In' in z.GetZoneName() else 67.6
+        add = pcbnew.SHAPE_POLY_SET()
+        for y0, y1 in BARRIER_GND:
+            a, e = P(b, xi - 0.1, y0 if y0 > 47.4 or 'In' not in z.GetZoneName() else 47.35), P(b, xi + 4.05, y1)
+            add.BooleanAdd(rect_poly(a.x, a.y, e.x, e.y))
+        probe = pcbnew.SHAPE_POLY_SET(add); probe.BooleanSubtract(ol)
+        if probe.Area() < M(0.01) * M(0.01):
+            continue
+        ol.BooleanAdd(add)
+        assert ol.OutlineCount() == 1
+        ol.thisown = 0
+        z.SetOutline(ol); done += 1
+    return done
+
+
 def rect_poly(x1, y1, x2, y2):
     ps = pcbnew.SHAPE_POLY_SET(); ps.NewOutline()
     for x, y in ((x1, y1), (x2, y1), (x2, y2), (x1, y2)):
@@ -237,7 +269,7 @@ def prep(board, work):
             z.SetLocked(True)
     moved, gone = move_parts(b, tracks)
     gone = {id(t) for t in gone}
-    print('prep: VS-In2 exit notch', notch_vs_in2(b), flush=True)
+    print('prep: VS-In2 exit notch', notch_vs_in2(b), '| barrier GND outlines extended', barrier_gnd(b), flush=True)
     removed = 0
     for t in tracks:
         if not t.IsLocked() or id(t) in gone:
