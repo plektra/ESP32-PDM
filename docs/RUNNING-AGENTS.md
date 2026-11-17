@@ -5,9 +5,9 @@ Run every command from the repo folder.
 
 ## Lay out a board
 
-`python3 tools/orchestrate.py pcb pdm-4ch`, then start a run as below. Six layout stages run one after another, each
-checked (DRC, schematic parity, outline, keep-outs) and landed on `main`; an EMC and a validator review follow. Open
-`hardware/pdm-4ch/ESP32-PDM-4CH.kicad_pcb` in KiCad to look, but do not save it while a run is going.
+Layout is not run by the agents (decision 216). Start an interactive session (`/board pdm-4ch`, phase layout): it
+places, routes and checks the whole board in one go. When `kpcb.py <board> drc` shows 0 errors, 0 unconnected and
+parity 0, queue the layout reviews here (`docs/AUTONOMY.md`, "What the orchestrator is for").
 
 ## See what is planned and done
 

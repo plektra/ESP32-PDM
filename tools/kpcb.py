@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scripted PCB editing and checks for the pcb-fixer agent (decision 130). Runs under KiCad's bundled Python
+"""Scripted PCB editing and checks for interactive layout sessions (decision 216). Runs under KiCad's bundled Python
 (it re-runs itself there when `pcbnew` is missing). Every command takes the board name first.
 
   python3 tools/kpcb.py pdm-4ch sync                 import/refresh footprints and nets from the schematic

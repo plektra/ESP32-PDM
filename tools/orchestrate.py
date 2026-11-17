@@ -66,7 +66,6 @@ FIX_SCOPES = BOARDS + ('shared', 'sync')
 SYNC_FILES = ('docs/ARCHITECTURE.md', 'docs/design-notes.md', 'tools/heat_budget.py') + tuple(
     f'hardware/{b}/STATUS.md' for b in BOARDS)
 BOARD_SCH = {'pdm-4ch': 'hardware/pdm-4ch/ESP32-PDM-4CH.kicad_sch', 'pdm-hc2': 'hardware/pdm-hc2/ESP32-PDM-HC2.kicad_sch'}
-PCB_FILES = {'pdm-4ch': 'ESP32-PDM-4CH.kicad_pcb', 'pdm-hc2': 'ESP32-PDM-HC2.kicad_pcb'}
 SHARED_SHEETS = ('analog_sw', 'can', 'power-usb')
 DECISIONS = Path('docs/decisions.md')
 # Runnable roles: report name, model and per-task budget (USD) for normal and deep runs; `edits`: may change the
@@ -77,11 +76,12 @@ ROLES = {
     'cost-controller': dict(kind='cost', model=('sonnet', 'opus'), budget=(8.0, 25.0)),
     'planner': dict(kind='plan', model=('opus', 'opus'), budget=(6.0, 6.0)),
     'board-fixer': dict(kind='fix', model=('opus', 'opus'), budget=(20.0, 20.0), edits=True),
-    # Lays out one board's PCB with tools/kpcb.py, one stage per task (decision 130); gated by pcb_gates.
-    'pcb-fixer': dict(kind='fix', model=('opus', 'opus'), budget=(25.0, 25.0), edits=True, pcb=True),
 }
+# PCB layout (placement, copper, routing, silkscreen) is not an agent role: it is done in interactive /board sessions
+# that see the whole board (decision 216, retires the pcb-fixer of decision 130). Layout items wait there.
+LAYOUT_UNTIL = 'layout'
 REVIEWERS = ('validator', 'emc-reviewer', 'cost-controller')
-FIX_ROLES = ('planner', 'board-fixer', 'pcb-fixer')  # off with `run --no-fixes`
+FIX_ROLES = ('planner', 'board-fixer')  # off with `run --no-fixes`
 TASK_TIMEOUT = 90 * 60  # seconds
 # Never allowed to an unattended agent, whatever its tool list says. Roles without `edits` also lose Edit.
 DENIED_TOOLS = ['Bash(git commit:*)', 'Bash(git push:*)', 'Bash(git reset:*)', 'Bash(git checkout:*)',
@@ -184,7 +184,7 @@ def runnable(q):
 
 def task_locks(t):
     """One board-fixer per board at a time (a shared or sync package holds both); one planner at a time."""
-    if t['role'] in ('board-fixer', 'pcb-fixer'):  # schematic and PCB of one board never change at once
+    if t['role'] == 'board-fixer':
         return set(BOARDS) if t['scope'] in ('shared', 'sync') else {t['scope']}
     return {'plan'} if t['role'] == 'planner' else set()
 
@@ -278,7 +278,7 @@ def mermaid_label(text):
 def write_roadmap(root, q):
     """docs/ROADMAP.md: what the agents will change next, what they changed, how the boards grew. Generated."""
     tasks = q['tasks']
-    pkgs = [t for t in tasks if t['role'] in ('board-fixer', 'pcb-fixer')]
+    pkgs = [t for t in tasks if t['role'] == 'board-fixer']
     verify = [t for t in tasks if t.get('verify')]
     upcoming = [t for t in pkgs if t['state'] in ('running', 'ready')]
     done = [t for t in pkgs if t['state'] == 'done']
@@ -492,11 +492,6 @@ CHECK_HINT = ("Before your final message run `python3 tools/report_check.py`: th
               "in only when it says OK.\n")
 FIX_HINT = ("Before writing the report run `python3 tools/fix_check.py --scope $PDM_SCOPE --refs <refs you touched>`: "
             "the orchestrator's own merge gates. Hand in only when it says OK.\n")
-PCB_HINT = ("Edit the board only with `python3 tools/kpcb.py <board> …` (sync, list, place, zone, track, via, delete, "
-            "text, fill, drc, render; `--help` shows each). Look at your work with `kpcb.py <board> render "
-            "$CLAUDE_JOB_DIR/board.png` and read the image. Never touch the schematic, lib/ or the outline. Before "
-            "the report run `python3 tools/fix_check.py --scope $PDM_SCOPE` – the orchestrator's own gates for this "
-            "stage. Hand in only when it says OK.\n")
 FACTS_DIR = 'docs/part-facts'
 FACTS_MAX = 15  # part_facts.py lookups per agent attempt
 FIXER_MODEL = None  # run --fixer-model
@@ -534,14 +529,6 @@ def prompt_for(t, report, inputs=None):
         return (common + f"The approved items to plan are in `{inputs}` (JSON). Write your report to exactly "
                 f"`{report}` and end it with the plan block. Change no other file in the repository. {CHECK_HINT}Your final "
                 f"message: the report path and the number of packages, deferred items and decision rows.")
-    if kind == 'fix' and t['role'] == 'pcb-fixer':
-        return (common + f"PCB stage {t['id']}: {t.get('title', '')} (board {t['scope']}).\n"
-                f"What this stage does:\n{t.get('brief', '')}\n"
-                + (f"Approved items for this stage are in `{inputs}` (JSON).\n" if t.get('items') else '')
-                + PCB_HINT + CHECK_HINT +
-                f"Write your report to exactly `{report}` and end it with the fix block (`done`/`blocked` list the "
-                f"item ids, empty when the stage has none; `refs`: the parts you placed or moved). Your final "
-                f"message: the report path and what the stage did.")
     if kind == 'fix':
         return (common + f"Work package {t['id']}: {t.get('title', '')} (scope {t['scope']}).\n"
                 f"Brief from the planner:\n{t.get('brief', '')}\n"
@@ -823,11 +810,9 @@ def shared_sheets_equal(wt):
     return [s for s, a, b in zip(SHARED_SHEETS, norm('pdm-4ch'), norm('pdm-hc2')) if a != b]
 
 
-def fix_allowed(path, scope, role='board-fixer'):
-    if role == 'pcb-fixer':  # the board file and its build scripts (decision 163), plus notes; never the schematic or lib/
-        d = f'hardware/{scope}/'
-        return (path.startswith(d) and path.endswith(('.kicad_pcb', '.kicad_pro', 'STATUS.md'))) or \
-            path.startswith(f'{d}scripts/') or path == 'docs/design-notes.md'
+def fix_allowed(path, scope):
+    if path.endswith('.kicad_pcb') or re.match(r'hardware/[^/]+/scripts/', path):
+        return False  # the layout and its build scripts belong to interactive sessions (decision 216)
     if scope == 'sync':
         return path in SYNC_FILES
     boards = BOARDS if scope == 'shared' else (scope,)
@@ -839,15 +824,14 @@ def fix_allowed(path, scope, role='board-fixer'):
 
 def fix_gates(wt, t, base, after, block, changed, report):
     """Everything a board-fixer change must pass before it is merged. Returns the list of failures."""
-    pcb = t.get('role') == 'pcb-fixer'
-    fails, declared = [], (set() if pcb else set(block.get('refs') or []))  # a PCB stage changes no netlist
+    fails, declared = [], set(block.get('refs') or [])
     for p in changed:
         if p == report or p.endswith('.kicad_prl'):
             continue
         tracked = bool(git('ls-files', '--', p, cwd=wt))
         if p.lower().endswith('.pdf'):
             fails.append(f'adds a PDF ({p}); public repo')
-        elif tracked and not fix_allowed(p, t['scope'], t.get('role', 'board-fixer')):
+        elif tracked and not fix_allowed(p, t['scope']):
             fails.append(f'changed {p}, outside the package scope {t["scope"]}')
     for b in BOARDS:
         if after[b] is None:
@@ -868,60 +852,6 @@ def fix_gates(wt, t, base, after, block, changed, report):
         fails.append('shared sheets differ between the boards: ' + ', '.join(differ))
     if t['scope'] == 'sync':
         fails += sync_gates(wt, changed)
-    if pcb:
-        fails += pcb_gates(wt, t)
-    return fails
-
-
-Q_FOR_GATES = None  # the queue, so pcb_gates can see the owner's rulings on a package's items
-
-
-def kpcb(wt, board, *args):
-    """tools/kpcb.py in a worktree; returns its first output line parsed as JSON (None on failure)."""
-    r = subprocess.run([sys.executable, str(wt / 'tools' / 'kpcb.py'), board, *args], cwd=wt,
-                       capture_output=True, text=True)
-    line = r.stdout.strip().splitlines()[0] if r.stdout.strip() else ''
-    try:
-        return json.loads(line)
-    except json.JSONDecodeError:
-        return None
-
-
-def pcb_gates(wt, t):
-    """Gates of a pcb-fixer stage (decision 130): schematic parity, no DRC errors on the board, outline and hole
-    keep-outs unchanged, nothing SMT on the bottom (decision 122), no part in a hole keep-out (decision 123); the
-    placement stages leave no part parked, the routing stage leaves nothing unconnected."""
-    board, fails = t['scope'], []
-    rel = Path(f'hardware/{board}/{PCB_FILES[board]}')
-    if not (wt / rel).exists():
-        return [f'{rel} missing']
-    d = kpcb(wt, board, 'drc', '--show', '0')
-    if d is None:
-        return ['tools/kpcb.py drc failed (run it yourself to see why)']
-    if d['parity']:
-        fails.append(f"schematic parity: {d['parity']} differences (run `kpcb.py {board} sync`)")
-    if d['errors']:
-        fails.append(f"DRC: {d['errors']} errors on the board (`kpcb.py {board} drc` lists them)")
-    if d['bottom_smt']:
-        fails.append(f"SMT parts on the bottom (decision 122): {', '.join(d['bottom_smt'][:10])}")
-    if d['hole_keepout']:
-        fails.append(f"parts in a hole keep-out (decision 123): {', '.join(d['hole_keepout'][:10])}")
-    if (t.get('placed') or t.get('final')) and d['parked']:
-        fails.append(f"{len(d['parked'])} parts still off the board: {', '.join(d['parked'][:12])}")
-    if t.get('final') and d['unconnected']:
-        fails.append(f"{d['unconnected']} unconnected items left")
-    ruled = t.get('outline_ok') or any(find_task(Q_FOR_GATES, i).get('ruling') for i in t.get('items', [])
-                                       if Q_FOR_GATES and any(x['id'] == i for x in Q_FOR_GATES['tasks']))
-    base = subprocess.run(['git', 'show', f'HEAD:{rel}'], cwd=wt, capture_output=True, text=True)
-    if base.returncode == 0 and not ruled:
-        tmp = wt / rel.with_name('.gate-base.kicad_pcb')
-        tmp.write_text(base.stdout)
-        try:
-            before, after = kpcb(wt, board, '--pcb', str(tmp), 'outline'), kpcb(wt, board, 'outline')
-        finally:
-            tmp.unlink(missing_ok=True)
-        if before != after:
-            fails.append('board outline or hole keep-outs changed (decisions 123, 128; owner only)')
     return fails
 
 
@@ -966,7 +896,7 @@ def maybe_sync(q):
     """Queue a sync sweep of the "For /system" lists once fixes have settled and the lists changed since the last
     sweep. The agent does the two-way bookkeeping and leaves design choices for an interactive /system session."""
     busy = ('ready', 'running')
-    if any(t['role'] in ('planner', 'board-fixer', 'pcb-fixer') and t['state'] in busy for t in q['tasks']):
+    if any(t['role'] in FIX_ROLES and t['state'] in busy for t in q['tasks']):
         return False
     if any(t['role'] in REVIEWERS and (t['state'] == 'running' or (t['state'] == 'ready' and deps_done(q, t)))
            for t in q['tasks']):
@@ -1040,7 +970,7 @@ def apply_plan(q, t, plan):
     """Planner result: packages become board-fixer tasks, deferred items wait, owner rulings become decisions,
     and each touched board gets a verify validator after its packages."""
     items = {i: find_task(q, i) for i in t.get('items', [])}
-    seen, pkg_ids = set(), {}
+    seen, pkg_ids, deferred = set(), {}, 0
     for p in plan.get('packages', []):
         if p.get('scope') not in FIX_SCOPES:
             raise ValueError(f"package {p.get('id')}: bad scope {p.get('scope')}")
@@ -1048,8 +978,12 @@ def apply_plan(q, t, plan):
         if not tasks:
             continue
         seen |= set(tasks)
-        role = 'pcb-fixer' if p.get('role') == 'pcb-fixer' and p['scope'] in BOARDS else 'board-fixer'
-        pkg = dict(id=new_id(q, 'T'), role=role, scope=p['scope'], state='ready', created=today(),
+        if p.get('role') == 'pcb-fixer':  # layout is interactive (decision 216): the item waits for that session
+            for i in tasks:
+                items[i].update(state='deferred', until=LAYOUT_UNTIL, reason=p.get('brief') or p.get('title', ''))
+            deferred += len(tasks)
+            continue
+        pkg = dict(id=new_id(q, 'T'), role='board-fixer', scope=p['scope'], state='ready', created=today(),
                    title=p.get('title', ''), brief=p.get('brief', ''), items=tasks, plan=t['id'], depends_on=[])
         pkg_ids[p.get('id')] = pkg
         q['tasks'].append(pkg)
@@ -1058,7 +992,6 @@ def apply_plan(q, t, plan):
     for p in plan.get('packages', []):
         if p.get('id') in pkg_ids:
             pkg_ids[p['id']]['depends_on'] = [pkg_ids[a]['id'] for a in p.get('after', []) if a in pkg_ids]
-    deferred = 0
     for d in plan.get('deferred', []):
         if d.get('task') in items and d['task'] not in seen:
             seen.add(d['task'])
@@ -1084,38 +1017,6 @@ def apply_plan(q, t, plan):
                                    recheck=ROLES[role]['kind']))
     left = [i for i in items if i not in seen]
     return dict(packages=len(pkg_ids), deferred=deferred, decisions=numbers, unplanned=left)
-
-
-def stage_blocks(q, t, block, report):
-    """A pcb-fixer stage has no queued items of its own, so what it reports as blocked becomes new items: one-way
-    blocks are owner questions in the inbox, two-way blocks approved items for the planner (a board-fixer or
-    pcb-fixer package). A stage that could not pass its gates waits for them and then runs again. Returns the
-    new item ids."""
-    mine = set(t.get('items', []))
-    new = []
-    for b in block.get('blocked', []):
-        key = b.get('task') or b.get('id') or ''
-        if key in mine or not b.get('reason'):
-            continue
-        one_way = b.get('door') == 'one-way'
-        f = dict(id=key or f"{t['id']}-{len(new) + 1}", kind='question' if one_way else 'finding',
-                 severity='MAJOR', board=t['scope'], location=f"PCB layout ({t['id']})", door=b.get('door', 'two-way'),
-                 summary=b['reason'][:300], fix=b.get('question') or b['reason'], default=b.get('default'))
-        if any(x.get('finding', {}).get('summary') == f['summary'] for x in q['tasks'] if x.get('finding')):
-            continue  # already asked (a repeated attempt)
-        s = dict(id=new_id(q, 'T'), role='board-fix', scope=t['scope'], created=today(), finding=f,
-                 source=dict(report=str(report), finding=f['id']), door=f['door'])
-        if one_way:
-            s.update(state='blocked-owner', question=new_id(q, 'Q'),
-                     why_big=[f"layout stage {t['id']}: {b.get('reason', '')[:200]}"])
-        else:
-            s.update(state='parked')
-        q['tasks'].append(s)
-        new.append(s['id'])
-    if new:
-        t['waits_for'] = sorted(set(t.get('waits_for', [])) | set(new))
-        t['depends_on'] = sorted(set(t.get('depends_on', [])) | set(new))
-    return new
 
 
 def apply_fix(q, t, block, merged):
@@ -1227,8 +1128,7 @@ def run_task(q, t, budget_left, dry_run=False):
     log = LOGS / f"{t['id']}-{datetime.datetime.now():%Y%m%d-%H%M%S}.json"
     ledger = log.with_name(log.stem + '-facts.jsonl')  # tools/part_facts.py lookups of this attempt and their cost
     env = dict(os.environ, CLAUDE_JOB_DIR=str(scratch), PATH=f"{KICAD_BIN_DIR}:{os.environ.get('PATH', '')}",
-               PDM_PDF_PYTHON=PDF_PY or 'python3', PDM_BASE=head, PDM_SCOPE=t['scope'], PDM_ROLE=t['role'],
-               PDM_PCB_PLACED='1' if t.get('placed') else '', PDM_PCB_FINAL='1' if t.get('final') else '',
+               PDM_PDF_PYTHON=PDF_PY or 'python3', PDM_BASE=head, PDM_SCOPE=t['scope'],
                PDM_COST_LEDGER=str(ledger), PDM_FACTS_MAX=str(FACTS_MAX), PDM_REPORT=str(report),
                PDM_BLOCK=block_name(spec['kind']))
     (scratch / 'scripts').mkdir(exist_ok=True)
@@ -1338,10 +1238,6 @@ def run_task(q, t, budget_left, dry_run=False):
             result, merge_note = finish_fix(q, t, wt, sha, fix_paths, changed, got, block, gate_fails, sizes)
             notes += merge_note
             commit_paths.append(str(DECISIONS))
-            if spec.get('pcb') and block:
-                waits = stage_blocks(q, t, block, got)
-                if waits:
-                    notes.append(f"waits for {', '.join(waits)}")
         else:
             facts = keep_new_facts(wt, changed)  # fact sheets a reviewer had written are worth keeping
             commit_paths += facts
@@ -1883,7 +1779,7 @@ def dashboard(width, recent):
                    + paint(f"{g['parts']:+d} parts, {g['unique']:+d} unique since the agents started",
                            'yellow' if grew else 'dim'))
 
-    nxt = [t for t in q['tasks'] if t['role'] in ('board-fixer', 'pcb-fixer') and t['state'] == 'ready']
+    nxt = [t for t in q['tasks'] if t['role'] == 'board-fixer' and t['state'] == 'ready']
     if nxt:
         out += ['', paint(f' UP NEXT ({len(nxt)} packages, details in docs/ROADMAP.md)', 'bold')]
         for t in nxt[:5]:
@@ -2067,67 +1963,6 @@ def cmd_add(args):
           f"added {t['id']} to {root / QUEUE}; commit it, the next run merges it in")
 
 
-RULES = ("Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions "
-         "122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 "
-         "(floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants "
-         "4 and 6. ")
-PCB_STAGES = (
-    ('Place connectors and mounting holes', {},
-     "Place H1–H4 on the keep-out centres and the edge connectors per the floorplan (decision 128): J10 battery "
-     "and J11 outputs on the power short edge, J5 panel and J4 CAN on the signal short edge, plugs and wires "
-     "leaving the board edge, a few mm margin beyond the drawing reach (decision 127), J10 with room on both "
-     "sides of its body. Also the parts that must sit at a connector pin: the TVS and filter parts at J10, J5, "
-     "J4 and J11 named in the rules. Leave everything else parked."),
-    ('Place the power path and output channels', {},
-     "Place the battery path (J10 → D30/C30 → JP30/FL30 position → Q30/U30/D31/C32 → VS, C31) and the four "
-     "output channels (each PROFET with its sense, input and protection parts) between J10 and J11, the "
-     "switches spread out, room for wide VS copper on both layers around their tabs and for ≥ 2 cm² at Q30's "
-     "drain; TH1 next to the hottest switch. Leave the logic half parked."),
-    ('Place the logic half and all remaining parts', {'placed': True},
-     "Place everything still parked: the ESP32 with its antenna at the front corner of the signal end and its "
-     "keep-out clear of copper, the buck (tight C1/C19/U3 loop, L2/JP1 position before C1), USB J3, the CAN "
-     "transceiver across its isolation gap (PCB rule 9), the analog_sw parts near J5, J6 service pads inside "
-     "the board, D7/D8 visible. No part may stay off the board."),
-    ('Power copper: pours and wide paths', {'placed': True},
-     "Draw the high-current copper: VBAT_IN, VBAT_FL and VS as wide pours on both layers sized for 16 A in "
-     "2 oz copper, the output paths to J11, GND pours, Q30 drain copper ≥ 2 cm², PROFET tab copper with "
-     "thermal vias, the surge loop switches → VS → D30 short and wide; no copper across the CAN barrier or in "
-     "the antenna or hole keep-outs. Use `kpcb zone` / `track` / `via`."),
-    ('Route all remaining connections', {'placed': True, 'final': True},
-     "Route every remaining connection with `kpcb track`/`via` (signal 0.25 mm or wider, power per the rules); "
-     "short loops for the buck and the CAN lines as a pair; no routing under the isolation barrier or in the "
-     "keep-outs. Finish with 0 unconnected and 0 DRC errors."),
-    ('Silkscreen, markings and a clean DRC', {'placed': True, 'final': True},
-     "Silkscreen: BATTERY and polarity at J10, function labels and pin 1 at every connector, PANEL and CAN at "
-     "J5/J4, the board name, version and date. References readable, nothing on pads. Refill zones; 0 DRC "
-     "errors, 0 unconnected, then record in STATUS.md what the layout does and what the bring-up should check."),
-)
-
-
-def cmd_pcb(args):
-    """Queue the layout stages of one board as pcb-fixer tasks, then an EMC and a validator check of the layout."""
-    root = state_root()
-    q = load_queue(root)
-    open_ = [t for t in q['tasks'] if t['role'] == 'pcb-fixer' and t['scope'] == args.board
-             and t['state'] in ('ready', 'running')]
-    if open_:
-        raise SystemExit(f"{args.board} already has open PCB stages: {', '.join(t['id'] for t in open_)}")
-    prev, ids = [], []
-    for title, flags, brief in PCB_STAGES:
-        t = dict(id=new_id(q, 'T'), role='pcb-fixer', scope=args.board, state='ready', created=today(),
-                 title=title, brief=RULES + brief, items=[], depends_on=prev, **flags)
-        q['tasks'].append(t)
-        prev, ids = [t['id']], ids + [t['id']]
-    for role, focus in (('emc-reviewer', 'layout: the new PCB against the layout rules of the EMC reports'),
-                        ('validator', 'pcb: the layout against the schematic, the heat budget copper and the rules')):
-        q['tasks'].append(dict(id=new_id(q, 'T'), role=role, scope=args.board, state='ready', created=today(),
-                               depends_on=prev, focus=focus, deep=True))
-    save_queue(root, q)
-    write_roadmap(root, q)
-    print(f"queued {len(ids)} PCB stages for {args.board} ({ids[0]}–{ids[-1]}) and an EMC and a validator check; "
-          f"start them with: {ORCH} run")
-
-
 def cmd_retry(args):
     root = state_root()
     q = load_queue(root)
@@ -2199,7 +2034,7 @@ def cmd_land(args):
 
 
 def cmd_run(args):
-    global WORKTREE, PDF_PY, FIXER_MODEL, NO_LAND, Q_FOR_GATES
+    global WORKTREE, PDF_PY, FIXER_MODEL, NO_LAND
     FIXER_MODEL = args.fixer_model
     if args.dry_run:  # touch nothing: read the queue where it is
         WORKTREE = state_root()
@@ -2215,7 +2050,7 @@ def cmd_run(args):
     land_now()  # work left on auto/pilot by an earlier run
     PDF_PY = pdf_python()
     print(f"PDF tools for agents: {PDF_PY or 'not available (agents use python3)'}", flush=True)
-    q = Q_FOR_GATES = load_queue(WORKTREE)
+    q = load_queue(WORKTREE)
     if 'board_size' not in q and any(t['role'] == 'board-fixer' for t in q['tasks']):
         print('measuring board size (once)…', flush=True)
         measure_sizes(q)
@@ -2371,9 +2206,6 @@ def main():
     s = sub.add_parser('undo', help="take back an agent's two-way decision: it becomes an owner question")
     s.add_argument('task')
     s.set_defaults(fn=cmd_undo)
-    s = sub.add_parser('pcb', help='queue the PCB layout stages of a board (pcb-fixer, decision 130)')
-    s.add_argument('board', choices=BOARDS)
-    s.set_defaults(fn=cmd_pcb)
     s = sub.add_parser('retry', help='set a failed task ready again')
     s.add_argument('task')
     s.set_defaults(fn=cmd_retry)
