@@ -169,6 +169,10 @@ printed enclosure if it exists, 30 min.
 2. Readings every 5 min: NTC, VS, the four IS values, and the surface of Q30, U11–U14, J10 and J11 if a thermometer is
    at hand. Scale to 40 °C ambient by adding (40 − room temperature) and compare with `tools/heat_budget.py`.
 3. Voltage drop J10.1 → VS at 16 A (Q30 + copper; *expect* about 2–4 mΩ, so ≤ 65 mV) and VS → each OUTx.
+4. **PWM loss (decision 221 [proposed], design-notes §4 "PWM dimming"):** at 24 V (28.8 V if the supply allows), one
+   channel at 3.5 A resistive, PWM from the MCU at 100 Hz and then 200 Hz, duty 90 %. Scope OUTx: measure the edge times
+   (30–70 %) and compare with 0.3–1.4 V/µs. After 15 min record the U1x case temperature against the same channel at
+   3.5 A DC. *Expect* the 200 Hz case at most ≈ 10 K warmer than DC; more than that lowers the PWM rating.
 
 ## 10. Destructive and stress tests (one board, after sections 1–9 pass on both)
 

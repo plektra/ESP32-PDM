@@ -168,6 +168,31 @@ Findings that drove the design:
   terminal + VS copper ≤ 2 mΩ and rate the input terminal for 16 A (decisions 103, 104; J10 is 30 A UL / 32 A IEC, §7);
   output terminals ≥ 10 A.
 
+**PWM dimming on pdm-4ch (2026-11-17, decision 221 [proposed]).** PWM adds a switching loss per channel on top of
+I²·RDS(on): each edge spends the slew-limited ramp half-on. Source: BTT6050-1ERA datasheet Rev 1.00 p. 15–16: slew
+dV/dtON / −dV/dtOFF 0.3 / 0.8 / 1.4 V/µs (min/typ/max, 30–70 %, VS 28 V, RL 12 Ω; P_5.5.11/12), tON / tOFF 20–150 µs
+(P_5.5.14/15), EON 0.6 mJ / EOFF 0.7 mJ typ at VS 36 V, RL 12 Ω (P_5.5.19/20, by design). Model for a resistive load:
+E per edge = V²·I / (6·slew); at the datasheet point (36 V, 3 A, 0.8 V/µs) it gives 0.81 mJ against 0.6–0.7 mJ, so it
+errs high. P_sw = f · 2 · E. Added to the `tools/heat_budget.py` model (40 °C, R_box 0.6, RthJA 40, p_other 2.3 W,
+r_path 4 mΩ, four channels alike) at duty ≈ 100 % (the hottest case: full conduction plus the edges), the on-current
+that keeps Tj at the DC 4 A figure (≈ 101 °C):
+
+| System (VS while charging) | f | P_sw at 4 A, typ / min slew | Current limit, typ / min slew |
+|---|---|---|---|
+| 12 V (14.4 V) | 100 Hz | 0.03 / 0.09 W | 3.95 / 3.87 A |
+| 12 V (14.4 V) | 200 Hz | 0.07 / 0.18 W | 3.90 / 3.75 A |
+| 24 V (28.8 V) | 100 Hz | 0.14 / 0.37 W | 3.81 / 3.51 A |
+| 24 V (28.8 V) | 200 Hz | 0.28 / 0.74 W | 3.63 / 3.09 A |
+
+- Loss rises with V², so 12 V systems keep the 4 A rating; on 24 V a dimmed channel is rated 3.5 A at 100 Hz (3 A if
+  200 Hz is used).
+- Usable duty range: edges take 18–48 µs (14.4 V) or 36–96 µs (28.8 V) and tON/tOFF up to 150 µs, so at 200 Hz duty
+  below ≈ 5 % or above ≈ 95 % does not switch cleanly. A lower frequency widens the range.
+- PWM only resistive loads and LED strips without their own driver: a capacitive input (driver, DC-DC, electronics)
+  takes an inrush every cycle, and an inductive load puts its energy into the PROFET clamp every turn-off (no
+  freewheel diode, CONTINUE-FROM-HERE "PWM outputs").
+- Estimate: slew and enclosure figures are unmeasured; bring-up.md §9.4 measures it.
+
 Layout rules from the budget: switches spread out and away from the ESP32; large VS copper on both
 layers around the cooling tabs, stitched with vias; 2 oz copper; vents at bottom and top; continuous
 current rating printed on the label; firmware warns or sheds load from measured current (and an NTC,

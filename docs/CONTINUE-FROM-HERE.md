@@ -49,7 +49,8 @@ Ideas parked by the owner to keep focus on the two boards. Not decisions; pick u
   de-fogging, with stepless fan speed; also LED dimming of load outputs. Findings so far:
   - pdm-4ch: MCU can PWM the PROFET channels (LEDC on IO6–IO8/IO11) at ≤ 200 Hz (EMC limit); a closed panel switch
     forces the output fully on via the diode-OR; PROFET has no freewheel diode, so motor PWM puts the turn-off energy
-    into the PROFET clamp every cycle; PROFET PWM limits and current-sense timing not checked in the datasheet.
+    into the PROFET clamp every cycle. PWM loss checked in the datasheet (decision 221 [proposed]: 3.5 A per dimmed
+    channel on 24 V at 100 Hz, design-notes §4); current-sense timing under PWM still not checked.
   - pdm-hc2: no PWM until the gate slew is limited and measured on the bench (Q-0001, EMC E2).
   - Stepless brushed-motor control needs ≈ 20–25 kHz, which conflicts with the EMC limits on long load cables near
     VHF; a separate PWM board inside the PDM is not recommended.

@@ -1,6 +1,7 @@
 # pdm-4ch status
 
-Updated: 2026-11-17 (decisions 215, 217–219: routing review, one-pass reroute – **fully routed, 0 unconnected**)
+Updated: 2026-11-17 (decisions 215, 217–219: routing review, one-pass reroute – **fully routed, 0 unconnected**;
+decision 221 [proposed]: PWM rating)
 
 **2026-11-16/17 (decisions 215, 217–219, owner – interactive): the board is fully routed.** `build_routing.sh`:
 0 DRC errors, **0 unconnected** (was 29), parity 0, every power pour whole; a second build from the new board gives
@@ -30,6 +31,14 @@ the same. VS-In2: 1 island, 1026.2 mm², 40/40 thermal vias. Tj 101 °C at 40 °
 file missing in KiCad 10 (PROFETs, KF135T, KF2EDGRC, both WJ15EDGRC, USB-C, TS-1187A, 1812 fuses, ESP32 module) use
 LCSC/EasyEDA STEP models in `lib/ESP32-PDM.3dshapes/` (see its README). Placement checked in renders. No copper,
 footprint pad or schematic change; DRC unchanged.
+
+**2026-11-17: PWM rating and showcase.** Decision 221 **[proposed], waiting for the owner:** a PWM-dimmed channel is
+rated 4 A on 12 V and 3.5 A on 24 V at 100 Hz (3 A at 200 Hz), from the datasheet switching energy and slew added to
+the heat budget (design-notes §4 "PWM dimming"); bring-up.md §9.4 measures it. The README carries a preview render
+(`docs/images/pdm-4ch-preview.jpg`, KiCad raytrace). A showcase page with a rotatable 3D model of the board (for the
+Signal K community) lives outside the repo as a claude.ai artifact; it is rebuilt from a KiCad GLB export
+(`kicad-cli pcb export glb --no-dnp --subst-models --include-tracks --include-pads --include-zones --include-silkscreen
+--include-soldermask`), so a layout change needs a fresh export to show there.
 
 ## Next
 
