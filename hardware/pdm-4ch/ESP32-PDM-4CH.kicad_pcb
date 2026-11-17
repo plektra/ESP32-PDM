@@ -2117,6 +2117,17 @@
 			(uuid "44880019-0d15-4d72-b537-5d39d08295c2")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Infineon_PG-TDSO-14_ThermalVias.step"
+			(offset
+				(xyz 0 0 0.05)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 270)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_0402_1005Metric"
 		(layer "F.Cu")
@@ -3487,7 +3498,7 @@
 			(uuid "6df74943-2beb-4fe2-81f2-3164ee2510f3")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Fuse.3dshapes/Fuse_1812_4532Metric.step"
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Fuse_1812_4532Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -4820,7 +4831,7 @@
 			(uuid "102dc43f-c160-4f79-98f1-4b8288533fec")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Fuse.3dshapes/Fuse_1812_4532Metric.step"
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Fuse_1812_4532Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -8555,6 +8566,17 @@
 			(uuid "d1154a5a-74ba-42d6-8b80-dc8577004911")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Kefa_KF135T-10.16-2P.step"
+			(offset
+				(xyz 5.08 -7.125 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_1206_3216Metric"
 		(layer "F.Cu")
@@ -13232,6 +13254,17 @@
 			(uuid "53936874-3583-4b6e-beea-c4be2d314ca2")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Infineon_PG-TDSO-14_ThermalVias.step"
+			(offset
+				(xyz 0 0 0.05)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 270)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_0402_1005Metric"
 		(layer "F.Cu")
@@ -15564,6 +15597,17 @@
 			(uuid "af0e9505-70d5-471f-a723-c896d705f920")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Infineon_PG-TDSO-14_ThermalVias.step"
+			(offset
+				(xyz 0 0 0.05)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 270)
+			)
+		)
 	)
 	(footprint "ESP32-PDM:Kefa_KF2EDGRC-5.08-4P"
 		(layer "F.Cu")
@@ -15822,6 +15866,17 @@
 			(uuid "83e46c7d-430d-475d-8b3e-0113cf1ef3a8")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Kefa_KF2EDGRC-5.08-4P.step"
+			(offset
+				(xyz 7.621 -4.774 -0.1)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_0402_1005Metric"
 		(layer "F.Cu")
@@ -19505,7 +19560,7 @@
 			(uuid "8f79dbab-6eb4-4050-a5f7-47349ed45d20")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Fuse.3dshapes/Fuse_1812_4532Metric.step"
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Fuse_1812_4532Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -23753,15 +23808,15 @@
 			(uuid "35472f0d-086b-4f3f-9f6f-d238f73b9261")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Connector_USB.3dshapes/USB_C_Receptacle_HRO_TYPE-C-31-M-12.step"
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/USB_C_Receptacle_HRO_TYPE-C-31-M-12.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -1.35 0)
 			)
 			(scale
 				(xyz 1 1 1)
 			)
 			(rotate
-				(xyz 0 0 0)
+				(xyz 0 0 180)
 			)
 		)
 	)
@@ -33412,6 +33467,17 @@
 			(uuid "bf646a46-5a1f-4f96-8eb6-a4779f43b327")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Kangnex_WJ15EDGRC-3.81-04P.step"
+			(offset
+				(xyz 5.712 -2.975 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_1206_3216Metric"
 		(layer "F.Cu")
@@ -38888,9 +38954,9 @@
 			(uuid "d14cf4a9-2783-4681-8d6c-946feb5ba9d2")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Button_Switch_SMD.3dshapes/SW_Push_1P1T_XKB_TS-1187A.step"
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/SW_Push_1P1T_XKB_TS-1187A.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 0 0.05)
 			)
 			(scale
 				(xyz 1 1 1)
@@ -39633,6 +39699,17 @@
 			(uuid "7463f366-d114-4472-a510-ce0992e059d0")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Infineon_PG-TDSO-14_ThermalVias.step"
+			(offset
+				(xyz 0 0 0.05)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 270)
+			)
+		)
 	)
 	(footprint "Diode_SMD:D_SMA"
 		(layer "F.Cu")
@@ -42566,7 +42643,7 @@
 			(uuid "60fb5451-5348-4be1-adad-d78d3638b2ef")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Fuse.3dshapes/Fuse_1812_4532Metric.step"
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Fuse_1812_4532Metric.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -43655,6 +43732,17 @@
 			(uuid "b4c5ba7a-50c9-4301-b148-18db78b1d6e0")
 		)
 		(embedded_fonts no)
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Kangnex_WJ15EDGRC-3.81-10P.step"
+			(offset
+				(xyz 0.004 -0.025 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Diode_SMD:D_SOD-882"
 		(layer "F.Cu")
@@ -44747,9 +44835,9 @@
 			(uuid "87c21915-ae82-441c-a762-c5b86631ad64")
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/Button_Switch_SMD.3dshapes/SW_Push_1P1T_XKB_TS-1187A.step"
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/SW_Push_1P1T_XKB_TS-1187A.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 0 0.05)
 			)
 			(scale
 				(xyz 1 1 1)
@@ -47062,9 +47150,9 @@
 			)
 		)
 		(embedded_fonts no)
-		(model "${KICAD10_3DMODEL_DIR}/RF_Module.3dshapes/ESP32-S2-MINI-1.step"
+		(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/ESP32-S2-MINI-1.step"
 			(offset
-				(xyz 0 0 0)
+				(xyz 0 -0.01 0.02)
 			)
 			(scale
 				(xyz 1 1 1)

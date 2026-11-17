@@ -51,4 +51,15 @@
 	(pad "" smd roundrect (at 0 1.8) (size 2.55 0.6) (layers "F.Paste") (roundrect_rratio 0.1) (uuid "b70cbf18-002a-4347-9a84-b7e806cadf13"))
 	(pad "" smd roundrect (at 0 -2.95) (size 2.55 0.5) (layers "F.Paste") (roundrect_rratio 0.1) (uuid "93f590cf-457b-4d07-9deb-bb4d2cceab4b"))
 	(pad "" smd roundrect (at 0 2.95) (size 2.55 0.5) (layers "F.Paste") (roundrect_rratio 0.1) (uuid "140a407c-7a3b-42be-9780-1d1f37c9d119"))
+	(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Infineon_PG-TDSO-14_ThermalVias.step"
+		(offset
+			(xyz 0 0 0.05)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 270)
+		)
+	)
 )

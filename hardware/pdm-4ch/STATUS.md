@@ -26,6 +26,11 @@ the same. VS-In2: 1 island, 1026.2 mm², 40/40 thermal vias. Tj 101 °C at 40 °
   (barrier keep-out) and the 0.2 mm VBUS/D3-A necks at J3; the old router scripts and the superseded decision rows
   are still to be cleaned up. A competent person reviews the board before installation.
 
+**2026-11-17: 3D models complete.** Every placed part now has a 3D model. The nine that had none or pointed to a
+file missing in KiCad 10 (PROFETs, KF135T, KF2EDGRC, both WJ15EDGRC, USB-C, TS-1187A, 1812 fuses, ESP32 module) use
+LCSC/EasyEDA STEP models in `lib/ESP32-PDM.3dshapes/` (see its README). Placement checked in renders. No copper,
+footprint pad or schematic change; DRC unchanged.
+
 ## Next
 
 1. **Do not run *Update Symbols from Library*, and do not save the schematics from KiCad 10 by hand** (2026-11-08):

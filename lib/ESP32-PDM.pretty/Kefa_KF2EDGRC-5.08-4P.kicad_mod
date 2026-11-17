@@ -24,4 +24,15 @@
 	(pad "2" thru_hole circle (at 5.08 0) (size 2.6 2.6) (drill 1.6) (layers "*.Cu" "*.Mask") (uuid "33be2c25-f817-4c54-a192-9f3638a00fc2"))
 	(pad "3" thru_hole circle (at 10.16 0) (size 2.6 2.6) (drill 1.6) (layers "*.Cu" "*.Mask") (uuid "dd33ebd5-9a9e-4ec6-912a-1b378c725139"))
 	(pad "4" thru_hole circle (at 15.24 0) (size 2.6 2.6) (drill 1.6) (layers "*.Cu" "*.Mask") (uuid "92d6de82-f8c6-46b4-8a9f-b896f2dc892e"))
+	(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Kefa_KF2EDGRC-5.08-4P.step"
+		(offset
+			(xyz 7.621 -4.774 -0.1)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )

@@ -24,4 +24,15 @@
 	(pad "2" thru_hole circle (at 3.81 0) (size 2.2 2.2) (drill 1.4) (layers "*.Cu" "*.Mask") (uuid "d7415c35-943b-462f-8efe-5639ef7b5a90"))
 	(pad "3" thru_hole circle (at 7.62 0) (size 2.2 2.2) (drill 1.4) (layers "*.Cu" "*.Mask") (uuid "31135dfb-bb99-41df-b3be-083d30d5260c"))
 	(pad "4" thru_hole circle (at 11.43 0) (size 2.2 2.2) (drill 1.4) (layers "*.Cu" "*.Mask") (uuid "439933b9-d1ba-4fca-b126-6045fd99d747"))
+	(model "${KIPRJMOD}/../../lib/ESP32-PDM.3dshapes/Kangnex_WJ15EDGRC-3.81-04P.step"
+		(offset
+			(xyz 5.712 -2.975 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
 )
