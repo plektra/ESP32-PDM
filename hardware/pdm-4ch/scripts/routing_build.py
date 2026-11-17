@@ -104,9 +104,10 @@ def move_parts(b, tracks):
             fp.SetPosition(pos); fp.SetOrientationDegrees(rot); moved += 1
     drop = set(getattr(fixed_routes, 'DROP_NETS', ()))
     segs = set()
+    um = lambda p: (round(p.x / 1000), round(p.y / 1000))   # decision 215: match to 1 um (mm -> nm can be 1 nm off)
     for lay, a, e in getattr(fixed_routes, 'DROP_GND', ()):
         pa, pe = P(b, *a), P(b, *e)
-        segs.add((b.GetLayerID(lay), *sorted([(pa.x, pa.y), (pe.x, pe.y)])))
+        segs.add((b.GetLayerID(lay), *sorted([um(pa), um(pe)])))
     # T-0276: GND vias moved in fixed_routes.py (old position listed in DROP_GND_VIAS, mm): the locked board via goes
     vdrop = set()
     for x, y in getattr(fixed_routes, 'DROP_GND_VIAS', ()):
@@ -138,7 +139,7 @@ def move_parts(b, tracks):
                 any(abs(t.GetPosition().x - vx) < 2000 and abs(t.GetPosition().y - vy) < 2000 for vx, vy in vdrop):
             gone.append(t)
         elif t.GetNetname() == 'GND' and t.GetClass() != 'PCB_VIA' and \
-                (t.GetLayer(), *sorted([(t.GetStart().x, t.GetStart().y), (t.GetEnd().x, t.GetEnd().y)])) in segs:
+                (t.GetLayer(), *sorted([um(t.GetStart()), um(t.GetEnd())])) in segs:
             gone.append(t)
     return moved, gone
 

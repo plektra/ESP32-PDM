@@ -366,3 +366,15 @@ void pf_restore(int ni) {
     memset(s, 0, sizeof(Snap));
     stamp(n, +1);
 }
+
+/* load a saved leg (resume): appended to the net; call pf_commit_loaded() once all legs are in */
+void pf_load_leg(int ni, int len, int32_t *states) {
+    Net *n = &nets[ni];
+    if (!n->leg) { n->leg = malloc(n->ncl * sizeof(Cells)); n->failcl = malloc(n->ncl * sizeof(int)); }
+    Cells *p = &n->leg[n->nleg++]; p->n = len; p->s = malloc((size_t)len * 4); memcpy(p->s, states, (size_t)len * 4);
+    for (int i = 1; i < len; i++) if (p->s[i] / N != p->s[i - 1] / N) {
+        n->vc = realloc(n->vc, (size_t)(n->nvc + 1) * 4); n->vc[n->nvc++] = p->s[i] % N;
+    }
+}
+void pf_load_fail(int ni, int cl) { Net *n = &nets[ni]; if (!n->failcl) { n->leg = malloc(n->ncl * sizeof(Cells)); n->failcl = malloc(n->ncl * sizeof(int)); } n->failcl[n->nfail++] = cl; }
+void pf_commit_loaded(int ni) { stamp(&nets[ni], +1); }

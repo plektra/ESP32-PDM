@@ -143,9 +143,11 @@ T(DP, 'In2.Cu', (58.4, 21.15), (58.4, 19.4), (69.65, 19.4), (70.1, 18.95), (70.1
 # ---- J3 CC1 (T-0210): A5 sits between the pair; it leaves above the pads (via clear of the J3 NPTH and of OUT1-B),
 # runs on In2 (GND plane, x < 26.5) past the pair vias and comes up beside R12.1.
 CC1 = 'Net-(J3-CC1)'
-T(CC1, 'F.Cu', (16.45, 8.24), (16.45, 7.3), (16.7, 6.85))
-V(CC1, 16.7, 6.85)
-T(CC1, 'In2.Cu', (16.7, 6.85), (16.7, 9.0), (19.4, 11.7), (19.7, 12.0), (19.7, 13.95))
+# decision 215: the via sits straight above A5 (was 16.7, 6.85), so the VBUS pin A4/B9 can leave north between it and
+# the J3 peg hole (18.09, 6.8); it is still 1.0 mm from the D+ top track and 0.56 mm from B8.
+T(CC1, 'F.Cu', (16.45, 8.24), (16.45, 6.75))
+V(CC1, 16.45, 6.75)
+T(CC1, 'In2.Cu', (16.45, 6.75), (16.7, 7.0), (16.7, 9.0), (19.4, 11.7), (19.7, 12.0), (19.7, 13.95))
 V(CC1, 19.7, 13.95)
 T(CC1, 'F.Cu', (19.7, 13.95), (19.7, 13.01))
 
@@ -1550,3 +1552,27 @@ T('/IO11', 'In2.Cu', (65.30, 67.00), (63.50, 68.80), (63.50, 72.00), (63.40, 72.
 V('/IO11', 62.30, 73.40)
 # /IO8 leg
 T('/IO8', 'B.Cu', (66.60, 66.70), (65.40, 67.90), (63.90, 67.90), (63.20, 68.60), (63.10, 68.60), (63.00, 68.70), (62.90, 68.70), (62.80, 68.80), (62.50, 68.80), (61.30, 70.00))
+
+
+REROUTED_NETS = sorted(set(REROUTED_NETS) | {CC1})   # decision 215: CC1 via moved; the board keeps only the copper above
+
+# ---- Decision 215 (owner, 2026-11-16): one-pass signal routing. scripts/pf_routes.json (written by pf_land.py from a
+# pf_export.py + pf_route.py run) holds the part moves and all copper of the routed nets: every signal net except the
+# CAN and USB pairs and J3 CC1, plus the two local J3 power links. For those nets every T()/V() entry above this
+# point is dropped (the Freerouting harvest, the maze passes, the J6 In2 bundle, the hand steps); only the file's
+# copper is built. REROUTED_NETS makes routing_build.prep drop their old board copper too.
+import json as _json, os as _os
+_pfp = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'pf_routes.json')
+if _os.path.exists(_pfp):
+    _pf = _json.load(open(_pfp))
+    _rip = set(_pf['nets'])
+    TRACKS[:] = [_t for _t in TRACKS if _t['net'] not in _rip]
+    VIAS[:] = [_v for _v in VIAS if _v['net'] not in _rip]
+    for _t in _pf['tracks']:
+        T(_t['net'], _t['layer'], *[tuple(_p) for _p in _t['pts']], w=_t['width'])
+    for _v in _pf['vias']:
+        V(_v['net'], _v['at'][0], _v['at'][1], size=_v['size'], drill=_v['drill'])
+    PLACE.update({_k: tuple(_x) for _k, _x in _pf['place'].items()})
+    REROUTED_NETS = sorted(set(REROUTED_NETS) | _rip)
+    DROP_GND += [(_l, tuple(_a), tuple(_e)) for _l, _a, _e in _pf['drop_gnd']]
+    DROP_GND_VIAS += [tuple(_p) for _p in _pf['drop_gnd_vias']]

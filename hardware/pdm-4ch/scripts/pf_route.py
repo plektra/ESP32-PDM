@@ -107,7 +107,9 @@ class Maps:
                 elif z['kind'] == 'corridor':
                     inside = self.mask([z['poly']])
                     cm[inside] = int(round(16 * IN2_COST * CORRIDOR_COST))
-                    band = self.mask([z['poly']], CORRIDOR_BAND) & ~self.mask([z['poly']]) | \
+                    # decision 178: runs inside VS-In2 stay >= 1.5 mm from its outline; outside it the normal zone
+                    # clearance holds (the old router also closed 1.5 mm outside the pour)
+                    band = self.mask([z['poly']], z['zc'] + 0.1 + m) & ~inside | \
                         (inside & ~self.erode(inside, CORRIDOR_BAND))
                     x0, y0, x1, y1 = EXIT_WINDOW
                     band[int(y0 / G):int(y1 / G), int(x0 / G):int(x1 / G)] = False
@@ -222,6 +224,7 @@ def main():
     ap.add_argument('work'); ap.add_argument('--iters', type=int, default=60)
     ap.add_argument('--nets', default=''); ap.add_argument('--skip', default=''); ap.add_argument('--png', action='store_true')
     ap.add_argument('--seed', type=int, default=1)
+    ap.add_argument('--resume', action='store_true'); ap.add_argument('--verbose', action='store_true')
     a = ap.parse_args()
     t0 = time.time()
     geo = json.load(open(os.path.join(a.work, 'geo.json')))
@@ -252,9 +255,23 @@ def main():
         nets.append({'name': n, 'i': ni, 'w': w, 'keys': keys, 'ncl': len(keys)})
     print('%d nets, %d links' % (len(nets), sum(n['ncl'] - 1 for n in nets)), flush=True)
     rng = np.random.default_rng(a.seed)
+    i32 = ctypes.POINTER(ctypes.c_int32)
+    legfile = os.path.join(a.work, 'legs.npz')
+    resume = a.resume and os.path.exists(legfile)
+    if resume:
+        z = np.load(legfile)
+        for n in nets:
+            for g in range(int(z['nleg_%d' % n['i']])):
+                arr = np.ascontiguousarray(z['leg_%d_%d' % (n['i'], g)])
+                core.pf_load_leg(n['i'], len(arr), arr.ctypes.data_as(i32))
+            for q in z['fail_%d' % n['i']]:
+                core.pf_load_fail(n['i'], int(q))
+            core.pf_commit_loaded(n['i'])
+        print('resumed', legfile, flush=True)
     # sealed by the fixed board alone?
     pres, todo = 0.5, list(nets)
-    for it in range(a.iters):
+    bad = {}
+    for it in range(0 if resume else a.iters):
         order = sorted(todo, key=lambda n: rng.random())
         for n in order:
             n['fail'] = core.pf_route(n['i'], pres, 0, VIA_COST)
@@ -276,6 +293,15 @@ def main():
             break
         pres = min(pres * 1.25, 80.0)
         todo = [n for n in nets if n['name'] in bad]
+    def save_legs():
+        d = {}
+        for n in nets:
+            k = core.pf_nleg(n['i']); d['nleg_%d' % n['i']] = k
+            for g in range(k):
+                arr = np.zeros(core.pf_leg_len(n['i'], g), np.int32); core.pf_leg_get(n['i'], g, arr.ctypes.data_as(i32))
+                d['leg_%d_%d' % (n['i'], g)] = arr
+            d['fail_%d' % n['i']] = np.array([core.pf_fail_get(n['i'], q) for q in range(core.pf_nfail(n['i']))], np.int32)
+        np.savez(legfile, **d)
     hot = {}
     for n in nets:
         buf = np.zeros(20000, np.int32)
@@ -312,39 +338,39 @@ def main():
             break
         for n in failed:
             core.pf_route(n['i'], 0.0, 1, VIA_COST)
+    if not resume:
+        save_legs()
     # rip-up: a net with an open link is routed across the cheapest committed nets; those are taken off, the net
     # goes in, they are put back. Kept only when fewer links stay open in total.
     def total_open():
         return sum(core.pf_nfail(n['i']) for n in nets)
-    for rnd in range(6):
+    for rnd, (rp, rv) in enumerate([(4, 1), (12, 1), (2, 1), (30, 1), (6, 0.4), (20, 2.5), (1, 1), (60, 1), (8, 0.2), (3, 3)]):
         failed = [n for n in nets if core.pf_nfail(n['i'])]
         if not failed:
             break
-        gain = False
         for x in failed:
             before = total_open()
             for n in nets:
                 core.pf_save(n['i'])
-            core.pf_route(x['i'], 4.0 + 4.0 * rnd, 0, VIA_COST)
+            core.pf_route(x['i'], float(rp), 0, VIA_COST * rv)
             blk = [n for n in nets if n is not x and core.pf_conflicts(n['i'], 0.0) > 0]
             ok = False
-            if blk and len(blk) <= 6 and core.pf_nfail(x['i']) == 0:
+            if blk and len(blk) <= 10 and core.pf_nfail(x['i']) == 0:
                 for n in blk:
                     core.pf_clear(n['i'])
-                core.pf_route(x['i'], 0.0, 1, VIA_COST)
+                core.pf_route(x['i'], 0.0, 1, VIA_COST * rv)
                 for n in sorted(blk, key=lambda n: (-n['w'], -n['ncl'])):
                     core.pf_route(n['i'], 0.0, 1, VIA_COST)
                 ok = total_open() < before
+            if a.verbose:
+                print('  try %d %s: soft fail %d, blockers %s -> open %d (was %d)' % (rnd, x['name'], core.pf_nfail(x['i']) if not blk else -1, [n['name'] for n in blk][:12], total_open(), before), flush=True)
             if ok:
-                gain = True
-                print('rip-up: %s in, moved %s; open %d -> %d' % (x['name'], [n['name'] for n in blk], before, total_open()), flush=True)
+                print('rip-up %d: %s in, moved %s; open %d -> %d' % (rnd, x['name'], [n['name'] for n in blk], before, total_open()), flush=True)
             else:
                 for n in [x] + blk:
                     core.pf_clear(n['i'])
                 for n in [x] + blk:
                     core.pf_restore(n['i'])
-        if not gain:
-            break
     out = {'tracks': [], 'vias': [], 'open': {}}
     for n in nets:
         legs = []

@@ -34,8 +34,16 @@ def clr(net):
     return max(fr.CLASSES[rb.net_class(net)][1] / 1000, 0.2) if net else 0.2
 
 
-# local power links at J3 routed here too: VBUS at 0.3 mm (a wider track cannot leave the 0.5 mm pitch pins)
-WIDTH = {'Net-(F2-Pad1)': 0.3, 'Net-(D3-A)': 0.4}
+# Local power links at J3 (VBUS J3 A4/B9, A9/B4 -> F2.1; D3-A at FB1.2): routed here at this width and the board's
+# 0.2 mm clearance, but their existing copper stays (only the missing links are added).
+# Local power links at J3, routed at these widths with the board's 0.2 mm clearance. VBUS 0.2 mm: the only exit from
+# the J3 VBUS pins passes between the CC1 via and a J3 peg hole; USB-only supply peaks at 0.40 A (decision 87),
+# about 16 mV over 8 mm of 0.5 oz In2. VBUS and D3-A keep their existing copper (only missing links are added);
+# Net-(C4-Pad1) (F2.2 -> FB1.1 -> C4) is rerouted whole because FB1 turns 180 degrees.
+WIDTH = {'Net-(F2-Pad1)': 0.2, 'Net-(D3-A)': 0.3, 'Net-(C4-Pad1)': 0.4}
+KEEP_COPPER = {'Net-(F2-Pad1)', 'Net-(D3-A)'}
+# Nets whose board copper is replaced by their fixed_routes.py lines before export (edited fixed routes)
+FROM_FR = {'Net-(J3-CC1)'}
 
 
 def rip_net(net):
@@ -51,6 +59,9 @@ def main():
     for ref, (x, y, rot) in moves.items():
         fp = b.FindFootprintByReference(ref)
         assert fp and not fp.IsFlipped(), ref
+        # a moved part may only carry pads of rerouted nets or GND: kept copper of any other net would end on the wrong pad
+        kept = {p.GetNetname() for p in fp.Pads() if p.GetNetname() and p.GetNetname() not in rb.GND_NETS and not rip_net(p.GetNetname())}
+        assert not kept, 'move of %s would leave kept copper of %s on the wrong pad' % (ref, sorted(kept))
         fp.SetPosition(rb.P(b, x, y)); fp.SetOrientationDegrees(rot)
     rb.barrier_gnd(b)
     keep = set()
@@ -62,7 +73,7 @@ def main():
     gone = []
     for t in list(b.GetTracks()):
         net = t.GetNetname()
-        if rip_net(net):
+        if rip_net(net) and net not in KEEP_COPPER:
             if t.GetClass() != 'PCB_VIA':
                 a, e = t.GetStart(), t.GetEnd()
                 if (net, *sorted([(a.x // 2000, a.y // 2000), (e.x // 2000, e.y // 2000)])) in keep or MM(t.GetWidth()) >= 0.5:
@@ -78,8 +89,26 @@ def main():
                                      t.GetStart().y + (t.GetEnd().y - t.GetStart().y) * i // 8) for i in range(9)]
                 if any(bb.Contains(q) for q in pts):
                     gone.append(t); break
+    drop_gnd, drop_gnd_vias = [], []
+    gone += [t for t in b.GetTracks() if t.GetNetname() in FROM_FR]
     for t in gone:
+        if t.GetNetname() in rb.GND_NETS:   # for fixed_routes.DROP_GND / DROP_GND_VIAS (the build repeats the removal)
+            if t.GetClass() == 'PCB_VIA':
+                drop_gnd_vias.append([MM(t.GetPosition().x - ox), MM(t.GetPosition().y - oy)])
+            else:
+                drop_gnd.append([b.GetLayerName(t.GetLayer()), [MM(t.GetStart().x - ox), MM(t.GetStart().y - oy)],
+                                 [MM(t.GetEnd().x - ox), MM(t.GetEnd().y - oy)]])
         b.Remove(t)
+    for r in fr.TRACKS:
+        if r['net'] in FROM_FR:
+            pts = [rb.P(b, *p) for p in r['pts']]
+            for p0, p1 in zip(pts, pts[1:]):
+                t = pcbnew.PCB_TRACK(b); t.SetStart(p0); t.SetEnd(p1); t.SetWidth(M(r['width']))
+                t.SetLayer(b.GetLayerID(r['layer'])); t.SetNet(b.FindNet(r['net'])); t.SetLocked(True); b.Add(t)
+    for r in fr.VIAS:
+        if r['net'] in FROM_FR:
+            v = pcbnew.PCB_VIA(b); v.SetPosition(rb.P(b, *r['at'])); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
+            v.SetWidth(M(r['size'])); v.SetDrill(M(r['drill'])); v.SetNet(b.FindNet(r['net'])); v.SetLocked(True); b.Add(v)
     for z in b.Zones():
         z.UnFill()
     base = os.path.join(out, 'base.kicad_pcb')
@@ -123,6 +152,12 @@ def main():
              'at': [round(MM(it.GetPosition().x - ox), 4), round(MM(it.GetPosition().y - oy), 4)]}
         if is_pad:
             e['smd'] = not it.HasHole()
+        elif rip_net(net):   # kept copper of a routed net: listed again by pf_land.py
+            if e['kind'] == 'via':
+                e['size'] = MM(it.GetWidth(pcbnew.F_Cu)); e['drill'] = MM(it.GetDrillValue())
+            else:
+                e['seg'] = [[MM(it.GetStart().x - ox), MM(it.GetStart().y - oy)], [MM(it.GetEnd().x - ox), MM(it.GetEnd().y - oy)]]
+                e['layer'] = b.GetLayerName(it.GetLayer()); e['w'] = MM(it.GetWidth())
         for key, inf in (('tf', c + HALF + MARGIN), ('tb', 0.2 + HALF + MARGIN), ('v', c + VIA_R + MARGIN), ('raw', 0),
                          ('esc', ESCAPE), ('vpad', VIA_R + MARGIN)):
             if key == 'esc' and not (is_pad and rip_net(net)):
@@ -169,7 +204,8 @@ def main():
     for name, (x1, y1, x2, y2) in rb.KEEPOUTS.items():
         geo['zones'].append({'name': name, 'net': '', 'layers': list(LAY), 'poly': [[(x1, y1), (x2, y1), (x2, y2), (x1, y2)]], 'kind': 'rule'})
     geo['width'] = {n: WIDTH.get(n, fr.CLASSES[rb.net_class(n)][0] / 1000) for n in {e['net'] for e in geo['items']} if rip_net(n)}
-    geo['clr'] = {n: clr(n) for n in geo['width']}
+    geo['clr'] = {n: 0.2 if n in WIDTH else clr(n) for n in geo['width']}
+    geo['moves'] = moves; geo['drop_gnd'] = drop_gnd; geo['drop_gnd_vias'] = drop_gnd_vias
     json.dump(geo, open(os.path.join(out, 'geo.json'), 'w'))
     print('items', len(geo['items']), 'zones', len(geo['zones']), 'nets to route', len(geo['width']), 'clusters', k)
 
