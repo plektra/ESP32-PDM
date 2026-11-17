@@ -1,12 +1,15 @@
 # ESP32-PDM
 
+![pdm-4ch, the 4-channel board, rendered from the KiCad design](docs/images/pdm-4ch-preview.jpg)
+
 An open, low-cost power distribution module for boats: solid-state outputs controlled both by ordinary
 panel switches and over NMEA 2000, with current and fault reporting. Built around an ESP32-S3 and
 Infineon PROFET+24V high-side switches, for 12 V and 24 V systems, assembled by JLCPCB.
 
-**Status:** schematic phase. Both boards (`hardware/pdm-4ch`, `hardware/pdm-hc2`) are complete at schematic
-level and pass ERC (apart from library-version notices); no PCB layout yet. Not tested in hardware. `pdm-4ch`
-goes first as a prototype, with `pdm-hc2` after its bring-up.
+**Status:** Both boards (`hardware/pdm-4ch`, `hardware/pdm-hc2`) are complete at schematic level and pass ERC
+(apart from library-version notices). The `pdm-4ch` PCB is fully routed (0 DRC errors, 0 unconnected); the image
+above is rendered from it. Not tested in hardware. `pdm-4ch` goes first as a prototype, with `pdm-hc2` layout
+after its bring-up.
 
 ## Boards
 
