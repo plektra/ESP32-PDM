@@ -112,6 +112,8 @@ History of the schematic fix rounds and of the layout up to 2026-11-16: `STATUS-
   1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C5464765 and C5219210. Recheck stock (C5464765
   2016 on 2026-11-07, C5219210 2923 on 2026-11-03).
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
+- Stock 2026-11-17 (`fab/README.md`): **U30 LM74500-Q1 C5219210 is out of stock** (0, min. order 5): wait for restock or
+  pre-order before the order. SMAJ30CA C19077548 has 172 pcs (20 needed). Parts + 14 extended-part fees for 2 boards ≈ 81 USD.
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 - T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
 

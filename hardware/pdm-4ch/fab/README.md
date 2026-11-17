@@ -35,3 +35,27 @@ Their sockets and plugs go in the same cart as separate LCSC parts.
 
 In the placement preview, check the rotation of U3, U11–U14 (EasyEDA draws them rotated 90°) and D7/D8 (C2286 pad 1 =
 anode). The CPL uses KiCad's rotation without correction; fix them in the preview.
+
+## Price and stock check (2026-11-17, live LCSC/JLCPCB lookup, 2 assembled boards)
+
+| Item | USD |
+|---|---|
+| Parts at need quantity (398 pcs, all at the 1+ price) | 38.93 |
+| Extended-part loading fees: 14 unique × 3 USD | 42.00 |
+| **Parts + fees** | **80.93** |
+| Hand-soldered sockets J4, J5, J10, J11 + plugs for J4, J5, J11 (separate LCSC lines) | ≈ 5.01 |
+
+PCB fabrication, Standard PCBA setup/stencil and shipping come from the JLCPCB quote page and are not included.
+Unit prices change daily; recheck in the cart.
+
+Extended parts (fee each): C170101, C487384, C2687131, C70113, C165948, C96963, C5464765, C7420022, C52155402,
+C2913206, C22427220, C528763, C534868, C5219210. Everything else is basic or preferred (no fee).
+
+Stock flags:
+- **U30 LM74500-Q1 C5219210: out of stock (0)**, minimum order 5. Blocks the order until it is restocked or the owner
+  pre-orders it as a global sourcing/consigned part. Its footprint check (T-0121) is still open too.
+- **D1, D16–D19, D50–D54 SMAJ30CA C19077548: 172 in stock** for 20 needed, so it is thin. JLCPCB's minimum purchase is
+  293 pcs (≈ 9 USD at the 100+ price).
+- Under 2000 in stock: L1 C96963 (1173), U3 C22427220 (1524), U11–U14 C534868 (1604), Q30 C5464765 (1650),
+  J10 C475108 (821).
+- U1 ESP32-S3-MINI-1 is Standard-PCBA-only (already the basis, decision 100).
