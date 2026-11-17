@@ -6634,7 +6634,7 @@
       "id": "T-0202",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-08",
       "title": "Silkscreen, markings and a clean DRC",
       "brief": "Layout rules: the board's STATUS.md (\"Next\" PCB items, PCB rule 9, the pre-order checklist), decisions 122 (all SMT on top), 123 (holes, Ø 8 mm keep-outs), 127 (connector margins, J10 clear zone, labels), 128 (floorplan), the \"Layout rules\" sections of the EMC reports in docs/reviews/, and ARCHITECTURE invariants 4 and 6. Silkscreen: BATTERY and polarity at J10, function labels and pin 1 at every connector, PANEL and CAN at J5/J4, the board name, version and date. References readable, nothing on pads. Refill zones; 0 DRC errors, 0 unconnected, then record in STATUS.md what the layout does and what the bring-up should check.",
@@ -6643,31 +6643,33 @@
         "T-0211"
       ],
       "placed": true,
-      "final": true
+      "final": true,
+      "summary": "retired by decision 216: PCB layout is done in interactive /board sessions, no pcb-fixer",
+      "note": null
     },
     {
       "id": "T-0203",
       "role": "emc-reviewer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "deferred",
       "created": "2026-11-08",
-      "depends_on": [
-        "T-0202"
-      ],
+      "depends_on": [],
       "focus": "layout: the new PCB against the layout rules of the EMC reports",
-      "deep": true
+      "deep": true,
+      "until": "layout",
+      "reason": "review of the finished layout; set ready with `orchestrate.py retry T-0203` when the interactive layout is done (decision 216)"
     },
     {
       "id": "T-0204",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "deferred",
       "created": "2026-11-08",
-      "depends_on": [
-        "T-0202"
-      ],
+      "depends_on": [],
       "focus": "pcb: the layout against the schematic, the heat budget copper and the rules",
-      "deep": true
+      "deep": true,
+      "until": "layout",
+      "reason": "review of the finished layout; set ready with `orchestrate.py retry T-0204` when the interactive layout is done (decision 216)"
     },
     {
       "id": "T-0205",
@@ -6891,7 +6893,7 @@
       "id": "T-0211",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-10",
       "placed": true,
       "title": "Close the last connections by build",
@@ -6909,8 +6911,8 @@
       "cost_usd": 10.3065,
       "attempts": 2,
       "finished": "2026-11-11",
-      "note": "repair 1: 78 unconnected items left; repair 2: 78 unconnected items left; gates failed: 78 unconnected items left; report kept as docs/reviews/2026-11-11-fix-pdm-4ch-T-0211-rejected.md; waits for T-0218, T-0219",
-      "summary": "waits for T-0218, T-0219 (blocked items), then runs again",
+      "note": null,
+      "summary": "retired by decision 216: PCB layout is done in interactive /board sessions, no pcb-fixer",
       "interrupted": null,
       "waits_for": [
         "T-0218",
@@ -7078,7 +7080,7 @@
         "finding": "T-0211"
       },
       "door": "one-way",
-      "state": "parked",
+      "state": "done",
       "question": "Q-0077",
       "why_big": [
         "8 work packages (last T-0281) returned it neither done nor blocked; check whether it is already done or say how to proceed"
@@ -7086,7 +7088,8 @@
       "ruling": "Standing rule for the rest of T-0218 (replaces case-by-case questions). Agents may, without asking: (1) move any small signal part (resistors, capacitors, small-signal diodes incl. D12-D15/D102-D402, the Q3-Q6 block, R60 and similar), including the ch2/ch3 blocks R201/R202 and R301/R302, and reroute any signal copper; (2) grow the In2 exit window and its VS-In2 notch as the runs need, if VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9); (3) leave GND fragments on F.Cu, B.Cu and In2 when each is tied to GND-In1 by >= 2 vias (no floating copper; GND-In1 stays one island). Fixed, owner only: connectors, PROFETs U11-U14, U1, Q30/U30/D30/D31, the buck, the 16 A/battery/surge paths, all other power-pour outlines, holes, board outline, schematic. Keep going until 0 unconnected; return only when a stage gains nothing or needs one of the fixed items.",
       "answered": "2026-11-14",
       "unfinished": 8,
-      "package": "T-0288"
+      "package": "T-0288",
+      "note": "superseded: pdm-4ch routing moved to an interactive session (decisions 214, 215, 216)"
     },
     {
       "id": "T-0219",
@@ -7253,7 +7256,7 @@
       "id": "T-0226",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "failed",
+      "state": "done",
       "created": "2026-11-11",
       "title": "pdm-4ch routing: signal vias through VS-In2, placement room for the U1 block and channel signal columns, rebuild to 0 unconnected",
       "brief": "Close the 78 unconnected items left by T-0210/T-0211 (docs/reviews/2026-11-11-fix-pdm-4ch-T-0211-rejected.md, design-notes 8.17/8.18).\n\nOwner's ruling (Q-0070), verbatim: \"Option 3 + option 2. Signal vias (not tracks) may pass through VS-In2; each pour must stay one island and keep >= 95 % of its area. Also allow a placement stage that gives the U1 transistor/resistor block (Q3-Q6, R17-R24/R50/R51) and the channel signal columns room. Recheck the heat budget (decision 9) after the change. No corridor notch. The scripts gate (question 4) is already settled by decision 163.\"\n\nWork through the build (decision 163): fixes go into hardware/pdm-4ch/scripts/ (routing_build.py, fixed_routes.py, build_routing.sh) and the board is the build output. Placement moves are made with tools/kpcb.py on the board, and the build then re-routes. The pcb-fixer gate admits scripts/ (c9fa4fa).\n\nSteps, in order:\n1. Build change (option 3):\n   - In routing_build.py, the VS-In2 outline on In2.Cu becomes a keep-out for foreign tracks only. Foreign signal vias may pass through it; in Freerouting DSN terms, a wire keep-out instead of a full keep-out on that layer.\n   - All other keep-outs stay as they are (decision 164): VS-In2 still bars tracks on In2, and the F.Cu/B.Cu power outlines, OUT3-F strip, antenna, CAN barrier, holes and edge strip are unchanged. Any via inside VS-In2 must still be legal on F.Cu, In1 and B.Cu.\n   - Pour acceptance (decision 166) changes from >= 98 % to >= 95 % of baseline area per pour. Every pour stays at its baseline island count (one island for VS-In2). The acceptance limit is the only thing to relax.\n   - Locked copper stays: PROFET thermal vias, VS vias and the fixed CAN/USB/CC1 routes.\n2. Placement (option 2):\n   - Give room to the U1 transistor/resistor block (Q3-Q6, R17-R24, R50, R51) and to the channel signal columns, the west-side signal parts on DEN, SW_IN1-4, +3V3 (D102/D202/D402), IO0/2/3/5, EN, NTC, U12/U14-IS and R60 (see 8.18).\n   - Move them toward U1, away from the VS/OUT outlines, and space the analog block so its short links and the U1 strip legs have lanes. Moves are two-way doors.\n   - Keep everything on top (decision 122), out of hole keep-outs and the antenna/CAN-barrier areas, and inside the outline.\n   - Do not move the PROFETs, Q30/U30/D31, connectors or buck, and do not change any power zone outline. No notch in VS-In2 or OUT3-F: the owner ruled it out.\n   - If a moved part leaves a locked link or fixed route dangling, update that entry in scripts/fixed_routes.py rather than hand-editing copper.\n3. Rebuild:\n   - Close KiCad and run build_routing.sh. Decision 166's other rules stay: 0 DRC errors, parity 0, and replace the board only if better. One run per input is enough, since T-0211 showed parallel runs are identical.\n   - If items remain that the router cannot close, add fixed routes in scripts/fixed_routes.py, using the new via freedom inside VS-In2. That includes J3 VBUS A4/A9/B4/B9 to F2.1 on In2, because no via may sit in OUT1-B (decision 170). Then rebuild.\n   - Target: 0 unconnected.\n4. Heat budget (decision 9):\n   - Record the VS-In2 area before and after, and every pour's percentage.\n   - Run python3 tools/heat_budget.py at --ambient 40 with the board's usual arguments (STATUS.md / ARCHITECTURE budget). Confirm the result is unchanged.\n   - The tool takes RthJA and path resistance, not copper area. State that in the report, and say whether the measured VS loss still fits the 2 oz RthJA ~40 K/W assumption: the In2 copper is 0.5 oz heat spreading only, and the load current runs on F.Cu/B.Cu.\n5. Checks:\n   - kpcb drc: 0 errors, parity 0, 0 unconnected.\n   - Pour report: every pour whole and >= 95 %, In1 free of signals, buck untouched.\n   - python3 tools/fix_check.py --scope pdm-4ch --role pcb-fixer: schematic, ERC and netlist unchanged, no bottom SMT, outline/holes unchanged.\n   - Update hardware/pdm-4ch/STATUS.md and design-notes (new 8.19) with the build change, the moves and the results.\n\nStop and ask (one-way door): stop if 0 unconnected needs any of the following:\n   - a VS-In2 or OUT3-F notch or any other power-outline change;\n   - a signal track (not a via) inside VS-In2;\n   - a pour below 95 % or split;\n   - moving a power part or connector, a bottom-side part, or an outline/hole change;\n   - a heat-budget result that changes.\nIn that case, land the best clean build only if it has fewer unconnected items than the board, and report the rest as blocked with the reason. Safety note in the report: VS-In2 is part of the battery-side VS copper and surge path, so a competent person reviews the battery path, VS copper and outputs before installation.",
@@ -7268,8 +7271,8 @@
       "cost_usd": 0.0,
       "attempts": 1,
       "finished": "2026-11-11",
-      "note": "no report written (unknown): timeout after 5400 s",
-      "summary": "failed",
+      "note": null,
+      "summary": "retired by decision 216: PCB layout is done in interactive /board sessions, no pcb-fixer",
       "interrupted": null
     },
     {
@@ -8734,7 +8737,7 @@
       "id": "T-0288",
       "role": "pcb-fixer",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-14",
       "title": "pdm-4ch routing to 0 unconnected under the Q-0077 standing rule",
       "brief": "Layout only (board file via tools/kpcb.py and the routing scripts; plus STATUS.md and design-notes). Start from the current board: T-0281 build b6, 37 unconnected, 0 DRC errors, parity 0. Owner ruling Q-0077, verbatim: \"Standing rule for the rest of T-0218 (replaces case-by-case questions). Agents may, without asking: (1) move any small signal part (resistors, capacitors, small-signal diodes incl. D12-D15/D102-D402, the Q3-Q6 block, R60 and similar), including the ch2/ch3 blocks R201/R202 and R301/R302, and reroute any signal copper; (2) grow the In2 exit window and its VS-In2 notch as the runs need, if VS-In2 stays one island, >= 1012.1 mm2, with all 40 thermal vias inside, and the heat budget is rechecked (decision 9); (3) leave GND fragments on F.Cu, B.Cu and In2 when each is tied to GND-In1 by >= 2 vias (no floating copper; GND-In1 stays one island). Fixed, owner only: connectors, PROFETs U11-U14, U1, Q30/U30/D30/D31, the buck, the 16 A/battery/surge paths, all other power-pour outlines, holes, board outline, schematic. Keep going until 0 unconnected; return only when a stage gains nothing or needs one of the fixed items.\" Order: (a) Update the routing_build.py gate to the ruling. GND fragments are now allowed on In2 as well as F/B when each has >= 2 ties to GND-In1, so the GND-In2 'keep island count' check becomes the same >= 2-tie check (this lifts the T-0281 b2/b4/b5 rejection only if the cut-off GND-In2 under U1 gets 2 stitching vias). GND-In1 stays exactly 1 island. No floating copper. Every power pour other than VS-In2 keeps its outline unchanged. VS-In2 gate: 1 island, >= 1012.1 mm2, 40/40 thermal vias. (b) Move the ch2/ch3 resistor blocks R201/R202 and R301/R302 (and nearby small parts as needed) to free the R201.1/R301.1 exits. Route SW_IN2/SW_IN3 and ch3 R302.1 /DEN (this also clears T-0285). (c) Grow EXIT_WINDOW/VS_IN2_NOTCH (fixed_routes.py) only as far as SW_IN1/SW_IN4 need, or move D12-D15 to give them via spots. The VS-B spine and the x 45.5-46.8 strip stay untouched, because they are 'other power-pour outlines'. (d) Run maze passes on the U1 strip and the analog block (GND, Q4-B/Q4-E/Q5-E, F2-Pad1, IO*, EN, NTC, VBAT_SENSE, D3-A, SW*, +3V3), moving Q3-Q6, R60 and other small parts where that helps. Build once per pass and keep only builds that reduce unconnected. Checks after every kept build: kpcb drc with 0 errors and parity 0; fix_check --role pcb-fixer; pour gates as above; no SMT part on the bottom; no part in a hole keep-out. After any VS-In2 change, run tools/heat_budget.py at 40 C (Tj report as in T-0281). Record each step's auto decisions. Stop and return (one-way door) if the next gain needs any fixed item: a connector, U11-U14, U1, Q30/U30/D30/D31, the buck, a 16 A/battery/surge path, a power-pour outline other than the VS-In2 notch, a hole, the outline, the schematic, or a bottom-side part. Also stop if VS-In2 would fall below 1012.1 mm2, lose a thermal via or split, if GND-In1 would split, or if the heat budget fails. Return as well when a whole stage gains nothing. Safety: 16 A and surge paths stay unchanged, and a competent person reviews the board before installation.",
@@ -8757,27 +8760,29 @@
         "reason": "an interruption"
       },
       "finished": "2026-11-14",
-      "note": "no report written (aborted_streaming): ",
-      "summary": "interrupted, queued again, resumes where it stopped",
+      "note": null,
+      "summary": "retired by decision 216: PCB layout is done in interactive /board sessions, no pcb-fixer",
       "interrupted": true
     },
     {
       "id": "T-0289",
       "role": "validator",
       "scope": "pdm-4ch",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-14",
       "depends_on": [
         "T-0288"
       ],
       "verify": true,
-      "since": "9bd106c07e17f556f0d94ecdef5a96a0639dc519"
+      "since": "9bd106c07e17f556f0d94ecdef5a96a0639dc519",
+      "summary": "skipped: T-0288 retired (decision 216)",
+      "cost_usd": 0.0
     },
     {
       "id": "T-0290",
       "role": "cost-controller",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-14",
       "depends_on": [
         "T-0288"
@@ -8785,13 +8790,15 @@
       "verify": true,
       "since": "9bd106c07e17f556f0d94ecdef5a96a0639dc519",
       "look_at": "price the change only: new, removed and swapped parts, basic/preferred vs extended, the unique extended part count per board before and after (each is a loading fee per order), and a cheaper equivalent where one exists",
-      "recheck": "cost"
+      "recheck": "cost",
+      "summary": "skipped: T-0288 retired (decision 216)",
+      "cost_usd": 0.0
     },
     {
       "id": "T-0291",
       "role": "emc-reviewer",
       "scope": "system",
-      "state": "ready",
+      "state": "done",
       "created": "2026-11-14",
       "depends_on": [
         "T-0288"
@@ -8799,7 +8806,9 @@
       "verify": true,
       "since": "9bd106c07e17f556f0d94ecdef5a96a0639dc519",
       "look_at": "check only the changed filters, protection parts and connectors only: do they keep invariant 4 and the layout rules of the last EMC report, and do they add new switching edges or coupling paths",
-      "recheck": "emc"
+      "recheck": "emc",
+      "summary": "skipped: T-0288 retired (decision 216)",
+      "cost_usd": 0.0
     }
   ],
   "board_size_start": {
