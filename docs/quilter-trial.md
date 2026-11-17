@@ -1,5 +1,18 @@
 # Quilter trial – handoff (pdm-4ch, 2026-11-14)
 
+**Status 2026-11-17 (owner):** pdm-4ch is fully routed by other means (decision 219), so no Quilter copper is needed
+on it and trial 3 needs no follow-up. This file and `hardware/pdm-4ch/scripts/quilter_export.py` are **kept on
+purpose**: the owner wants to try Quilter on `pdm-hc2` when its layout starts. What to carry over from the three
+trials below:
+- Give Quilter the placement too. On pdm-4ch it got every part and 2000 tracks locked, and only the leftover links.
+- It has no isolation or creepage rule and reads only board-wide minimums: every such rule goes in as a keep-out,
+  one zone per outline (KiCad saves only a zone's first outline).
+- It routes at the board minimum and does not honour Net Widths reliably: set the minimum to the narrowest track
+  wanted (0.2 mm), and check widths on import.
+- Its candidates are checked like any other copper: `docs/ARCHITECTURE.md`, "PCB layout rules", and KiCad DRC.
+- The "What blocks the last 37" analysis below is superseded: no pad was sealed; see decision 215 and
+  `hardware/pdm-4ch/STATUS.md`.
+
 Owner's idea: try Quilter's free tier (AI place-and-route) on the 37 open pdm-4ch connections. Decision 213. The routing
 method of decisions 163/181 and the decision-212 work (moving the ch2/ch3 resistor blocks) go on unchanged. Taking
 Quilter copper into the board amends 163/181 and needs the owner's ruling.
