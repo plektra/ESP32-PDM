@@ -49,11 +49,11 @@ PCB fabrication, Standard PCBA setup/stencil and shipping come from the JLCPCB q
 Unit prices change daily; recheck in the cart.
 
 Extended parts (fee each): C170101, C487384, C2687131, C70113, C165948, C96963, C5464765, C7420022, C52155402,
-C2913206, C22427220, C528763, C534868, C5219210. Everything else is basic or preferred (no fee).
+C2913206, C22427220, C528763, C534868, C5219203. Everything else is basic or preferred (no fee).
 
 Stock flags:
-- **U30 LM74500-Q1 C5219210: out of stock (0)**, minimum order 5. Blocks the order until it is restocked or the owner
-  pre-orders it as a global sourcing/consigned part. Its footprint check (T-0121) is still open too.
+- U30 LM74500-Q1 C5219210 was out of stock (0) everywhere. **U30 is now LM74502H-Q1 C5219203** (decision 222):
+  1995 in stock on 2026-11-17, 1.49 USD, minimum order 1. Its footprint check (T-0121) is still open.
 - **D1, D16–D19, D50–D54 SMAJ30CA C19077548: 172 in stock** for 20 needed, so it is thin. JLCPCB's minimum purchase is
   293 pcs (≈ 9 USD at the 100+ price).
 - Under 2000 in stock: L1 C96963 (1173), U3 C22427220 (1524), U11–U14 C534868 (1604), Q30 C5464765 (1650),
@@ -67,4 +67,4 @@ JLCPCB matched every line to the LCSC number in our BOM. What it flagged:
 - "Multiple lines in the BOM have been matched to the same part" on C307331, C15849 and C28233 (same part under
   different value spellings). Fixed: `tools/jlc_package.py` now writes one line per LCSC part (54 lines).
 - SW_BOOT1/SW_RESET1 "Unconfirmed" (generic value `SW_Push`): C318884 TS-1187A-B-A-B is the intended part; confirm it.
-- U30 LM74500-Q1 C5219210: 0 at JLCPCB (Source column "0 JLCPCB"); still the open stock blocker above.
+- U30 LM74500-Q1 C5219210: 0 at JLCPCB (Source column "0 JLCPCB"). Resolved: U30 is now LM74502H-Q1 C5219203.

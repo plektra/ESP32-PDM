@@ -4382,7 +4382,7 @@
 				)
 			)
 		)
-		(symbol "ESP32-PDM:LM74500-Q1"
+		(symbol "ESP32-PDM:LM74502H-Q1"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -4394,7 +4394,7 @@
 					)
 				)
 			)
-			(property "Value" "LM74500-Q1"
+			(property "Value" "LM74502H-Q1"
 				(at 0 -12.7 0)
 				(effects
 					(font
@@ -4402,7 +4402,7 @@
 					)
 				)
 			)
-			(property "Footprint" "Package_TO_SOT_SMD:TSOT-23-8"
+			(property "Footprint" "ESP32-PDM:TI_DDF0008A"
 				(at 0 -15.24 0)
 				(effects
 					(font
@@ -4411,7 +4411,7 @@
 					(hide yes)
 				)
 			)
-			(property "Datasheet" "https://www.ti.com/lit/ds/symlink/lm74500-q1.pdf"
+			(property "Datasheet" "https://www.ti.com/lit/ds/symlink/lm74502-q1.pdf"
 				(at 0 -17.78 0)
 				(effects
 					(font
@@ -4420,7 +4420,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Reverse polarity protection controller for an external N-MOSFET, no reverse-current blocking, 65 V, SOT-23-THIN-8 (DDF)"
+			(property "Description" "Reverse polarity protection controller for an external N-MOSFET, no reverse-current blocking, 65 V, 11 mA gate drive (H), OV input, SOT-23-THIN-8 (DDF)"
 				(at 0 -20.32 0)
 				(effects
 					(font
@@ -4429,7 +4429,7 @@
 					(hide yes)
 				)
 			)
-			(property "LCSC" "C5219210"
+			(property "LCSC" "C5219203"
 				(at 0 -22.86 0)
 				(effects
 					(font
@@ -4438,7 +4438,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "LM74500-Q1_0_1"
+			(symbol "LM74502H-Q1_0_1"
 				(rectangle
 					(start -7.62 7.62)
 					(end 7.62 -7.62)
@@ -4451,11 +4451,11 @@
 					)
 				)
 			)
-			(symbol "LM74500-Q1_1_1"
+			(symbol "LM74502H-Q1_1_1"
 				(pin passive line
 					(at -10.16 2.54 0)
 					(length 2.54)
-					(name "SOURCE"
+					(name "VS"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4473,7 +4473,7 @@
 				(pin input line
 					(at -10.16 -2.54 0)
 					(length 2.54)
-					(name "EN"
+					(name "EN/UVLO"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4560,10 +4560,10 @@
 						)
 					)
 				)
-				(pin no_connect line hide
-					(at 0 10.16 270)
+				(pin input line
+					(at 2.54 -10.16 90)
 					(length 2.54)
-					(name "NC"
+					(name "OV"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4578,10 +4578,10 @@
 						)
 					)
 				)
-				(pin no_connect line hide
-					(at 2.54 10.16 270)
+				(pin passive line
+					(at -10.16 0 0)
 					(length 2.54)
-					(name "NC"
+					(name "SRC"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -11675,7 +11675,7 @@
 		)
 	)
 	(symbol
-		(lib_id "ESP32-PDM:LM74500-Q1")
+		(lib_id "ESP32-PDM:LM74502H-Q1")
 		(at 195.58 175.26 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11693,7 +11693,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "LM74500-Q1"
+		(property "Value" "LM74502H-Q1"
 			(at 198.12 176.53 0)
 			(effects
 				(font
@@ -11711,7 +11711,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/lm74500-q1.pdf"
+		(property "Datasheet" "https://www.ti.com/lit/ds/symlink/lm74502-q1.pdf"
 			(at 195.58 175.26 0)
 			(effects
 				(font
@@ -11720,7 +11720,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Reverse-battery controller for Q30 (EN tied to SOURCE: always on, no MCU)"
+		(property "Description" "Reverse-battery controller for Q30 (EN/UVLO tied to VS, OV to GND: always on, no MCU)"
 			(at 195.58 175.26 0)
 			(effects
 				(font
@@ -11729,7 +11729,7 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C5219210"
+		(property "LCSC" "C5219203"
 			(at 195.58 175.26 0)
 			(effects
 				(font
@@ -11738,7 +11738,7 @@
 				(hide yes)
 			)
 		)
-		(property "MPN" "LM74500QDDFRQ1"
+		(property "MPN" "LM74502HQDDFRQ1"
 			(at 195.58 175.26 0)
 			(effects
 				(font
@@ -11940,17 +11940,6 @@
 				)
 			)
 		)
-	)
-	(wire
-		(pts
-			(xy 185.42 172.72)
-			(xy 185.42 177.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f979a757-7a6d-4d7d-95ae-8d49996b824f")
 	)
 	(label "VBAT_FL"
 		(at 185.42 172.72 180)
@@ -13403,5 +13392,44 @@
 				)
 			)
 		)
+	)
+	(wire
+		(pts
+			(xy 185.42 172.72)
+			(xy 185.42 175.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "31de1c59-33c3-471f-bed9-b6265368c14e")
+	)
+	(wire
+		(pts
+			(xy 185.42 175.26)
+			(xy 185.42 177.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "54692e77-80d4-4eab-a880-0f65074fe4b5")
+	)
+	(junction
+		(at 185.42 175.26)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ab23da01-bb32-402d-83e4-2b76ae53607a")
+	)
+	(wire
+		(pts
+			(xy 198.12 185.42)
+			(xy 195.58 185.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "19ff57e3-45d7-43bb-8e9e-bfdad42c7cc3")
 	)
 )

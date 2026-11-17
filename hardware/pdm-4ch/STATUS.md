@@ -122,11 +122,12 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
   (design-notes §2).
 - T-0107/T-0120: C30 and C104–C404 use C170101 2.2 µF instead of C13832 1 µF. pdm-4ch no longer carries C13832, so its loading fee is gone; this pays on short runs only. Revisit the choice if runs grow past about 12 boards (owner ruling Q-0063). RIS is now 2 × C4410 per channel.
 - T-0121: check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30, pads 1 G / 2 S / 3 D) and `ESP32-PDM:TI_DDF0008A` (U30, since 2026-11-09; was `TSOT-23-8`; TI DDF land
-  1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C5464765 and C5219210. Recheck stock (C5464765
-  2016 on 2026-11-07, C5219210 2923 on 2026-11-03).
+  1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C5464765 and C5219203 (U30 is the LM74502H-Q1 since decision 222). Recheck stock
+  (C5464765 2016 on 2026-11-07, C5219203 1995 on 2026-11-17).
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
-- Stock 2026-11-17 (`fab/README.md`): **U30 LM74500-Q1 C5219210 is out of stock** (0, min. order 5): wait for restock or
-  pre-order before the order. SMAJ30CA C19077548 has 172 pcs (20 needed). Parts + 14 extended-part fees for 2 boards ≈ 81 USD.
+- Stock 2026-11-17 (`fab/README.md`): U30 LM74500-Q1 C5219210 was out of stock everywhere; **U30 is now LM74502H-Q1
+  C5219203** (1995 in stock, decision 222: pin 7 OV → GND, pin 8 SRC → VBAT_FL; pad 5 got its own VBAT_FL via and pad 7 a
+  GND via on the PCB; DRC 0 errors / 0 unconnected / parity 0). SMAJ30CA C19077548 has 172 pcs (20 needed). Parts + 14 extended-part fees for 2 boards ≈ 81 USD.
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 - T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
 - Decision 220 (licence): add "CERN-OHL-S v2" and the source location `github.com/plektra/ESP32-PDM` to the PCB
