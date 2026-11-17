@@ -39,7 +39,7 @@ POUR_LOSS_MAX = 0.05
 
 # In2 corridor (Q-0071): VS-In2 may lose up to 15 % of its 1190.7 mm2 baseline (T-0236) and must stay one island;
 # the router keep-out stays over each PROFET's thermal-via field (pad THERMAL_PAD PTH vias) plus THERMAL_KEEP_MM.
-# Decision 216 (within decision 215 (6)): VS-In2 may be cut into several pieces by signal runs. A piece without a VS
+# Decision 218 (within decision 215 (6)): VS-In2 may be cut into several pieces by signal runs. A piece without a VS
 # via is removed by the fill (island removal), so every piece left is tied to VS; all 40 PROFET thermal vias must
 # still sit in copper (thermal_check) and the pour keeps >= 75 % of its 1190.7 mm2 baseline (was 85 %, one island).
 CORRIDOR_MIN_MM2 = {'VS-In2': round(1190.7 * 0.75, 1)}

@@ -19,6 +19,12 @@ for it in geo['items']:   # copper of the routed nets that stayed on the base bo
         out['vias'].append({'net': it['net'], 'at': it['at'], 'size': it['size'], 'drill': it['drill'], 'kept': 1})
 out['tracks'] += [{'net': t['net'], 'layer': t['layer'], 'width': t['width'], 'pts': [rnd(p) for p in t['pts']]} for t in r['tracks']]
 out['vias'] += [{'net': v['net'], 'at': rnd(v['at']), 'size': 0.6, 'drill': 0.3} for v in r['vias']]
+seen, uniq = set(), []   # two legs of a net may end in the same via: keep one
+for v in out['vias']:
+    k = (v['net'], round(v['at'][0] * 1000), round(v['at'][1] * 1000))
+    if k not in seen:
+        seen.add(k); uniq.append(v)
+out['vias'] = uniq
 with open(os.path.join(HERE, 'pf_routes.json'), 'w') as f:
     f.write('{\n')
     for k in ('nets', 'place', 'open', 'drop_gnd', 'drop_gnd_vias'):

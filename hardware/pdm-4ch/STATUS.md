@@ -1,6 +1,30 @@
 # pdm-4ch status
 
-Updated: 2026-11-16 (decision 214: router fixes, west divider block moved east, maze passes + rip-up: 37 -> 29 unconnected)
+Updated: 2026-11-17 (decisions 215, 217–219: routing review, one-pass reroute – **fully routed, 0 unconnected**)
+
+**2026-11-16/17 (decisions 215, 217–219, owner – interactive): the board is fully routed.** `build_routing.sh`:
+0 DRC errors, **0 unconnected** (was 29), parity 0, every power pour whole; a second build from the new board gives
+the same. VS-In2: 1 island, 1026.2 mm², 40/40 thermal vias. Tj 101 °C at 40 °C, 4 × 4 A (unchanged).
+- **Review finding (decision 215).** The board was not out of room: 17 nets run from U1 to the switch/CAN block and
+  11 cross the VS block, with B.Cu and In2 mostly empty. It was stuck on pad access (parts pad to pad, many of them
+  facing away from their connections) and on a method that locked every earlier route.
+- **Method.** All signal copper except the CAN and USB pairs is removed and routed again together:
+  `scripts/pf_export.py` (base board + geometry) → `scripts/pf_route.py` + `pf_core.c` (0.05 mm grid, every net
+  negotiates with the others, then rip-up) → `scripts/pf_land.py` writes `scripts/pf_routes.json`, which
+  `fixed_routes.py` loads → `build_routing.sh` with all its gates. A full reroute takes about 10 minutes. KiCad's DRC
+  agrees with the router's rules (the check: its output placed on the board gives 0 errors).
+- **What unlocked it,** in order of effect: (1) the CAN barrier keep-out drawn to the rule 9 minimum (decision 217):
+  the one passage to the switch-input block went from 6.8 to 10.9 mm; (2) In2 runs may cross the VS-In2 east edge
+  anywhere (decision 218); (3) 27 small parts turned 180° so their pads face their connections, e.g. the six
+  resistors beside U12/U13; (4) R30–R33 moved out of the switch-input pocket to their source by C14–C17; (5) D24 and
+  D23 moved out of the pocket; (6) at J3 the CC1 via moved, D4 and FB1 turned, VBUS and D3-A 0.2 mm (decision 219).
+- **Not moved:** J6, the connectors, U1, the PROFETs, the power path, all power pour outlines, SW_BOOT1/SW_RESET1.
+  No schematic change.
+- **Found on the way:** no pad was ever walled in by fixed copper; the earlier "sealed" findings came from the old
+  router's model (a hole rule that fenced in every through-hole pad's own net).
+- **Open:** silkscreen (stage 6); the EMC layout review and the validator review of the PCB, including decision 217
+  (barrier keep-out) and the 0.2 mm VBUS/D3-A necks at J3; the old router scripts and the superseded decision rows
+  are still to be cleaned up. A competent person reviews the board before installation.
 
 **2026-11-16 (decision 214 part move, owner – interactive):** 32 -> 29 unconnected, 0 DRC errors, parity 0, every pour
 whole. The west divider block moved east (decision 212 (1), `PLACE.update` in `fixed_routes.py`): the SWIN2-4 load

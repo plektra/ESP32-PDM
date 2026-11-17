@@ -40,8 +40,8 @@ def clr(net):
 # the J3 VBUS pins passes between the CC1 via and a J3 peg hole; USB-only supply peaks at 0.40 A (decision 87),
 # about 16 mV over 8 mm of 0.5 oz In2. VBUS and D3-A keep their existing copper (only missing links are added);
 # Net-(C4-Pad1) (F2.2 -> FB1.1 -> C4) is rerouted whole because FB1 turns 180 degrees.
-WIDTH = {'Net-(F2-Pad1)': 0.2, 'Net-(D3-A)': 0.3, 'Net-(C4-Pad1)': 0.4}
-KEEP_COPPER = {'Net-(F2-Pad1)', 'Net-(D3-A)'}
+WIDTH = {'Net-(F2-Pad1)': 0.2, 'Net-(D3-A)': 0.2, 'Net-(C4-Pad1)': 0.4}
+KEEP_COPPER = set()   # (D4 turns 180 degrees, so D3-A is rerouted whole as well)
 # Nets whose board copper is replaced by their fixed_routes.py lines before export (edited fixed routes)
 FROM_FR = {'Net-(J3-CC1)'}
 

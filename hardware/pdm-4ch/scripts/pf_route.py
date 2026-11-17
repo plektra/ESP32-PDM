@@ -21,7 +21,7 @@ CORRIDOR_BAND = 1.5
 # x 55-57, y 6.45-20). In2 runs may cross the edge anywhere east of the PROFET thermal fields; the build's gates
 # (one island, area, 40/40 thermal vias, heat budget) check the pour afterwards.
 EXIT_WINDOW = tuple(float(v) for v in os.environ.get('PF_EXIT', '53.0,6.45,61.5,56.0').split(','))
-VS_MIN_MM2 = 893.0   # decision 216: 75 % of the 1190.7 mm2 baseline, pieces allowed (each via-tied)
+VS_MIN_MM2 = 893.0   # decision 218: 75 % of the 1190.7 mm2 baseline, pieces allowed (each via-tied)
 IN2_COST, CORRIDOR_COST, VIA_COST = 1.2, 3.0, 60.0   # via = 3 mm of track
 
 
@@ -226,7 +226,7 @@ def main():
     ap.add_argument('work'); ap.add_argument('--iters', type=int, default=60)
     ap.add_argument('--nets', default=''); ap.add_argument('--skip', default=''); ap.add_argument('--png', action='store_true')
     ap.add_argument('--seed', type=int, default=1)
-    ap.add_argument('--ties', default='auto')
+    ap.add_argument('--ties', default='auto'); ap.add_argument('--walk', type=int, default=120); ap.add_argument('--ties-extra', default=''); ap.add_argument('--reroute', default=''); ap.add_argument('--gnd-links', default='')
     ap.add_argument('--resume', action='store_true'); ap.add_argument('--verbose', action='store_true')
     a = ap.parse_args()
     t0 = time.time()
@@ -264,6 +264,8 @@ def main():
     if resume:
         z = np.load(legfile)
         for n in nets:
+            if n['name'] in a.reroute.split(','):
+                continue
             for g in range(int(z['nleg_%d' % n['i']])):
                 arr = np.ascontiguousarray(z['leg_%d_%d' % (n['i'], g)])
                 core.pf_load_leg(n['i'], len(arr), arr.ctypes.data_as(i32))
@@ -271,14 +273,34 @@ def main():
                 core.pf_load_fail(n['i'], int(q))
             core.pf_commit_loaded(n['i'])
         print('resumed', legfile, flush=True)
+        for nm in [x for x in a.reroute.split(',') if x]:   # nets whose pads changed since the saved run
+            n = [n for n in nets if n['name'] == nm][0]
+            core.pf_clear(n['i'])   # routed again after the GND links and ties below
     # sealed by the fixed board alone?
     pres, todo = 0.5, list(nets)
     # GND ties (--ties auto | R17.2,C21.2,...): a short F.Cu stub and a via to the GND plane for GND pads the pours may
     # not reach between the routed tracks. Routed first, on the empty board; the signals then keep clear of them.
-    tie_legs, tie_fail = [], []
+    tie_legs, tie_legs2, tie_fail = [], [], []
     if a.ties == 'auto':   # every GND SMD pad of a moved part: its old tie copper went with the move
         a.ties = ','.join(it['ref'] for it in geo['items'] if it['kind'] == 'pad' and it['net'] == 'GND' and it.get('smd')
                           and it['ref'].split('.')[0] in geo.get('moves', {}))
+    link_legs = []
+    for pair in [x for x in a.gnd_links.split(',') if x]:   # --gnd-links J3.A1:D4.1 : a GND track between two pads
+        gp = {it['ref']: it for it in geo['items'] if it['kind'] == 'pad' and it['net'] == 'GND'}
+        li = core.pf_add_net(mp.nid['GND'], 0)
+        refs_ = pair.split(':')
+        for r in refs_:
+            it = gp[r.rstrip('*')]; cx, cy = int(round(it['at'][0] / G)), int(round(it['at'][1] / G))
+            arr = np.array([cy * mp.W + cx], np.int32); core.pf_add_cluster(li, 1, arr.ctypes.data_as(i32))
+        core.pf_finalize(li)
+        op = core.pf_route(li, 0.0, 1, VIA_COST * 20)
+        # a pad marked * also gets a stub and via to the GND plane (same net object, so its own link is no obstacle)
+        tied = [r for q, r in enumerate(refs_) if r.endswith('*') and core.pf_route_tie(li, q)]
+        print('GND link', pair, 'open', op, 'tied', tied, flush=True)
+        for g in range(core.pf_nleg(li)):
+            arr = np.zeros(core.pf_leg_len(li, g), np.int32); core.pf_leg_get(li, g, arr.ctypes.data_as(i32)); link_legs.append(arr)
+    if a.ties_extra:
+        a.ties = ','.join(x for x in (a.ties, a.ties_extra) if x)
     if a.ties:
         gid = mp.nid['GND']; N_ = mp.W * mp.H
         ti = core.pf_add_net(gid, int(round((0.3 - 0.2) / 2 / G)))
@@ -293,7 +315,22 @@ def main():
                 tie_fail.append(r)
         for g in range(core.pf_nleg(ti)):
             arr = np.zeros(core.pf_leg_len(ti, g), np.int32); core.pf_leg_get(ti, g, arr.ctypes.data_as(i32)); tie_legs.append(arr)
-        print('GND ties: %d routed, failed %s' % (len(tie_legs), tie_fail), flush=True)
+        if tie_fail:   # second try at 0.2 mm (fine-pitch pins)
+            t2 = core.pf_add_net(gid, 0); again, tie_fail = tie_fail, []
+            for r in again:
+                it = pads[r]; cx, cy = int(round(it['at'][0] / G)), int(round(it['at'][1] / G))
+                arr = np.array([cy * mp.W + cx], np.int32)
+                core.pf_add_cluster(t2, 1, arr.ctypes.data_as(i32))
+            for q, r in enumerate(again):
+                if not core.pf_route_tie(t2, q):
+                    tie_fail.append(r)
+            for g in range(core.pf_nleg(t2)):
+                arr = np.zeros(core.pf_leg_len(t2, g), np.int32); core.pf_leg_get(t2, g, arr.ctypes.data_as(i32)); tie_legs2.append(arr)
+        print('GND ties: %d routed, failed %s' % (len(tie_legs) + len(tie_legs2), tie_fail), flush=True)
+    if resume:
+        for nm in [x for x in a.reroute.split(',') if x]:
+            n = [n for n in nets if n['name'] == nm][0]
+            print('rerouted', nm, 'open', core.pf_route(n['i'], 0.0, 1, VIA_COST), flush=True)
     bad = {}
     for it in range(0 if resume else a.iters):
         order = sorted(todo, key=lambda n: rng.random())
@@ -379,7 +416,9 @@ def main():
             core.pf_route(x['i'], float(rp), 0, VIA_COST * rv)
             blk = [n for n in nets if n is not x and core.pf_conflicts(n['i'], 0.0) > 0]
             ok = False
-            if blk and len(blk) <= 10 and core.pf_nfail(x['i']) == 0:
+            if not blk and core.pf_nfail(x['i']) == 0 and core.pf_conflicts(x['i'], 0.0) == 0:
+                ok = True   # the retry found a clean route by itself
+            elif blk and len(blk) <= 10 and core.pf_nfail(x['i']) == 0:
                 for n in blk:
                     core.pf_clear(n['i'])
                 core.pf_route(x['i'], 0.0, 1, VIA_COST * rv)
@@ -398,6 +437,8 @@ def main():
     out = {'tracks': [], 'vias': [], 'open': {}}
     t, v = emit(mp, 'GND', 0.3, tie_legs)
     out['tracks'] += t; out['vias'] += v; out['tie_fail'] = tie_fail
+    t, v = emit(mp, 'GND', 0.2, tie_legs2 + link_legs)
+    out['tracks'] += t; out['vias'] += v
     for n in nets:
         legs = []
         for g in range(core.pf_nleg(n['i'])):
@@ -409,7 +450,43 @@ def main():
         nf = core.pf_nfail(n['i'])
         if nf:
             out['open'][n['name']] = nf
-    # VS-In2 island check (decision 216: area floor; pieces listed): the fill is the outline minus every foreign In2
+    # walk: a swap that leaves the count unchanged (one net in, another out) is accepted too, so the search can leave
+    # a dead end; a net just put in is not ripped again for a few steps
+    tabu = []
+    for step in range(a.walk):
+        failed = [n for n in nets if core.pf_nfail(n['i']) and n['name'] not in tabu[-4:]]
+        if not total_open():
+            break
+        if not failed:
+            tabu = []; continue
+        x = failed[int(rng.integers(len(failed)))]
+        rp, rv = [(4, 1), (12, 1), (2, 1), (30, 1), (6, 0.4), (20, 2.5), (1, 1), (8, 0.2)][int(rng.integers(8))]
+        before = total_open()
+        for n in nets:
+            core.pf_save(n['i'])
+        core.pf_route(x['i'], float(rp), 0, VIA_COST * rv)
+        blk = [n for n in nets if n is not x and core.pf_conflicts(n['i'], 0.0) > 0]
+        ok = False
+        if not blk and core.pf_nfail(x['i']) == 0 and core.pf_conflicts(x['i'], 0.0) == 0:
+            ok = True
+        elif blk and len(blk) <= 8 and core.pf_nfail(x['i']) == 0:
+            for n in blk:
+                core.pf_clear(n['i'])
+            core.pf_route(x['i'], 0.0, 1, VIA_COST * rv)
+            order = list(blk); rng.shuffle(order)
+            for n in order:
+                core.pf_route(n['i'], 0.0, 1, VIA_COST)
+            ok = total_open() <= before and core.pf_nfail(x['i']) == 0
+        if ok:
+            tabu.append(x['name'])
+            if total_open() < before:
+                print('walk %d: %s in; open %d -> %d' % (step, x['name'], before, total_open()), flush=True)
+        else:
+            for n in [x] + blk:
+                core.pf_clear(n['i'])
+            for n in [x] + blk:
+                core.pf_restore(n['i'])
+    # VS-In2 island check (decision 218: area floor; pieces listed): the fill is the outline minus every foreign In2
     # item (fixed and routed) grown by the zone clearance; counted at 0.1 mm
     if hasattr(mp, 'vs_inside'):
         im = Image.new('1', (mp.W, mp.H), 0); d = ImageDraw.Draw(im); zc = mp.vs_zc
