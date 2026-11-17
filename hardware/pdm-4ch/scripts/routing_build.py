@@ -106,9 +106,28 @@ def move_parts(b, tracks):
     vdrop = set()
     for x, y in getattr(fixed_routes, 'DROP_GND_VIAS', ()):
         p = P(b, x, y); vdrop.add((p.x, p.y))
+    # decision 214: a rerouted net keeps only the copper fixed_routes.py lists (2 um grid match); the rest goes
+    rer = set(getattr(fixed_routes, 'REROUTED_NETS', ()))
+    listed = set()
+    for r in fixed_routes.TRACKS:
+        if r['net'] in rer:
+            pts = [P(b, *p) for p in r['pts']]
+            for a, e in zip(pts, pts[1:]):
+                listed.add(('t', r['net'], b.GetLayerID(r['layer']), *sorted([(a.x // 2000, a.y // 2000), (e.x // 2000, e.y // 2000)])))
+    for r in fixed_routes.VIAS:
+        if r['net'] in rer:
+            p = P(b, *r['at']); listed.add(('v', r['net'], p.x // 2000, p.y // 2000))
     gone = []   # tracks to remove (prep removes them in its one pass over the board's tracks: a second
     for t in tracks:  # GetTracks() after b.Remove() breaks KiCad's SWIG layer)
-        if t.GetNetname() in drop:
+        if t.GetNetname() in rer:
+            if t.GetClass() == 'PCB_VIA':
+                k = ('v', t.GetNetname(), t.GetPosition().x // 2000, t.GetPosition().y // 2000)
+            else:
+                a, e = t.GetStart(), t.GetEnd()
+                k = ('t', t.GetNetname(), t.GetLayer(), *sorted([(a.x // 2000, a.y // 2000), (e.x // 2000, e.y // 2000)]))
+            if k not in listed:
+                gone.append(t)
+        elif t.GetNetname() in drop:
             gone.append(t)
         elif t.GetNetname() == 'GND' and t.GetClass() == 'PCB_VIA' and \
                 any(abs(t.GetPosition().x - vx) < 2000 and abs(t.GetPosition().y - vy) < 2000 for vx, vy in vdrop):
@@ -193,6 +212,13 @@ def keepout(b, name, x1, y1, x2, y2):
 
 def prep(board, work):
     b = pcbnew.LoadBoard(board)
+    old = [z for z in b.Zones() if z.GetIsRuleArea() and z.GetZoneName().startswith(SLIVER)]
+    if old:   # decision 214: each build decides its own slivers again; reload after b.Remove() (KiCad's SWIG layer
+        for z in old:   # breaks on the next lookup otherwise)
+            b.Remove(z)
+        tmp = os.path.join(work, 'nosliver.kicad_pcb')
+        pcbnew.SaveBoard(tmp, b)
+        b = pcbnew.LoadBoard(tmp)
     # T-0281 (Q-0076): the board as it is now is the reference for the GND fragment gate and the pour gates
     fill(b)
     weak = gnd_weak(b)
@@ -502,6 +528,9 @@ def finish(b, work, out, nw, nv):
     gf0 = gnd_fragments(b, work)
     if gf0['stitched']:
         fill(b)
+    sl = drop_slivers(b, work)   # decision 206/214: new GND fragments that cannot get 2 ties are not filled
+    if sl:
+        fill(b)
     base = json.load(open(os.path.join(work, 'baseline.json')))
     now = islands(b)
     split = pour_check(base, now)
@@ -514,7 +543,7 @@ def finish(b, work, out, nw, nv):
     if th:
         split['thermal'] = th
     pcbnew.SaveBoard(out + '.kicad_pcb', b)
-    json.dump({'split': split, 'stitch': st, 'removed': rs, 'pruned': pr, 'tracks': nw, 'vias': nv,
+    json.dump({'split': split, 'stitch': st, 'slivers': sl, 'removed': rs, 'pruned': pr, 'tracks': nw, 'vias': nv,
                'gnd_new': gf0['new'], 'frag_vias': gf0['vias_added'], 'islands': now},
               open(out + '.json', 'w'), indent=1)
     print('pours:', 'whole' if not split else 'SPLIT %s' % split, '| stitch vias', st, '| cleaned', rs,
@@ -545,6 +574,10 @@ def prune(b):
     unconnected count cannot rise. Returns the removed items (net, kind, layer, mm board-relative)."""
     ox, oy = origin(b)
     out = []
+    keep = set()   # decision 214: deliberate escape stubs (fixed_routes.KEEP_TRACKS) stay even while dangling
+    for n, a, e in getattr(fixed_routes, 'KEEP_TRACKS', ()):
+        pa, pe = P(b, *a), P(b, *e)
+        keep.add((n, *sorted([(pa.x // 2000, pa.y // 2000), (pe.x // 2000, pe.y // 2000)])))
     # KiCad 10 pcbnew: BOARD::Remove() of a held track breaks the SWIG track list, and reusing a connectivity object
     # after a via was deleted segfaults; so items are deleted (BOARD::Delete) and connectivity is rebuilt per pass
     for _ in range(20):
@@ -561,6 +594,8 @@ def prune(b):
                 if sum(1 for l in ALL_CU if conn.IsConnectedOnLayer(t, l)) < 2 and via_touches(b, t) <= 1:
                     gone.append(t)
             elif conn.TestTrackEndpointDangling(t, True):   # track_dangling: a free end
+                if (n, *sorted([(t.GetStart().x // 2000, t.GetStart().y // 2000), (t.GetEnd().x // 2000, t.GetEnd().y // 2000)])) in keep:
+                    continue
                 gone.append(t)
         if not gone:
             break
@@ -784,7 +819,9 @@ def tie_islands(b, net, fills, vias):
 # (an old fragment, unchanged or cut smaller). Every other weak island is new: finish() adds stitching vias into it up
 # to FRAG_MIN_TIES, and the build fails the gate when one stays weak. Floating copper (an island with no pad or via)
 # is removed by the fill itself (GND-F/GND-B island removal "always").
-FRAG_ZONES = {'GND-F': pcbnew.F_Cu, 'GND-B': pcbnew.B_Cu}
+# decision 212 (3) / 214: GND-In2 follows the GND-F/B fragment rule (a new island needs >= 2 ties to GND-In1); its
+# island count is no longer gated (In1 is the solid reference plane, In2 GND is fill)
+FRAG_ZONES = {'GND-F': pcbnew.F_Cu, 'GND-B': pcbnew.B_Cu, 'GND-In2': pcbnew.In2_Cu}
 FRAG_MIN_TIES = 2
 NO_VIA_X = (45.5, 46.8)   # the x 46.15 USB via strip: never a stitching via (decision 172 / Q-0076)
 
@@ -815,7 +852,7 @@ def _bbox_mm(b, s):
 
 
 def gnd_weak(b):
-    """weak GND-F/B islands of a filled board: zone -> [outline points (nm)] (outer outline only)"""
+    """weak GND-F/B/In2 islands of a filled board: zone -> [outline points (nm)] (outer outline only)"""
     ties = _gnd_ties(b)
     out = {}
     for name in FRAG_ZONES:
@@ -908,8 +945,36 @@ def gnd_fragments(b, work, add=True):
     return {'new': new, 'new_weak': new_weak, 'stitched': bool(added), 'vias_added': added}
 
 
+SLIVER = 'sliver-'   # fill keep-outs over unstitched new GND fragments (decision 214); prep removes the old ones
+
+
+def drop_slivers(b, work):
+    """new weak GND-F/B/In2 fragments that the stitcher could not tie twice get a fill keep-out on their layer (rule
+    area: no zone fill, tracks/vias/pads allowed) over the island itself, so they are not filled (decision 206:
+    unstitched slivers are removed). Returns [[zone, bbox, area]]. A sliver that carried a connection shows up as an
+    unconnected item, and the build then keeps the board it has."""
+    ref = json.load(open(os.path.join(work, 'gnd_ref.json')))['weak']
+    ties = _gnd_ties(b)
+    out = []
+    for name, lay in FRAG_ZONES.items():
+        old = [_poly(o) for o in ref.get(name, [])]
+        for s in list(_islands_of(b, name)):
+            if sum(1 for p in ties if s.Contains(p)) >= FRAG_MIN_TIES:
+                continue
+            if any((lambda c: (c.BooleanIntersection(o), c.Area() > 0.9 * s.Area())[1])(pcbnew.SHAPE_POLY_SET(s)) for o in old):
+                continue
+            k = pcbnew.SHAPE_POLY_SET(s)
+            k.Inflate(M(0.02), pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, M(0.01)); k.thisown = 0
+            z = pcbnew.ZONE(b); z.SetIsRuleArea(True)
+            z.SetDoNotAllowTracks(False); z.SetDoNotAllowVias(False); z.SetDoNotAllowZoneFills(True)
+            z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
+            z.SetLayer(lay); z.SetOutline(k); z.SetZoneName('%s%d' % (SLIVER, len(out))); b.Add(z)
+            out.append([name, _bbox_mm(b, s), round(s.Area() / 1e12, 2)])
+    return out
+
+
 def ref_check(ref, now):
-    """T-0281: every pour except GND-F/GND-B against the board before the build: GND-In1 exactly one island; every
+    """T-0281: every pour except GND-F/GND-B/GND-In2 (decision 214) against the board before the build: GND-In1 exactly one island; every
     other pour no more islands than before and >= (1 - POUR_LOSS_MAX) of its area (VS-In2 keeps its own gate)"""
     bad = {}
     for k, (n0, a0) in ref.items():

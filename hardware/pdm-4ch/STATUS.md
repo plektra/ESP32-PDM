@@ -1,8 +1,47 @@
 # pdm-4ch status
 
-Updated: 2026-11-14 (Quilter trial export; T-0281 stitched GND-F/B fragments, IO2/IO5 through the exit, +3V3 under U1: 37 unconnected)
+Updated: 2026-11-16 (decision 214: router fixes, west divider block moved east, maze passes + rip-up: 37 -> 29 unconnected)
 
-**2026-11-14 (Quilter trial – owner):** the owner is trying Quilter's free tier on the 37 open connections
+**2026-11-16 (decision 214 part move, owner – interactive):** 32 -> 29 unconnected, 0 DRC errors, parity 0, every pour
+whole. The west divider block moved east (decision 212 (1), `PLACE.update` in `fixed_routes.py`): the SWIN2-4 load
+pairs R4/R46, R7/R47, R8/R48 (their midpoints join nothing else) next to the SWIN rows by D16-D19, and R1, R2, R31,
+R33, R38 into the strip x 65-67 west of the CAN barrier. D23 stays (no SOD-123 spot east; SW4 is routed). Copper the
+move made illegal (SWIN1/2/4 row tracks, an SW3_IO via, a +3V3 via) or dangling was removed from `fixed_routes.py`
+and rerouted; R2.1 got a GND via. Maze pass 2 (pruned geometry) closed SWIN2-4 and IO7; rip-up closed +3V3 (with
+SW4) and IO11 (with IO8). The rip-up loop then found no further improving trial.
+- Pipeline lessons: the router geometry must be pruned of dangling copper, and that copper deleted from
+  `fixed_routes.py` too (else the build re-adds it over the new routes); `KEEP_TRACKS` protects the R60.2 stub.
+- Open (29): GND 3; IO6, IO17, Q4-B, F2-Pad1 2 each; DEN, EN, IO0, IO11, IO18, NTC, SW1_IO, SW2, SW2_IO, SW3_IO, SW4,
+  SW4_IO, SW_IN1-3, VBAT_SENSE, D3-A, Q4-E 1 each.
+
+**2026-11-15/16 (decision 214, owner – interactive):** the routing method is reworked; 37 -> 32 unconnected, 0 DRC
+errors, parity 0, every pour whole (VS-In2 untouched). What changed and why:
+- **Router bugs found.** `geom_export.py` (a) built a THT pad's hole keep-out from the pad outline + 0.55 mm instead of
+  the drill + 0.25 mm hole clearance: radius 1.40 mm on a 2.54 mm header, so J6 (x 55.2, y 55-73) was a solid wall
+  and, with the VS block, sealed 11 links west of it (dividers R1/R2/R4/R7/R8/R31/R33/R38, D23, SW_RESET1, SW_BOOT1,
+  TH1); (b) keyed clusters by Python `id()` of KiCad's SWIG wrappers, which never match: 1755 phantom clusters, so the
+  maze spent legs (and clearance) joining copper that was already joined - the source of many 0.1 mm stubs in
+  `fixed_routes.py`; now UUIDs, 34 real clusters; (c) margin 0.06 -> 0.08 (0.06 left 2-3 um misses).
+- **Build gate.** GND-In2 follows the GND-F/B fragment rule (decision 212 (3)): a new island needs >= 2 ties to In1.
+  New unstitchable slivers get a fill keep-out (`sliver-N` rule areas, rebuilt each build; decision 206 "slivers are
+  removed").
+- **R60.2 escape.** R60.2 (VBAT_SENSE) lay inside the router's zone-clearance ring of VS-F-drain; a fixed stub east to
+  x 59.6 (`# keep`) lets the router start outside it.
+- **Maze pass 1** with the fixes: SW1, SW4, SW_IN4 complete (37 -> 34). **Rip-up** (`scripts/ripup.py`): Q5-E by
+  rerouting Q6-B (34 -> 32). `REROUTED_NETS` in `fixed_routes.py`: a listed net keeps only the copper the file lists.
+- **Tried, not kept.** Rerouting 46 nets in one pass with a negotiated-congestion router (`scripts/reroute.py`): 44
+  legs open, worse than the incremental copper. Rip-up of whole blocker nets or only the crossed segments: no other
+  net improves - every new route displaces one that has no other way.
+- **Where it is stuck (analysis in `docs/quilter-trial.md`).** Board size is not the limit. The remaining links meet at
+  the west-east crossing past J6 and the U1/analog block: SWIN2-4, EN, IO0, IO11 now compete with the SW1/SW4 routes
+  for the J6 pin gaps, with the dense divider block on the west side and the switch column on the east side.
+  Open (32): GND 3; IO6, IO11, IO17, Q4-B, F2-Pad1 2 each; D3-A, VBAT_SENSE, SWIN2-4, SW4_IO, SW2_IO, SW1_IO, EN,
+  IO0, NTC, IO7, IO18, SW_IN1-3, DEN, +3V3, Q4-E 1 each (kicad-cli DRC of the landed board).
+- Next: part moves allowed by decision 212 (the west divider block next to the switch column, so its links need no
+  J6 crossing), then maze + rip-up again. No schematic change; only 0.2/0.3 mm signal copper and GND stitching changed.
+  A competent person reviews the board before installation.
+
+**2026-11-14 (Quilter trial – owner; handoff `docs/quilter-trial.md`):** the owner is trying Quilter's free tier on the 37 open connections
 (decision 213). `scripts/quilter_export.py <out_dir>` (KiCad Python) writes a locked copy of the board plus
 `UPLOAD.md`: all parts, tracks, vias and zones locked; dangling signal copper pruned (none); In1 named GND;
 export-only rule areas for no tracks on In1 and no tracks/vias under the antenna on In1/In2. The export copy has
