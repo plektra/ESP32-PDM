@@ -2538,6 +2538,27 @@ Owner ruling Q-0076 (decision 206):
 - **Safety.** No 16 A or surge path changed and no power outline changed except the notch. The new copper is signal
   copper and GND stitching. A competent person reviews the board before installation.
 
+### 8.24 Layout rules from the pdm-4ch layout EMC review (2026-11-17)
+
+Source: `docs/reviews/2026-11-17-emc-pdm-4ch.md` (findings E22–E25). These rules add to the earlier EMC layout rules
+(2026-10-30 rules 1–13, 2026-11-03, 2026-11-04, 2026-11-07) and to `docs/ARCHITECTURE.md` "PCB layout rules"; they go
+into that list in the next `/system` session and are cited as "rules 1–4 of 2026-11-17". They apply to both boards,
+and to pdm-hc2 when its layout starts.
+
+1. **Filter capacitor next to its series resistor.** The shunt capacitor of an RC/RF filter sits within 5 mm of the
+   resistor it works with, with a GND via beside its pad. The track onward to the protected part may be long. On
+   pdm-4ch, C50 on the LED1 line breaks this rule (E22): on a 21 mm stub, ≈ 1 nH/mm makes ≈ 20 Ω at 160 MHz, so the
+   stage gives ≈ −14 dB instead of ≈ −40 dB (estimate, unverified).
+2. **TVS flow-through, also on differential lines.** Every protected line passes through its TVS pad, and nothing
+   taps the line between the connector and the clamp. On pdm-4ch, CANL does this at D9 but CANH does not (E23).
+3. **Short dead-end SW copper.** DNP snubber or option footprints on the buck SW node stay short (≤ 3 mm of spur)
+   and ≥ 3 mm from the FB node and its divider. On pdm-4ch, R44 is 0.7 mm from R10 (E24, scan item for now).
+4. **Re-check after every reroute.** The router knows nets, not the order of parts along a filtered line, so rules
+   1 and 2 are checked after each reroute (lever E25: report-only checks in `build_routing.sh`).
+
+Silkscreen items still open from the same report (stage 6): J10 "BATTERY" with + and −, J11 "OUT1–OUT4", J5 "PANEL"
+with pin 1 and the drain pin J5.10, J4 "CAN".
+
 ## 9. Open items
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)

@@ -40,11 +40,28 @@ footprint pad or schematic change; DRC unchanged.
    format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
 2. Silkscreen (layout stage 6): connector and pin-1 marks, "BATTERY + −", OUT1–OUT4, "PANEL", "CAN"; clear the
    398 silkscreen warnings of the DRC.
-3. `/emc pdm-4ch` on the layout and `/validate pdm-4ch` on the PCB, then fix the findings. Points to check first:
+3. `/validate pdm-4ch` on the PCB, then fix the findings. Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and
    Net-(D3-A) necks at J3 (decision 219), the fill keep-outs that removed GND slivers on F.Cu/B.Cu/In2.
+   `/emc pdm-4ch` on the layout is done (2026-11-17, `docs/reviews/2026-11-17-emc-pdm-4ch.md`): 0 CRITICAL,
+   0 MAJOR, 3 MINOR, all layout-only, two-way, no part change. Open, to fix one at a time in the layout session:
+   - **E22:** C50 (LED1 line RF/ESD shunt) sits on a 21–25 mm stub from R19; C51–C53 are at their resistors. At
+     160 MHz the stage gives ≈ −14 dB instead of ≈ −40 dB (estimate), so Q3 may rectify VHF (LED1 flicker). Fix:
+     C50 within 5 mm of R19.2 with a GND via beside it; reroute Q3 from there.
+   - **E23:** D9 (PESD2CAN) is a 6 mm side branch on CANH_BUS (R71/U5 tapped upstream of the clamp), while CANL_BUS
+     runs through its D9 pad. Fix: re-route the CANH hand route (decision 168) through D9 pad 1, then on to R71/FL1.
+   - **E24:** R10 pad 1 (FB) is 0.7 mm from the SW pad of DNP R44, and a 6 mm dead-end SW spur to R44/C20 runs
+     1.6 mm from the FB track. No change now; added to the T-0161 scan below. Move R9/R10 or R44/C20 only if the
+     scan shows jitter.
+   - **E25 (lever, optional):** report-only checks in `build_routing.sh` (filter cap ≤ 5 mm from its resistor, TVS
+     tap order, FB-to-SW distance) so the next reroute shows E22/E23-type slips.
+   - Not a finding, noted: the VBAT_FL track at x = 40.25 (U30 pin 5 to the pour) is 0.3 mm from GND fill for
+     about 4 mm, beyond rule 4's 0.6 mm pad zone. The BTT6050 slew is now read from the datasheet (0.3/0.8/1.4 V/µs),
+     which closes the "slew UNVERIFIED" item for pdm-4ch.
 4. At the first order, check the CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°), and
-   the footprints listed in the pre-order checklist below.
+   the footprints listed in the pre-order checklist below. The JLCPCB package (Gerber zip, BOM, CPL) is built by
+   `python3 tools/jlc_package.py pdm-4ch` into `fab/` behind a DRC gate; see `fab/README.md` for the quote settings.
+   The 2026-11-17 package is for quoting only.
 5. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384 and
    C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2. Remaining part check from
    the BOM audit: PESD2CAN pin 3 = common.
@@ -61,7 +78,7 @@ History of the schematic fix rounds and of the layout up to 2026-11-16: `STATUS-
   current; afterwards inspect R54–R56 and F1/F3/F4 (cracks, discoloration, resistance). Pass before installation
   (design-notes §8.3).
   T-0161: make the short behind F1 with **JP1 fitted** (a short at C1 also puts JP1 in the path) and, if L2 is ever fitted, repeat it.
-- **T-0161 / decision 28 – buck input filter (pre-compliance scan):** conducted emission on the battery input with JP1 fitted. If the buck's 1.1 MHz or PFM components need it: cut JP1, fit L2 (start 8.2 µH C96963) **together with** C22 2.2 µF + R73 10 Ω (3.3–4.7 Ω 1206 if the ring at 33–57 kHz is not damped enough). Then scope U3 VIN at light load (PFM) and during a 28.8 V hot-plug; the peak must stay ≤ 65 V (design-notes §8.3).
+- **T-0161 / decision 28 – buck input filter (pre-compliance scan):** conducted emission on the battery input with JP1 fitted. If the buck's 1.1 MHz or PFM components need it: cut JP1, fit L2 (start 8.2 µH C96963) **together with** C22 2.2 µF + R73 10 Ω (3.3–4.7 Ω 1206 if the ring at 33–57 kHz is not damped enough). Then scope U3 VIN at light load (PFM) and during a 28.8 V hot-plug; the peak must stay ≤ 65 V (design-notes §8.3). EMC E24 (2026-11-17): also scope U3 FB and +3V3 at light load for jitter or pulse bunching.
 - **T-0042 / Q-0034 – switch-path margin:** measure IN − device GND (U11–U14 pin IN vs the channel's ground network) at
   SWIN = 10.5 V with the channel on, once with the 3.3 V rail removed and once with it present. Repeat at a 10.5 V battery
   with D55's drop (SWIN ≈ 9.8–10.1 V). Pass: ≥ 2.0 V (VIN(H) min). If short, the planned fix is **RIN R101/R201/R301/R401 →
@@ -100,6 +117,8 @@ History of the schematic fix rounds and of the layout up to 2026-11-16: `STATUS-
 
 ## For /system
 
+- EMC 2026-11-17: add layout rules 1–4 of 2026-11-17 (design-notes §8.24: filter cap ≤ 5 mm from its resistor, TVS flow-through
+  on differential lines, short dead-end SW copper, re-check after a reroute) to `docs/ARCHITECTURE.md` "PCB layout rules".
 - Decision 150: cost reviews still price pdm-4ch as 2 layers; the owner's quote is €43.95 for 5 boards (4 layers, 100 × 75 mm). ARCHITECTURE Mechanics/Budgets: note 4 layers.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
