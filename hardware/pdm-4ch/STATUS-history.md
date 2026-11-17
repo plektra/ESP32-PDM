@@ -1,0 +1,634 @@
+# pdm-4ch status – history
+
+Older entries moved out of `STATUS.md` on 2026-11-17, newest first, unchanged. Many describe routing methods and
+copper that decisions 215–219 replaced; `docs/decisions.md` says which decisions still hold.
+
+**2026-11-16 (decision 214 part move, owner – interactive):** 32 -> 29 unconnected, 0 DRC errors, parity 0, every pour
+whole. The west divider block moved east (decision 212 (1), `PLACE.update` in `fixed_routes.py`): the SWIN2-4 load
+pairs R4/R46, R7/R47, R8/R48 (their midpoints join nothing else) next to the SWIN rows by D16-D19, and R1, R2, R31,
+R33, R38 into the strip x 65-67 west of the CAN barrier. D23 stays (no SOD-123 spot east; SW4 is routed). Copper the
+move made illegal (SWIN1/2/4 row tracks, an SW3_IO via, a +3V3 via) or dangling was removed from `fixed_routes.py`
+and rerouted; R2.1 got a GND via. Maze pass 2 (pruned geometry) closed SWIN2-4 and IO7; rip-up closed +3V3 (with
+SW4) and IO11 (with IO8). The rip-up loop then found no further improving trial.
+- Pipeline lessons: the router geometry must be pruned of dangling copper, and that copper deleted from
+  `fixed_routes.py` too (else the build re-adds it over the new routes); `KEEP_TRACKS` protects the R60.2 stub.
+- Open (29): GND 3; IO6, IO17, Q4-B, F2-Pad1 2 each; DEN, EN, IO0, IO11, IO18, NTC, SW1_IO, SW2, SW2_IO, SW3_IO, SW4,
+  SW4_IO, SW_IN1-3, VBAT_SENSE, D3-A, Q4-E 1 each.
+
+**2026-11-15/16 (decision 214, owner – interactive):** the routing method is reworked; 37 -> 32 unconnected, 0 DRC
+errors, parity 0, every pour whole (VS-In2 untouched). What changed and why:
+- **Router bugs found.** `geom_export.py` (a) built a THT pad's hole keep-out from the pad outline + 0.55 mm instead of
+  the drill + 0.25 mm hole clearance: radius 1.40 mm on a 2.54 mm header, so J6 (x 55.2, y 55-73) was a solid wall
+  and, with the VS block, sealed 11 links west of it (dividers R1/R2/R4/R7/R8/R31/R33/R38, D23, SW_RESET1, SW_BOOT1,
+  TH1); (b) keyed clusters by Python `id()` of KiCad's SWIG wrappers, which never match: 1755 phantom clusters, so the
+  maze spent legs (and clearance) joining copper that was already joined - the source of many 0.1 mm stubs in
+  `fixed_routes.py`; now UUIDs, 34 real clusters; (c) margin 0.06 -> 0.08 (0.06 left 2-3 um misses).
+- **Build gate.** GND-In2 follows the GND-F/B fragment rule (decision 212 (3)): a new island needs >= 2 ties to In1.
+  New unstitchable slivers get a fill keep-out (`sliver-N` rule areas, rebuilt each build; decision 206 "slivers are
+  removed").
+- **R60.2 escape.** R60.2 (VBAT_SENSE) lay inside the router's zone-clearance ring of VS-F-drain; a fixed stub east to
+  x 59.6 (`# keep`) lets the router start outside it.
+- **Maze pass 1** with the fixes: SW1, SW4, SW_IN4 complete (37 -> 34). **Rip-up** (`scripts/ripup.py`): Q5-E by
+  rerouting Q6-B (34 -> 32). `REROUTED_NETS` in `fixed_routes.py`: a listed net keeps only the copper the file lists.
+- **Tried, not kept.** Rerouting 46 nets in one pass with a negotiated-congestion router (`scripts/reroute.py`): 44
+  legs open, worse than the incremental copper. Rip-up of whole blocker nets or only the crossed segments: no other
+  net improves - every new route displaces one that has no other way.
+- **Where it is stuck (analysis in `docs/quilter-trial.md`).** Board size is not the limit. The remaining links meet at
+  the west-east crossing past J6 and the U1/analog block: SWIN2-4, EN, IO0, IO11 now compete with the SW1/SW4 routes
+  for the J6 pin gaps, with the dense divider block on the west side and the switch column on the east side.
+  Open (32): GND 3; IO6, IO11, IO17, Q4-B, F2-Pad1 2 each; D3-A, VBAT_SENSE, SWIN2-4, SW4_IO, SW2_IO, SW1_IO, EN,
+  IO0, NTC, IO7, IO18, SW_IN1-3, DEN, +3V3, Q4-E 1 each (kicad-cli DRC of the landed board).
+- Next: part moves allowed by decision 212 (the west divider block next to the switch column, so its links need no
+  J6 crossing), then maze + rip-up again. No schematic change; only 0.2/0.3 mm signal copper and GND stitching changed.
+  A competent person reviews the board before installation.
+
+**2026-11-14 (Quilter trial – owner; handoff `docs/quilter-trial.md`):** the owner is trying Quilter's free tier on the 37 open connections
+(decision 213). `scripts/quilter_export.py <out_dir>` (KiCad Python) writes a locked copy of the board plus
+`UPLOAD.md`: all parts, tracks, vias and zones locked; dangling signal copper pruned (none); In1 named GND;
+export-only rule areas for no tracks on In1 and no tracks/vias under the antenna on In1/In2. The export copy has
+0 DRC errors, parity 0, 37 unconnected. Quilter keeps parts inside the outline and pre-routed copper. It keeps pours
+only when they are ticked, so the power pours and the In1 planes are ticked and the outer and In2 GND pours are left
+to it. The stackup comes from the file, so the In2 routes survive. Next: upload, then an import step that takes only
+the candidate's new tracks/vias into `fixed_routes.py` and runs the normal build gates. The repo board is unchanged. After reading Quilter's physics-constraints docs (no isolation or creepage rule),
+the export also carries the build's router keep-outs on all layers (antenna, CAN barrier band, JP30, JP1, edge
+strip, with holes round the fixed copper already inside them) and preserves the GND_CAN pours, so the CAN side is
+sealed. `UPLOAD.md` says which Circuit Comprehension constraints to remove. After the design-parameters docs (Quilter
+reads only board-wide minimums, keeps a preserved pour's fill but not its outline): the copy also gets the build's
+power-pour keep-outs (`routing_build.pour_keepout()`, now shared with `prep`, whose output is unchanged), board
+minimums clearance 0.2 mm / track 0.15 mm (the repo board has 0 there), and `UPLOAD.md` lists Net Widths for the
+open nets wider than 0.2 mm (+3V3, GND, D3-A, F2-Pad1). Export DRC: 0 errors, parity 0, 37 open.
+
+**2026-11-14 (T-0281: T-0218 per Q-0076/Q-0073 – unattended):** the build gate now follows Q-0076.
+`routing_build.py` (`gnd_fragments`, `ref_check`) compares each build with the board as it was before the build.
+A GND-F/GND-B island with fewer than 2 ties to GND-In1 (GND vias or THT pads inside it, centred in the In1 fill) is
+"weak". A weak island is accepted only where it lies on a weak island of that reference, or on one of the start board
+of this stage (`scripts/gnd_weak_q0076.json`, the fragments that existed when Q-0076 was ruled). Every new weak island
+gets stitching vias up to 2 (outside foreign pour outlines and the x 45.5–46.8 strip), and the build fails when one
+stays weak. Floating copper is removed by the fills (island removal "always"). GND-In1 must stay exactly 1 island.
+GND-In2 and every other pour keep their island count and ≥ 95 % of their area against that reference. VS-In2 keeps its
+gate (1 island, ≥ 1012.1 mm², 40/40 thermal vias).
+Routed and kept:
+- **IO2 and IO5** go through the marked exit. The column vias are at x 56.50, y 16.60 / 17.50, and `VS_IN2_NOTCH`
+  grows to y 18.3 (decision 199: only as much as the runs need). East of the column they run as nested B lanes under
+  the D201-A via to F vias at (60.2, 12.8) / (60.2, 14.0).
+- **+3V3** is down to 1 open item, with 4 maze legs: B under U1, a short In2 hop at y 17.7, and a B run to (82.1, 5.4).
+- New fragments, each with 2 ties to In1: GND-F 3.1 mm² (x 56–58, y 25–29), 4.8 mm² (x 65–70, y 20–22) and
+  11.6 mm² (x 57–62, y 13–18); GND-B 6.6 mm² (x 64–65, y 21–29) and 5.2 mm² (x 75–83, y 6–8). The build added
+  5 stitching vias for them.
+- GND-F 37 → 41 islands, GND-B 19 → 24. Weak islands: GND-F 23 → 22, GND-B 11 → 11. The one changed 1-via island is
+  the old GND-F fragment at x 36–43, y 20–21, cut from 7.4 to 6.7 mm².
+- GND-In1 1 island, GND-In2 18. VS-In2 1 island, 1093.8 mm² (the IO2/IO5 In2 slots), 40/40 thermal vias.
+  Tj 101 °C at 40 °C, 4 × 4 A.
+
+Given up:
+- **ch3 R302.1 (/DEN)** had its B lane into the column. The lane had to make way for the IO2/IO5 column, so DEN is
+  1 open item again. Its only other path, an In2 leg down from the DEN drop (59.40, 10.60), isolates the 78 mm² of
+  GND-In2 under U1 (builds b2/b4/b5).
+
+Not routable within the ruling:
+- **SW_IN2/SW_IN3** are blocked at the source. R201.1/R301.1 are boxed by the U12/U13 IN and DEN links: 4 links
+  but only 3 gaps in the 2-column resistor block, and no via is possible next to it (VS-B spine). Rerouting the J6
+  bundle does not help (tried: D13.3 then reaches the whole east half, but R201.1/R301.1 still cannot get out), so
+  D12–D15 were not moved.
+- **SW_IN1/SW_IN4** would need a 4th and 5th exit-column via, but F has room for only three (y 15.3–17.7).
+- The other analog-block nets found no path in a maze pass.
+
+No part moved, no power copper outside the notch, no schematic change. Builds: b3 41 kept, b6 37 kept, three
+rejected (GND-In2 split, R207 short). 42 → 37 unconnected. Open (37): GND 3; Q4-B, F2-Pad1, SW1, IO6, IO17, IO11 2 each;
+Q5-E, Q4-E, D3-A, VBAT_SENSE, SW_IN1–4, SW4_IO, SW4, SW2_IO, SW1_IO, NTC, IO7, IO18, IO0, EN, DEN, SWIN2–4, +3V3 1 each.
+Next one-way door: moving the ch2/ch3 resistor blocks (R201/R202, R301/R302) or a wider exit for SW_IN1/SW_IN4.
+Safety: no 16 A or surge path changed, and all new copper is 0.2/0.3 mm signal copper and GND stitching vias. A
+competent person reviews the board before installation. Details: `docs/reviews/2026-11-14-fix-pdm-4ch-T-0281.md`,
+design-notes 8.23.
+
+**2026-11-14 (T-0276: T-0218 per Q-0075/Q-0073 – unattended):** the marked In2 exit is in place. `maze_route.py`
+has one named window, `EXIT_WINDOW` x 55.0–57.0 / y 6.45–20 (constant `EXIT_WINDOW_MM` and `EXIT_NETS` in
+`fixed_routes.py`; `routing_build.py` cuts the same window out of its router-copy band). Only SW_IN1/SW_IN4/IO2/IO5/DEN
+may cross the band there; everywhere else the 1.5 mm band stays. The maze's via mask now keeps a via a zone clearance
+plus a via radius outside every foreign power-pour outline (before, the margin was only 0.25 mm). **VS-In2 notch:**
+x 55.6–56.5, y 14.9–16.5 (`VS_IN2_NOTCH`, cut by `prep`, idempotent), i.e. the column via plus the 0.5 mm zone
+clearance. The rest of the outline is unchanged and the Q-0074 trim is dropped. **VS-In2: 1 island, 1133.4 mm²
+(≥ 1012.1), 40/40 thermal vias; Tj 101 °C at 40 °C, 4 × 4 A.** **Via column:** one via, /DEN at (56.45, 15.70). On F the
+column has room only at y 15.3–17.7 (three via spots). DEN: pocket via (42.20, 8.90) → In2 around the U12 thermal field
+→ column → B north along x 56.36 → its In2 drop at (59.40, 10.60). The pocket DEN and the ch2/U1.28 DEN are now one net.
+ch3 (Q-0073 step): the U13-DEN link moved to the middle gap and U13-IN to the south gap. The C301.2 GND via moved
+0.16 mm up to (56.78, 25.30). R302.1 now leaves north to a via at (57.45, 25.95) and runs on B along x 56.36 into the
+column via. **DEN 2 → 0.** A maze pass on the U1 strip and analog block joined /SW4 by J6 (2 → 1).
+Not kept: **IO2 and IO5** routed through the column (vias at y 16.6 and 17.5) cut the only GND-B link east of the
+spine (x 56.4 to the IO4 track at x 61, y 12–17.6) and split GND-B 19 → 20. IO2's F leg also cuts the pocket's only
+GND-F passage (x 43.8–45.2 between R107.1 and C202/the VS track) and isolates GND-F by R203.2: GND-F 37 → 39. No other
+IO2 path exists, and IO4 cannot move (no via spot past the VBAT_SENSE/NTC copper). **+3V3** (5 → 1 in the maze) needs B runs under U1
+(y 5.4–20) that split GND-B 19 → 24, and with B blocked there the maze finds no leg. **SW_IN1–4**: the diode pads
+D12.3/D13.3/D14.3/D15.3 by J6 are walled in by their own links and the In2 bundle at x 57.8–59.3 (no via spot), so the
+exit does not help them.
+
+Board = build output. Results: 0 DRC errors, 407 warnings, parity 0, **42 unconnected** (was 45), only the /IO13
+via_dangling, every pour at its baseline island count (GND-F 37, GND-B 19, GND-In2 18, GND-In1 1; losses ≤ 0.62 %).
+New vias: (56.45, 15.70), (57.45, 25.95), (57.70, 73.00); none in VS-B-front/rear or the x 46.15 strip. The new In2
+run is 37 mm from the nearest GND THT pad. Unconnected per net: +3V3 5, GND 3, IO6/IO11/IO17 2 each, SW1 2, F2-Pad1 2,
+Q4-B 2, and 1 each for SW4, SW_IN1–4, SWIN2–4, SW1_IO/SW2_IO/SW4_IO, IO0/IO2/IO5/IO7/IO18, EN, NTC, VBAT_SENSE,
+D3-A, Q4-E, Q5-E. Open (one-way doors for the owner): allow a stitched GND-B/GND-F fragment for IO2/IO5 (or move
+signal copper away from the GND-B link), and the same for the +3V3 B run under U1. Safety: no 16 A or surge path
+changed; a competent person reviews the board before installation. Details: `docs/reviews/2026-11-14-fix-pdm-4ch-T-0276.md`.
+
+**2026-11-14 (T-0271: T-0218 per Q-0074/Q-0073 – unattended):** the VS-In2 east-edge trim was **not** made. The
+1.5 mm corridor band straddles the VS-In2 outline, so an In2 run can never cross a trimmed edge, and any via ≥ 1.5 mm
+inside the pour is in the B spine (x ≤ 55.0 vs ≥ 56.3 needed). The trim alone gains nothing, and the build gate
+would reject it (design-notes 8.21 gives the geometry and the three one-way options). **VS-In2 unchanged: 1 island,
+1156.4 mm², 40/40 thermal vias; Tj 101 °C.** Two-way steps done in `scripts/fixed_routes.py`:
+- the U12-DEN link now runs through the middle gap, so R202.1 (/DEN) leaves north and reaches U1.28 over In2 under U1;
+- U1.28 leaves north on F to a via at (72.50, 17.50), and the Q3-B track stays;
+- the U13-IN link moved to the middle gap, so R301.1 (/SW_IN3) is open but not yet routed;
+- R302.1 stays boxed (the C301.2 GND via fills its gap), and R201.1 likewise (only one pad per channel can be freed).
+
+Board = build output. Results: 0 DRC errors, 407 warnings, parity 0, **45 unconnected** (was 46), only the /IO13
+via_dangling, every pour at its baseline island count. A full maze pass over all 31 open nets gained nothing.
+Unconnected per net: +3V3 5, GND 3, DEN 2, IO6/IO11/IO17 2 each, SW1/SW4 2 each, F2-Pad1 2, Q4-B 2, and 1 each for
+SW_IN1–4, SWIN2–4, SW1_IO/SW2_IO/SW4_IO, IO0/IO2/IO5/IO7/IO18, EN, NTC, VBAT_SENSE, D3-A, Q4-E, Q5-E.
+Open: the pocket exit (SW_IN1/4, IO2, IO5, pocket DEN) still needs a one-way ruling. The options are an In2 exit
+across the VS-In2 east edge inside the band, a spine notch, or signal vias in the x 46.15 strip. Then come
+SW_IN3 R301.1 → D14.3, R201.1/R302.1, the U1 strip and the analog block. Details:
+`docs/reviews/2026-11-13-fix-pdm-4ch-T-0271.md`.
+
+**2026-11-13 (T-0266: T-0264 – unattended):** the ch4 DEN via that sat on pad R402.1 (37.60/24.30) now sits at
+(38.60, 25.42), 0.60 mm from the pad, with a 45° F.Cu link to R402.1. The B.Cu stub from (37.30, 21.50) ends there.
+The change is in `scripts/fixed_routes.py`, and `/DEN` is added to `DROP_NETS` so the rebuild drops the old via. The
+board is again the build output (LAND_BEST). Results: 0 DRC errors, parity 0, 46 unconnected (DEN 0), no new
+dangling copper, every pour at its baseline island count, VS-In2 1 island at 1156.4 mm² with 40/40 thermal vias,
+Tj 101 °C. No via touches an R401/R402/R403/R407 pad. No part moved. Left: the boxed-in pads listed below.
+Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0266.md`.
+
+**2026-11-13 (T-0259: T-0218 per Q-0073 – unattended):** the board is again the scripts' output.
+- **maze_route.py merge fix (decision 185).** A routed leg's cells now join the source side, so the next leg of the
+  net starts from any copper already laid. The full open-net pass gave 87 lines (pass 2 of T-0246: 314) and no
+  duplicate legs. When a leg fails, the open clusters are tried as new seeds, so one boxed-in pad no longer stops
+  the whole net. The `@file` net list is now one net per line (net names with spaces).
+- **Placement move (scripted: `fixed_routes.PLACE`, applied by `routing_build.prep` → `move_parts()`).** R101/R102
+  and R401/R402 turned 180°, so the U11/U14 IN/DEN pad faces its PROFET pin (straight link) and the SW_IN/DEN pad
+  faces east. R103/R107 and R403/R407 turned to 270°, so the IS pads are on top next to R104/R404, and the IS
+  track no longer runs down x 38.9 across the pocket. Positions are unchanged except R101 (y 9.4 → 9.2), R102
+  (8.0 → 7.93), R401 (26.0 → 25.8) and R402 (24.6 → 24.53), which now line up with their pins. The bottom GND pads
+  of R103/R107 and R403/R407 get a 0.4 mm link and one GND via each (42.9, 11.6) and (42.9, 28.2). The copper this
+  replaces (`DROP_NETS`, `DROP_GND`) is removed in prep. R105/D101, R405/D401, OUT, VS and every other part did not
+  move. All parts are on top.
+- **Passes.** Build 1 (pass 1): 47 unconnected, but 2 errors from a 3 µm NTC clearance, so it was not kept and the
+  line was dropped. Build 2 (move + pass 1): **47**, kept. Build 3 (pass 2: DEN R102.1 → R402.1 over B.Cu/In2):
+  **46**, kept. All three ran with 0 errors, parity 0 and no new dangling copper.
+- Board: **46 unconnected** (was 48): MOD_ID 1 → 0 and DEN 4 → 3. VS-In2 is 1 island, 1156.4 mm² (≥ 1012.1), with
+  40/40 thermal vias inside it. No power pour lost an island or more than 5 %. Tj is 101 °C at 40 °C ambient,
+  4 × 4 A.
+- **Wall still in place.** The pocket nets (SW_IN1/4, IO2, IO5, DEN) now leave their pads, but they cannot reach
+  U1. On In2 the corridor ends 1.5 mm inside the VS-In2 east edge (x 55.0, while the U1 side starts at x 58.1), and
+  a via at x ≤ 55 lands in the B.Cu VS spine. The F.Cu gap at y 19–20 carries the USB pair. Opening it needs a
+  power-outline change, which is a one-way door (see the report).
+- **Open:** boxed-in pads outside the move: R201.1/R202.1/R301.1/R302.1 (ch2/ch3, the same
+  wrap-around pattern), U1.28, D12.3, U5.2/U5.3, R70.2, R60.2, FB1.2, the J3 VBUS pins and the Q block.
+  Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0259.md`.
+
+**2026-11-13 (T-0253: T-0250 + T-0251 – unattended):** the board is again the scripts' output (LAND_BEST build).
+- **+3V3 class width (T-0251).** The maze-made +3V3 copper is now 0.3 mm, 196 mm in total. `prep` widens an identical
+  locked track to its `fixed_routes.py` width and never narrows one. Two necks stay 0.2 mm because a GND via sits
+  too close at 0.3 mm: In2 (65.7, 59.9)–(65.8, 59.7) and B.Cu (45.9, 68.1)–(46.2, 68.2), 0.6 mm in total.
+  The loads behind them were not traced; bound instead (T-0260): the necks are < 4 mΩ, < 2 mV at 0.5 A
+  (design-notes §8.20). U1.3, the ESP32 3V3 pin, is not connected yet (T-0218).
+- **maze_route.py** now emits each net's class width and sizes its keep-outs for that width. Legs start and end at
+  least one grid cell inside their copper, so a leg no longer stops just short of its target.
+- **Dangling copper (T-0250).** Six legs that stopped 0.03–0.99 mm short of their own pad are finished with one
+  segment each: J6.8 ×2, R403.1, Q6.1, R3.2 and R4.2. The new `prune()` step in `finish()` removes the rest
+  (32 items): the 15 dead U1 fan-out stubs and their vias, and a SW2_IO stub. One via_dangling stays on purpose:
+  the /IO13 via at (64.15, 16.80) joins two F.Cu tracks and carries the connection.
+- Board: **48 unconnected** (was 52), 0 errors, parity 0, and every pour at 1 island. VS-In2 is 1165.0 mm² with
+  40/40 thermal vias inside it. Tj is 101 °C at 40 °C ambient, 4 × 4 A. Left: 48 items for T-0218.
+  Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0253.md`.
+
+**2026-11-13 (T-0246, Q-0072 – unattended):** Freerouting is out of the build; the board is the scripts' output.
+- `build_routing.sh` runs prep → `routing_build.py apply <work> -` (refill, stitching, pour/thermal checks) → DRC.
+- The T-0236 copper is now fixed data in `scripts/fixed_routes.py`; maze_route.py pass 1 added the short links and
+  some IO/Q-block links as fixed routes.
+- Board: **52 unconnected** (was 74), 0 errors, parity 0. VS-In2 is 1 island, 1165.5 mm²; 40/40 thermal vias are
+  inside it. Tj 101 °C at 40 °C, 4 × 4 A.
+- **Not done:** the ch1/ch4 signal-part move out of the west pocket. Pass 2 was dropped: it duplicated copper,
+  because maze_route.py doesn't merge a leg's copper into the source side.
+- **Left:** 52 items (design-notes §8.20). Details: `docs/reviews/2026-11-13-fix-pdm-4ch-T-0246.md`.
+
+**2026-11-13 (T-0241, Q-0071 – unattended):** the board is unchanged (T-0236 build 2: 74 unconnected, 0 DRC
+errors, parity 0, VS-In2 1 island, 1185.4 mm²).
+- **Router export.** It now loads with **0 pre-existing violations** (was 723): keep-out holes round fixed copper,
+  per-pin and fixed-via clearance classes. No KiCad rule changed.
+- **In2 corridor rule.** Signal tracks may use In2 inside VS-In2, at least 1.5 mm inside its outline and never over
+  a PROFET thermal-via field. The pour check is per pour: VS-In2 ≥ 1012.1 mm² and 1 island; the others keep their
+  islands and ≥ 95 %. A new check requires all 40 thermal vias to be inside VS-In2.
+- **Channel bus.** Generated by `scripts/maze_route.py`. Channels 1/3/4 have identical signal placement; channel 2
+  differs.
+- **Builds.** Five builds, none better than 74. The final-rule build: 77 unconnected, 1 error, pours whole.
+- **Where the scripts are.** The changes wait in `scripts/T-0241-next-build.patch`, so the scripts still reproduce
+  the board.
+- **Spread.** The three runs per build were always identical.
+- **Left open.** SW_IN1 and SW_IN4 share the only west-pocket via strip. The short links need scripting
+  (design-notes §8.19).
+- **Heat.** Tj 101 °C at 40 °C, 4 × 4 A.
+
+**2026-11-12 (T-0236, decision 172 / Q-0070 – unattended):** builds with the VS-In2 via freedom from T-0231 (whose
+own run stopped before its first build ended).
+- **Stage A'** (vias may pass VS-In2): 79 unconnected against 78, so not landed. A via also needs F.Cu and B.Cu room,
+  and the west channel columns sit in a B.Cu pocket closed by VS-B-front, the VS-B spine and VS-B-rear (design-notes
+  §8.18).
+- **Stage B:** the J6 service bundle (TXD0/RXD0/IO35–37/IO42) on In2 had cut diagonally through the Q3–Q6 block.
+  - It now runs as nested L-routes in `scripts/fixed_routes.py`, round the block's east side and under it at
+    y 32.6–35.1.
+  - R60 moved into the VS-F-drain edge (58.3/41.4), so only VBAT_SENSE leaves the power area.
+  - Build: 74 unconnected (was 78), 0 errors, parity 0, pours whole.
+- **Builds 3 and 4** were not kept (77 and 75):
+  - build 3 added a J3 VBUS fixed route, which closed VBUS;
+  - build 4 added a J6 bundle v2 lane at x 77.8–80.3.
+- Both are written out in design-notes §8.18 for the next stage, and the scripts stay at the build-2 input.
+  Details: `docs/reviews/2026-11-12-fix-pdm-4ch-T-0236.md`.
+- VS-In2: 1 island, 1185 mm² of 1190.7 mm² (−0.4 %). Heat budget at 40 °C, 4 × 4 A: Tj 101 °C.
+- **Left:** the west channel nets (DEN, SW_IN1–4, IO0/2/3/5, EN, NTC, +3V3 to D102/D402) need the long B.Cu→In2 path
+  round the south (§8.18) as fixed routes, and the rest of the U1 strip/analog block.
+
+**2026-11-11 (T-0214, fixed routes into the build scripts – unattended):** the CAN, USB and CC1 routes from T-0210
+now live in `scripts/fixed_routes.py` (34 track entries, 16 vias), and `build_routing.sh` takes `LAND_BEST=1`. This is
+the patch T-0210 held back, applied unchanged. The build's own `add_fixed` on the board adds 0 items: every segment
+and via in the script matches locked copper (net, layer, width, via size/drill). No board, schematic or lib change.
+Next build: no `LAND_BEST=1` is needed, because the board already is the build output with these routes.
+
+**2026-11-11 (T-0210, CAN and USB pairs as fixed routes, rebuild – unattended):** the CAN H/L pair, USB D+/D− and
+J3 CC1 are now hand-made, locked copper. The board is the output of `build_routing.sh 3 3` with those routes as
+fixed input. No part was moved, and no zone outline changed.
+- **CAN:** H and L run side by side on F.Cu over GND_CAN.
+  - The two crossings forced by the pin order stay on the CAN side: CANL_XCVR runs on In2 under FL1, and CANH_BUS
+    reaches J4.3 on B.Cu.
+  - CANH (FL1/R71) is closed.
+  - CANL_XCVR has a 0.15 mm neck between the R71/R72 pads.
+- **USB:** J3 → D5/D6 (ESD at the connector) → U1. The pair crosses the VS block:
+  - on B.Cu in the free band at y 19–19.5;
+  - on F.Cu at y 20.5/21.15 through the gap between U12/D201 and U13;
+  - on In2 east of x 56.5, where In2 is the GND plane, to U1's fan-out vias.
+- **J3 end:** no via sits in OUT1-B. CC1 leaves above the pads to In2. Two fixed GND ties serve D5.1/D6.1 and
+  D4.1/R12.2.
+- **Result:**
+  - `kpcb drc`: 0 errors, 78 unconnected (T-0209: 75), parity 0.
+  - Every pour is whole. In1 has no signals. The buck is untouched.
+  - The pairs and CC1 are joined. The router's variance moved the rest: analog block, U1 strip legs, west-bound
+    nets.
+- **Fixed routes:** in `scripts/fixed_routes.py`; the pcb-fixer gate admits `scripts/` (c9fa4fa, decision 163).
+- **Left (78):**
+  - West-bound nets across the VS block: DEN, SW_IN1–4, +3V3, EN, IO0, IO2, IO3, IO5, NTC, U12/U14-IS. The USB
+    lane shows the way: B.Cu y 19–21 west of x 46.5, plus the F.Cu gap between U12 and U13.
+  - U1 strip legs: IO6/7/8/11/17/18/39/40, SW1–4_IO, SW_SENSE(_IO), MOD_ID. The USB In2 run under U1 (y 18.95/19.4)
+    closes In2 southward there, so these need B.Cu lanes.
+  - Analog-block short links: Q3–Q6, R3/R4, VBAT_SENSE, SWIN1–4, SW1/2/4.
+  - VBUS (F2-Pad1) at J3: A4–A9 and F2.1. Its via cannot go into OUT1-B, so it needs a fixed In2 route.
+  - D3-A, one GND island, one VS item.
+- Details: design-notes §8.17 and `docs/reviews/2026-11-11-fix-pdm-4ch-T-0210.md`.
+
+**2026-11-11 (T-0209, routing as a build, U1 strip – unattended):** routing is now a reproducible build
+(decision 163). No part was moved, and no zone outline changed.
+- **Build:** close KiCad and run `hardware/pdm-4ch/scripts/build_routing.sh [runs=3] [passes=25]`. Two optional
+  environment variables: `FR_STRATS` (one Freerouting strategy per run) and `KEEP_WORK=<dir>` (keeps the work
+  folder).
+  - The steps live in `scripts/routing_build.py` (pcbnew, under KiCad's Python).
+  - Hand-made routing, router classes and parameters live in `scripts/fixed_routes.py` (mm from the top-left
+    corner).
+  - A problem the router leaves is fixed in these files, followed by a rebuild. Never edit only the board.
+- **Fixed copper:** the first build locked every existing track, via and zone: the stage 4–5 power copper and the
+  T-0207/T-0208 links and fan-out. The router's tracks are unlocked, and each build replaces them.
+- **Router input:**
+  - Each power outline (VS, VBAT_IN, VBAT_FL, OUT1–4, VS-In2) is both a plane and a keep-out for foreign nets,
+    minus 0.5 mm escapes around foreign pads.
+  - Keep-outs on all four layers: antenna, CAN barrier, JP30/JP1, the holes and a 0.35 mm edge strip.
+  - Signals never use In1. The buck SW/CB nets are F.Cu only.
+- **Result:**
+  - `kpcb drc`: 0 errors, 75 unconnected (from 216), parity 0.
+  - Every VS/VBAT/OUT pour is one island, with ≤ 2 % area change.
+  - GND stitching and island tie-in vias are added by the build.
+- **Freerouting:** it is deterministic for one input, and its best result is pass 1. Progress comes from changing
+  the input, not from more runs.
+- **Left:**
+  - The west-bound nets have no lane across the VS block: DEN, SW_IN1–4, +3V3 to D102/D202/D402 and R9, EN, IO0,
+    USB/J3, IO2, IO5, NTC and U12/U14-IS. The next stage needs a deliberate lane: an F.Cu gap between U12 and U13,
+    or a channel through VS-In2.
+  - U1 strip legs from the fan-out vias: IO6/7/8/11/17/18/39, SW1–4_IO and SW_SENSE. They need fixed lanes in the
+    corridor x 59.5–67.5.
+  - Analog-block short links (Q3–Q5, R60/R61, SWIN1–3, LED_K3, SW1–4) need fixed F.Cu tracks.
+  - Three GND islands (D52/U1.64, D101, J3).
+  - CANH at FL1/R71.
+- Details: design-notes §8.16 and `docs/reviews/2026-11-11-fix-pdm-4ch-T-0209.md`.
+
+**2026-11-10 (T-0208, layout stage 6b – room in the U1 strip, U1 fan-out, unattended):** no part was moved.
+- **VS narrowed:** VS-B-spine and VS-In2 now end at x 59.5 instead of 61.0 next to C31. This is a side area with no
+  VS pad or via. About 2 % of the VS copper is gone (−27 mm² on B.Cu, −24 mm² on In2). The drain rule is met on
+  F.Cu, and the heat budget is unchanged.
+- **Stitching vias:** six removed from the corridor and the fan-out lanes, two re-added west of U1.
+- **U1 fan-out:**
+  - every used pin has a stub and a via, staggered under the module so that In1 keeps webs;
+  - IO3 has a stub only, since its parts sit beside U1 on F.Cu.
+- **J6 service lines:** routed on In2. IO35/36/37/42 are on In2 all the way. TXD0/RXD0 change to B.Cu for the last
+  5 mm, because their pin order swaps between U1 and J6.
+- **Result:**
+  - `kpcb drc`: 0 errors, 216 unconnected (from 222), parity 0. The 29 new warnings are the fan-out vias, which
+    are open until they are routed.
+  - Pours: In1 GND is one piece, and every VS/VBAT/OUT pour is one island.
+  - `fix_check`: OK.
+- **Left:** route from the fan-out vias. The corridor x 59.5–67.5 holds about 30 lanes (B.Cu + In2) for 21 nets.
+  - Nine nets go west to SW_BOOT1/SW_RESET1, U11/U14, J3 and TH1: IO0, EN, DEN, USB_DN/DP, IO2, IO5, NTC and
+    +3V3. They have no way across the VS block on In2 or B.Cu.
+  - The next stage first looks for an F.Cu gap between U12 and U13. Otherwise these nets also take the corridor,
+    and then the bottom edge.
+- Details: design-notes §8.15 and `docs/reviews/2026-11-10-fix-pdm-4ch-T-0208.md`.
+
+**2026-11-09 (decision 150):** the board is 4 layers (F.Cu/B.Cu 2 oz, In1/In2 0.5 oz, 1.6 mm, JLCPCB stack-up in the board file). Stages 1–4 stay; the 2-layer routing stage T-0201 is superseded. Queued: T-0205 (In1 GND plane split at the CAN barrier, In2 VS under the switches, stitching and thermal vias), T-0206 (routing on 4 layers), then T-0202 (silkscreen) and the EMC and validator reviews.
+
+**2026-11-10 (T-0207, layout stage 6a – short local links and ground vias, unattended):** I routed the local links by script on F.Cu only. No track is on In1.Cu, and nothing crosses the CAN barrier or the antenna strip. The links:
+- **Buck:** VIN chain U3.4/5–C19–C1–D3–JP1–L2–C22 (0.6 mm), D2-K (JP1–D2–L2), D2–R54–D1, R54–F1 (1.2 mm).
+- **Buck switch side:** SW U3.6–C2–L1, plus L1–R44 (snubber) and R44–C20. CB through R43, and FB R9/R10.
+- **Buck GND:** a GND track from U3.2 under the IC body to C19.2/C1.1. The C1/C19/U3 input loop closes on F.Cu with no via.
+- **Other links:** U30/C32/Q30 (VCAP, VBAT_FL, gate), C4–F2–FB1, R106–OUT1, D7–R59, D8–R67, C22–R73, L1.2–C3.
+
+Parts moved (two-way, recorded in the report):
+- C2 and R43 now sit stacked between L1 and U3. A bootstrap link on F.Cu would otherwise have to cross SW.
+- R67 and R59 are turned 180°. Their +3V3/IO13 pad sat between the LED anode and the resistor's anode pad, under the antenna strip.
+
+Ground vias:
+- Every GND/GND_CAN pad reaches In1 through its F.Cu pour island.
+- New GND vias at U30.2 and R106.2, whose pockets the new tracks closed.
+- Two vias beside C19/C1, outside the loop.
+- Nine stitching vias under the ESP32 module (around pad 61 and under the top GND pin row).
+
+Result: `kpcb drc` 0 errors, 222 unconnected (from 253), parity 0. Every VS/VBAT/OUT pour is still one island after the refill. **Left:** the U1 strip, J6, the panel/switch nets, sense lines, +3V3 distribution, and D3-A (FB1–D4–D3) to later routing stages. Details: design-notes §8.14.
+
+**2026-11-09 (T-0205, layout stage 5 – inner planes and stitching, unattended):** five inner zones and 90 stitching vias. The outer copper is unchanged.
+- **In1.Cu:**
+  - A solid GND plane under the whole GND side, in one piece. It has the outer GND outline: antenna notch, barrier cut at x 67.55, Ø 8.8 mm arcs around H1–H3.
+  - A GND_CAN area equal to the outer island (x ≥ 75.65, y ≥ 51.35). The gap is 8.1 mm across U5 and 4.0 mm above J4, the same as outside. No copper on any layer under U5 between the pin rows (PCB rule 9).
+- **In2.Cu:**
+  - VS (12.2 cm², pads solid) under the four switches, Q30's drain, C31 and D31's VS side. All 40 PROFET tab thermal vias and all 38 VS vias at the drain land in it.
+  - The rest GND, and GND_CAN under the CAN island. Tracks displace the fill, so routing can use In2.
+- **Vias:** 34 GND vias along the edges (about 5 mm), 5 on the GND_CAN edge, 12 around the buck, 8 around U1, 30 on an open-area grid and 1 island tie. Every outer GND/GND_CAN fill island is now tied to In1.
+- **Load current:** the 16 A paths stay on the 2 oz outer layers. VS-In2 runs in parallel and takes only about 11 %.
+- **Keep-outs:** the hole and antenna keep-out rule areas cover only F.Cu/B.Cu, so the inner zone outlines leave those areas out themselves. A later revision could add In1/In2 to the rule areas (decision 123, owner).
+- **Checks:** `kpcb drc` 0 errors, 404 warnings, 253 unconnected (all signal or routing items; no GND, GND_CAN or zone item; one VS item, R60, for routing), parity 0; `fix_check` OK.
+- **Left for T-0206 (routing):** all signal nets, U30/C32/R60/R106. Route on In2 first; keep In1 unbroken under the ESP32, the buck and the switch networks.
+- Details in design-notes §8.13 and `docs/reviews/2026-11-09-fix-pdm-4ch-T-0205.md`.
+
+**2026-11-09 (T-0200, layout stage 4 – power copper, unattended):** the high-current copper is drawn as 18 zones and 103 vias, with a few short stubs.
+- **Battery path:** VBAT_IN is a pour on both layers from both J10.1 pins through D30/C30 to JP30 (about 3.4 cm² per layer, stitched with 36 vias). VBAT_FL is a pour on both layers over the Q30 source pins, JP30.1, D31's anode and U30 pin 1.
+- **VS:** top VS pour of 2.67 cm² on Q30's drain tab (rule ≥ 2 cm²), with C31, F4, C304/C303, D31 and F1 on it. The surge loop switches → VS → D31/Q30 → D30 stays on one compact area.
+- **VS on the bottom:** a spine under U12/U13 and the drain, plus a front band (U11) and a rear band (U14), about 11 cm² together. Thermal vias come from the footprints; 40 stitching vias join the drain pour to the spine.
+- **Outputs:**
+  - OUT1 runs as a bottom band with four vias at U11.
+  - OUT2 and OUT3 run on top through the corridor between the switch rows. OUT4 runs on top below D403.
+  - Each OUT passes through its TVS pad to J11. The narrowest point is about 1.2 mm (OUT3 beside C302) for 4 A.
+- **GND:** pours on both layers. A 3 mm strip along the power edge carries the J11 TVS returns to J10.2.
+- **CAN barrier (PCB rule 9):** the GND_CAN island has its own pour; the gap is 8.1 mm across U5. C70 is turned 180° so that each pad faces its own side.
+- **Clearances and keep-outs:** 1.0 mm from VS/VBAT_IN/VBAT_FL copper to every other net (EMC rule 7). The antenna strip and the hole keep-outs are copper-free.
+- **Checks:** `kpcb drc` 0 errors, 403 warnings (silkscreen, FL30), 256 unconnected, parity 0; `fix_check` OK.
+- **Left for routing (T-0201):**
+  - U30 pin 5, C32, U30 VCAP and gate; R60 (VS sense); R106.
+  - All signal nets; the C104–C404 GND returns.
+  - JP30 stays the 2 mm net tie (about 0.25 mΩ, 64 mW at 16 A, top only). Widening it is a footprint change for a later revision.
+- Details in design-notes §8.12 and `docs/reviews/2026-11-09-fix-pdm-4ch-T-0200.md`.
+
+**2026-11-09 (T-0199, layout stage 3, unattended):** all remaining parts are placed and nothing is parked.
+- **Signal edge:** J5 and its protection cluster moved 7.4 mm toward the front, and J4 sits below it (pin 1 at the rail
+  end, 0.6 mm courtyard gap, both between the H2 and H4 keep-outs). The SW_SUPPLY chain turns down to F4, which is
+  unchanged.
+- **U1:** at 69.25/9.75 with its antenna on the front edge in the signal-end corner. The keep-out strip x 46.5–92,
+  y 0–4.5 is clear, so channel 2 moved 2.6 mm toward the rail and its IS column was reshaped.
+- **Front corner:** D7/D8, the EN/IO0 parts and the LED-line caps. Below U1: C8/C10, the VBAT/NTC dividers and the
+  four LED sinks.
+- **USB:** J3 on the front edge in the power-end corner, with its ESD, CC and shield parts.
+- **Buck:** along the rail edge, from VS at D31 through F1 → R54 → D1/D2 → JP1 ‖ L2 → C1/C19/U3 (input loop about 3 mm,
+  no via) → L1 → C3.
+- **CAN:** one barrier block at J4 (PCB rule 9): U5 logic pins facing the board, a GND_CAN island x ≥ 78.1 / y ≥ 51.4
+  with D9, FL1, R71/R72, F3/R55/D10/FB2/D11/C13 and U6, and only C70 across the 13 mm band.
+- **Other parts:** the switch inputs on the logic side and the rail strip; J6 upright at 55.2/55.1 (a compromise,
+  35–55 mm from U1); SW_RESET1 below JP30 and SW_BOOT1 below J10; U30 at its reserved spot with TI_DDF0008A.
+- **Checks:** `kpcb drc` 0 errors, 403 warnings (silkscreen), 469 unconnected, parity 0; `fix_check` OK.
+- **Left for the next stages:** silkscreen labels "CAN"/"PANEL" and pin-1 marks, and copper: a short wide C8/C10 →
+  U1 pin 3 feed, the USB pair through the switch-row corridor, the barrier pours ≥ 8 mm apart, and the antenna strip
+  free of copper.
+- Details in design-notes §8.11 and `docs/reviews/2026-11-09-fix-pdm-4ch-T-0199.md`.
+
+**2026-11-09 (decision 138):** the board is 100 × 75 mm: bottom (rail) edge moved 10 mm down, H3/H4 and their keep-outs to y 71; stages 1–2 unchanged (`kpcb drc`: 0 errors, parity 0). Stage 3 (T-0199) is queued again; J5 moves up the signal edge so J4 fits below it.
+
+**2026-11-09 (layout stage 3 blocked, interactive):** U30 gets its own footprint `ESP32-PDM:TI_DDF0008A` from TI's DDF0008A example land (pads 1.05 × 0.45 mm, pitch 0.65, columns 2.6 mm; LM74500-Q1 drawing 4222047/E p. 27): KiCad's TSOT-23-8 has 0.5 mm pads with 0.15 mm gaps, below the 0.2 mm clearance. Schematic: U30 Footprint field only; netlist connectivity identical, ERC unchanged (0 errors, 5 warnings); board refreshed with `kpcb sync` (U30 replaced, still parked at its reserved spot 42.5/39.3). Stage 3 (T-0199) stopped because the 100 × 65 mm board is full and J5 + J4 (57 mm) do not fit the 49 mm between the signal-edge hole keep-outs – a floorplan error of decision 128 – owner question on the board depth.
+
+**2026-11-09 (T-0198, layout stage 2, unattended):** placed the power path and the four output channels. The battery path runs along the rail side: J10 → D30/C30 → JP30 (38.1/47) → Q30 (48.2/47, drain tab toward C31 and the switches) with D31 directly under Q30, C31 at the drain and C32 above. The J10 clear zone x 20–35, y 33–56 stays free. U11/U12/U14/U13 sit in a 2×2 grid (about 19 × 18 mm pitch), OUT pins toward J11, each with its VS caps at the tab end, the OUT parts beside the OUT pins and the IN/DEN/IS/GND-network parts on the logic side. TH1 is at U13, the hottest place. There is room for more than 2 cm² of VS at Q30's drain. **Blocked (two-way, board-fixer): U30 stays parked.** Its stock `TSOT-23-8` footprint has 0.15 mm pad gaps (6 DRC clearance errors; 2 oz needs 0.2 mm; TI DDF land uses 0.45 mm pads). The spot is reserved at 42.5/39.3, rot 180. Logic half still parked. FL30 has no footprint. `kpcb drc` 0 errors on the board, parity 0; `fix_check` OK. Details in design-notes §8.10 and `docs/reviews/2026-11-08-fix-pdm-4ch-T-0198.md`.
+
+**2026-11-08 (T-0197, layout stage 1, unattended):**
+- **Placed:**
+  - H1–H4 on the keep-out centres.
+  - On the power edge, J11 toward the front and J10 toward the rail, with D30/C30 at the J10 pins and the DNP D103–D403 at the J11 pins.
+  - On the signal edge, J5 toward the rail with the nine TVSs (two staggered columns), R34–R37/C14–C17 and the SW_SUPPLY chain D54/C54/D55/R56/F4.
+  - Silkscreen "BATTERY", "+", "−", OUT1–OUT4, "PANEL" and pin 1.
+- **Blocked, owner:** J4 does not fit. The H2/H4 keep-outs leave 49 mm of the signal edge, and J5 + J4 need 55–57 mm. Decision 128 counted the full 65 mm edge. J4, D9 and D10 stay parked.
+- **Next stages:**
+  - Keep the J10 clear zone behind its rear face (x 20–35, y 33–56) free of other parts.
+  - Remaining DRC warnings are silkscreen reference overlaps for the silkscreen pass, including the "OUT3" text over the D303 reference; `kpcb` cannot delete text.
+
+Checks: `kpcb drc` 0 errors, 10 warnings, parity 0; `fix_check` OK. Details in design-notes §8.9 and `docs/reviews/2026-11-08-fix-pdm-4ch-T-0197.md`.
+
+**2026-11-08 (decision 130):** footprints imported from the schematic with `tools/kpcb.py sync` (226 parts parked beside the board, FL30 has no footprint; schematic parity 0, DRC 0 errors); the hole keep-outs now allow the hole itself (pads and footprints allowed, no copper; `kpcb drc` reports any other part's courtyard inside them). Layout stages T-0197–T-0202 are queued for the pcb-fixer agent, then an EMC (layout) and a validator (pcb) review.
+
+**2026-11-08 (/board pdm-4ch pcb, documents only):** decision 127: no connector sample check before layout or order; the decision 98 checks move to the prototype test list, and the layout covers the risks (footprints checked against drawing and JLCPCB footprint in software, J10 clear zone on both sides, J4/J5 labelled and apart, edge margin). PCB can start. No schematic change.
+
+**2026-11-08 (/board pdm-4ch pcb):** decision 128: floorplan 100 × 65 mm, power edge J10/J11, signal edge J5/J4, rail on a long edge, antenna at the front signal-end corner, H1–H4 4 mm from both edges (rail-side spacing 92 mm). New skeleton `ESP32-PDM-4CH.kicad_pcb`: Edge.Cuts outline, 2-layer 2 oz stackup (HASL lead-free), four Ø 8 mm keep-out rule areas at the hole centres, floorplan notes on Cmts.User; no footprints yet. `kicad-cli pcb drc`: 0 violations. Footprint check (decision 127, item 1) against the maker drawings: J11 `Kefa_KF2EDGRC-5.08-4P` (drawing KF2EDGRC-5.08 rev. A 2021-03-13: pitch 5.08, hole Ø1.60 +0.10/0, pin 1.0 mm, row 1.30 mm from the rear edge, body (P×5.08+1.60) × 8.40 × 12.20 mm, pin 4.1 mm) and J5/J4 `Kangnex_WJ15EDGRC-3.81-10P/-04P` (drawing WJ15EDGRC-3.81-XXP rev. A 2024-03-10: pitch 3.81, hole Ø1.40, pin 0.80 mm, row 1.20 mm from the rear edge, body (N×3.81+0.88) × 7.25 × 9.20 mm, pin 3.5 mm): **pass, unchanged**. The EasyEDA footprints have the same pitch and pad 1 but other holes (C441238 1.8, C26895 1.5, C7245 1.26 mm); ours follow the drawings.
+Updated: 2026-11-08 (T-0190: C3 → C170101, shared power-usb)
+
+**2026-11-08 (T-0196: "For /system" sweep, unattended, documents only):** every entry in "For /system" is a firmware, mechanical, installation/safety or owner choice, not a record to sync, so all stay word for word for an interactive `/system` session. No schematic change. Report: `docs/reviews/2026-11-08-fix-sync-T-0196.md`.
+
+**2026-11-08 (T-0190: T-0187, cost lever L5, unattended, shared `power-usb`):** C3 (+3V3 at the L1 output) C377773 2.2 µF/50 V 0805 → **C170101** 2.2 µF/100 V X7R 1206 (`Capacitor_SMD:C_1206_3216Metric`), the part already used for C1/C22/C30; identical on both boards. U3 (LMR51610) gives no C_OUT maximum or ESR limit; same nominal value, less DC-bias loss (design-notes §8.8). ERC 0 errors, 5 warnings (unchanged); netlist: only C3 Value/Footprint/LCSC differ; unique parts **−1** (59). No output changed, no heat-budget run. Layout: C3 needs the 1206 land. Report: `docs/reviews/2026-11-08-fix-shared-T-0190.md`.
+
+**2026-11-08 (/system tidy and mechanical, documents only):** decision 122: all SMT parts on the top side. Decision 123: M3 holes H1–H4 in the four corners, the same length and rail-side hole spacing on both boards, Ø 8 mm keep-out at each hole; the DIN mount is one printed ASA part on the two rail-side holes or all four. Cost review `docs/reviews/2026-11-07-cost-system-2.md`: first pdm-4ch order about 204 $ (about 220 $ with the fixture fee); T-0187 (C3 → C170101, shared sheet) done in T-0190. No schematic change.
+
+**2026-11-07 (decision 121, /system, `pdm-4ch` root sheet only):** J10 is now the fixed screw terminal **KF135T-10.16-2P C475108** (65 A UL / 57 A IEC, 10 mm², M4) for the prototype, because every flange-locking socket that fits is out of stock or thin at LCSC (C577772 0, C6394053 4). New footprint `ESP32-PDM:Kefa_KF135T-10.16-2P` from the Kefa drawing (`docs/part-facts/C475108.md`, design-notes connectors section). J10 fields only: Value, Footprint, Description, LCSC; `LCSC_Plug` removed. ERC 0 errors, 5 warnings (unchanged); netlist: 169 nets identical, 227 parts, only J10 fields differ; unique parts unchanged (C577772 out, C475108 in). No output changed, so the heat budget was not rerun. The T-0158 cross-board mis-plug question closes (no pdm-4ch battery plug). **A competent person reviews the battery path (J10, Q30/U30, D31) before installation.**
+
+**2026-11-07 (decision 120, /system, documents only):** the owner's Q-0068/Q-0069 ruling is recorded as a decision: J10 stays C577772 + C577752, bought from any seller (header must read KF2EDGSRM-7.62), and the decision 98 sample, layout and order wait if none is available. No substitute socket. Live stock 2026-11-07: socket 0, plug 63. ARCHITECTURE Mechanics now has a separate pdm-4ch J10 row. No schematic change.
+**2026-11-07 (T-0185: "For /system" sweep, unattended, documents only; its J10 row superseded by decision 121):** ARCHITECTURE now names Q30 AGM601LL C5464765, D7/R59, D8/R67 and J6 in the root row, the BTT6010 option as not on this version (Boards row, budget row, decision 103), a pdm-4ch J10 row C577772 + C577752 (decision 104) and the Q30 figures with the 16 A input limit in the supply-path row. The T-0158/T-0171 done-notes left this list. No schematic change. Report: `docs/reviews/2026-11-07-fix-sync-T-0185.md`.
+
+**2026-11-07 (T-0179: T-0166, T-0168, T-0177, owner rulings Q-0068/Q-0069, unattended, documents only; J10 part and plug marking superseded by decision 121):** C577772 + C577752 stay (no design change); buy C577772 from any seller, marking KF2EDGSRM-7.62 (flange header); no C577767, C7422678 or other socket; the order waits if none can be bought. The J10 battery plug fits the pdm-hc2 J11 output socket: mark the battery plug and check it before power-up (pre-order checklist, README). No schematic, footprint or BOM change. Report: `docs/reviews/2026-11-07-fix-shared-T-0179.md`.
+
+**2026-11-07 (T-0171: T-0166, T-0167, T-0169, unattended, documents only):** C577772 (J10 socket) has stock 0, minimum order 18. No design change. Two possible substitutes were checked: C577767 (Kefa KF2EDGSR-7.62-2P) and C7422678 (DORABO DB3ERC-7.62-2P-GN). Both match the J10 pad grid and hole size and are rated 30 A UL / 32 A IEC. Neither has the flange header that the C577752 plug's ear screws need, and neither drawing shows that the plug locks, so both fail. The only fallback is C577772 from another seller (pre-order checklist). Changing to another socket would amend decisions 98/104, so that question goes to the owner. T-0167 (the T-0158 saving, about 4.8 $ per board at 5) is confirmed and needs no action. No schematic, footprint or BOM change. Report: `docs/reviews/2026-11-07-fix-pdm-4ch-T-0171.md`.
+
+**2026-11-07 (T-0161: T-0153, owner ruling 2026-11-06, unattended, shared – `power-usb`, same on both boards):** buck input filter position. Net-(D2-K) is split: D2.K → **JP1** (copper bridge, bridged solder-jumper footprint, no part) ‖ **L2** (DNP, SWPA6045S8R2MT C96963 footprint, example 8.2 µH) → C1/C19/U3. D3 (USB) stays on the U3 side, so USB-only input is unchanged (3.74 V at 0.40 A, decision 87). Damping option **C22 2.2 µF C170101 + R73 10 Ω C17903 across C1, both DNP**. A 0 Ω chip part was not used: neither C17168 nor C21189 publishes pulse data for the ≈ 86 A / ≤ 9.6 A²s F1 trip. The 0.6 mm copper bar carries 87 A²s at 2 oz (Onderdonk). With JP1 fitted, the buck input changes only by ≈ 0.2 mΩ. L2 must be fitted only together with C22/R73: undamped, the filter peak (≤ 21 Ω) is only 1.4× below the buck's 29 Ω negative input impedance at a cranking dip, and a surge step can push U3 VIN to ≈ 64 V (65 V recommended). F1, R54 and their ratings are unchanged. ERC 0 errors, 5 warnings (unchanged); +4 DNP parts, unique +0. Design-notes §8.3. **A competent person reviews F1 and R54 before installation.** Report: `docs/reviews/2026-11-07-fix-shared-T-0161.md`.
+
+**2026-11-07 (T-0160: T-0150, T-0151, T-0152, owner rulings 2026-11-06, unattended, shared – controller part of the root sheet, same on both boards except J6 pins 4–6):** sign-of-life LEDs and service pads. **D8 + R67** power LED +3V3 → GND; **D7 + R59** status LED IO13 → GND (high = on, off while IO13 is undriven). LEDs KT-0603R red 0603 C2286 (basic, the one new line), resistors 2.2 k C25879 (on the BOM): ≈ 0.7 mA each. D8 draws continuously, also in Eco/Sleep (decision 13), ≈ 2.3 mW from 3.3 V. **J6** unfitted `PinHeader_1x08_P2.54mm_Vertical`, DNP, no BOM line: 1 GND, 2 TXD0, 3 RXD0, 4 IO35, 5 IO36, 6 IO37, 7 IO42, 8 +3V3. Pin checks: none strapping, none used in the N8 module. CAN TX/RX LEDs left out (an LED to GND on TXD sits at the 2 V VIH limit with R70; the active-low version would light too briefly to see). Pin map (IO13, IO34–IO37, IO42, TXD0/RXD0) and the controller power row updated in ARCHITECTURE. ERC 0 errors, 5 warnings (unchanged); netlist differs only in U1 pins 17, 31–33, 38–40 and the new parts. 223 parts (+5, J6 DNP), 60 unique (+1). Design-notes §8.7. Report: `docs/reviews/2026-11-07-fix-shared-T-0160.md`.
+
+**2026-11-07 (T-0159: T-0149, owner ruling, decisions 99 and 105, unattended, shared – same on both boards):** near-duplicate BOM lines merged; values and nets unchanged. C2 → C307331 0402, C12 → C15849 0603, R9 → C36871 0402, R10 → C25768 0402. **C13 stays on C28323:** C15849 keeps only 0.10 µF at 29 V and 0.31 µF at 12 V (Samsung's simulation), below the L78M05's 0.33 µF, while C28323 keeps 0.42 µF worst case at 29 V. C14663, C52923, C31850, C23231 are gone; C36871 is new on this board because R9 is on the shared sheet, so net 3 lines fewer: 59 unique (−3), 4.59 USD per order. **Layout:** C2, R9, R10 are 0402, C12 is 0603 (was 0402), C13 stays 0805. ERC 0 errors, 5 warnings (unchanged). 3.3 V setpoint tolerance unchanged (±1 %, ±100 ppm/°C). Design-notes §8.3. Report: `docs/reviews/2026-11-07-fix-shared-T-0159.md`.
+
+**2026-11-06 (cost session, no schematic change):** `pdm-4ch` is the whole first order and the MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 218 $ with connector sets (decisions 99, 101, 102; `docs/reviews/2026-11-05-cost-system.md`). First version is 16 A only, all BTT6050 (decision 103). T-0148 is done (T-0158, below). **Queued, not done:** T-0149 part merges; T-0150 status LEDs; T-0151 spare GPIO pads; T-0152 serial pads; T-0153 buck filter position.
+
+**2026-11-07 (T-0158: T-0148, owner ruling, decisions 103 and 104, unattended, `pdm-4ch` root sheet only; J10 part superseded by decision 121):** the board input is now 16 A. **J10** is KF2EDGSRM-7.62-2P C577772 + plug C577752 (30 A UL / 32 A IEC), footprint `ESP32-PDM:Kefa_KF2EDGSRM-7.62-2P`, pin 1 VBAT_IN, pin 2 GND; the footprint passes against the drawing and is unchanged (design-notes §7). **Q30** is AGM601LL C5464765 (60 V, VGS ±20 V, 1.6 mΩ max, TOLL, same pins, footprint unchanged, 0.85 USD instead of about 3.55 USD); the symbol stays `ESP32-PDM:IPT007N06N`. C32, U30, D31, D30, C30, FL30 and JP30 are unchanged. **Heat at 40 °C:** 4 × 4 A inside 45.8 °C, Tj 102 °C (`--r-path 0.0069`); 4.5 A OVER. Q30 at 16 A: Tj 66 °C at 40 K/W, 80 °C at 62 K/W; AGM's 50 K/W has no stated copper area, so it is not relied on. **Copper rule:** ≥ 2 cm² of 2 oz VS copper on the drain tab replaces the 6 cm² of decisions 90 and 95. Decision 96's limits and invariant 4 hold: VDS 59.4 V and VS −4.0 V at 31 A do not depend on the FET. ERC 0 errors, 5 warnings (unchanged); netlist differs only in J10 and Q30 fields; 218 parts (+0), 62 unique (+0). **C577772 stock is 0 today (minimum order 18), so the set cannot be bought until restocked.** BTT6010 stays out of this version: four at 8 A would take Q30 to about 179 °C. **A competent person reviews the battery path (J10, Q30/U30, D31) before installation.** Older entries that give 32 A or IPT007N06N are history. Details and failure modes: design-notes §7, §8.6. Report: `docs/reviews/2026-11-07-fix-pdm-4ch-T-0158.md`.
+
+**Where it stands:** schematic complete (scripted edits), ERC: 5 `lib_symbol_mismatch` notices only (since T-0066). Netlist checked
+after every edit. No PCB. Decisions 1–7, 9–14, 17, 18 apply. Panel connector J5 and the pin map changed on
+2026-10-30 (decisions 17, 18): SW_SUPPLY on J5.5, MMBT5551 LED sinks on IO38–IO41, VBAT_SENSE IO10, NTC TH1 on IO9,
+channel-4 drive moved to IO11.
+
+**2026-11-04 (T-0147: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row names D31 SMDJ40CA C42371557 across Q30 (VS to `VBAT_FL`, decisions 92, 96). The T-0064 and T-0065 cost entries left this list: C13832 and C107198 are on neither board, C1 is C170101, and the record stays in design-notes §8.1 and §8.3. No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0147.md`.
+
+**2026-11-05 (decision 98, /system mechanical, same on both boards except J11):** all four connectors are keyed plugs on right-angle sockets: J10 C6394053 + C6394029, J11 C441238 + C440882, J5 C26895 + C26865, J4 C7245 + C7244. Five new footprints in `lib/ESP32-PDM.pretty` drawn from the maker drawings. Fields only: no net changed; pads match pins; ERC 0 errors, 5 warnings (unchanged). **For the PCB:** mating faces at the board edge; board depth about 65 mm; J10 reaches 34 mm in from the edge; TVSs at the socket pins (invariant 4); keep the J10/J11 rows on one edge, J5/J4 on the other.
+
+**2026-11-05 (decision 97, /system mechanical, root sheet, same on both boards):** the board mounts on a plastic DIN carrier (edge-on, about 36 mm per unit, enclosure by the installer) or in a printed enclosure. H1/H2 had no footprint: H1–H4 are now four `MountingHole_3.2mm_M3` non-plated holes. ERC 0 errors, 5 warnings (unchanged); netlist adds H3/H4 and footprints only. **For the PCB:** holes at the corners with copper keep-out, no copper reachable by carrier or screws (invariant 6), and J10 height sets the pitch.
+
+**2026-11-04 (T-0143: T-0129, owner ruling Q-0067, unattended, `pdm-4ch` root sheet only):** **D31 SMDJ40CA C42371557** (preferred, 0.22 USD, no loading fee; `Diode_SMD:D_SMC`, bidirectional, as D30) fitted across Q30, VS to VBAT_FL, so a negative transient with VS charged no longer avalanches Q30. **Residual risk accepted by the owner:** VDS 59.4 V at 31 A (25 °C, source short-circuit current ≤ 31 A; about 60.4 V with the TVS at 47 °C); VS ≥ 0 V up to about 20.3 A, down to about −4.0 V at 31 A, so C31, which has no reverse rating, is briefly reverse-biased. Unverified whether such spikes occur (T-0130); prototype check added below. Steady reversal ≤ 28 V: D31 does not conduct. ERC 0 errors, 5 warnings (unchanged); netlist differs only in D31. 216 parts (+1), 62 unique (+1). Heat unchanged at 40 °C. Details and failure modes: design-notes §8.6. **A competent person reviews this circuit before installation** (F4 feeds navigation lights and bilge forced run). Needs the KiCad tidy of D31. Report: `docs/reviews/2026-11-04-fix-pdm-4ch-T-0143.md`.
+
+**2026-11-04 (decision 95, /system, no schematic change):** board input limits are 32 A (`pdm-4ch`) and 36 A (`pdm-hc2`) instead of ≈ 40 / 50 A; they set J10, its GND pole and the supply copper in `/system mechanical`. Q30 is about 86 °C at 32 A with the 6 cm² copper rule kept; the cheaper AGM601LL still fails at about 179 °C. Older entries that say 40 A are history.
+
+**2026-11-04 (decision 93, /system, shared `analog_sw` + root sheet, same on both boards):** SW_SUPPLY sense added: R49 10 k 1206 → SW_SENSE, R57 4.7 k, D24 BZT52C3V3, C21 470 nF, R58 10 k (root sheet) → IO12 as a digital input. It replaces the decision 21 divider, which could not work on IO12 (design-notes §5). +5 parts, +0 unique. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those parts and U1 pad 16. Needs the KiCad tidy of the new parts' labels.
+
+**2026-11-04 (T-0141: "For /system" sweep, unattended, documents only):** ARCHITECTURE root row (C30 2.2 µF C170101, blocker Q30/U30/C32 on pdm-4ch only) and supply-path budget updated; `tools/heat_budget.py --p-other` default 2.2 → 2.3 W (4 × 4 A Tj ≈ 101 °C, unchanged). No schematic change. Report: `docs/reviews/2026-11-04-fix-sync-T-0141.md`.
+
+**2026-11-04 (T-0137, superseded by T-0143 above: T-0129, owner ruling Q-0066, unattended, no schematic change):** the TVS across Q30 is **not fitted yet; back with the owner**. Stop (iii) of the brief applies: every part that keeps Q30 VDS below 60 V at the 31 A bounding current with an adequate pulse rating also lets VS fall below 0 V at that current. Example: SMDJ40CA C42371557 (preferred, same SMC package), VDS 59.4 V at 31 A, VS +3.1 V at the 12 A textbook pulse but −4.0 V at 31 A. C31 has no reverse rating (decision 82). SMCJ30CA already on the BOM is the worst for this: −15.1 V at 31 A and still −8.0 V at 12 A. §8.6 (b) and (c) stay unchanged until the owner chooses. Numbers per candidate and the question: `docs/reviews/2026-11-04-fix-pdm-4ch-T-0137.md`. Facts added for seven TVS parts in `docs/part-facts/`.
+
+**2026-11-04 (T-0132: T-0126 cost lever L1, T-0129/EMC E18, unattended, documents only):** AGM601LL (C5464765) as a cheaper Q30 **fails** the heat check and was not fitted: its 1.25 mΩ is typical, 1.6 mΩ max (≈ 2.9 mΩ at 150 °C); with RthJA 40–50 K/W Q30 has no stable Tj below 175 °C at 40 A (IPT007N06N: 124 °C by the same method). Q30 stays IPT007N06N C122552; no schematic change, no refs. Details: design-notes §8.6 Cost. T-0129 (the §8.6 (b) "VDS ≤ 48.4 V" correction) is **blocked for the owner**: in a negative transient with VS charged, Q30 avalanches at about 60–63 V and absorbs about 80–115 mJ. EAS 1100 mJ is for Tj(start) 25 °C only. At the 40 A hot case (Tj ≈ 122 °C) the IAS–tAV curve (Diagram 13) leaves only ≈ 1–2× margin, depending on C31 ESR, which is not bounded. §8.6 (b) is unchanged until the owner rules. Report: `docs/reviews/2026-11-03-fix-pdm-4ch-T-0132.md`.
+
+**2026-11-03 (T-0121: T-0088/EMC E16, owner ruling Q-0054, unattended, `pdm-4ch` root sheet only):** reverse-battery blocker on VS in front of the bulk capacitors. New net `VBAT_FL` between FL30/JP30 and **Q30 IPT007N06N** (C122552, 60 V, 0.75 mΩ max, TOLL; source VBAT_FL, drain VS), driven by **U30 TI LM74500-Q1** (C5219210, SOT-23-THIN-8; SOURCE+EN on VBAT_FL = always on without MCU, GATE → Q30) with **C32** 1 µF/50 V (C15849, basic, on the BOM) at VCAP. D30/C30 stay on VBAT_IN at J10; C31, C104–C404, U11–U14, F1, F4, R60 sit behind Q30. The LM74500 does not block reverse current: Q30 is fully on both ways, so OUT → body diode → VS → D30 (invariant 4) is kept, no TVS on VS. Reverse battery up to 30 V: VS stays unpowered, no time limit. Heat at 40 °C (`--r-path 0.00505`): 4 × 4 A Tj 101 → 102 °C, mix 8 A/4 A unchanged (90/102 °C), Q30 itself 1.8 W / Tj 122 °C at 40 A with ≥ 6 cm² 2 oz drain copper. New symbols `ESP32-PDM:IPT007N06N` and `ESP32-PDM:LM74500-Q1` in `lib/`. ERC 0 errors, 5 warnings (unchanged); netlist differs only in Q30/U30/C32 and FL30.1/JP30.1 (now VBAT_FL). 210 parts (+3), 61 unique (+2 extended). README and design-notes §8/§8.1/§8.6 updated, failure-mode note in §8.6: **a competent person reviews the blocker before installation** (panel switches for navigation lights and bilge forced run depend on Q30). Report: `docs/reviews/2026-11-03-fix-pdm-4ch-T-0121.md`.
+
+**2026-11-03 (T-0120: T-0099/T-0115, owner Q-0063/Q-0064, unattended, `channel`):** VS-tab capacitors C104–C404 are now 2.2 µF/100 V X7R 1206 C170101 (Samsung CL31B225KCHSNNE, already on the BOM as C1/C30) instead of 1 µF C13832. Same footprint C_1206_3216Metric. Decision 26 amended by the owner to "≥ 1 µF/100 V (2.2 µF C170101)"; this supersedes auto decision 44. No C13832 is left on pdm-4ch. ERC 0 errors, 5 warnings (unchanged); netlist differs only in C104–C404. 207 parts (+0), 59 unique (−1). Details: design-notes §8.1, `docs/reviews/2026-11-03-fix-pdm-4ch-T-0120.md`.
+
+**2026-11-03 (T-0119: T-0096/T-0090, owner Q-0061/Q-0062, decision 83, unattended, shared – `power-usb`, same on both boards):** USB shield capacitor C18 is now 1 nF/2 kV X7R 1206 C9196 (basic, already on the BOM) instead of 4.7 nF/1 kV C107198 (extended). Footprint, R13 1 MΩ and R14 0 Ω DNP unchanged. Shield RC 1 MΩ ‖ 1 nF, corner ≈ 160 Hz (was 34 Hz). ERC 0 errors, 5 warnings (unchanged); netlist differs only in C18 value/LCSC. 207 parts (+0), 60 unique (−1). Details: design-notes §8.3, `docs/reviews/2026-11-03-fix-shared-T-0119.md`.
+
+**2026-11-03 (T-0118: T-0018, Q-0060/decision 81, unattended, shared – `power-usb`, `can`, `analog_sw`, same on both
+boards):** F1–F4 are now TECHFUSE mSMD050-60V C70113 (60 V, I_max 100 A, I_hold 0.50 A, R1max 1.0 Ω, 1812; F2 moved from
+`Fuse_0805_2012Metric` to `Fuse_1812_4532Metric`). New 0.2 Ω 2 W alloy 2512 FOJAN FRM252WJR200TK C7420022 in series on the
+protected side: R54 (F1 → D1/D2), R55 (F3 → D10/FB2), R56 (F4 → D55); F2 has none. Hard short behind a resistor: 30 V /
+0.35 Ω ≈ 86 A < 100 A. Checks: switch path ≈ 2.03 V ≥ 2.0 V at a 10.5 V battery via D55 (F4 + R56 1.2 Ω, less than the
+old 1.4 Ω); L78M05 input ≈ 8.5 V at NET-S 9 V; buck input −0.22 V at 0.18 A; USB-only at the 0.40 A peak 3.74 V typ (was
+3.80 V; below the 4 V minimum with either part, same result in every corner). ERC 0 errors, 5 warnings (unchanged);
+netlist differs only in F1–F4 and R54–R56. +3 parts, +0 unique (+C70113 +C7420022 −C19078719 −C269104). Heat budget: no
+output change, losses in mW. Details: design-notes §8.3, `docs/reviews/2026-11-03-fix-shared-T-0118.md`.
+
+**2026-11-03 (T-0107: T-0098, T-0099, unattended, shared – cost levers L7/L8):** RIS is now two 1 kΩ 1206 0.25 W in parallel = 500 Ω per channel: R103 ‖ R107, R203 ‖ R207, R303 ‖ R307, R403 ‖ R407 (C4410, basic). The extended 680 Ω C17975 is no longer used. IS at full load is ≤ 1.63 V (BTT6050 4.5 A, kILIS min) and ≤ 1.27 V (BTT6010 9 A), below the 2.9 V ADC range and the 3.3 V clamp. **Firmware scale constant: RIS 500 Ω (≈ 0.33 V/A for the BTT6050).** C30 (root, battery input J10, same on both boards) is now 2.2 µF/100 V X7R 1206 C170101 (the part already used as C1; decision 26 allows 1–2.2 µF at J10). C104–C404 are unchanged: 1 µF C13832, because confirmed decision 26 names them (that is an owner question). The C18 swap (T-0096) is blocked too: confirmed decision 31 names 4.7 nF, so it goes to the owner. ERC 0 errors, 5 warnings (unchanged). The netlist differs only in the refs above. +4 parts, +0 unique. Extended types 19 → 18 (−C17975). Details: design-notes §6.1 and §8.1, `docs/reviews/2026-11-03-fix-shared-T-0107.md`.
+
+
+**2026-11-03 (T-0105: T-0046, Q-0048/decision 74, unattended, shared `analog_sw` – same on both boards):** the switch
+loads R3/R4/R7/R8 (4.7 k) are now two 2 k 1206 in series each: R3+R45, R4+R46, R7+R47, R8+R48 (C17944, basic, 4.0 k):
+0.11 W per part at 30 V (44 %, was 77 %), 0.29 W per part in a 48 V clamp (inside the 5 s overload rating). Thresholds
+and the 10.5 V margin unchanged (≤ 2 mV at IN); leakage rejection slightly better; p_other ≈ 2.3 W → Tj ≈ 101 °C at
+4 × 4 A, the 4 A rating stands. ERC 0 errors, 5 warnings (unchanged); netlist differs only in those eight resistors and
+four new mid-point nets. +4 parts, +0 unique. Details: design-notes §3, §4, §5.
+
+**2026-11-03 (T-0104: T-0018, Q-0047/decision 73, unattended, shared – documents only):** the 100 A PTCs pass the
+datasheet check (TECHFUSE mSMD050-60V C70113 and JDT ASMD1812-050-60V C427396: 60 V / I_max 100 A, I_hold 0.50 A, 1812
+body as now; C70113 preferred, R1max 1.0 Ω). The series resistor (0.20 Ω → 86 A, ≤ 1.9 J in ≈ 1.3 ms, ≈ 1.5 kW peak) is
+**not shown to pass**: no basic or cheap 0.1–0.22 Ω resistor publishes a ms pulse rating (5 s overload tests only).
+Following the ruling, nothing was changed (F1/F3/F4 stay 1812L050/60GR, F2 stays SMD0805B050TF) and the question is
+back with the owner. Details: design-notes §8.3, `docs/reviews/2026-11-03-fix-shared-T-0104.md`.
+
+**2026-11-03 (T-0085, unattended, scope sync – documents only):** ARCHITECTURE `can` row (CA-IS3050G, L78M05ABDT, LEN)
+and root row (C30/C31, FL30/JP30, VBAT_IN) brought in line with the schematic; `tools/heat_budget.py --p-other`
+default 0.6 → 2.2 W (design-notes §4). The 32 V full scale is already recorded (decision 38). No schematic change.
+
+**2026-11-03 (T-0078: T-0076, Q-0052, unattended, shared lib + `can` – same on both boards):** U5 CA-IS3050G symbol pin
+numbers corrected to the datasheet (v1.10 Table 6-1): pin 2 RXD, pin 3 TXD (they were swapped, the CA-IS3052G order).
+Renumbered only – no wire moved: /IO17 (U1.21, R70) → U5.3 TXD, /IO18 (U1.22) → U5.2 RXD. Pin map unchanged. ERC
+unchanged (5 `lib_symbol_mismatch`, none on U5); the netlist differs only in those two U5 pins. Details: design-notes §8.5.
+
+**2026-11-03 (T-0073: T-0021/T-0031/T-0033/T-0043/T-0051/T-0060, unattended, shared – same on both boards):** `LCSC` fields added (cost report C1, each checked against value, package and net voltage): C2 C14663, C4/C6 C15849, C5 C19666, C7/C9 C28233, C8 C45783, C10/C11 C307331, C12 C52923, D12–D15 BAT54C C22466350 (preferred; pinout 1/2 anodes, 3 common cathode), R1/R2/R5/R6 C25879, R11/R12 C25905, R15–R17/R21/R24/R27 C25744 – all basic except the BAT54C, no new unique extended part. C13 and FB1/FB2 already had codes from T-0065. R1/R2 and the NTC TH1 (C52155402) stay (Q-0025, Q-0024). VBAT full scale ≈ 32 V and the IO3 strap rule are in design-notes §2.
+
+**2026-11-02 (T-0068, Q-0006/Q-0040/Q-0034, unattended, shared `analog_sw` – same on both boards):** C14–C17 → 470 nF
+0402 (C47339, preferred; debounce τ ≈ 1.5 ms). New D55 DSK16 (C22466351, already on the BOM) in series after F4 in the
+SW_SUPPLY feed: protects the panel LEDs against reverse battery and costs 0.3–0.7 V of switch supply. D54/C54 stay on
+J5.5. Margin at SWIN 10.5 V corrected (design-notes §3), p_other ≈ 2.2 W documented (§4, Tj 101 °C at 4 A, the rating
+stands), reverse-battery limits qualified (§8, README). README: dry contacts and 12 V cranking note. ERC 0 errors,
+5 warnings (unchanged). +1 part, +1 unique part. T-0046 (R3/R4/R7/R8 split) was done later in T-0105 (2 k + 2 k).
+
+**2026-11-02 (T-0069, Q-0032/Q-0033/Q-0041, unattended):** RIS R103/R203/R303/R403 now 680 Ω **1206** (C17975, extended – no
+basic exists; value unchanged). New DNP OUT pull-downs R106/R206/R306/R406 47 kΩ 0603 (C25819) per channel. DEN policy
+and firmware requirements: design-notes §6.1. ERC 0 errors, 5 warnings (unchanged). Heat budget unchanged.
+The 40 mA fault-current case (≈ 1.1 W in RIS) relies on the firmware DEN rule, not hardware.
+
+**Population and ordering rule (Q-0032, T-0040/T-0032):** standard build = **all four BTT6050-1ERA** (≈ 4 A per channel at
+40 °C); heavy loads go on pdm-hc2. Fit BTT6010-1ERA only on a channel with a load > 4 A. A mixed build adds one extended
+loading fee (≈ 3.07 $) per order and each BTT6010 costs ≈ 1.57 $ more at 10 pcs (2+2 mix ≈ +3.71 $/board), so order mixed
+builds together in one order so the fee is paid once.
+
+**2026-11-01 (T-0064, decisions 26/27, unattended):** battery input J10 now has D30 + C30 (1 µF/100 V) on the
+terminal net `VBAT_IN`, a DNP ferrite position FL30 bridged by the copper net tie JP30 to `VS`, and C31 100 µF/63 V
+bulk on VS (same controller part as HC2). Each channel has C104 1 µF/100 V at the BTT6050 VS tab and a DNP SMAJ30CA
+D103 from OUT to GND (refs x04/x03 per channel). Invariant 4 now states the PROFET output rule. ERC unchanged
+(6 `lib_symbol_mismatch`), netlist checked. Details and failure-mode notes: design-notes §8.1/§8.2.
+
+**2026-11-02 (T-0065, decisions 30–32, unattended, shared sheets – same on both boards):** FB1/FB2 → GZ2012D601TF
+(C1017, basic); D4–D6 → H5VL10B (C7420372, preferred, SOD-882); U6 TPS7B91 → L78M05ABDT (C58069, basic, DPAK) with C13
+1 µF/50 V input capacitor; buck: C19 100 nF/100 V at VIN, R43 0 Ω boot resistor, R44/C20 SW snubber **DNP**; C1 →
+2.2 µF/100 V 1206 (C170101); C50–C53 → 1 nF/2 kV 1206 (C9196, basic); J3 shield on the new net `USB_SHIELD` with R13
+1 MΩ ‖ C18 4.7 nF/1 kV to GND, R14 0 Ω hard-tie **DNP**. README USB service rule added. ERC unchanged
+(6 `lib_symbol_mismatch`), netlist checked. Details: design-notes §8.3.
+
+**2026-11-02 (T-0066, Q-0036/Q-0037, unattended, shared lib + `power-usb`, same on both boards):** PG-TDSO-14
+footprint paste moved between the thermal vias: 4 × 2.55 × 0.6 + 2 × 2.55 × 0.5 mm windows, 51 % of the exposed pad, all ≥ 0.15 mm
+from the via drills. Pads rechecked against Infineon Fig. 53 and the JLCPCB footprint of C534868; they agree. U3 LMR51610 now
+uses `Package_TO_SOT_SMD:SOT-23-6` (checked against TI DBV0006A and the JLCPCB footprint, pin numbering identical);
+custom `LMR51610.kicad_mod` removed. ERC 0 errors, warnings 6 → 5 (U3 mismatch cleared); netlist: only U3's
+footprint changed. Details: design-notes §8.4.
+
+**2026-11-02 (T-0067, Q-0023/Q-0039/Q-0004, rulings Q-0012/Q-0031, unattended, shared `can`, same on both boards):**
+U5 ISO1044 → **Chipanalog CA-IS3050G** (C528763, SOIC-8-WB `Package_SO:SOIC-8_7.5x5.85mm_P1.27mm`, new symbol
+`ESP32-PDM:CA-IS3050G`; not pin-compatible, pins 5/6/7 = GND2/CANL/CANH). The datasheet check passed: supplies, ±58 V bus,
+210 ns loop, 2–8 ms timeout, 5 kV_RMS; LEN 1 still holds at 49.3 mA worst case. −0.71 USD/board. R70 10 k TXD pull-up
+to +3V3. DNP CMC FL1 (FACT4532-510-2P-T) in series with CANH/CANL, bridged by fitted 0 Ω R71/R72 (new nets
+CANH/CANL_BUS and _XCVR). DNP Y-cap C70 1 nF/2 kV 1206 GND_CAN–GND (capacitor only). The bus side stays on NET-S (Q-0031);
+J4 stays 4-pole with the shield open (Q-0012). ERC unchanged (5 `lib_symbol_mismatch`), netlist checked. Details: design-notes §8.5.
+
+**PTC interrupt rating: settled (T-0118, decision 81).** F1–F4 C70113 (I_max 100 A), 0.2 Ω C7420022 R54/R55/R56 in series
+with F1/F3/F4 (≈ 86 A for a 30 V hard short). The resistor is accepted on its 5 s / 50 J overload rating; the 30 V
+hard-short prototype test below is mandatory before installation. An overstressed resistor fails open (for F4: panel
+supply permanently off, bus control keeps working). F4 feeds the panel switches (bilge forced run, navigation lights):
+a competent person reviews F1–F4 and R54–R56 before installation.
+
+
+## Old "Next" list (until 2026-11-16)
+
+
+1. **Do not run *Update Symbols from Library*, and do not save the schematics from KiCad 10 by hand** (2026-11-08):
+   a KiCad 10 save with a symbol update reset every Value/Footprint/LCSC field, merged GND_CAN into GND and renamed
+   SW_BOOT1/SW_RESET1, FL30, JP30. That copy is kept on the local branch `backup/kicad10-resave-2026-11-08`, never
+   merged. Schematic changes go through `tools/ksch.py` (agents), checked by ERC and the netlist compare; a KiCad 10
+   format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
+2. After `/emc pdm-4ch` and `/validate pdm-4ch deep`: fix findings.
+3. ~~Verify `Infineon_PG-TDSO-14_ThermalVias` against the JLCPCB footprint~~ done (T-0066). At the first order, check the
+   CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°).
+4. Remaining part checks from the BOM audit: PESD2CAN
+   pin 3 = common; Molex 39301080 = 5569-08A2 (if still used).
+5. PCB layout is done by the orchestrator (decision 130): `python3 tools/orchestrate.py run` works through the
+   queued stages T-0197–T-0202 (footprints already imported: 226 parked beside the board, parity 0). Rules: 2 oz, VS copper on both
+   layers around the cooling tabs, switches spread out and away from the ESP32; TH1 next to the hottest switch;
+   J5 TVSs at the connector.
+6. PCB rules from T-0064 (design-notes §8.1/§8.2):
+   - **VS copper from the four switches to D30 wide** (both layers, 2 oz): it is the output surge path
+     (OUT → PROFET body diode → VS → D30), decision 27.
+   - JP30 is the VBAT_IN–VS link: draw it as a copper bridge as wide as the VS copper (the placeholder footprint
+     `NetTie-2_SMD_Pad2.0mm` is far too small for 16 A). FL30 has no footprint yet; decide at pre-compliance.
+   - D30 and C30 directly at the J10 socket pins; C31 close to J10; C104–C404 at each VS tab.
+   - MLCCs on VS/VBAT_IN (C30, C104–C404): away from the J10 flange screws and board edges and not across a bending
+     line (a cracked MLCC shorts the battery input).
+   - D103–D403 (DNP) next to J11, GND return straight to J10.2.
+   - T-0121, T-0158 (design-notes §8.6): Q30 in the 16 A path between JP30 and VS. VBAT_FL and VS copper as wide as the VS
+     copper, both layers. **≥ 2 cm² 2 oz copper joined to Q30's drain tab (VS)**: Tj ≈ 66–80 °C at 16 A (40–62 K/W, Infineon's TOLL
+     figures as an analogue; AGM gives no copper area). U30 next to Q30 with short SOURCE/GATE traces. C32 at U30, away from Q30's tab. The surge loop
+     switches → VS → Q30 → D30 short and wide.
+   - T-0143 (design-notes §8.6): D31 directly across the Q30 drain tab and source pins, short and wide.
+   - T-0160 (design-notes §8.7): **J6** (unfitted service pads) inside the board near the EMC test points (VS, 3V3, GND, buck SW, CANH/CANL; `docs/reviews/2026-11-03-emc-system.md` item 9), not at an edge connector, short traces from U1, outside the antenna keep-out, pin 1 (GND) marked. On-board use only: no cable leaves the board (invariant 9 for 3V3; invariant 4, the lines are unprotected). **D7/D8** where they are visible with the board in its carrier.
+   T-0161 (design-notes §8.3): the buck input loop C1/C19/U3 stays tight and unchanged; the filter position JP1 ‖ L2 sits **before** C1 (D2.K → JP1/L2 → C1), with room for L2's 6 × 6 mm body. JP1 traces at least as wide as its 0.6 mm bar; JP1 on an outer layer where it can be cut. C22/R73 (DNP) next to C1, outside the C1/C19/U3 loop. D3.K joins on the C1 side.
+   T-0065 layout rules (design-notes §8.3): C19 (100 nF) right at U3 VIN/GND; R44/C20 footprints tight at the SW
+   node; R13/C18/R14 at J3 next to the shield tabs; U6 DPAK with copper under the tab (≈ 0.5 W); C1 1206 away from
+   board edges and screws.
+   **Decision 122 (cost lever L3):** all SMT parts on the top side; nothing SMT on the bottom (a double-sided
+   Standard PCBA job costs 33.77 USD more per order). Through-hole connectors are hand-soldered and do not count.
+   A bottom-side part needs an owner ruling.
+   **Decision 123 (mounting holes):** H1–H4 (M3, non-plated) in the four board corners; board length and the rail-side
+   hole spacing the same as on the other board (set at the first layout, pdm-4ch). No copper and no parts within
+   Ø 8 mm of each hole (nylon screw head and washer). The printed DIN mount fits the two rail-side holes, or all four.
+7. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384
+   and C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2.
+
+**PCB rule 9 – isolation barrier (EMC review 2026-10-30, updated T-0067):** no copper (pour, trace, via) under U5
+between pins 1–4 and 5–8. Keep the GND and GND_CAN islands apart around the body by the package creepage (CA-IS3050G
+SOIC-8-WB: 8 mm CLR/CPG), at least ≥ 4 mm. **C70 is the only part that crosses the gap**, on its own pads next to
+U5. D9, D10, F3, FB2, D11, U6, FL1, R71/R72 sit on the GND_CAN side; U5 pins 1–4 and R70 on the GND side. FL1 and
+R71/R72 go between D9 and U5 (D9 at J4).
+

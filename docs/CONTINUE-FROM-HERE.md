@@ -1,12 +1,12 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-08 (decisions 124–129).
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-17 (decisions 215–219).
 
 ## Boards
 
 | Board | Schematic | PCB | Status file |
 |---|---|---|---|
-| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | 100 × 75 mm, 4 layers (decisions 138, 150); stages 1–4 done, planes, routing and silkscreen queued (decision 130) | `hardware/pdm-4ch/STATUS.md` |
+| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); silkscreen and the EMC and validator layout reviews are left | `hardware/pdm-4ch/STATUS.md` |
 | `pdm-hc2` (2 × TPS48110A-Q1 + MOSFETs) | done, ERC clean except library notices | not started | `hardware/pdm-hc2/STATUS.md` |
 
 Firmware: not started.
@@ -24,7 +24,9 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
 4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout.
-5. **`/board pdm-4ch pcb`**, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102).
+5. **`/board pdm-4ch pcb`** – routed (decision 219). Left: silkscreen, then `/emc pdm-4ch` and `/validate pdm-4ch` on
+   the layout, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
+   the rules are in `docs/ARCHITECTURE.md`, "PCB layout rules".
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
    blinking = fault; alerts and failures go to Signal K where they can be acknowledged and muted – design the

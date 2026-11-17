@@ -62,6 +62,39 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 9. No 3.3 V (or other logic rail) leaves the board on a cable; panel switches and LEDs run from the fused switch supply (decision 17).
 10. Analog measurements the firmware relies on (MOD_ID, current sense, VBAT_SENSE, NTC) use ADC1 pins (IO1–IO10); ADC2 is shared with Wi-Fi.
 
+## PCB layout rules
+
+The live list. The EMC reviews, design-notes §8 and older decision rows give the reasons; where they differ from this
+list, this list holds. On `pdm-4ch` the router (`hardware/pdm-4ch/scripts/pf_route.py`) and the build
+(`build_routing.sh`) enforce rules 2–12; `pdm-hc2` follows the same rules when its layout starts.
+
+1. All SMT parts on the top side (decision 122). Connectors on the edges named in decision 128.
+2. Four layers: F.Cu/B.Cu 2 oz carry all load current; In1 is a solid GND plane (GND_CAN its own area) with no
+   signal on it; In2 is VS under the switches and GND elsewhere, and carries signals (decisions 150, 165).
+3. Power pour outlines (VS, VBAT_IN, VBAT_FL, OUT1–4) are closed to foreign tracks and vias, except within 0.6 mm of
+   a pad that must be reached. Each pour keeps its island count and at least 95 % of its area (decisions 164, 172).
+4. 1.0 mm from VS and VBAT_IN copper to every other net on the outer layers; the board's 0.2 mm applies only within
+   0.6 mm of a routed pad (EMC review 2026-11-03 rule 7, decision 219).
+5. VS-In2: all 40 PROFET thermal vias sit in copper, and no signal runs over a thermal-via field plus 1 mm. In2 runs
+   inside the pour stay 1.5 mm from its outline, except where they cross its east edge. The pour keeps at least 75 %
+   of 1190.7 mm²; every piece is tied to VS by vias (decisions 178, 218).
+6. CAN isolation: 8.1 mm between logic copper and GND_CAN copper across the U5 body and C70 (y 53.2–66.6),
+   4.0 mm elsewhere, on all four layers; no copper under U5 between its pin rows; nothing but C70 crosses
+   (EMC review 2026-10-30 rule 9, decision 217).
+7. No copper under the antenna (x 45.85–92.5, y 0–4.5) and inside the Ø 8 mm hole keep-outs (decision 123).
+   Copper stays 0.5 mm from the board edge.
+8. Tracks and clearance 0.2 mm, vias 0.6/0.3 mm, +3V3 0.3 mm. Exceptions on `pdm-4ch`: VBUS and Net-(D3-A) 0.2 mm
+   at J3 (decision 219), a 0.15 mm neck on CANL_XCVR between R71 and R72 (decision 168).
+9. No via on an SMD pad. In2 tracks stay 1.8 mm from GND through-hole pads (thermal relief). Two vias of one net
+   are at least 0.55 mm apart.
+10. GND copper on F.Cu, B.Cu and In2 is fill, not the reference plane: a fragment needs two vias to In1 or is
+    removed by a fill keep-out; a GND pad the fill cannot reach gets a stub and a via (decisions 206, 214, 219).
+11. Buck SW and CB nets on F.Cu only, no via in the hot loop (decision 165). The CAN and USB pairs are fixed
+    hand routes (decisions 168, 169).
+12. The board file is the output of the build: a change goes into the scripts or `pf_routes.json`, never into the
+    board alone (decision 163). A build is accepted with 0 DRC errors, schematic parity 0 and the gates of rules
+    3, 5 and 10.
+
 ## Mechanics
 
 Same four non-plated M3 holes (H1–H4) for every mounting (decision 97), one in each corner; both boards have the same length and the same hole spacing along the rail-side edge, with no copper and no parts within Ø 8 mm of each hole (decision 123). DIN mount: one solid printed ASA part on the two rail-side holes, or a long version also reaching the far corners along the short edges (65 / 75 mm depth), nylon M3 hardware (decision 123). DIN rail: bare board on a plastic carrier, PCB edge-on to the rail, about 36 mm of rail per unit, in an enclosure the installer provides. Alternative: a 3D-printed vented ASA enclosure, also for flat mounting. Nothing conductive from carrier, screws or enclosure reaches board copper (invariant 6).

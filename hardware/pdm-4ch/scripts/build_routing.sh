@@ -1,14 +1,16 @@
 #!/bin/zsh
-# Routing build for pdm-4ch (decision 163 as amended by Q-0072: no Freerouting). Run with KiCad closed:
+# Routing build for pdm-4ch (decisions 163, 215, 219). Run with KiCad closed:
 #   hardware/pdm-4ch/scripts/build_routing.sh            (env KEEP_WORK, LAND_BEST optional)
-# 1 fixed copper (locked) + fixed_routes.py (hand routes, the kept T-0236 copper and the maze_route.py routes),
-#   unlocked tracks/vias removed                                              (routing_build.py prep)
+# 1 fixed copper (locked) + fixed_routes.py: the hand routes (CAN and USB pairs, CC1), the GND and power copper, and
+#   the signal routing in pf_routes.json; part moves applied; other copper of the routed nets removed
+#                                                                             (routing_build.py prep)
 # 2 zones refilled, GND stitching, dangling vias/stubs removed, pour + thermal checks  (routing_build.py apply -)
 # 3 checks: `kpcb drc` with parity
 # 4 the result (0 DRC errors, parity 0, pours whole) replaces the board only when it has fewer unconnected items
 #   than the board now has. Env LAND_BEST=1 lands it even without fewer unconnected: use it once after
-#   fixed_routes.py changed, so the board is again the output of the scripts.
-# Every signal track comes from fixed_routes.py; new routes are generated with geom_export.py + maze_route.py.
+#   fixed_routes.py or pf_routes.json changed, so the board is again the output of the scripts.
+# New signal routing: pf_export.py <board> <work> [moves.json] -> pf_route.py <work> -> pf_land.py <work> (writes
+# pf_routes.json), then this build. pf_route.py needs Python 3 with numpy and pillow and a C compiler (pf_core.c).
 set -u
 RUNS=1
 SCRIPTS=${0:A:h}; PROJ=${SCRIPTS:h}; REPO=${PROJ:h:h}
