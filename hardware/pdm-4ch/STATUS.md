@@ -72,6 +72,10 @@ History of the schematic fix rounds and of the layout up to 2026-11-16: `STATUS-
 
 ## Prototype test list
 
+The full bring-up and validation plan, in order, with pass criteria and a record sheet, is `bring-up.md` beside this
+file (2026-11-17). It includes every test below. Open owner choice in it: cutting JP1 on one board to get the
+"3.3 V rail down" case of T-0042 (section 7.3).
+
 - **Decision 127 – connector fit (moved from decision 98):** on the first assembled boards check that the J11, J5 and J4 plugs cannot go in reversed; whether the J4 plug enters the J5 socket (labels are on the silkscreen either way); the height across the rail (part height + pin length + 1 mm; J10 expected 34.8 mm; recorded, not a pass/fail limit); the J10 wire-entry side and M4 screw access at 36 mm pitch; reach of mated plugs and cable bend past the edge. Findings go into the next revision.
 - **T-0118 / decision 81 – PTC hard short (mandatory before installation):** from a 30 V battery-like supply (low source
   impedance), short J5.5 to GND (behind F4/R56), then behind F1 (D1/D2 node) and behind F3 (D10/FB2 node). Scope the

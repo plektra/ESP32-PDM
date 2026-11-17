@@ -36,6 +36,8 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 
 - No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
 - Connector checks of decision 98 on the first assembled boards, not before the order (decision 127). Re-check connector stock before ordering.
+- Prototype bring-up and validation: `hardware/pdm-4ch/bring-up.md` (order, pass criteria, record sheet; MicroPython as
+  bring-up firmware until `/system firmware`).
 - Measurements: bilge pump locations and feeds. Pump start current on or after the first working prototype, before a board runs a pump in service (decision 100, `docs/pump-start-current-test.md`).
 - Check whether the Standard PCBA fixture fee (16.42 $ per order) applies when quoting.
 
