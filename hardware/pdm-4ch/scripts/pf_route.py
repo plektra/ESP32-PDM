@@ -21,6 +21,7 @@ CORRIDOR_BAND = 1.5
 # x 55-57, y 6.45-20). In2 runs may cross the edge anywhere east of the PROFET thermal fields; the build's gates
 # (one island, area, 40/40 thermal vias, heat budget) check the pour afterwards.
 EXIT_WINDOW = tuple(float(v) for v in os.environ.get('PF_EXIT', '53.0,6.45,61.5,56.0').split(','))
+VS_MIN_MM2 = 893.0   # decision 216: 75 % of the 1190.7 mm2 baseline, pieces allowed (each via-tied)
 IN2_COST, CORRIDOR_COST, VIA_COST = 1.2, 3.0, 60.0   # via = 3 mm of track
 
 
@@ -114,6 +115,7 @@ class Maps:
                     x0, y0, x1, y1 = EXIT_WINDOW
                     band[int(y0 / G):int(y1 / G), int(x0 / G):int(x1 / G)] = False
                     zb |= band
+                    self.vs_inside = inside; self.vs_zc = z['zc']
             esc = self.mask(esc_all[l])
             Pm = np.where(zb, -1, F)
             Pm = np.where(esc, B, Pm)
@@ -224,6 +226,7 @@ def main():
     ap.add_argument('work'); ap.add_argument('--iters', type=int, default=60)
     ap.add_argument('--nets', default=''); ap.add_argument('--skip', default=''); ap.add_argument('--png', action='store_true')
     ap.add_argument('--seed', type=int, default=1)
+    ap.add_argument('--ties', default='auto')
     ap.add_argument('--resume', action='store_true'); ap.add_argument('--verbose', action='store_true')
     a = ap.parse_args()
     t0 = time.time()
@@ -270,6 +273,27 @@ def main():
         print('resumed', legfile, flush=True)
     # sealed by the fixed board alone?
     pres, todo = 0.5, list(nets)
+    # GND ties (--ties auto | R17.2,C21.2,...): a short F.Cu stub and a via to the GND plane for GND pads the pours may
+    # not reach between the routed tracks. Routed first, on the empty board; the signals then keep clear of them.
+    tie_legs, tie_fail = [], []
+    if a.ties == 'auto':   # every GND SMD pad of a moved part: its old tie copper went with the move
+        a.ties = ','.join(it['ref'] for it in geo['items'] if it['kind'] == 'pad' and it['net'] == 'GND' and it.get('smd')
+                          and it['ref'].split('.')[0] in geo.get('moves', {}))
+    if a.ties:
+        gid = mp.nid['GND']; N_ = mp.W * mp.H
+        ti = core.pf_add_net(gid, int(round((0.3 - 0.2) / 2 / G)))
+        pads = {it['ref']: it for it in geo['items'] if it['kind'] == 'pad' and it['net'] == 'GND' and it.get('smd')}
+        refs = [r for r in a.ties.split(',') if r in pads]
+        for r in refs:
+            it = pads[r]; cx, cy = int(round(it['at'][0] / G)), int(round(it['at'][1] / G))
+            arr = np.array([cy * mp.W + cx + dy * mp.W + dx for dy in (-1, 0, 1) for dx in (-1, 0, 1)], np.int32)
+            core.pf_add_cluster(ti, len(arr), arr.ctypes.data_as(i32))
+        for q, r in enumerate(refs):
+            if not core.pf_route_tie(ti, q):
+                tie_fail.append(r)
+        for g in range(core.pf_nleg(ti)):
+            arr = np.zeros(core.pf_leg_len(ti, g), np.int32); core.pf_leg_get(ti, g, arr.ctypes.data_as(i32)); tie_legs.append(arr)
+        print('GND ties: %d routed, failed %s' % (len(tie_legs), tie_fail), flush=True)
     bad = {}
     for it in range(0 if resume else a.iters):
         order = sorted(todo, key=lambda n: rng.random())
@@ -372,6 +396,8 @@ def main():
                 for n in [x] + blk:
                     core.pf_restore(n['i'])
     out = {'tracks': [], 'vias': [], 'open': {}}
+    t, v = emit(mp, 'GND', 0.3, tie_legs)
+    out['tracks'] += t; out['vias'] += v; out['tie_fail'] = tie_fail
     for n in nets:
         legs = []
         for g in range(core.pf_nleg(n['i'])):
@@ -383,6 +409,40 @@ def main():
         nf = core.pf_nfail(n['i'])
         if nf:
             out['open'][n['name']] = nf
+    # VS-In2 island check (decision 216: area floor; pieces listed): the fill is the outline minus every foreign In2
+    # item (fixed and routed) grown by the zone clearance; counted at 0.1 mm
+    if hasattr(mp, 'vs_inside'):
+        im = Image.new('1', (mp.W, mp.H), 0); d = ImageDraw.Draw(im); zc = mp.vs_zc
+        for it in geo['items']:
+            if it['net'] != 'VS' and 'In2.Cu' in it['layers']:
+                for p in it['raw']['In2.Cu']:
+                    if len(p) > 2:
+                        d.polygon([px(q) for q in p], fill=1)
+            if it['net'] != 'VS' and 'hole_t' in it:
+                for p in it['hole_t']:
+                    if len(p) > 2:
+                        d.polygon([px(q) for q in p], fill=1)
+        for t in out['tracks']:
+            if t['layer'] == 'In2.Cu':
+                d.line([px(p) for p in t['pts']], fill=1, width=int(round(t['width'] / G)) + 1)
+                for p in t['pts']:
+                    x, y = px(p); r = t['width'] / 2 / G
+                    d.ellipse([x - r, y - r, x + r, y + r], fill=1)
+        for v in out['vias']:
+            x, y = px(v['at']); r = 0.3 / G
+            d.ellipse([x - r, y - r, x + r, y + r], fill=1)
+        k = int(round((zc + 0.15) / G)) * 2 + 1   # + half the pour min width: necks thinner than that vanish
+        foreign = np.asarray(im.convert('L').filter(ImageFilter.MaxFilter(k if k % 2 else k + 1))) > 0
+        fill = mp.vs_inside & ~foreign
+        img = np.ascontiguousarray(fill.astype(np.uint8))
+        buf = np.zeros(3 * 4096, np.int32)
+        k = core.pf_components(img.ctypes.data_as(p8), mp.W, mp.H, buf.ctypes.data_as(ctypes.POINTER(ctypes.c_int32)), 4096)
+        comps = [(int(buf[3 * i]) * G * G, int(buf[3 * i + 1]) * G, int(buf[3 * i + 2]) * G) for i in range(min(k, 4096))]
+        comps.sort(reverse=True)
+        big = [c for c in comps if c[0] > 1.0]
+        out['vs_in2'] = {'islands': len(big), 'area': round(sum(c[0] for c in comps), 1), 'parts': [[round(c[0], 1), round(c[1], 1), round(c[2], 1)] for c in big[:5]]}
+        print('VS-In2 check: %d islands > 1 mm2, total %.1f mm2 (min %.1f)%s' % (len(big), out['vs_in2']['area'], VS_MIN_MM2,
+              ('' if out['vs_in2']['area'] >= VS_MIN_MM2 else '  FAIL') + ' ' + str(out['vs_in2']['parts'])), flush=True)
     json.dump(out, open(os.path.join(a.work, 'routes.json'), 'w'))
     print('done: %d tracks, %d vias, open %d links in %d nets, %.0f s'
           % (len(out['tracks']), len(out['vias']), sum(out['open'].values()), len(out['open']), time.time() - t0))

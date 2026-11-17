@@ -39,7 +39,10 @@ POUR_LOSS_MAX = 0.05
 
 # In2 corridor (Q-0071): VS-In2 may lose up to 15 % of its 1190.7 mm2 baseline (T-0236) and must stay one island;
 # the router keep-out stays over each PROFET's thermal-via field (pad THERMAL_PAD PTH vias) plus THERMAL_KEEP_MM.
-CORRIDOR_MIN_MM2 = {'VS-In2': round(1190.7 * 0.85, 1)}
+# Decision 216 (within decision 215 (6)): VS-In2 may be cut into several pieces by signal runs. A piece without a VS
+# via is removed by the fill (island removal), so every piece left is tied to VS; all 40 PROFET thermal vias must
+# still sit in copper (thermal_check) and the pour keeps >= 75 % of its 1190.7 mm2 baseline (was 85 %, one island).
+CORRIDOR_MIN_MM2 = {'VS-In2': round(1190.7 * 0.75, 1)}
 THERMAL_PAD = '15'
 THERMAL_KEEP_MM = 1.0
 # corridor runs stay this far inside the VS-In2 outline (router keep-out band; maze_route.py CORRIDOR_BAND)
@@ -1576,3 +1579,25 @@ if _os.path.exists(_pfp):
     REROUTED_NETS = sorted(set(REROUTED_NETS) | _rip)
     DROP_GND += [(_l, tuple(_a), tuple(_e)) for _l, _a, _e in _pf['drop_gnd']]
     DROP_GND_VIAS += [tuple(_p) for _p in _pf['drop_gnd_vias']]
+    # the same GND copper is also listed above as fixed lines (harvest, maze passes): drop those segments and vias too,
+    # else add_fixed puts them back on the turned parts' pads (matched to 1 um)
+    _um = lambda _p: (round(_p[0] * 1000), round(_p[1] * 1000))
+    _dseg = {(_l, *sorted([_um(_a), _um(_e)])) for _l, _a, _e in _pf['drop_gnd']}
+    _dvia = [_um(_p) for _p in _pf['drop_gnd_vias']]
+    _keep = []
+    for _t in TRACKS:
+        if _t['net'] != 'GND':
+            _keep.append(_t); continue
+        _run = [_t['pts'][0]]
+        for _a, _e in zip(_t['pts'], _t['pts'][1:]):
+            if (_t['layer'], *sorted([_um(_a), _um(_e)])) in _dseg:
+                if len(_run) > 1:
+                    _keep.append(dict(_t, pts=_run))
+                _run = [_e]
+            else:
+                _run.append(_e)
+        if len(_run) > 1:
+            _keep.append(dict(_t, pts=_run))
+    TRACKS[:] = _keep
+    VIAS[:] = [_v for _v in VIAS if _v['net'] != 'GND' or
+               not any(abs(_um(_v['at'])[0] - _q[0]) <= 2 and abs(_um(_v['at'])[1] - _q[1]) <= 2 for _q in _dvia)]

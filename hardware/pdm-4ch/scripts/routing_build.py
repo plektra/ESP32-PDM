@@ -652,7 +652,7 @@ def pour_check(base, now):
             continue
         n, a = now.get(k, [0, 0])
         if name in CORRIDOR_POURS:
-            if n != 1 or a < fixed_routes.CORRIDOR_MIN_MM2[name]:
+            if n < 1 or a < fixed_routes.CORRIDOR_MIN_MM2[name]:   # decision 216: several via-tied pieces allowed
                 bad[k] = (base[k], [n, a])
         elif n > base[k][0] or a < base[k][1] * (1 - fixed_routes.POUR_LOSS_MAX):
             bad[k] = (base[k], [n, a])

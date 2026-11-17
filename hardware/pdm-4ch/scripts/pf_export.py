@@ -171,7 +171,7 @@ def main():
                 it.TransformHoleToPolygon(ps, M(inf), M(0.01), pcbnew.ERROR_OUTSIDE)
                 e[key] = polys(ps, ox, oy)
             if net in rb.GND_NETS and lays:   # In2 tracks stay 0.9 mm off GND THT pads (thermal relief on the plane)
-                e['gndtht'] = shape(it, pcbnew.In2_Cu, 1.3)
+                e['gndtht'] = shape(it, pcbnew.In2_Cu, 1.8)
         if lays or 'hole_t' in e:
             geo['items'].append(e)
     for z in b.Zones():

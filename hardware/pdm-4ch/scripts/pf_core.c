@@ -378,3 +378,64 @@ void pf_load_leg(int ni, int len, int32_t *states) {
 }
 void pf_load_fail(int ni, int cl) { Net *n = &nets[ni]; if (!n->failcl) { n->leg = malloc(n->ncl * sizeof(Cells)); n->failcl = malloc(n->ncl * sizeof(int)); } n->failcl[n->nfail++] = cl; }
 void pf_commit_loaded(int ni) { stamp(&nets[ni], +1); }
+
+/* connected components (4-neighbour) of the non-zero cells of img (w x h, overwritten): writes up to cap rows of
+ * (cells, seed x, seed y) for the largest-first unsorted list; returns the component count */
+int pf_components(uint8_t *img, int w, int h, int32_t *out, int cap) {
+    int n = 0; int32_t *st = malloc((size_t)w * h * 4);
+    for (int i = 0; i < w * h; i++) {
+        if (img[i] != 1) continue;
+        int sp = 0, cnt = 0; st[sp++] = i; img[i] = 2;
+        while (sp) {
+            int c = st[--sp], x = c % w, y = c / w; cnt++;
+            if (x > 0 && img[c - 1] == 1) { img[c - 1] = 2; st[sp++] = c - 1; }
+            if (x < w - 1 && img[c + 1] == 1) { img[c + 1] = 2; st[sp++] = c + 1; }
+            if (y > 0 && img[c - w] == 1) { img[c - w] = 2; st[sp++] = c - w; }
+            if (y < h - 1 && img[c + w] == 1) { img[c + w] = 2; st[sp++] = c + w; }
+        }
+        if (n < cap) { out[3 * n] = cnt; out[3 * n + 1] = i % w; out[3 * n + 2] = i / w; }
+        n++;
+    }
+    free(st);
+    return n;
+}
+
+/* GND tie: from the net's cluster q on F.Cu (layer 0) to the nearest cell where a via is legal on every layer and
+ * clear of all routed copper; stored as a leg that ends with the via (last state on layer 2). Returns 1 if routed. */
+int pf_route_tie(int ni, int q) {
+    Net *n = &nets[ni];
+    stamp(n, -1);
+    if (!n->leg) { n->leg = malloc((n->ncl + 1) * sizeof(Cells)); n->failcl = malloc((n->ncl + 1) * sizeof(int)); }
+    epoch++; hn = 0;
+    for (int i = 0; i < n->cl[q].n; i++) { int s = n->cl[q].s[i]; if (s < N && mark[s] != epoch) { mark[s] = epoch; gcost[s] = 0; par[s] = -1; hpush(0, s); } }
+    int end = -1; long expd = 0;
+    while (hn) {
+        HE e = hpop(); int c = e.s; float g = gcost[c];
+        if (e.f > g + 1e-3f) continue;
+        int16_t v = VM[c];
+        if ((v == 0 || v == n->id) && !occ_v[c] && !own_via_near(n, c, c) &&
+            passT(n, 0, c) && passT(n, 1, c) && passT(n, 2, c) && !occ_t[0][c] && !occ_t[1][c] && !occ_t[2][c]) { end = c; break; }
+        if (++expd > 400000) break;
+        int x = c % W, y = c / W;
+        for (int k = 0; k < 8; k++) {
+            int nx = x + NB8[k][0], ny = y + NB8[k][1];
+            if (nx < 1 || ny < 1 || nx >= W - 1 || ny >= H - 1) continue;
+            int nc = ny * W + nx;
+            if (!passT(n, 0, nc) || occT(n, 0, nc)) continue;
+            float ng = g + (k < 4 ? 1.0f : 1.4142f);
+            if (mark[nc] != epoch || ng < gcost[nc]) { mark[nc] = epoch; gcost[nc] = ng; par[nc] = c; hpush(ng, nc); }
+        }
+    }
+    int ok = 0;
+    if (end >= 0) {
+        int len = 1; for (int s = end; s >= 0; s = par[s]) len++;
+        n->leg = realloc(n->leg, (n->nleg + 1) * sizeof(Cells));
+        Cells *p = &n->leg[n->nleg++]; p->n = len; p->s = malloc((size_t)len * 4);
+        p->s[len - 1] = 2 * N + end;
+        int i = len - 1; for (int s = end; s >= 0; s = par[s]) p->s[--i] = s;
+        n->vc = realloc(n->vc, (size_t)(n->nvc + 1) * 4); n->vc[n->nvc++] = end;
+        ok = 1;
+    }
+    stamp(n, +1);
+    return ok;
+}
