@@ -4,7 +4,7 @@ DRC gate: 0 errors, 404 warnings, 0 unconnected, 0 parity issues - pass
 
 Gerber zip `ESP32-PDM-4CH-gerbers.zip`: ESP32-PDM-4CH-B_Cu.gbl, ESP32-PDM-4CH-B_Mask.gbs, ESP32-PDM-4CH-B_Paste.gbp, ESP32-PDM-4CH-B_Silkscreen.gbo, ESP32-PDM-4CH-Edge_Cuts.gm1, ESP32-PDM-4CH-F_Cu.gtl, ESP32-PDM-4CH-F_Mask.gts, ESP32-PDM-4CH-F_Paste.gtp, ESP32-PDM-4CH-F_Silkscreen.gto, ESP32-PDM-4CH-In1_Cu.g1, ESP32-PDM-4CH-In2_Cu.g2, ESP32-PDM-4CH-NPTH-drl_map.gbr, ESP32-PDM-4CH-NPTH.drl, ESP32-PDM-4CH-PTH-drl_map.gbr, ESP32-PDM-4CH-PTH.drl, ESP32-PDM-4CH-job.gbrjob
 
-BOM `ESP32-PDM-4CH-bom-jlc.csv`: 58 lines, 199 placed parts, 54 unique LCSC parts.
+BOM `ESP32-PDM-4CH-bom-jlc.csv`: 54 lines, 199 placed parts, 54 unique LCSC parts.
 CPL `ESP32-PDM-4CH-cpl-jlc.csv`: 199 rows, sides: all top
 
 ## Left out of BOM/CPL

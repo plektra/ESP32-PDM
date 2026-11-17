@@ -29,7 +29,7 @@ Regenerate after any board or schematic change (it runs the DRC gate first):
 | Assembly | **Standard PCBA**, top side only (decisions 99, 100, 122); Economic is not offered with 2 oz |
 | Fixture fee | check whether the 16.42 USD Standard PCBA fixture fee applies (CONTINUE-FROM-HERE) |
 
-In the BOM/CPL: 199 placed parts, 54 unique LCSC parts, all top side. Left out: DNP parts, H1–H4, J6 (service pads),
+In the BOM/CPL: 199 placed parts, 54 unique LCSC parts (one BOM line per LCSC part), all top side. Left out: DNP parts, H1–H4, J6 (service pads),
 JP1/JP30 (copper bridges) and the THT connectors J4, J5, J10, J11, which the owner buys and hand-solders (decision 85).
 Their sockets and plugs go in the same cart as separate LCSC parts.
 
@@ -59,3 +59,12 @@ Stock flags:
 - Under 2000 in stock: L1 C96963 (1173), U3 C22427220 (1524), U11–U14 C534868 (1604), Q30 C5464765 (1650),
   J10 C475108 (821).
 - U1 ESP32-S3-MINI-1 is Standard-PCBA-only (already the basis, decision 100).
+
+## BOM-step dry run (owner, 2026-11-17)
+
+JLCPCB matched every line to the LCSC number in our BOM. What it flagged:
+
+- "Multiple lines in the BOM have been matched to the same part" on C307331, C15849 and C28233 (same part under
+  different value spellings). Fixed: `tools/jlc_package.py` now writes one line per LCSC part (54 lines).
+- SW_BOOT1/SW_RESET1 "Unconfirmed" (generic value `SW_Push`): C318884 TS-1187A-B-A-B is the intended part; confirm it.
+- U30 LM74500-Q1 C5219210: 0 at JLCPCB (Source column "0 JLCPCB"); still the open stock blocker above.

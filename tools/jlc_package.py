@@ -149,13 +149,16 @@ def main():
     for ref in placed:
         s = sym[ref]
         fp = s['Footprint'].split(':')[-1]
-        groups.setdefault((s['LCSC'].strip(), s['Value'], fp), []).append(ref)
+        # One BOM line per LCSC part: JLCPCB warns "multiple lines matched to the same part" when the
+        # same part appears under different value spellings (0.1uF/100nF, 1uF/1uF/50V).
+        key = s['LCSC'].strip() or (s['Value'], fp)
+        groups.setdefault(key, {'val': s['Value'], 'fp': fp, 'refs': []})['refs'].append(ref)
     bom = out / f'{name}-bom-jlc.csv'
     with bom.open('w', newline='') as f:
         w = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
         w.writerow(['Comment', 'Designator', 'Footprint', 'JLCPCB Part #'])
-        for (lcsc, val, fp), refs in sorted(groups.items(), key=lambda kv: natural(kv[1][0])):
-            w.writerow([val, ','.join(refs), fp, lcsc])
+        for key, g in sorted(groups.items(), key=lambda kv: natural(kv[1]['refs'][0])):
+            w.writerow([g['val'], ','.join(sorted(g['refs'], key=natural)), g['fp'], key if isinstance(key, str) else ''])
     cpl = out / f'{name}-cpl-jlc.csv'
     with cpl.open('w', newline='') as f:
         w = csv.writer(f)
@@ -165,7 +168,7 @@ def main():
             w.writerow([ref, f"{float(p['PosX']):.4f}mm", f"{float(p['PosY']):.4f}mm",
                         'Top' if p['Side'] == 'top' else 'Bottom', f"{float(p['Rot']):.1f}"])
 
-    lcscs = sorted({k[0] for k in groups})
+    lcscs = sorted(k for k in groups if isinstance(k, str))
     report += ['', f'BOM `{bom.name}`: {len(groups)} lines, {len(placed)} placed parts, {len(lcscs)} unique LCSC parts.',
                f'CPL `{cpl.name}`: {len(placed)} rows, sides: ' +
                ('all top' if not bad_side else f'NOT TOP: {", ".join(bad_side)} (decision 122)'), '',
