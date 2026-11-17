@@ -231,6 +231,8 @@ R71/R72 go between D9 and U5 (D9 at J4).
 - T-0107: C30, C102 and C202 use C170101 2.2 µF/100 V instead of C13832 1 µF, which removes the C13832 loading fee for the 5-board first run. For runs of **15+ pdm-hc2 boards** C13832 at these places is cheaper again (cost report L8). C102/C202 must stay within TPS4811 Table 9-3 (0.1–10 µF).
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 - T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
+- Decision 220 (licence): add "CERN-OHL-S v2" and the source location `github.com/plektra/ESP32-PDM` to the PCB
+  silkscreen and to the KiCad title-block comments.
 
 ## For /system
 

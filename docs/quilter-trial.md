@@ -82,7 +82,7 @@ capacitors, crystal oscillators, switching converters), plus upload / prepare in
   every keep-out item unticked (ours all have some ticked, so they stay keep-outs).
 - Free tier: personal, academic and eligible exploratory R&D (< 10 people, < 50 k$ revenue); input files may be used
   for training; Terms restrict sharing Output with third parties. **Check that before Quilter copper goes into the
-  MIT repo.**
+  public, open-licensed repo.**
 
 **Asked with the MCP's `askQuestion` (2026-11-14), answers checked against the cited pages:**
 1. KiCad 10 file support (format 20260206): **not documented.** The docs say only "KiCad"; the CAD compatibility

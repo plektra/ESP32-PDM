@@ -127,4 +127,7 @@ This repository supersedes the earlier two-board design (base board + output mod
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+Hardware (schematics, PCB, fabrication files, documentation, library parts): [CERN-OHL-S v2](LICENSE).
+Software (`tools/`, board scripts, firmware): [MIT](LICENSE-MIT). Third-party 3D models and KiCad stock-library
+parts keep their own terms. Versions up to commit `1799052` (2026-11-17) were released under MIT. Details, and the
+source-location notice for anyone who makes boards from these files: [NOTICE.md](NOTICE.md).

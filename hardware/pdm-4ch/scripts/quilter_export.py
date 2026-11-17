@@ -316,7 +316,7 @@ the build amends decisions 163/181 and is the owner's call.
 ## Terms to keep in mind
 
 Free tier: personal/academic and eligible exploratory R&D; Quilter may use the input files for training (the repo is
-public anyway). Check that putting the routed result into the MIT repo is fine under the current Quilter terms.
+public anyway). Check that putting the routed result into the public, open-licensed repo is fine under the current Quilter terms.
 """
 
 

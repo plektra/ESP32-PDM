@@ -38,7 +38,7 @@ assembled by JLCPCB. First user: the tug Vega (24 V).
    before/after. `kicad-cli` rewrites `*.kicad_prl`; do not commit those (git-ignored).
 7. **Safety-relevant outputs** (bilge pumps, navigation lights, anything that can trap or burn) get a failure-mode
    note; remind the owner that a competent person should review them before installation.
-8. **Public repo** (MIT): no personal data, credentials or manufacturer PDFs.
+8. **Public repo** (hardware CERN-OHL-S v2, software MIT; `NOTICE.md`, decision 220): no personal data, credentials or manufacturer PDFs.
 
 ## Git (decision 129)
 
@@ -51,7 +51,7 @@ directly, not on a branch or PR. Before starting work, sync: `git fetch origin &
 ## Repo layout
 
 ```
-CLAUDE.md, README.md, LICENSE
+CLAUDE.md, README.md, LICENSE (CERN-OHL-S v2), LICENSE-MIT (software), NOTICE.md
 .claude/commands/   /board /system /handoff /progress /validate /cost /emc /inbox
 .claude/agents/     architect, validator, cost-controller, emc-reviewer, part-facts, stock-check, planner, board-fixer
 docs/               CONTINUE-FROM-HERE.md, ARCHITECTURE.md, decisions.md, design-notes.md, WORKING-WITH-CLAUDE.md,
