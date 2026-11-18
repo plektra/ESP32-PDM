@@ -1,6 +1,30 @@
 # pdm-4ch status
 
-Updated: 2026-11-17 (decisions 215, 217–219: routing review, one-pass reroute – **fully routed, 0 unconnected**)
+Updated: 2026-11-18 (decision 221: EMC E22/E23 fixed, E25 report in the build – still fully routed)
+
+**2026-11-17/18 (decision 221, owner – interactive): EMC layout findings E22 and E23 fixed, E25 added.** One reroute
+(`pf_route.py --iters 300`, converged at round 259, 0 open); `build_routing.sh`: 0 DRC errors, 0 unconnected,
+parity 0, every power pour whole; VS-In2 1 island, 1003.4 mm² (84 %, was 1026.2), 40/40 thermal vias; Tj 101 °C at
+40 °C, 4 × 4 A (unchanged); DRC warnings 413 (unchanged, silkscreen).
+- **E22:** D50 (LED_K1 TVS) moved to (87.6, 27.05) into the J5 TVS column beside D51/D53/D54, 1.6 mm of copper
+  from J5.6 (was 10.3 mm); R19 (83.0, 27.05, 180°) and C50 (79.6, 27.05, 180°) take its old place, so LED1 now
+  has the LED2–LED4 order TVS → R → C. Copper path C50 → R19.2 **0.8 mm** (was 22.8 mm); C50.2 GND via 0.9 mm away.
+  D24 (SW_SENSE clamp, 3.3 V zener) moved to (86.8, 20.25) to make room; it may sit anywhere on SW_SENSE.
+- **E23:** the CANH hand route (`fixed_routes.py`) now enters J4.3 → B.Cu → via (88.6, 52.4) → D9.1 → via
+  (86.0, 53.45) → R71/FL1: R71 is tapped behind the clamp. TVS stub **0.0 mm** (was 6.4 mm), like CANL.
+- **E25:** `scripts/emc_report.py` runs after each DRC in `build_routing.sh`, report only: filter cap to resistor
+  path (≤ 5 mm), TVS stub on every J3/J4/J5 line (≤ 1 mm), GND via within 2.5 mm of every connector-line TVS and
+  filter-cap GND pad, FB–SW gap (≥ 2 mm). Current result: 2 CHECK lines, both known – FB–SW 0.70 mm (E24, waits for
+  the T-0161 scan) and SW_SUPPLY (below).
+- **Found on the way, fixed:** (a) some GND pads had no via of their own and lived on F.Cu fill or on grid
+  stitching vias that the build only places where all four layers are GND; a reroute can cut them off. Fixed GND
+  ties now in `fixed_routes.py`: C70.2 (via at x 67.1, logic side of the barrier), D52.1, C14.2, C15.2, R1.2.
+  (b) `pf_land.py` now keeps the GND drop lists of earlier runs (the export no longer sees that copper, so a second
+  reroute put the harvest GND copper back on turned pads: 59 DRC errors) and drops an old router GND stub only when
+  the new run ties the same pad again (two vias 0.05 mm apart otherwise).
+- **Noted, not changed:** on SW_SUPPLY, R49 (10 k, SW_SENSE divider) is tapped at J5.5, 3.7 mm ahead of D54. A surge
+  into that branch meets 10 kΩ, then C21 470 nF and D24, so the stub carries microamps; the report keeps showing it.
+  Move R49's tap behind D54 if a later layout pass touches that corner.
 
 **2026-11-16/17 (decisions 215, 217–219, owner – interactive): the board is fully routed.** `build_routing.sh`:
 0 DRC errors, **0 unconnected** (was 29), parity 0, every power pour whole; a second build from the new board gives
@@ -38,30 +62,25 @@ footprint pad or schematic change; DRC unchanged.
    SW_BOOT1/SW_RESET1, FL30, JP30. That copy is kept on the local branch `backup/kicad10-resave-2026-11-08`, never
    merged. Schematic changes go through `tools/ksch.py` (agents), checked by ERC and the netlist compare; a KiCad 10
    format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
-2. Silkscreen (layout stage 6): connector and pin-1 marks, "BATTERY + −", OUT1–OUT4, "PANEL", "CAN"; clear the
-   398 silkscreen warnings of the DRC.
+2. **Next step:** silkscreen (layout stage 6): connector and pin-1 marks, "BATTERY + −", OUT1–OUT4, "PANEL", "CAN";
+   clear the silkscreen warnings of the DRC (413 warnings in all on 2026-11-18).
 3. `/validate pdm-4ch` on the PCB, then fix the findings. Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and
    Net-(D3-A) necks at J3 (decision 219), the fill keep-outs that removed GND slivers on F.Cu/B.Cu/In2.
    `/emc pdm-4ch` on the layout is done (2026-11-17, `docs/reviews/2026-11-17-emc-pdm-4ch.md`): 0 CRITICAL,
-   0 MAJOR, 3 MINOR, all layout-only, two-way, no part change. Open, to fix one at a time in the layout session:
-   - **E22:** C50 (LED1 line RF/ESD shunt) sits on a 21–25 mm stub from R19; C51–C53 are at their resistors. At
-     160 MHz the stage gives ≈ −14 dB instead of ≈ −40 dB (estimate), so Q3 may rectify VHF (LED1 flicker). Fix:
-     C50 within 5 mm of R19.2 with a GND via beside it; reroute Q3 from there.
-   - **E23:** D9 (PESD2CAN) is a 6 mm side branch on CANH_BUS (R71/U5 tapped upstream of the clamp), while CANL_BUS
-     runs through its D9 pad. Fix: re-route the CANH hand route (decision 168) through D9 pad 1, then on to R71/FL1.
+   0 MAJOR, 3 MINOR, all layout-only, two-way, no part change. E22 and E23 are fixed and E25 is in the build
+   (decision 221, entry at the top). Left:
    - **E24:** R10 pad 1 (FB) is 0.7 mm from the SW pad of DNP R44, and a 6 mm dead-end SW spur to R44/C20 runs
      1.6 mm from the FB track. No change now; added to the T-0161 scan below. Move R9/R10 or R44/C20 only if the
      scan shows jitter.
-   - **E25 (lever, optional):** report-only checks in `build_routing.sh` (filter cap ≤ 5 mm from its resistor, TVS
-     tap order, FB-to-SW distance) so the next reroute shows E22/E23-type slips.
    - Not a finding, noted: the VBAT_FL track at x = 40.25 (U30 pin 5 to the pour) is 0.3 mm from GND fill for
      about 4 mm, beyond rule 4's 0.6 mm pad zone. The BTT6050 slew is now read from the datasheet (0.3/0.8/1.4 V/µs),
      which closes the "slew UNVERIFIED" item for pdm-4ch.
 4. At the first order, check the CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°), and
    the footprints listed in the pre-order checklist below. The JLCPCB package (Gerber zip, BOM, CPL) is built by
    `python3 tools/jlc_package.py pdm-4ch` into `fab/` behind a DRC gate; see `fab/README.md` for the quote settings.
-   The 2026-11-17 package is for quoting only.
+   The 2026-11-17 package is for quoting only and predates decision 221 (D50, R19, C50, D24 moved; copper changed):
+   rebuild it after the silkscreen.
 5. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384 and
    C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2. Remaining part check from
    the BOM audit: PESD2CAN pin 3 = common.
@@ -127,6 +146,8 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 
 - EMC 2026-11-17: add layout rules 1–4 of 2026-11-17 (design-notes §8.24: filter cap ≤ 5 mm from its resistor, TVS flow-through
   on differential lines, short dead-end SW copper, re-check after a reroute) to `docs/ARCHITECTURE.md` "PCB layout rules".
+  Decision 221 adds one: every TVS and RF filter-cap GND pad has its own GND via (≤ 2.5 mm), never only fill or grid
+  stitching; on pdm-4ch `scripts/emc_report.py` reports all of these after each build.
 - Decision 150: cost reviews still price pdm-4ch as 2 layers; the owner's quote is €43.95 for 5 boards (4 layers, 100 × 75 mm). ARCHITECTURE Mechanics/Budgets: note 4 layers.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.

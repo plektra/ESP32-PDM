@@ -43,7 +43,7 @@ def clr(net):
 WIDTH = {'Net-(F2-Pad1)': 0.2, 'Net-(D3-A)': 0.2, 'Net-(C4-Pad1)': 0.4}
 KEEP_COPPER = set()   # (D4 turns 180 degrees, so D3-A is rerouted whole as well)
 # Nets whose board copper is replaced by their fixed_routes.py lines before export (edited fixed routes)
-FROM_FR = {'Net-(J3-CC1)'}
+FROM_FR = {'Net-(J3-CC1)', '/CAN/CANH_BUS'}   # CANH_BUS: EMC E23 flow-through via D9.1
 
 
 def rip_net(net):

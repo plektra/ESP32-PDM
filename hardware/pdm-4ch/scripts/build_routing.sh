@@ -5,7 +5,7 @@
 #   the signal routing in pf_routes.json; part moves applied; other copper of the routed nets removed
 #                                                                             (routing_build.py prep)
 # 2 zones refilled, GND stitching, dangling vias/stubs removed, pour + thermal checks  (routing_build.py apply -)
-# 3 checks: `kpcb drc` with parity
+# 3 checks: `kpcb drc` with parity; EMC report (emc_report.py, report only, EMC E25)
 # 4 the result (0 DRC errors, parity 0, pours whole) replaces the board only when it has fewer unconnected items
 #   than the board now has. Env LAND_BEST=1 lands it even without fewer unconnected: use it once after
 #   fixed_routes.py or pf_routes.json changed, so the board is again the output of the scripts.
@@ -37,6 +37,8 @@ for i in $(seq 1 $RUNS); do
   $KPY -I $SCRIPTS/routing_build.py apply $WORK - $R/proj/ESP32-PDM-4CH 2>&1 | grep -v -e assert -e swig -e '^$'
   mv $R/proj/ESP32-PDM-4CH.json $R/pour.json
   D=$(drc $R/proj/ESP32-PDM-4CH.kicad_pcb); echo "r$i: $D"; echo $D > $R/drc.json
+  # EMC E25: report-only layout checks (filter cap to resistor, TVS stub, FB-SW gap); never gates the build
+  $KPY -I $SCRIPTS/emc_report.py $R/proj/ESP32-PDM-4CH.kicad_pcb 2>/dev/null | grep '^emc' | tee $R/emc.txt | grep -e CHECK -e 'emc report'
   OK=$(python3 - $R <<'PY'
 import json, sys
 r = sys.argv[1]; d = json.load(open(r + '/drc.json')); p = json.load(open(r + '/pour.json'))

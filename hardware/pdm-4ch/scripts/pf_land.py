@@ -12,6 +12,24 @@ r = json.load(open(os.path.join(work, 'routes.json')))
 rnd = lambda p: [round(p[0], 4), round(p[1], 4)]
 out = {'nets': sorted(geo['width']), 'place': geo['moves'], 'open': r['open'],
        'drop_gnd': geo['drop_gnd'], 'drop_gnd_vias': geo['drop_gnd_vias'], 'tracks': [], 'vias': []}
+# GND copper an earlier run removed is no longer on the exported board, so this export does not list it again: keep
+# the earlier drop lists (else fixed_routes.py puts that harvest copper back on turned parts' pads)
+_old = os.path.join(HERE, 'pf_routes.json')
+if os.path.exists(_old):
+    _o = json.load(open(_old))
+    for _k in ('drop_gnd', 'drop_gnd_vias'):
+        out[_k] = _o.get(_k, []) + [x for x in out[_k] if x not in _o.get(_k, [])]
+    # the router's GND pad stubs of the earlier run are locked board copper now. Where this run put a new GND via
+    # within 0.6 mm of an old one (the same pad tied again, e.g. 0.05 mm off), the old via and its stub go (else both
+    # stay and the vias break hole-to-hole). Old stubs the router did not redo stay: it saw them as existing copper.
+    _new_v = [v['at'] for v in r['vias'] if v['net'] == 'GND']
+    _near = lambda p, q, d: abs(p[0] - q[0]) <= d and abs(p[1] - q[1]) <= d
+    _gone = [v['at'] for v in _o.get('vias', []) if v['net'] == 'GND' and not v.get('kept') and
+             any(_near(v['at'], q, 0.6) and not _near(v['at'], q, 1e-4) for q in _new_v)]
+    out['drop_gnd_vias'] += _gone
+    for t in _o.get('tracks', []):
+        if t['net'] == 'GND' and not t.get('kept') and any(_near(p, g, 1e-3) for p in t['pts'] for g in _gone):
+            out['drop_gnd'] += [[t['layer'], a, e] for a, e in zip(t['pts'], t['pts'][1:])]
 for it in geo['items']:   # copper of the routed nets that stayed on the base board (wide feeds, escape stubs)
     if it['net'] in geo['width'] and it['kind'] == 'track':
         out['tracks'].append({'net': it['net'], 'layer': it['layer'], 'width': it['w'], 'pts': it['seg'], 'kept': 1})   # exact: matches the board copper

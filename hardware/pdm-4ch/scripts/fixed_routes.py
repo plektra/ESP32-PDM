@@ -91,15 +91,35 @@ T(CLX, 'F.Cu', (84.25, 58.72), (83.42, 57.89), (83.42, 57.62))                 #
 T(CLX, 'F.Cu', (86.4, 56.09), (85.8, 56.6))                                    # R72.2 down between R71/R72:
 T(CLX, 'F.Cu', (85.8, 56.6), (85.8, 57.6), w=0.15)    # 0.15 neck: the slot between the 0402 pads is 0.56 mm
 T(CLX, 'F.Cu', (85.8, 57.6), (85.8, 58.72), (84.25, 58.72))                     # -> via
-T(CH, 'F.Cu', (79.78, 55.38), (81.78, 55.38), (83.70, 53.45), (86.0, 53.45), (87.96, 53.45))  # FL1.1 -> D9.1
+# CANH flow-through (EMC E23, 2026-11-17): J4.3 reaches D9.1 first and only one track leaves D9.1 toward the
+# transceiver; R71 (and FL1) are tapped behind the clamp at the via (86.0, 53.45). Was: a T at x 88.8-89.3 on B.Cu
+# with D9 on a 6 mm side branch.
+T(CH, 'F.Cu', (79.78, 55.38), (81.78, 55.38), (83.70, 53.45), (86.0, 53.45), (87.96, 53.45))  # FL1.1 <- D9.1
 V(CH, 86.0, 53.45)
-T(CH, 'B.Cu', (86.0, 53.45), (88.83, 56.28), (93.3, 56.28))                    # D9.1 -> J4.3 under the L pair
+T(CH, 'B.Cu', (93.3, 56.28), (91.0, 56.28), (91.0, 53.8), (89.6, 52.4), (88.6, 52.4))  # J4.3 -> via N of D9.1
+V(CH, 88.6, 52.4)
+T(CH, 'F.Cu', (88.6, 52.4), (88.6, 53.45), (87.96, 53.45))                     # via -> D9.1 (enters the pad)
 T(CH, 'F.Cu', (85.2, 57.11), (85.1, 58.05))                                    # R71.1 -> via
 V(CH, 85.1, 58.05)
-T(CH, 'B.Cu', (85.1, 58.05), (87.5, 58.05), (89.27, 56.28))
+T(CH, 'B.Cu', (85.1, 58.05), (86.0, 57.15), (86.0, 53.45))                     # R71.1 <- behind D9
 T(CL, 'F.Cu', (83.42, 55.38), (83.73, 55.07), (86.78, 55.07), (87.11, 55.35), (87.96, 55.35))  # FL1.4 -> D9.2
 T(CL, 'F.Cu', (87.96, 55.35), (87.96, 54.89), (90.38, 52.47), (93.3, 52.47))   # D9.2 -> J4.4
 T(CL, 'F.Cu', (86.4, 57.11), (87.08, 56.43), (87.08, 55.32))                   # R72.1 -> L
+# C70 (DNP barrier cap) logic-side GND: its 0.5 mm track ends at x 67.40 and relied on the GND-F fill, which signal
+# runs west of it can cut off (E22/E23 reroute, 2026-11-17: SW4/IO8). Its own via to In1, inside the logic side
+# (barrier keep-out from x 67.5).
+T('GND', 'F.Cu', (67.40, 61.70), (67.10, 61.70), w=0.5)
+V('GND', 67.10, 61.70)
+# Own GND vias for pads that relied on fill or on grid stitching vias (lost in the E22/E23 reroute, 2026-11-17):
+# D52.1 (LED_K3 TVS) south of the pad, C14.2/C15.2 (SW1/SW2 filter caps) north of the pad.
+T('GND', 'F.Cu', (78.8, 19.43), (78.8, 21.05), w=0.4)
+V('GND', 78.8, 21.05)
+T('GND', 'F.Cu', (66.82, 42.29), (66.82, 41.35), w=0.3)
+V('GND', 66.82, 41.35)
+T('GND', 'F.Cu', (66.82, 46.10), (66.82, 45.15), w=0.3)
+V('GND', 66.82, 45.15)
+# R1.2 (GND) to the R38.2 GND via of the router (pf_routes.json): the IO8/SW2 runs cut it off from the fill
+T('GND', 'F.Cu', (65.25, 64.10), (65.71, 64.71), w=0.3)
 
 
 # ---- USB D+/D- pair (T-0210): J3 -> D5/D6 (ESD, at the connector) -> U1 fan-out vias (69.25,16.8)/(70.10,18.0).
@@ -633,7 +653,8 @@ V('GND', 66.85, 67.92)
 # ---- Decision 214 rip-up: /IO11 (with /IO8), open clusters 2 -> 1
 
 
-REROUTED_NETS = sorted(set(REROUTED_NETS) | {CC1})   # decision 215: CC1 via moved; the board keeps only the copper above
+REROUTED_NETS = sorted(set(REROUTED_NETS) | {CC1, CH})   # decision 215: CC1 via moved; EMC E23: CANH flow-through via D9.1;
+# the board keeps only the copper above for these nets
 
 # ---- Decision 215 (owner, 2026-11-16): one-pass signal routing. scripts/pf_routes.json (written by pf_land.py from a
 # pf_export.py + pf_route.py run) holds the part moves and all copper of the routed nets: every signal net except the
