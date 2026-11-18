@@ -1,12 +1,12 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-18 (decisions 215–225).
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-18 (decisions 215–226).
 
 ## Boards
 
 | Board | Schematic | PCB | Status file |
 |---|---|---|---|
-| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 223); silkscreen done (decision 224); validator layout review done, V1 fixed (decision 225); order preparation is left | `hardware/pdm-4ch/STATUS.md` |
+| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 223); silkscreen done (decision 224); validator layout review done, V1 fixed (decision 225); test pads TP1/TP30/TP70–TP72 (decision 226); order preparation is left | `hardware/pdm-4ch/STATUS.md` |
 | `pdm-hc2` (2 × TPS48110A-Q1 + MOSFETs) | done, ERC clean except library notices | not started | `hardware/pdm-hc2/STATUS.md` |
 
 Firmware: not started.
@@ -25,8 +25,8 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
    footprints, circuit math, heat budget.
 4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout.
 5. **`/board pdm-4ch pcb`** – routed (decision 219); EMC layout review done and E22/E23 fixed (decision 223);
-   silkscreen done (decision 224); validated, V1 fixed (decision 225). Left: rebuild the JLCPCB package and the
-   pre-order checklist, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
+   silkscreen done (decision 224); validated, V1 fixed (decision 225); test pads (decision 226, JLCPCB package rebuilt with them).
+   Left: the pre-order checklist, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
    the rules are in `docs/ARCHITECTURE.md`, "PCB layout rules".
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,

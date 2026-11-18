@@ -1,6 +1,6 @@
 # JLCPCB package: pdm-4ch
 
-DRC gate: 0 errors, 404 warnings, 0 unconnected, 0 parity issues - pass
+DRC gate: 0 errors, 4 warnings, 0 unconnected, 0 parity issues - pass
 
 Gerber zip `ESP32-PDM-4CH-gerbers.zip`: ESP32-PDM-4CH-B_Cu.gbl, ESP32-PDM-4CH-B_Mask.gbs, ESP32-PDM-4CH-B_Paste.gbp, ESP32-PDM-4CH-B_Silkscreen.gbo, ESP32-PDM-4CH-Edge_Cuts.gm1, ESP32-PDM-4CH-F_Cu.gtl, ESP32-PDM-4CH-F_Mask.gts, ESP32-PDM-4CH-F_Paste.gtp, ESP32-PDM-4CH-F_Silkscreen.gto, ESP32-PDM-4CH-In1_Cu.g1, ESP32-PDM-4CH-In2_Cu.g2, ESP32-PDM-4CH-NPTH-drl_map.gbr, ESP32-PDM-4CH-NPTH.drl, ESP32-PDM-4CH-PTH-drl_map.gbr, ESP32-PDM-4CH-PTH.drl, ESP32-PDM-4CH-job.gbrjob
 
@@ -39,6 +39,11 @@ CPL `ESP32-PDM-4CH-cpl-jlc.csv`: 199 rows, sides: all top
 | R206 | 47k | C25819 | DNP |
 | R306 | 47k | C25819 | DNP |
 | R406 | 47k | C25819 | DNP |
+| TP1 | GND |  | footprint only (no symbol) |
+| TP30 | VS |  | footprint only (no symbol) |
+| TP70 | CANH |  | footprint only (no symbol) |
+| TP71 | CANL |  | footprint only (no symbol) |
+| TP72 | GND_CAN |  | footprint only (no symbol) |
 
 ## Check in the JLCPCB placement preview
 

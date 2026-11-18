@@ -1,6 +1,8 @@
 # pdm-hc2 status
 
-Updated: 2026-11-08 (T-0191: R105/R205 → C17927 1206)
+Updated: 2026-11-18 (decision 226: test pads TP70–TP72 in the shared `can` sheet)
+
+**2026-11-18 (decision 226, from the pdm-4ch session):** the shared `can` sheet gained three copper-only test pads, TP70 CANH_BUS, TP71 CANL_BUS, TP72 GND_CAN (`TestPoint:TestPoint_Pad_D1.0mm`, not in BOM/CPL), so this board has them too. ERC unchanged (0 errors, 5 library warnings); netlist: only those three nodes added. **PCB phase:** place them on the bus side behind the CAN TVS, TP72 on the GND_CAN pour, and add VS / GND-by-the-buck pads on the root as pdm-4ch did (TP30, TP1); probe buck SW and +3V3 on the inductor pads.
 
 **2026-11-08 (T-0196: "For /system" sweep, unattended, documents only):** every entry in "For /system" is a firmware, mechanical, installation/safety or owner choice, not a record to sync, so all stay word for word for an interactive `/system` session. No schematic change. Report: `docs/reviews/2026-11-08-fix-sync-T-0196.md`.
 

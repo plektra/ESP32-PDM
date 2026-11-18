@@ -10,7 +10,8 @@ placed again.
   body (its F.Fab outline), a footprint's silk lines (+0.05 mm), another text or within 0.6 mm of the board edge. 1.0 mm text,
   0.8 mm if nothing fits; a label that fits nowhere stops the script.
 3 Top labels: OUT1-OUT4 on the J11 pins, BATTERY / + / - at J10, PANEL at J5, CAN at J4.
-4 Bottom (no parts there): pin legends of J5, J4, J11, J10 and the J6 service pads, board name and licence."""
+4 Bottom (no parts there): pin legends of J5, J4, J11, J10 and the J6 service pads, board name and licence.
+5 Test pads TP1/TP30/TP70-TP72 (decision 226): the net name beside each pad, placed last."""
 import math, os, sys
 import pcbnew
 
@@ -23,6 +24,8 @@ M, MM = pcbnew.FromMM, pcbnew.ToMM
 KEEP = ['J3', 'J4', 'J5', 'J6', 'J10', 'J11', 'U1', 'U3', 'U5', 'U30', 'Q30', 'U11', 'U12', 'U13', 'U14',
         'F1', 'F2', 'F3', 'F4', 'R54', 'R55', 'R56', 'JP1', 'JP30', 'L2', 'FL1', 'D103', 'D203', 'D303', 'D403',
         'R44', 'C20', 'C22', 'R73', 'D7', 'D8', 'SW_BOOT1', 'SW_RESET1']
+# copper-only test pads (decision 226): reference hidden, the net name printed beside the pad
+TEST_PADS = {'TP1': 'GND', 'TP30': 'VS', 'TP70': 'CANH', 'TP71': 'CANL', 'TP72': 'GND_C'}
 SIZES = (1.0, 0.8)
 EDGE = 0.6
 PAD_GAP = 0.15         # JLCPCB silk-to-pad minimum
@@ -256,6 +259,11 @@ def main():
         reach = 8.0 if own is None else max(8.0, math.hypot(own[2] - own[0], own[3] - own[1]) / 2 + 5.0)
         s = place(t, 'F', ref, MM(c.x - ox), MM(c.y - oy), None if fp.IsDNP() else own, maxd=reach)
         placed.append((ref, s))
+
+    # ---- 5 test pads (copper only): the net name beside each pad, placed last so no earlier text moves
+    for ref, text in TEST_PADS.items():
+        x, y = at(pad(ref, '1'))
+        label(text, 'F', x, y, around=(x - 0.65, y - 0.65, x + 0.65, y + 0.65), maxd=4.5, sizes=(0.8,))
 
     pcbnew.SaveBoard(BOARD, b)
     small = ['%s %.1f' % (r, s) for r, s in placed if s < 1.0]

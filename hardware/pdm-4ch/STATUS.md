@@ -1,7 +1,9 @@
 # pdm-4ch status
 
-Updated: 2026-11-18 (decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+Updated: 2026-11-18 (decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221 [proposed]: PWM rating)
+
+**2026-11-18 (decision 226, owner – interactive): copper-only test pads.** The debug-access check found USB-Serial/JTAG, BOOT/RESET and J6 enough for firmware, but no test points for bring-up scoping (EMC review 2026-11-03 item 9). Added five bare 1.0 mm pads, top side, not in BOM/CPL: TP1 GND (17.6, 59.4) 3 mm from the buck SW node, TP30 VS (56.1, 42.7), TP70 CANH_BUS (83.6, 53.3), TP71 CANL_BUS (85.3, 54.6), TP72 GND_CAN (89.4, 57.3). No new track or via (pads join their pours or sit on the fixed CAN routes). Buck SW and +3V3 are probed on L1's pads. `silk.py` prints the net name beside each pad. Probe table with scope-ground points: `bring-up.md`. Schematic: TP1/TP30 on the root, TP70–TP72 in the shared `can` sheet (pdm-hc2 too); ERC unchanged, netlist only the five nodes added. Build (`LAND_BEST=1`): 0 DRC errors, 4 warnings (known), 0 unconnected, parity 0, pours whole, tracks/vias unchanged, VS-In2 2 pieces 966.9 mm², GND_CAN-F −0.9 mm². **Note:** the build no longer adds the 43 `sliver-*` fill keep-outs that the committed board carried; a build of the untouched HEAD gives the same (0 slivers, identical GND islands), so this is the build's own current output, not the pads. Fab package rebuilt: it was stale (CPL still had the pre-decision-223 C50/D24/D50/R19 positions); BOM unchanged, CPL 199 rows.
 
 **2026-11-18 (decision 225, owner): layout validated, V1 fixed.** `/validate pdm-4ch` on the layout
 (`docs/reviews/2026-11-18-validate-pdm-4ch.md`): 0 CRITICAL, 0 MAJOR, 1 MINOR. V1: GND vias inside SMD pads (rule 9),

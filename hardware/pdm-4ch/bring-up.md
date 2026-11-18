@@ -38,6 +38,20 @@ Connector pins (netlist):
 | J4 NMEA 2000 | 1 GND_CAN (NET-C), 2 NET-S (via F3), 3 CANH, 4 CANL |
 | J6 service pads (unfitted) | 1 GND, 2 TXD0, 3 RXD0, 4–6 IO35–IO37, 7 IO42, 8 +3V3 |
 
+Scope and meter points (decision 226). TP pads are bare 1.0 mm copper, top side, net name printed beside each. Keep
+the probe ground short: use the GND pad next to the point and a ground spring, not the long clip lead.
+
+| Signal | Where | Scope ground |
+|---|---|---|
+| Buck SW | L1 pad 1 (east pad, toward U3) | TP1 "GND", 3 mm away |
+| +3V3 | L1 pad 2 (west pad), or J6.8 | TP1 "GND", or J6.1 |
+| U3 VIN | C1 north pad (1206) | C1 south pad (GND), 2.9 mm |
+| VS | TP30 "VS" beside C31 | J6.1 or a C31 GND pad |
+| CANH / CANL (bus side) | TP70 "CANH", TP71 "CANL" by FL1/D9 | TP72 "GND_C" – **GND_CAN, isolated from GND** |
+
+Measure CAN against TP72 only. GND and GND_CAN are separated by the U5 isolation barrier: a scope ground on board GND
+puts the CAN side at the scope's potential and the reading is meaningless.
+
 ## 1. Before any power (both boards)
 
 1. Visual check under a lamp or loupe: solder bridges on U11–U14 (TDSO-14), U30 (SOT-23-THIN-8), U5 (SOIC-8), U1; rotation

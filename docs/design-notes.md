@@ -1528,6 +1528,13 @@ rail and resets the ESP32; the panel switches still drive the outputs (invariant
 test points (VS, 3V3, GND, buck SW, CANH/CANL; `docs/reviews/2026-11-03-emc-system.md` item 9), with short traces
 from U1 pins 31–33 and 38–40, outside the antenna keep-out.
 
+**Test pads (decision 226).** The EMC test points above became five bare 1.0 mm pads on pdm-4ch (no part, not in BOM or
+CPL): TP1 GND by the buck, TP30 VS, TP70 CANH_BUS, TP71 CANL_BUS, TP72 GND_CAN; the bus-side CAN pads (behind D9, ahead
+of FL1/R71/R72) show what the backbone sees. Buck SW and +3V3 are probed on L1's pads (pad 1 SW, pad 2 +3V3): a pad of
+their own could only sit on that same copper, and a stub on the SW node would add switching-node area (EMC rule for the
+buck hot loop). TP70–TP72 live in the shared `can` sheet, so pdm-hc2 places the same three in its layout. Probe table:
+`hardware/pdm-4ch/bring-up.md`. CAN is measured against TP72 only (GND_CAN is isolated from GND by U5).
+
 **Footprint polarity (D7, D8).** KiCad `LED_0603_1608Metric`: pad 1 = cathode at x −0.79 mm, pads 0.875 × 0.95 mm. The JLCPCB
 footprint `LED-SMD_L1.6-W0.8-R-RD` of C2286: pad 2 = K at −0.75 mm, pad 1 = A at +0.75 mm, pads 0.8 × 0.8 mm. So the cathode is on
 the same side in both, only the pad numbers differ, and the electrical connection is by name. The maker's mark (green) is at the
