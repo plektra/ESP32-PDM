@@ -1,8 +1,9 @@
 # pdm-4ch status
 
-Updated: 2026-11-18 (decision 221: EMC E22/E23 fixed, E25 report in the build – still fully routed)
+Updated: 2026-11-18 (decision 223: EMC E22/E23 fixed, E25 report in the build – still fully routed; decision 222: U30
+→ LM74502H-Q1; decision 221 [proposed]: PWM rating)
 
-**2026-11-17/18 (decision 221, owner – interactive): EMC layout findings E22 and E23 fixed, E25 added.** One reroute
+**2026-11-17/18 (decision 223, owner – interactive): EMC layout findings E22 and E23 fixed, E25 added.** One reroute
 (`pf_route.py --iters 300`, converged at round 259, 0 open); `build_routing.sh`: 0 DRC errors, 0 unconnected,
 parity 0, every power pour whole; VS-In2 1 island, 1003.4 mm² (84 %, was 1026.2), 40/40 thermal vias; Tj 101 °C at
 40 °C, 4 × 4 A (unchanged); DRC warnings 413 (unchanged, silkscreen).
@@ -25,7 +26,6 @@ parity 0, every power pour whole; VS-In2 1 island, 1003.4 mm² (84 %, was 1026.2
 - **Noted, not changed:** on SW_SUPPLY, R49 (10 k, SW_SENSE divider) is tapped at J5.5, 3.7 mm ahead of D54. A surge
   into that branch meets 10 kΩ, then C21 470 nF and D24, so the stub carries microamps; the report keeps showing it.
   Move R49's tap behind D54 if a later layout pass touches that corner.
-
 **2026-11-16/17 (decisions 215, 217–219, owner – interactive): the board is fully routed.** `build_routing.sh`:
 0 DRC errors, **0 unconnected** (was 29), parity 0, every power pour whole; a second build from the new board gives
 the same. VS-In2: 1 island, 1026.2 mm², 40/40 thermal vias. Tj 101 °C at 40 °C, 4 × 4 A (unchanged).
@@ -55,6 +55,14 @@ file missing in KiCad 10 (PROFETs, KF135T, KF2EDGRC, both WJ15EDGRC, USB-C, TS-1
 LCSC/EasyEDA STEP models in `lib/ESP32-PDM.3dshapes/` (see its README). Placement checked in renders. No copper,
 footprint pad or schematic change; DRC unchanged.
 
+**2026-11-17: PWM rating and showcase.** Decision 221 **[proposed], waiting for the owner:** a PWM-dimmed channel is
+rated 4 A on 12 V and 3.5 A on 24 V at 100 Hz (3 A at 200 Hz), from the datasheet switching energy and slew added to
+the heat budget (design-notes §4 "PWM dimming"); bring-up.md §9.4 measures it. The README carries a preview render
+(`docs/images/pdm-4ch-preview.jpg`, KiCad raytrace). A showcase page with a rotatable 3D model of the board (for the
+Signal K community) lives outside the repo as a claude.ai artifact; it is rebuilt from a KiCad GLB export
+(`kicad-cli pcb export glb --no-dnp --subst-models --include-tracks --include-pads --include-zones --include-silkscreen
+--include-soldermask`), so a layout change needs a fresh export to show there.
+
 ## Next
 
 1. **Do not run *Update Symbols from Library*, and do not save the schematics from KiCad 10 by hand** (2026-11-08):
@@ -69,7 +77,7 @@ footprint pad or schematic change; DRC unchanged.
    Net-(D3-A) necks at J3 (decision 219), the fill keep-outs that removed GND slivers on F.Cu/B.Cu/In2.
    `/emc pdm-4ch` on the layout is done (2026-11-17, `docs/reviews/2026-11-17-emc-pdm-4ch.md`): 0 CRITICAL,
    0 MAJOR, 3 MINOR, all layout-only, two-way, no part change. E22 and E23 are fixed and E25 is in the build
-   (decision 221, entry at the top). Left:
+   (decision 223, entry at the top). Left:
    - **E24:** R10 pad 1 (FB) is 0.7 mm from the SW pad of DNP R44, and a 6 mm dead-end SW spur to R44/C20 runs
      1.6 mm from the FB track. No change now; added to the T-0161 scan below. Move R9/R10 or R44/C20 only if the
      scan shows jitter.
@@ -79,7 +87,7 @@ footprint pad or schematic change; DRC unchanged.
 4. At the first order, check the CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°), and
    the footprints listed in the pre-order checklist below. The JLCPCB package (Gerber zip, BOM, CPL) is built by
    `python3 tools/jlc_package.py pdm-4ch` into `fab/` behind a DRC gate; see `fab/README.md` for the quote settings.
-   The 2026-11-17 package is for quoting only and predates decision 221 (D50, R19, C50, D24 moved; copper changed):
+   The 2026-11-17 package is for quoting only and predates decision 223 (D50, R19, C50, D24 moved; copper changed):
    rebuild it after the silkscreen.
 5. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384 and
    C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2. Remaining part check from
@@ -132,11 +140,12 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
   (design-notes §2).
 - T-0107/T-0120: C30 and C104–C404 use C170101 2.2 µF instead of C13832 1 µF. pdm-4ch no longer carries C13832, so its loading fee is gone; this pays on short runs only. Revisit the choice if runs grow past about 12 boards (owner ruling Q-0063). RIS is now 2 × C4410 per channel.
 - T-0121: check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30, pads 1 G / 2 S / 3 D) and `ESP32-PDM:TI_DDF0008A` (U30, since 2026-11-09; was `TSOT-23-8`; TI DDF land
-  1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C5464765 and C5219210. Recheck stock (C5464765
-  2016 on 2026-11-07, C5219210 2923 on 2026-11-03).
+  1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C5464765 and C5219203 (U30 is the LM74502H-Q1 since decision 222). Recheck stock
+  (C5464765 2016 on 2026-11-07, C5219203 1995 on 2026-11-17).
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
-- Stock 2026-11-17 (`fab/README.md`): **U30 LM74500-Q1 C5219210 is out of stock** (0, min. order 5): wait for restock or
-  pre-order before the order. SMAJ30CA C19077548 has 172 pcs (20 needed). Parts + 14 extended-part fees for 2 boards ≈ 81 USD.
+- Stock 2026-11-17 (`fab/README.md`): U30 LM74500-Q1 C5219210 was out of stock everywhere; **U30 is now LM74502H-Q1
+  C5219203** (1995 in stock, decision 222: pin 7 OV → GND, pin 8 SRC → VBAT_FL; pad 5 got its own VBAT_FL via and pad 7 a
+  GND via on the PCB; DRC 0 errors / 0 unconnected / parity 0). SMAJ30CA C19077548 has 172 pcs (20 needed). Parts + 14 extended-part fees for 2 boards ≈ 81 USD.
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 - T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
 - Decision 220 (licence): add "CERN-OHL-S v2" and the source location `github.com/plektra/ESP32-PDM` to the PCB
@@ -146,7 +155,7 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 
 - EMC 2026-11-17: add layout rules 1–4 of 2026-11-17 (design-notes §8.24: filter cap ≤ 5 mm from its resistor, TVS flow-through
   on differential lines, short dead-end SW copper, re-check after a reroute) to `docs/ARCHITECTURE.md` "PCB layout rules".
-  Decision 221 adds one: every TVS and RF filter-cap GND pad has its own GND via (≤ 2.5 mm), never only fill or grid
+  Decision 223 adds one: every TVS and RF filter-cap GND pad has its own GND via (≤ 2.5 mm), never only fill or grid
   stitching; on pdm-4ch `scripts/emc_report.py` reports all of these after each build.
 - Decision 150: cost reviews still price pdm-4ch as 2 layers; the owner's quote is €43.95 for 5 boards (4 layers, 100 × 75 mm). ARCHITECTURE Mechanics/Budgets: note 4 layers.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.

@@ -1,12 +1,12 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-18 (decisions 215–221).
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-18 (decisions 215–223).
 
 ## Boards
 
 | Board | Schematic | PCB | Status file |
 |---|---|---|---|
-| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 221); silkscreen and the validator layout review are left | `hardware/pdm-4ch/STATUS.md` |
+| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 223); silkscreen and the validator layout review are left | `hardware/pdm-4ch/STATUS.md` |
 | `pdm-hc2` (2 × TPS48110A-Q1 + MOSFETs) | done, ERC clean except library notices | not started | `hardware/pdm-hc2/STATUS.md` |
 
 Firmware: not started.
@@ -24,7 +24,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
 4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout.
-5. **`/board pdm-4ch pcb`** – routed (decision 219); EMC layout review done and E22/E23 fixed (decision 221). Left:
+5. **`/board pdm-4ch pcb`** – routed (decision 219); EMC layout review done and E22/E23 fixed (decision 223). Left:
    silkscreen, then `/validate pdm-4ch` on the layout, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
    the rules are in `docs/ARCHITECTURE.md`, "PCB layout rules".
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
@@ -49,7 +49,8 @@ Ideas parked by the owner to keep focus on the two boards. Not decisions; pick u
   de-fogging, with stepless fan speed; also LED dimming of load outputs. Findings so far:
   - pdm-4ch: MCU can PWM the PROFET channels (LEDC on IO6–IO8/IO11) at ≤ 200 Hz (EMC limit); a closed panel switch
     forces the output fully on via the diode-OR; PROFET has no freewheel diode, so motor PWM puts the turn-off energy
-    into the PROFET clamp every cycle; PROFET PWM limits and current-sense timing not checked in the datasheet.
+    into the PROFET clamp every cycle. PWM loss checked in the datasheet (decision 221 [proposed]: 3.5 A per dimmed
+    channel on 24 V at 100 Hz, design-notes §4); current-sense timing under PWM still not checked.
   - pdm-hc2: no PWM until the gate slew is limited and measured on the bench (Q-0001, EMC E2).
   - Stepless brushed-motor control needs ≈ 20–25 kHz, which conflicts with the EMC limits on long load cables near
     VHF; a separate PWM board inside the PDM is not recommended.

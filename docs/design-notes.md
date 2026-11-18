@@ -168,6 +168,31 @@ Findings that drove the design:
   terminal + VS copper ≤ 2 mΩ and rate the input terminal for 16 A (decisions 103, 104; J10 is 30 A UL / 32 A IEC, §7);
   output terminals ≥ 10 A.
 
+**PWM dimming on pdm-4ch (2026-11-17, decision 221 [proposed]).** PWM adds a switching loss per channel on top of
+I²·RDS(on): each edge spends the slew-limited ramp half-on. Source: BTT6050-1ERA datasheet Rev 1.00 p. 15–16: slew
+dV/dtON / −dV/dtOFF 0.3 / 0.8 / 1.4 V/µs (min/typ/max, 30–70 %, VS 28 V, RL 12 Ω; P_5.5.11/12), tON / tOFF 20–150 µs
+(P_5.5.14/15), EON 0.6 mJ / EOFF 0.7 mJ typ at VS 36 V, RL 12 Ω (P_5.5.19/20, by design). Model for a resistive load:
+E per edge = V²·I / (6·slew); at the datasheet point (36 V, 3 A, 0.8 V/µs) it gives 0.81 mJ against 0.6–0.7 mJ, so it
+errs high. P_sw = f · 2 · E. Added to the `tools/heat_budget.py` model (40 °C, R_box 0.6, RthJA 40, p_other 2.3 W,
+r_path 4 mΩ, four channels alike) at duty ≈ 100 % (the hottest case: full conduction plus the edges), the on-current
+that keeps Tj at the DC 4 A figure (≈ 101 °C):
+
+| System (VS while charging) | f | P_sw at 4 A, typ / min slew | Current limit, typ / min slew |
+|---|---|---|---|
+| 12 V (14.4 V) | 100 Hz | 0.03 / 0.09 W | 3.95 / 3.87 A |
+| 12 V (14.4 V) | 200 Hz | 0.07 / 0.18 W | 3.90 / 3.75 A |
+| 24 V (28.8 V) | 100 Hz | 0.14 / 0.37 W | 3.81 / 3.51 A |
+| 24 V (28.8 V) | 200 Hz | 0.28 / 0.74 W | 3.63 / 3.09 A |
+
+- Loss rises with V², so 12 V systems keep the 4 A rating; on 24 V a dimmed channel is rated 3.5 A at 100 Hz (3 A if
+  200 Hz is used).
+- Usable duty range: edges take 18–48 µs (14.4 V) or 36–96 µs (28.8 V) and tON/tOFF up to 150 µs, so at 200 Hz duty
+  below ≈ 5 % or above ≈ 95 % does not switch cleanly. A lower frequency widens the range.
+- PWM only resistive loads and LED strips without their own driver: a capacitive input (driver, DC-DC, electronics)
+  takes an inrush every cycle, and an inductive load puts its energy into the PROFET clamp every turn-off (no
+  freewheel diode, CONTINUE-FROM-HERE "PWM outputs").
+- Estimate: slew and enclosure figures are unmeasured; bring-up.md §9.4 measures it.
+
 Layout rules from the budget: switches spread out and away from the ESP32; large VS copper on both
 layers around the cooling tabs, stitched with vias; 2 oz copper; vents at bottom and top; continuous
 current rating printed on the label; firmware warns or sheds load from measured current (and an NTC,
@@ -1256,14 +1281,15 @@ decision 40 (keyed J10, warning). J10 on pdm-4ch is keyed too (decisions 98, 104
 **Re-selected for 16 A (decisions 103, 104, T-0158, 2026-11-07).** The first pdm-4ch is 16 A only, all BTT6050, with no BTT6010 build. Q30 is now AGM601LL C5464765 instead of IPT007N06N C122552, with the same pin order and footprint. The 40–50 A in the ruling above and the 32 A of decision 95 no longer apply to this board.
 
 **Circuit (root sheet of pdm-4ch only).** J10.1 → `VBAT_IN` (D30, C30) → FL30 (DNP) / JP30 → new net `VBAT_FL` →
-Q30 source; Q30 drain → `VS` (C31, C104–C404, U11–U14, F1, F4, R60). U30 LM74500-Q1: SOURCE (pin 5) and EN (pin 1) on
-VBAT_FL, GATE (pin 6) → Q30 gate, VCAP (pin 4) → C32 → VBAT_FL, GND (pin 2) → GND, pins 3/7/8 N.C. D31 (T-0143, owner
-ruling Q-0067) sits across Q30: VS (drain) to VBAT_FL (source).
+Q30 source; Q30 drain → `VS` (C31, C104–C404, U11–U14, F1, F4, R60). U30 LM74502H-Q1 (since decision 222; was
+LM74500-Q1): VS (pin 5), SRC (pin 8) and EN/UVLO (pin 1) on VBAT_FL, GATE (pin 6) → Q30 gate, VCAP (pin 4) → C32 →
+VBAT_FL, GND (pin 2) → GND, OV (pin 7) → GND (overvoltage cut-off not used), pin 3 N.C. D31 (T-0143, owner ruling
+Q-0067) sits across Q30: VS (drain) to VBAT_FL (source).
 
 | Ref | Part | Facts |
 |---|---|---|
 | Q30 | AGM-Semi AGM601LL, TOLL, C5464765, extended, 0.85 USD @1, stock 2016 (2026-11-07) | `docs/part-facts/C5464765.md` (VER2.65): VDS 60 V, VGS ±20 V, VGS(th) ≤ 2.2 V, RDS(on) max 1.6 mΩ (10 V, 30 A, 25 °C), ≈ 2.35 mΩ at 100 °C and ≈ 2.9 mΩ at 150 °C (derived: Fig. 6 × max), Tj 175 °C, RthJC 0.7 K/W max, RthJA 50 K/W with no copper area stated, body diode IS 223 A, VSD ≤ 1.2 V at 20 A, ISM not given, IDM 892 A, Ciss 5.47 nF typ (no max), Qg 102 nC typ. Pin 1 G, pins 2–8 S, tab D = KiCad `Infineon_PG-HSOF-8-1` pads 1 G, 2 S, 3 D |
-| U30 | TI LM74500-Q1 (LM74500QDDFRQ1), SOT-23-THIN-8 (DDF), C5219210, extended, 1.82 USD @1, stock 2923 | `docs/part-facts/C5219210.md` (SNOSDB7): SOURCE ±65 V abs max (±60 V recommended), GATE–SOURCE abs max 15 V, gate drive VCAP−SOURCE 10.3/11.6/13.0 V on, 13.9 V max; **no reverse-current blocking** (FET fully on both ways); EN tied to SOURCE = always on; IQ 80/130 µA; Tj −40…150 °C; footprint KiCad `TSOT-23-8` (0.65 mm pitch, 2.9 × 1.6 mm body) |
+| U30 | TI LM74502H-Q1 (LM74502HQDDFRQ1), SOT-23-THIN-8 (DDF), C5219203, extended, 1.49 USD @1, stock 1995 (2026-11-17); replaces LM74500-Q1 C5219210 (out of stock everywhere, decision 222) | `docs/part-facts/C5219203.md` (SNOSDE0A): VS ±65 V abs max (±60 V recommended), GATE–SRC abs max 15 V, gate drive VCAP−VS 10.3/11.6/13.0 V on, 13.9 V max, 11 mA gate source (H variant, as LM74500-Q1); **no reverse-current blocking** (FET fully on both ways); EN/UVLO tied to VS = always on; OV to GND = unused; IQ 45/65 µA; Tj −40…150 °C; footprint `ESP32-PDM:TI_DDF0008A` (same DDF0008A drawing as LM74500-Q1). Pins 1–6 have the LM74500-Q1 functions; pins 7 (OV) and 8 (SRC) were N.C. there |
 | C32 | 1 µF/50 V X5R 0603, Samsung CL10A105KB8NNN, C15849 (basic, already on the BOM) | `docs/part-facts/C15849.md`; VCAP capacitor |
 | D31 | hongjiacheng SMDJ40CA, SMC / DO-214AB, C42371557, preferred, 0.22 USD @1, stock 10271 (2026-11-04) | `docs/part-facts/C42371557.md`: bidirectional, VRWM 40 V, VBR 44.4–49.1 V (1 mA), VC 64.5 V at IPP 46.5 A (10/1000 µs), IR ≤ 2 µA at VRWM (25 °C), 3 kW 10/1000 µs on 8 × 8 mm copper per terminal, VBR +0.1 %/K, derating 60 % at 75 °C. Footprint `Diode_SMD:D_SMC` as D30 |
 
@@ -1272,7 +1298,8 @@ Why this topology:
   ≈ 10 W at 40 A in one package.
 - **Ideal-diode controller rejected.** It blocks VS → VBAT_IN, so a positive PROFET output surge (OUT → body diode →
   VS) could no longer reach D30, and VS would need its own TVS (a change of invariant 4).
-- **LM74500-Q1 + N-FET.** It is not an ideal diode: it keeps Q30 fully on in both directions and turns it off only when
+- **LM74500-Q1 + N-FET** (U30 is now the LM74502H-Q1, decision 222: same behaviour, gate drive and charge pump; the
+  text below holds for it with SOURCE read as VS/SRC). It is not an ideal diode: it keeps Q30 fully on in both directions and turns it off only when
   the input is reversed or too low. Requirements of the ruling:
   - (a) Invariant 1: U30 is powered from VBAT_FL with EN tied to SOURCE: no ESP32, no 3.3 V, no firmware. The panel
     supply (F4 on VS) works as before.
@@ -1417,8 +1444,8 @@ VS copper (drain tab) as wide as the existing VS copper, on both layers with sti
 copper joined directly to the drain tab (VS), the rule derived under "Heat" above. Keep U30 next to Q30 with short SOURCE and GATE traces (U30 §11.1). Keep C32 at
 U30 but away from Q30's hot tab. Keep the VS loop from the four switches through Q30 to D30 short and wide (invariant 4
 path). Place D31 directly across Q30's drain tab and source pins, short and wide (T-0143); its 3 kW rating assumes 8 × 8 mm
-copper per terminal. Before ordering, check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30) and `TSOT-23-8` (U30) against the
-JLCPCB footprints of C5464765 (`TOLL-8_L10.4-W9.9-P1.20-LS11.7-BL_2`) and C5219210. The U30 land pattern in the datasheet: 1.05 × 0.45 mm pads, 2.6 mm column pitch.
+copper per terminal. Before ordering, check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30) and `ESP32-PDM:TI_DDF0008A` (U30) against the
+JLCPCB footprints of C5464765 (`TOLL-8_L10.4-W9.9-P1.20-LS11.7-BL_2`) and C5219203 (LM74502H-Q1, decision 222). The U30 land pattern in the datasheet: 1.05 × 0.45 mm pads, 2.6 mm column pitch.
 
 **Cost.** Q30 0.85 + U30 1.82 + C32 0.01 ≈ 2.7 USD per board at 1 pc (T-0158; 5.4 USD with IPT007N06N), plus two extended loading fees (≈ 3 USD each per
 order). D31 (T-0143): +0.22 USD per board, one more unique preferred part, no loading fee. Alternative checked: 2 × BSC014N06NS (C113391, 1.45 mΩ max each, 1.52 USD, `docs/part-facts/C113391.md`) in

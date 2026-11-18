@@ -121,6 +121,13 @@ V('GND', 66.82, 45.15)
 # R1.2 (GND) to the R38.2 GND via of the router (pf_routes.json): the IO8/SW2 runs cut it off from the fill
 T('GND', 'F.Cu', (65.25, 64.10), (65.71, 64.71), w=0.3)
 
+# ---- Decision 222 (U30 -> LM74502H-Q1): pad 8 (SRC) takes the VBAT_FL track to the pour, pad 5 its own VBAT_FL via
+# (to VBAT_FL-B), pad 7 (OV) to GND. Drawn on the board in that session; kept here so the build reproduces it.
+T('/VBAT_FL', 'F.Cu', (41.2, 40.275), (40.25, 40.275), (40.25, 44.2), w=0.3)
+V('/VBAT_FL', 40.25, 38.325)
+T('GND', 'F.Cu', (41.2, 39.625), (39.55, 39.625), w=0.3)
+V('GND', 39.55, 39.625)
+
 
 # ---- USB D+/D- pair (T-0210): J3 -> D5/D6 (ESD, at the connector) -> U1 fan-out vias (69.25,16.8)/(70.10,18.0).
 # The VS block is closed on In2 (VS-In2) and B (VS spine) east of x 46.5, so the pair crosses it on F.Cu in the gap
