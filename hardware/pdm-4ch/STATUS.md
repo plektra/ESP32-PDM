@@ -21,6 +21,9 @@ Updated: 2026-11-18 (RoHS/REACH check, no design change; decision 224: silkscree
 REACH: Q30 AGM601LL declares lead above 0.1 % (SGS); U6 likely too (unverified); 22 parts have no maker statement,
 mainly the THT connectors. Nothing blocks the prototype order; the declarations to collect before any sale are in the
 pre-order checklist.
+Follow-up the same day (no browser in the session): U6 declaration still unread (st.com timed out); LCSC pages of
+14 of the 15 listing-only parts read, no maker certificate found; DigiKey quota used up; declaration requests for 16
+makers drafted, not sent, in `docs/reviews/2026-11-18-rohs-reach-requests-pdm-4ch.md`.
 
 **2026-11-18 (decision 224, owner – interactive): silkscreen done.** `scripts/silk.py` (KiCad python, rewrites the
 board; the same result on every run) draws all silkscreen. Re-run it after any part move or reroute.
@@ -186,6 +189,8 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 - RoHS/REACH (`docs/reviews/2026-11-18-rohs-reach-pdm-4ch.md`): hand-solder J4/J5/J10/J11 with lead-free solder.
   Before any sale (not for the prototypes): ST declaration for U6 (R2), maker declarations for the connectors and the
   small makers (R3–R5), REACH Art. 33 note + SCIP entry for lead in Q30 AGM601LL (R1). Re-run the check after a BOM change.
+  Requests are drafted in `docs/reviews/2026-11-18-rohs-reach-requests-pdm-4ch.md` for the owner to send through LCSC.
+  Still needs a browser: the ST declaration for U6, and the RoHS documents on four LCSC pages (report, "Still open").
 
 ## For /system
 

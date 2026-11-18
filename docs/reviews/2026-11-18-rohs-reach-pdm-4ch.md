@@ -114,16 +114,37 @@ No basic or preferred 22 µF / 25 V X5R 0805 alternative exists. If JLCPCB stock
 C602037 (extended, 865 k on 2026-11-18, same series). HRE CGA0805X5R226M250MT C6119899 is another extended option,
 but its DC-bias and REACH data are not checked.
 
-## Follow-up (a session with a browser, `claude --chrome`)
+## Follow-up session (2026-11-18, later the same day)
+
+No browser was attached to the session, so pages were read with plain fetches. That limits two of the four items.
+
+1. **R2 (U6, ST declaration): still not verified.** The declaration PDF on www.st.com timed out twice (60 s) and
+   failed once more with curl (HTTP/2 error). estore.st.com opened and links the same PDF, with RoHS grade
+   "Ecopack2". The verdict above is unchanged: U6 is "likely" a second part with lead above 0.1 %.
+2. **LCSC product pages of the 15 "distributor listing only" parts: read for 14, no maker certificate found.**
+   The compliance fields came from a summary of each page, not from verbatim text, so treat them as a pointer.
+   - No RoHS, REACH or SVHC field at all: C475108 and C441238 (Kefa), the four Kangnex parts, C9196 and C1546 (FH),
+     C528763 (Chipanalog).
+   - "ROHS Compliant" with documents that the fetch could not reach: C440882 (Kefa plug, 1 document), C7420372
+     (H5VL10B, 1), C2145 (MMBT5551, 1), C318884 (XKB switch, 6).
+   - "ROHS2 Compliant", no document: C52155402 (APV).
+   - C96963 (Sunlord L1): the page is not found on lcsc.com.
+   - No page has a REACH or SVHC field. The Kangnex brand page claims "CE and SGS environmental testing
+     certification" without a report. The Kefa brand page makes no RoHS or REACH claim.
+   - C7420372 is listed under the maker name "R+O" at LCSC and "hongjiacheng" at JLCPCB.
+   The counts in this report do not change: a distributor's RoHS flag is the same class of evidence as before.
+3. **DigiKey: not done.** The shared pcbparts quota was used up again (resets 2026-11-19 00:00 UTC).
+4. **Declaration requests: drafted, not sent**, in `2026-11-18-rohs-reach-requests-pdm-4ch.md` (16 makers, R3–R5).
+
+## Still open (needs a real browser, `claude --chrome`)
 
 1. R2: open the ST material declaration for U6 L78M05ABDT-TR and read the lead content, the RoHS exemption and the
    REACH SVHC entry:
    https://www.st.com/resource/en/material_declaration/md_gr-wspc-to-wspc-252-wspc-dpak-wspc-cu-wspc-wire_hzgr-wspc-ml052b6_ver2_signed.pdf
    (product page https://estore.st.com/en/l78m05abdt-tr-cpn.html). Update R2 and the C58069 row of the CSV.
-2. Read the RoHS field on the LCSC product pages of the 15 parts that rely only on the JLCPCB listing (the CSV
-   `rohs_status` says "distributor listing only"). Look for any maker certificate linked there, especially for the
-   Kefa/Kangnex connectors (R3).
-3. DigiKey (the pcbparts quota resets at 00:00 UTC daily): RoHS and REACH status for the parts DigiKey stocks, mainly
-   to cover R4/R5.
-4. Draft (not send) the declaration requests to the makers in R3–R5. The owner sends them through LCSC support.
+2. Open the "RoHS Compliance – documents available" entries on the LCSC pages of C440882, C7420372, C2145 and
+   C318884, and look up C96963.
+3. DigiKey RoHS and REACH status for the parts DigiKey stocks (U6, U1, Sunlord, possibly Ymin), after the quota
+   resets.
+4. Owner: send the drafted requests through LCSC support when a sale is planned.
 5. Later: the same check for pdm-hc2 once its BOM is settled.
