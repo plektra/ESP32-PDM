@@ -1,6 +1,6 @@
 # RoHS/REACH declaration requests – pdm-4ch (drafts, not sent)
 
-Drafts for findings R3–R5 of `2026-11-18-rohs-reach-pdm-4ch.md`. The owner sends them through LCSC support (one
+Drafts for findings R2–R5 of `2026-11-18-rohs-reach-pdm-4ch.md`. The owner sends them through LCSC support (one
 ticket per maker works best, since LCSC forwards each to a different supplier). Fill in `<name>` and
 `<LCSC order no.>` before sending. Nothing here has been sent.
 
@@ -45,7 +45,9 @@ Used at the start of every request; the per-maker part follows it.
 > and screw alloys, and whether RoHS exemption 6(c) (copper alloy with up to 4 % lead) is used. If it is, lead is
 > likely above 0.1 % of the part, so please confirm this in the REACH statement.
 >
-> The LCSC page of C440882 shows "RoHS Compliance – 1 document available". Please send that document too.
+> The RoHS document on the LCSC page of C440882 is SGS report NGBEC24003843404 (2024-07-17) on the brass rod C3604:
+> lead 34974 mg/kg under exemption 6(c). Please confirm that this brass is used in the three parts above, and give
+> the lead content as a share of each whole part (needed for the REACH Article 33 statement).
 
 ### Ningbo Kangnex Elec
 
@@ -69,17 +71,18 @@ Used at the start of every request; the per-maker part follows it.
 
 ## R4 – makers with no REACH statement
 
-### hongjiacheng (Zhuhai Hongjiacheng Technology)
+### hongjiacheng (Zhuhai Hongjiacheng Technology; brand "R+O" at LCSC)
 
 > Parts: C19077548 SMAJ30CA, C19077539 SMAJ18CA, C19077607 SMCJ30CA, C42371557 SMDJ40CA, C22466351 DSK16,
 > C22466350 BAT54C, C7420333 BAT54S, C19077396 BZT52C3V3, C7420372 H5VL10B.
 >
 > The datasheets state "RoHS compliant, halogen free" for all of these except H5VL10B (C7420372), which has no RoHS
-> statement. Please include it explicitly. For the SMA/SMB/SMC/SMD packages please state whether high-melting lead
-> solder (exemption 7(a)) is used for die attach.
+> statement. Please include it explicitly.
 >
-> Note: the LCSC page of C7420372 names the manufacturer "R+O", while JLCPCB names it "hongjiacheng". Please confirm
-> the manufacturer of this part.
+> SGS report CANEC26019898601 (2026-07-30, on the LCSC page of C7420372) tests one mixed sample for the whole package
+> list and finds lead 26317 mg/kg under exemption 7(a). Please state for each part number above whether
+> high-melting lead solder (exemption 7(a)) is used, and if so the lead content as a share of the whole part.
+> The report does not cover REACH, so the REACH declaration is still needed.
 
 ### FH (Guangdong Fenghua Advanced Technology)
 
@@ -101,8 +104,9 @@ Used at the start of every request; the per-maker part follows it.
 
 > Part: C318884 TS-1187A-B-A-B (tactile switch).
 >
-> Please state whether the metal parts use RoHS exemption 6(c). The LCSC page shows "RoHS Compliance – 6 documents
-> available". Please send those documents too.
+> The LCSC page carries the maker's RoHS statement of 2025-03-13 and SGS material reports from 2023 (brass, gold
+> plating, PA66). They do not cover REACH and name no exemption. Please send a REACH SVHC declaration, and confirm
+> that no RoHS exemption (for example 6(c)) is used in this part.
 
 ## R5 – statements to refresh or complete
 
@@ -163,6 +167,16 @@ Espressif is better asked directly (sales or technical inquiry form on espressif
 
 ## Not requested through LCSC
 
-- **U6 L78M05ABDT-TR (R2):** ST publishes the declaration itself; it only needs to be opened in a browser (URL in
-  the report).
 - **Samsung, UNI-ROYAL, TI, UMW, JCET, Infineon:** current statements are already on file in the CSV.
+
+### STMicroelectronics (U6, R2)
+
+Ask ST directly (online support on st.com), not through LCSC.
+
+> Part: L78M05ABDT-TR (DPAK).
+>
+> The material declaration linked from the product page (Quality & Reliability, "Material Declaration", file
+> `md_gr-wspc-to-wspc-252-wspc-dpak-wspc-cu-wspc-wire_hzgr-wspc-ml052b6_ver2_signed.pdf`) returns "page not found",
+> as does its XML version. Please send the current IPC-1752 material declaration for this part, with the RoHS
+> exemption used (7(a)?), the lead content in ppm of the part, and the REACH SVHC answer against the current
+> Candidate List.

@@ -19,7 +19,7 @@ Updated: 2026-11-18 (RoHS/REACH check, no design change; decision 224: silkscree
 222: U30 → LM74502H-Q1; decision 221 [proposed]: PWM rating)
 
 **2026-11-18 (owner – interactive): RoHS and REACH check** of the 54 BOM parts and 7 THT connector parts,
-`docs/reviews/2026-11-18-rohs-reach-pdm-4ch.md` + `.csv`. RoHS: no non-compliant part (18 by exemption 7(a)/7(c)-I).
+`docs/reviews/2026-11-18-rohs-reach-pdm-4ch.md` + `.csv`. RoHS: no non-compliant part (19 by exemption 7(a)/7(c)-I).
 REACH: Q30 AGM601LL declares lead above 0.1 % (SGS); U6 likely too (unverified); 22 parts have no maker statement,
 mainly the THT connectors. Nothing blocks the prototype order; the declarations to collect before any sale are in the
 pre-order checklist.
@@ -27,6 +27,12 @@ Follow-up the same day (no browser in the session): U6 declaration still unread 
 14 of the 15 listing-only parts read, no maker certificate found; DigiKey lists only U6, U1 and L1 and its web pages
 gave no RoHS/REACH values without a browser; declaration requests for 16
 makers drafted, not sent, in `docs/reviews/2026-11-18-rohs-reach-requests-pdm-4ch.md`.
+Browser follow-up (Chrome): ST's declaration for U6 returns 404 (also from ST's product page), so U6 stays
+unverified; the DPAK sister part L78M05CDT-TR declares lead 4566 ppm under 7(a). LCSC documents read: Kefa brass
+C3604 holds 3.5 % lead under 6(c) (SGS, raw material); hongjiacheng (= "R+O" at LCSC) mixed diode sample holds
+2.6 % lead under 7(a) (SGS), so D4–D6 now count as "by exemption"; MMBT5551 and the XKB switch now have maker
+RoHS evidence. Listing-only parts 15 → 12. DigiKey: U6 "ROHS3 Compliant" / "REACH Unaffected", U1 "REACH
+Unaffected", L1 no values. C96963 is not listed at LCSC. Request drafts corrected and one for ST added (not sent).
 
 **2026-11-18 (decision 224, owner – interactive): silkscreen done.** `scripts/silk.py` (KiCad python, rewrites the
 board; the same result on every run) draws all silkscreen. Re-run it after any part move or reroute.
@@ -190,10 +196,10 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 - Decision 220 (licence): add "CERN-OHL-S v2" and the source location `github.com/plektra/ESP32-PDM` to the PCB
   silkscreen and to the KiCad title-block comments.
 - RoHS/REACH (`docs/reviews/2026-11-18-rohs-reach-pdm-4ch.md`): hand-solder J4/J5/J10/J11 with lead-free solder.
-  Before any sale (not for the prototypes): ST declaration for U6 (R2), maker declarations for the connectors and the
-  small makers (R3–R5), REACH Art. 33 note + SCIP entry for lead in Q30 AGM601LL (R1). Re-run the check after a BOM change.
-  Requests are drafted in `docs/reviews/2026-11-18-rohs-reach-requests-pdm-4ch.md` for the owner to send through LCSC.
-  Still needs a browser: the ST declaration for U6, and the RoHS documents on four LCSC pages (report, "Still open").
+  Before any sale (not for the prototypes): ST declaration for U6 (R2; ST's link is dead, ask ST), maker declarations
+  for the connectors and the small makers (R3–R5), REACH Art. 33 note + SCIP entry for lead in Q30 AGM601LL (R1) and,
+  if the makers confirm it, in U6, the Kefa connectors and the hongjiacheng diodes. Re-run the check after a BOM change.
+  Requests are drafted in `docs/reviews/2026-11-18-rohs-reach-requests-pdm-4ch.md` for the owner to send (LCSC; ST directly).
 
 ## For /system
 
