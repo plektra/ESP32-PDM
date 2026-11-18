@@ -1,6 +1,6 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-18 (decisions 215–226).
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-18 (decisions 215–229).
 
 ## Boards
 
@@ -9,7 +9,7 @@ Project-level handoff: which board is where and what to do next. Updated: 2026-1
 | `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 223); silkscreen done (decision 224); validator layout review done, V1 fixed (decision 225); test pads TP1/TP30/TP70–TP72 (decision 226); order preparation is left | `hardware/pdm-4ch/STATUS.md` |
 | `pdm-hc2` (2 × TPS48110A-Q1 + MOSFETs) | done, ERC clean except library notices | not started | `hardware/pdm-hc2/STATUS.md` |
 
-Firmware: not started.
+Firmware: first draft in `firmware/` (decisions 227–229, all **[proposed]**): pdm-4ch, Active mode, NMEA 2000 switch bank, current sense, soft fuse. Builds and passes its host tests; never run on a board. Open list: `firmware/README.md`.
 
 ## Order of work
 
@@ -31,11 +31,12 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
    blinking = fault; alerts and failures go to Signal K where they can be acknowledged and muted – design the
-   failure modes per output (what blinks, alerts, latches, clears).
+   failure modes per output (what blinks, alerts, latches, clears). A draft exists (`firmware/`, decisions 227–229);
+   the session rules on its proposals and on Wi-Fi/Signal K, OTA, power modes and pdm-hc2.
 
 ## Waiting on the owner
 
-- No **[proposed]** decisions left; decision 20 (fault/alert handling) open until `/system firmware`.
+- **[proposed]** decisions 221 (PWM rating) and 227–229 (firmware draft: stack, fault behaviour, NMEA 2000 messages). Decision 20 (fault/alert handling) stays open until `/system firmware`; decision 228 is the draft's proposal for it.
 - Connector checks of decision 98 on the first assembled boards, not before the order (decision 127). Re-check connector stock before ordering.
 - Prototype bring-up and validation: `hardware/pdm-4ch/bring-up.md` (order, pass criteria, record sheet; MicroPython as
   bring-up firmware until `/system firmware`).

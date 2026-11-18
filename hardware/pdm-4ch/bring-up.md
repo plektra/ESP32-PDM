@@ -106,7 +106,8 @@ burn eFuse `EFUSE_STRAP_JTAG_SEL`** (IO3 is held low by the IS2 network, design-
 sample, then drop it** (design-notes §6.1: a fault current through RIS is not covered by hardware).
 
 The CAN test (section 8) needs a TWAI driver, which the generic MicroPython build does not have: use the ESP-IDF TWAI
-example for that step, or wait for the first product firmware.
+example for that step, or the draft product firmware in `firmware/` (decisions 227–229, not yet run on a board; it
+sends PGN 127501 and 127751 and has a USB console: `status`, `on N`, `off N`).
 
 ## 4. First battery-side power (bench supply on J10)
 

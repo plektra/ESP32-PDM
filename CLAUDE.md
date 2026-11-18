@@ -59,6 +59,7 @@ docs/               CONTINUE-FROM-HERE.md, ARCHITECTURE.md, decisions.md, design
   reviews/          validator, cost and EMC reports
 hardware/pdm-4ch/   KiCad project + STATUS.md
 hardware/pdm-hc2/   KiCad project + STATUS.md
+firmware/           PlatformIO project (draft, decisions 227–229); `pio test -e native`, `pio run -e pdm`
 lib/                shared symbols (ESP32-PDM.kicad_sym) and footprints (ESP32-PDM.pretty)
 tools/              heat_budget.py, ksch.py (schematic editing), kpcb.py (PCB editing), kicad_netlist.py,
                     orchestrate.py, land.py
