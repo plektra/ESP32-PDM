@@ -133,7 +133,13 @@ No browser was attached to the session, so pages were read with plain fetches. T
      certification" without a report. The Kefa brand page makes no RoHS or REACH claim.
    - C7420372 is listed under the maker name "R+O" at LCSC and "hongjiacheng" at JLCPCB.
    The counts in this report do not change: a distributor's RoHS flag is the same class of evidence as before.
-3. **DigiKey: not done.** The shared pcbparts quota was used up again (resets 2026-11-19 00:00 UTC).
+3. **DigiKey: no values obtained.** The shared pcbparts quota was used up again (resets 2026-11-19 00:00 UTC), so
+   the DigiKey web pages were fetched instead. Only three of the eleven parts tried have a DigiKey page:
+   U6 L78M05ABDT-TR, U1 ESP32-S3-MINI-1-N8 and L1 SWPA6045S8R2MT. On all three the "Environmental & Export
+   Classifications" heading came back without its values (the table is probably filled in by script; not
+   verified), and no environmental document is linked. DigiKey does not list GZ2012D601TF, VKMD1001J101MV,
+   TS-1187A-B-A-B, TYPE-C-31-M-12, CA-IS3050G, AGM601LL, FRM252WJR200TK or mSMD050-60V, so it cannot cover most of
+   R4/R5.
 4. **Declaration requests: drafted, not sent**, in `2026-11-18-rohs-reach-requests-pdm-4ch.md` (16 makers, R3–R5).
 
 ## Still open (needs a real browser, `claude --chrome`)
@@ -144,7 +150,10 @@ No browser was attached to the session, so pages were read with plain fetches. T
    (product page https://estore.st.com/en/l78m05abdt-tr-cpn.html). Update R2 and the C58069 row of the CSV.
 2. Open the "RoHS Compliance – documents available" entries on the LCSC pages of C440882, C7420372, C2145 and
    C318884, and look up C96963.
-3. DigiKey RoHS and REACH status for the parts DigiKey stocks (U6, U1, Sunlord, possibly Ymin), after the quota
-   resets.
+3. DigiKey RoHS and REACH status for the three parts it lists, through the pcbparts tool after the quota resets
+   or in a browser:
+   https://www.digikey.com/en/products/detail/stmicroelectronics/L78M05ABDT-TR/586201 ,
+   https://www.digikey.com/en/products/detail/espressif-systems/ESP32-S3-MINI-1-N8/15295890 and
+   https://www.digikey.com/en/products/result?keywords=SWPA6045S8R2MT
 4. Owner: send the drafted requests through LCSC support when a sale is planned.
 5. Later: the same check for pdm-hc2 once its BOM is settled.

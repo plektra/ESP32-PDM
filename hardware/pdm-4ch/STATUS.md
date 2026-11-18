@@ -22,7 +22,8 @@ REACH: Q30 AGM601LL declares lead above 0.1 % (SGS); U6 likely too (unverified);
 mainly the THT connectors. Nothing blocks the prototype order; the declarations to collect before any sale are in the
 pre-order checklist.
 Follow-up the same day (no browser in the session): U6 declaration still unread (st.com timed out); LCSC pages of
-14 of the 15 listing-only parts read, no maker certificate found; DigiKey quota used up; declaration requests for 16
+14 of the 15 listing-only parts read, no maker certificate found; DigiKey lists only U6, U1 and L1 and its web pages
+gave no RoHS/REACH values without a browser; declaration requests for 16
 makers drafted, not sent, in `docs/reviews/2026-11-18-rohs-reach-requests-pdm-4ch.md`.
 
 **2026-11-18 (decision 224, owner – interactive): silkscreen done.** `scripts/silk.py` (KiCad python, rewrites the
