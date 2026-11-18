@@ -103,5 +103,57 @@ leaded report covers "K" packages only.
    - Collect declarations for R3–R5.
    - Write the board's RoHS Declaration of Conformity and technical file.
    - Make the REACH Art. 33 statement (lead in Q30, plus U6 if R2 confirms it) and the SCIP notification.
-3. Repeat this check after any BOM change. The Candidate List grows in January and June each year, so a sale-ready
-   record needs declarations against the list current at that time.
+3. Repeat this check after any BOM change.
+   The Candidate List grows in January and June each year, so a sale-ready record needs declarations against the
+   list current at that time.
+
+## C8 (owner question, 2026-11-18)
+
+Keep C45783. "End of Life" is only Mouser's flag for that ordering code. JLCPCB has 3.66 M in stock as a basic part.
+No basic or preferred 22 µF / 25 V X5R 0805 alternative exists. If JLCPCB stock drops, use Samsung CL21A226MAYNNNE
+C602037 (extended, 865 k on 2026-11-18, same series). HRE CGA0805X5R226M250MT C6119899 is another extended option,
+but its DC-bias and REACH data are not checked.
+
+## Follow-up session (2026-11-18, later the same day)
+
+No browser was attached to the session, so pages were read with plain fetches. That limits two of the four items.
+
+1. **R2 (U6, ST declaration): still not verified.** The declaration PDF on www.st.com timed out twice (60 s) and
+   failed once more with curl (HTTP/2 error). estore.st.com opened and links the same PDF, with RoHS grade
+   "Ecopack2". The verdict above is unchanged: U6 is "likely" a second part with lead above 0.1 %.
+2. **LCSC product pages of the 15 "distributor listing only" parts: read for 14, no maker certificate found.**
+   The compliance fields came from a summary of each page, not from verbatim text, so treat them as a pointer.
+   - No RoHS, REACH or SVHC field at all: C475108 and C441238 (Kefa), the four Kangnex parts, C9196 and C1546 (FH),
+     C528763 (Chipanalog).
+   - "ROHS Compliant" with documents that the fetch could not reach: C440882 (Kefa plug, 1 document), C7420372
+     (H5VL10B, 1), C2145 (MMBT5551, 1), C318884 (XKB switch, 6).
+   - "ROHS2 Compliant", no document: C52155402 (APV).
+   - C96963 (Sunlord L1): the page is not found on lcsc.com.
+   - No page has a REACH or SVHC field. The Kangnex brand page claims "CE and SGS environmental testing
+     certification" without a report. The Kefa brand page makes no RoHS or REACH claim.
+   - C7420372 is listed under the maker name "R+O" at LCSC and "hongjiacheng" at JLCPCB.
+   The counts in this report do not change: a distributor's RoHS flag is the same class of evidence as before.
+3. **DigiKey: no values obtained.** The shared pcbparts quota was used up again (resets 2026-11-19 00:00 UTC), so
+   the DigiKey web pages were fetched instead. Only three of the eleven parts tried have a DigiKey page:
+   U6 L78M05ABDT-TR, U1 ESP32-S3-MINI-1-N8 and L1 SWPA6045S8R2MT. On all three the "Environmental & Export
+   Classifications" heading came back without its values (the table is probably filled in by script; not
+   verified), and no environmental document is linked. DigiKey does not list GZ2012D601TF, VKMD1001J101MV,
+   TS-1187A-B-A-B, TYPE-C-31-M-12, CA-IS3050G, AGM601LL, FRM252WJR200TK or mSMD050-60V, so it cannot cover most of
+   R4/R5.
+4. **Declaration requests: drafted, not sent**, in `2026-11-18-rohs-reach-requests-pdm-4ch.md` (16 makers, R3–R5).
+
+## Still open (needs a real browser, `claude --chrome`)
+
+1. R2: open the ST material declaration for U6 L78M05ABDT-TR and read the lead content, the RoHS exemption and the
+   REACH SVHC entry:
+   https://www.st.com/resource/en/material_declaration/md_gr-wspc-to-wspc-252-wspc-dpak-wspc-cu-wspc-wire_hzgr-wspc-ml052b6_ver2_signed.pdf
+   (product page https://estore.st.com/en/l78m05abdt-tr-cpn.html). Update R2 and the C58069 row of the CSV.
+2. Open the "RoHS Compliance – documents available" entries on the LCSC pages of C440882, C7420372, C2145 and
+   C318884, and look up C96963.
+3. DigiKey RoHS and REACH status for the three parts it lists, through the pcbparts tool after the quota resets
+   or in a browser:
+   https://www.digikey.com/en/products/detail/stmicroelectronics/L78M05ABDT-TR/586201 ,
+   https://www.digikey.com/en/products/detail/espressif-systems/ESP32-S3-MINI-1-N8/15295890 and
+   https://www.digikey.com/en/products/result?keywords=SWPA6045S8R2MT
+4. Owner: send the drafted requests through LCSC support when a sale is planned.
+5. Later: the same check for pdm-hc2 once its BOM is settled.
