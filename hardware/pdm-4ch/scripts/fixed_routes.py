@@ -375,7 +375,7 @@ V('GND', 53.475400, 67.948100, size=0.600, drill=0.300)
 V('GND', 16.725000, 69.885700, size=0.600, drill=0.300)
 V('GND', 67.020600, 27.049400, size=0.600, drill=0.300)
 V('GND', 12.500000, 52.500000, size=0.600, drill=0.300)
-V('GND', 37.777366, 6.848300, size=0.600, drill=0.300)
+# (C101.2 GND via at 37.777366, 6.8483 removed: it sat in the pad, validator V1 2026-11-18; see the V1 block)
 V('GND', 66.820000, 35.727800, size=0.600, drill=0.300)
 V('GND', 87.516300, 11.666300, size=0.600, drill=0.300)
 V('GND', 2.000000, 59.993800, size=0.600, drill=0.300)
@@ -413,7 +413,7 @@ V('GND', 59.527000, 73.492700, size=0.600, drill=0.300)
 V('GND', 43.610500, 70.921200, size=0.600, drill=0.300)
 V('GND', 67.600000, 15.120400, size=0.600, drill=0.300)
 V('GND', 67.075400, 9.648300, size=0.600, drill=0.300)
-V('GND', 56.776978, 25.300000, size=0.600, drill=0.300)   # T-0276: C301.2 GND via up 0.16 mm (was y 25.4582) so R302.1 leaves through the north gap
+# (C301.2 GND via at 56.776978, 25.30 removed: it sat in the pad, validator V1 2026-11-18; the router ties C301.2)
 V('GND', 64.242300, 62.292300, size=0.600, drill=0.300)
 V('GND', 77.500000, 36.103400, size=0.600, drill=0.300)
 V('GND', 85.600000, 21.824000, size=0.600, drill=0.300)
@@ -662,6 +662,25 @@ V('GND', 66.85, 67.92)
 
 REROUTED_NETS = sorted(set(REROUTED_NETS) | {CC1, CH})   # decision 215: CC1 via moved; EMC E23: CANH flow-through via D9.1;
 # the board keeps only the copper above for these nets
+
+# ---- Validator V1 (2026-11-18, PCB rule 9: no via on an SMD pad). C101.2 gets an off-pad via 1.0 mm east on a stub;
+# C301.2 has no free spot within reach (IS pin, DEN on B.Cu, R302) and is tied by the router (pf_route GND ties).
+# The old in-pad vias and the R106.2 leftover (locked board copper from an older build, in no script) are dropped.
+# routing_build.stitch/_via_spot/tie_islands no longer place vias on SMD pads; finish() gates it (via_in_pad).
+T('GND', 'F.Cu', (37.68, 6.60), (38.68, 6.60), w=0.3)
+V('GND', 38.68, 6.60)
+# GND pads whose only tie was an in-pad stitching via: own off-pad via on a stub (spots >= 0.1 mm from every SMD pad,
+# stub clear of other nets); C301.2 and U1.63 are tied by the router (pf_route.py --ties-extra C301.2,U1.63)
+T('GND', 'F.Cu', (27.48, 22.50), (28.18, 22.50), w=0.3)
+V('GND', 28.18, 22.50)                             # C402.2
+T('GND', 'F.Cu', (37.60, 13.40), (36.60, 13.40), w=0.3)
+V('GND', 36.60, 13.40)                             # D101.1
+T('GND', 'F.Cu', (27.43, 12.50), (28.23, 12.40), w=0.3)
+V('GND', 28.23, 12.40)                             # R106.2 (DNP)
+# U1.63 (module GND corner pad) lost its fill access in the V1 reroute: tied by the router as well
+# (pf_route.py --ties-extra C301.2,U1.63)
+DROP_GND_VIAS += [(37.777366, 6.8483), (56.776978, 25.30), (27.95, 12.35)]
+DROP_GND += [('F.Cu', (27.43, 12.5), (27.95, 12.35))]
 
 # ---- Decision 215 (owner, 2026-11-16): one-pass signal routing. scripts/pf_routes.json (written by pf_land.py from a
 # pf_export.py + pf_route.py run) holds the part moves and all copper of the routed nets: every signal net except the

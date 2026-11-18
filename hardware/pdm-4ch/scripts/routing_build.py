@@ -575,6 +575,9 @@ def finish(b, work, out, nw, nv):
     th = thermal_check(b)
     if th:
         split['thermal'] = th
+    vip = via_in_pad(b)
+    if vip:
+        split['via-in-pad'] = vip
     pcbnew.SaveBoard(out + '.kicad_pcb', b)
     json.dump({'split': split, 'stitch': st, 'slivers': sl, 'removed': rs, 'pruned': pr, 'tracks': nw, 'vias': nv,
                'gnd_new': gf0['new'], 'frag_vias': gf0['vias_added'], 'islands': now},
@@ -735,8 +738,59 @@ def b_via_one_layer(b, v):
     return hit < 2
 
 
+_SMD = {}
+
+
+def on_smd_pad(b, p, r=None):
+    """PCB rule 9 (validator V1, 2026-11-18): True if a via at p (copper radius r, default 0.3 mm) would touch an SMD pad
+    of any net. A GND fill contains its own GND pads, so "inside the fill" alone put stitching vias into pads."""
+    r = M(0.3) if r is None else r
+    key = id(b)
+    if key not in _SMD:
+        lst = []
+        for fp in b.GetFootprints():
+            for pad in fp.Pads():
+                if pad.HasHole():
+                    continue
+                for lay in (pcbnew.F_Cu, pcbnew.B_Cu):
+                    if pad.IsOnLayer(lay):
+                        bb = pad.GetBoundingBox()
+                        lst.append((bb.GetLeft(), bb.GetTop(), bb.GetRight(), bb.GetBottom(), pad, lay))
+        _SMD[key] = lst
+    for x1, y1, x2, y2, pad, lay in _SMD[key]:
+        if x1 - r <= p.x <= x2 + r and y1 - r <= p.y <= y2 + r and pad.GetEffectiveShape(lay).Collide(p, r):
+            return True
+    return False
+
+
+VIP_TAB_MM2 = 10.0   # rule 9 gate: SMD pads this large (thermal tabs, e.g. the U6 DPAK tab) may carry a via
+
+
+def via_in_pad(b):
+    """rule 9 gate (validator V1): every via whose copper touches an SMD pad smaller than VIP_TAB_MM2"""
+    _SMD.clear()
+    ox, oy = origin(b)
+    bad = []
+    for t in b.GetTracks():
+        if t.GetClass() != 'PCB_VIA':
+            continue
+        p = t.GetPosition()
+        if not on_smd_pad(b, p):
+            continue
+        r = M(0.3)
+        small = [pad for x1, y1, x2, y2, pad, lay in _SMD[id(b)]
+                 if x1 - r <= p.x <= x2 + r and y1 - r <= p.y <= y2 + r and pad.GetEffectiveShape(lay).Collide(p, r)
+                 and MM(pad.GetSize(lay).x) * MM(pad.GetSize(lay).y) < VIP_TAB_MM2]
+        if small:
+            bad.append('%s via %.2f,%.2f on %s' % (t.GetNetname(), MM(p.x - ox), MM(p.y - oy),
+                       ','.join(pd.GetParentFootprint().GetReference() + '.' + pd.GetNumber() for pd in small)))
+    _SMD.clear()
+    return bad
+
+
 def stitch(b):
     """GND stitching vias on a 5 mm grid where all four layers are GND fill with 0.5 mm margin"""
+    _SMD.clear()   # the pad cache belongs to one board object
     pitch = M(fixed_routes.STITCH_PITCH_MM)
     ox, oy = origin(b)
     box = b.GetBoardEdgesBoundingBox()
@@ -762,7 +816,8 @@ def stitch(b):
             x = box.GetX() + pitch // 2
             while x < box.GetRight():
                 p = pcbnew.VECTOR2I(x, y)
-                if all(s.Contains(p) for s in fills.values()) and all((p - q).EuclideanNorm() > pitch * 0.6 for q in vias):
+                if (all(s.Contains(p) for s in fills.values()) and all((p - q).EuclideanNorm() > pitch * 0.6 for q in vias)
+                        and not on_smd_pad(b, p)):
                     v = pcbnew.PCB_VIA(b); v.SetPosition(p); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
                     v.SetWidth(M(0.6)); v.SetDrill(M(0.3)); v.SetNet(net); b.Add(v); vias.append(p); added += 1
                 x += pitch
@@ -834,7 +889,8 @@ def tie_islands(b, net, fills, vias):
                         if (fills[lay].Contains(p) and isl.Contains(p) and fills[pcbnew.In1_Cu].Contains(p)
                                 and all((l in fills and fills[l].Contains(p)) or layer_free(b, p, l, M(0.55))
                                         for l in ALL_CU if l not in (lay, pcbnew.In1_Cu))
-                                and all((p - q).EuclideanNorm() > M(0.8) for q in vias)):
+                                and all((p - q).EuclideanNorm() > M(0.8) for q in vias)
+                                and not on_smd_pad(b, p)):
                             v = pcbnew.PCB_VIA(b); v.SetPosition(p); v.SetLayerPair(pcbnew.F_Cu, pcbnew.B_Cu)
                             v.SetWidth(M(0.6)); v.SetDrill(M(0.3)); v.SetNet(net); b.Add(v); vias.append(p)
                             added += 1; done = True; break
@@ -931,6 +987,7 @@ def _via_spot(b, isl, lay, ties):
             xm = MM(x - ox)
             if (not NO_VIA_X[0] <= xm <= NO_VIA_X[1] and me.Contains(p) and pcbnew.In1_Cu in f and f[pcbnew.In1_Cu].Contains(p)
                     and all((p - q).EuclideanNorm() > M(0.8) for q in vias)
+                    and not on_smd_pad(b, p)
                     and all((l in f and f[l].Contains(p))
                             or (layer_free(b, p, l, M(0.55))
                                 and not any(z.IsOnLayer(l) and z.Outline().Collide(p, z.GetLocalClearance() + M(0.31))
@@ -946,6 +1003,7 @@ def gnd_fragments(b, work, add=True):
     """the Q-0076 gate on a filled board: new weak GND-F/B islands (see above). add: stitch each with vias up to
     FRAG_MIN_TIES first (fill again afterwards). Returns new (every new island: zone, bbox, area, ties),
     new_weak (those still below FRAG_MIN_TIES), stitched/vias_added."""
+    _SMD.clear()
     ref = json.load(open(os.path.join(work, 'gnd_ref.json')))['weak']
     gnd = b.FindNet('GND')
     ties = _gnd_ties(b)

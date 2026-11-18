@@ -4,13 +4,14 @@
 # 1 fixed copper (locked) + fixed_routes.py: the hand routes (CAN and USB pairs, CC1), the GND and power copper, and
 #   the signal routing in pf_routes.json; part moves applied; other copper of the routed nets removed
 #                                                                             (routing_build.py prep)
-# 2 zones refilled, GND stitching, dangling vias/stubs removed, pour + thermal checks  (routing_build.py apply -)
+# 2 zones refilled, GND stitching (never on an SMD pad), dangling vias/stubs removed, pour + thermal + via-in-pad gates
+#                                                                             (routing_build.py apply -)
 # 3 checks: `kpcb drc` with parity; EMC report (emc_report.py, report only, EMC E25)
 # 4 the result (0 DRC errors, parity 0, pours whole) replaces the board only when it has fewer unconnected items
 #   than the board now has. Env LAND_BEST=1 lands it even without fewer unconnected: use it once after
 #   fixed_routes.py or pf_routes.json changed, so the board is again the output of the scripts.
-# New signal routing: pf_export.py <board> <work> [moves.json] -> pf_route.py <work> -> pf_land.py <work> (writes
-# pf_routes.json), then this build. pf_route.py needs Python 3 with numpy and pillow and a C compiler (pf_core.c).
+# New signal routing: pf_export.py <board> <work> [moves.json] -> pf_route.py <work> --iters 300 --ties-extra C301.2,U1.63
+# -> pf_land.py <work> (writes pf_routes.json), then this build (decision 225: those two GND pads need a router tie). pf_route.py needs Python 3 with numpy and pillow and a C compiler (pf_core.c).
 set -u
 RUNS=1
 SCRIPTS=${0:A:h}; PROJ=${SCRIPTS:h}; REPO=${PROJ:h:h}

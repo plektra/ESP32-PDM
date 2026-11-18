@@ -1,7 +1,18 @@
 # pdm-4ch status
 
-Updated: 2026-11-18 (decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+Updated: 2026-11-18 (decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221 [proposed]: PWM rating)
+
+**2026-11-18 (decision 225, owner): layout validated, V1 fixed.** `/validate pdm-4ch` on the layout
+(`docs/reviews/2026-11-18-validate-pdm-4ch.md`): 0 CRITICAL, 0 MAJOR, 1 MINOR. V1: GND vias inside SMD pads (rule 9),
+mostly placed by the build's own stitching (a GND fill contains its GND pads). Fixed in the build: stitching and tie
+vias never touch an SMD pad, and `finish()` fails a build that has a via on an SMD pad below 10 mm² (the U6 tab via
+stays). Pads that lost their only tie got their own off-pad via (C101.2, C402.2, D101.1, R106.2) or a router tie
+(**a new reroute needs `pf_route.py --iters 300 --ties-extra C301.2,U1.63`**, see `build_routing.sh`). Result:
+0 DRC errors, 0 unconnected, parity 0, pours whole; VS-In2 2 pieces, 966.9 mm² (81 %; was 1 piece 1003.4 mm²; gate
+75 %, every piece via-tied), 40/40 thermal vias, Tj 101 °C; a second build gives the same. Silkscreen unchanged.
+Not covered by the review: the fab package, the JLCPCB footprint/rotation checks and stock (pre-order list), the
+hot-plug surge path with the new U30.
 
 **2026-11-18 (decision 224, owner – interactive): silkscreen done.** `scripts/silk.py` (KiCad python, rewrites the
 board; the same result on every run) draws all silkscreen. Re-run it after any part move or reroute.
@@ -84,7 +95,9 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
    merged. Schematic changes go through `tools/ksch.py` (agents), checked by ERC and the netlist compare; a KiCad 10
    format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
 2. Silkscreen: done (decision 224). After any part move or reroute run `scripts/silk.py` again and check the DRC.
-3. **Next step:** `/validate pdm-4ch` on the PCB, then fix the findings. Points to check first:
+3. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). **Next step:** rebuild the JLCPCB
+   package and work through the pre-order checklist below (footprints, CPL rotation, stock: U30 is now C5219203).
+   Earlier notes for this step: Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and
    Net-(D3-A) necks at J3 (decision 219), the fill keep-outs that removed GND slivers on F.Cu/B.Cu/In2.
    `/emc pdm-4ch` on the layout is done (2026-11-17, `docs/reviews/2026-11-17-emc-pdm-4ch.md`): 0 CRITICAL,
@@ -99,7 +112,7 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
 4. At the first order, check the CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°), and
    the footprints listed in the pre-order checklist below. The JLCPCB package (Gerber zip, BOM, CPL) is built by
    `python3 tools/jlc_package.py pdm-4ch` into `fab/` behind a DRC gate; see `fab/README.md` for the quote settings.
-   The 2026-11-17 package is for quoting only and predates decisions 223/224 (D50, R19, C50, D24 moved; copper and
+   The 2026-11-17 package is for quoting only and predates decisions 223–225 (D50, R19, C50, D24 moved; copper and
    silkscreen changed): rebuild it before quoting again.
 5. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384 and
    C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2. Remaining part check from
@@ -169,6 +182,8 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
   on differential lines, short dead-end SW copper, re-check after a reroute) to `docs/ARCHITECTURE.md` "PCB layout rules".
   Decision 223 adds one: every TVS and RF filter-cap GND pad has its own GND via (≤ 2.5 mm), never only fill or grid
   stitching; on pdm-4ch `scripts/emc_report.py` reports all of these after each build.
+  Decision 225: rule 9 (no via on an SMD pad) gets an exception for thermal tabs ≥ 10 mm² (U6 DPAK tab); the
+  pdm-4ch build gates the rule.
 - Decision 150: cost reviews still price pdm-4ch as 2 layers; the owner's quote is €43.95 for 5 boards (4 layers, 100 × 75 mm). ARCHITECTURE Mechanics/Budgets: note 4 layers.
 - T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.
 - Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
