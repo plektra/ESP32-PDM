@@ -103,5 +103,27 @@ leaded report covers "K" packages only.
    - Collect declarations for R3–R5.
    - Write the board's RoHS Declaration of Conformity and technical file.
    - Make the REACH Art. 33 statement (lead in Q30, plus U6 if R2 confirms it) and the SCIP notification.
-3. Repeat this check after any BOM change. The Candidate List grows in January and June each year, so a sale-ready
-   record needs declarations against the list current at that time.
+3. Repeat this check after any BOM change.
+   The Candidate List grows in January and June each year, so a sale-ready record needs declarations against the
+   list current at that time.
+
+## C8 (owner question, 2026-11-18)
+
+Keep C45783. "End of Life" is only Mouser's flag for that ordering code. JLCPCB has 3.66 M in stock as a basic part.
+No basic or preferred 22 µF / 25 V X5R 0805 alternative exists. If JLCPCB stock drops, use Samsung CL21A226MAYNNNE
+C602037 (extended, 865 k on 2026-11-18, same series). HRE CGA0805X5R226M250MT C6119899 is another extended option,
+but its DC-bias and REACH data are not checked.
+
+## Follow-up (a session with a browser, `claude --chrome`)
+
+1. R2: open the ST material declaration for U6 L78M05ABDT-TR and read the lead content, the RoHS exemption and the
+   REACH SVHC entry:
+   https://www.st.com/resource/en/material_declaration/md_gr-wspc-to-wspc-252-wspc-dpak-wspc-cu-wspc-wire_hzgr-wspc-ml052b6_ver2_signed.pdf
+   (product page https://estore.st.com/en/l78m05abdt-tr-cpn.html). Update R2 and the C58069 row of the CSV.
+2. Read the RoHS field on the LCSC product pages of the 15 parts that rely only on the JLCPCB listing (the CSV
+   `rohs_status` says "distributor listing only"). Look for any maker certificate linked there, especially for the
+   Kefa/Kangnex connectors (R3).
+3. DigiKey (the pcbparts quota resets at 00:00 UTC daily): RoHS and REACH status for the parts DigiKey stocks, mainly
+   to cover R4/R5.
+4. Draft (not send) the declaration requests to the makers in R3–R5. The owner sends them through LCSC support.
+5. Later: the same check for pdm-hc2 once its BOM is settled.
