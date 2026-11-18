@@ -13,6 +13,7 @@ Regenerate after any board or schematic change (it runs the DRC gate first):
 | `ESP32-PDM-4CH-bom-jlc.csv` | PCB Assembly step → BOM |
 | `ESP32-PDM-4CH-cpl-jlc.csv` | PCB Assembly step → CPL (pick and place) |
 | `package-report.md` | not uploaded: DRC gate, parts left out and why, rotations to check |
+| `ESP32-PDM-4CH-assembly.pdf` | not uploaded: assembly drawing for bring-up, every reference on F.Fab at 2:1 (decision 224; `kicad-cli pcb export pdf --layers F.Fab,Edge.Cuts --sketch-pads-on-fab-layers --sketch-DNP-footprints-on-fab-layers --black-and-white --mode-single --scale 2`) |
 
 ## Quote settings (decisions 99–103, 122, 150)
 

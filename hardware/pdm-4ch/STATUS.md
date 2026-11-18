@@ -1,7 +1,20 @@
 # pdm-4ch status
 
-Updated: 2026-11-18 (decision 223: EMC E22/E23 fixed, E25 report in the build – still fully routed; decision 222: U30
-→ LM74502H-Q1; decision 221 [proposed]: PWM rating)
+Updated: 2026-11-18 (decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+222: U30 → LM74502H-Q1; decision 221 [proposed]: PWM rating)
+
+**2026-11-18 (decision 224, owner – interactive): silkscreen done.** `scripts/silk.py` (KiCad python, rewrites the
+board; the same result on every run) draws all silkscreen. Re-run it after any part move or reroute.
+- References shown only for the 38 parts looked for at bring-up and service (list in decision 224); all others hidden
+  and kept on F.Fab for `fab/ESP32-PDM-4CH-assembly.pdf` (assembly drawing, 2:1, every reference).
+- Top: OUT1–OUT4 (0.8 mm, one column level with the J11 pins; OUT1/OUT3 sit between the pads of the DNP TVS
+  footprints D103/D303 and would be hidden under a fitted diode), BATTERY, + / − at J10, PANEL and CAN between J5 and
+  J4. The old labels were off: OUT1/OUT3 sat beside the wrong pins, the "1" was at J4 pin 3, PANEL under J5's body.
+- Bottom (no parts there): pin legends of J5 (SW1–SW4, SW SUPPLY, LED1–LED4, GND), J4 (NET-C GND, NET-S, CAN-H,
+  CAN-L), J11 (OUT1–OUT4), J10 (BAT + / BAT −), J6 (GND, TXD0, RXD0, IO35–IO37, IO42, +3V3); board name, revision,
+  licence.
+- DRC: 0 errors, 0 unconnected, parity 0; warnings 413 → 4: three U1 module silk lines clipped at the antenna edge
+  (JLCPCB clips silk at the outline) and the U1 library-version note. No copper change.
 
 **2026-11-17/18 (decision 223, owner – interactive): EMC layout findings E22 and E23 fixed, E25 added.** One reroute
 (`pf_route.py --iters 300`, converged at round 259, 0 open); `build_routing.sh`: 0 DRC errors, 0 unconnected,
@@ -70,9 +83,8 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
    SW_BOOT1/SW_RESET1, FL30, JP30. That copy is kept on the local branch `backup/kicad10-resave-2026-11-08`, never
    merged. Schematic changes go through `tools/ksch.py` (agents), checked by ERC and the netlist compare; a KiCad 10
    format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
-2. **Next step:** silkscreen (layout stage 6): connector and pin-1 marks, "BATTERY + −", OUT1–OUT4, "PANEL", "CAN";
-   clear the silkscreen warnings of the DRC (413 warnings in all on 2026-11-18).
-3. `/validate pdm-4ch` on the PCB, then fix the findings. Points to check first:
+2. Silkscreen: done (decision 224). After any part move or reroute run `scripts/silk.py` again and check the DRC.
+3. **Next step:** `/validate pdm-4ch` on the PCB, then fix the findings. Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and
    Net-(D3-A) necks at J3 (decision 219), the fill keep-outs that removed GND slivers on F.Cu/B.Cu/In2.
    `/emc pdm-4ch` on the layout is done (2026-11-17, `docs/reviews/2026-11-17-emc-pdm-4ch.md`): 0 CRITICAL,
@@ -87,8 +99,8 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
 4. At the first order, check the CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°), and
    the footprints listed in the pre-order checklist below. The JLCPCB package (Gerber zip, BOM, CPL) is built by
    `python3 tools/jlc_package.py pdm-4ch` into `fab/` behind a DRC gate; see `fab/README.md` for the quote settings.
-   The 2026-11-17 package is for quoting only and predates decision 223 (D50, R19, C50, D24 moved; copper changed):
-   rebuild it after the silkscreen.
+   The 2026-11-17 package is for quoting only and predates decisions 223/224 (D50, R19, C50, D24 moved; copper and
+   silkscreen changed): rebuild it before quoting again.
 5. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384 and
    C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2. Remaining part check from
    the BOM audit: PESD2CAN pin 3 = common.
