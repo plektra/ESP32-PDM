@@ -13,6 +13,14 @@ stays). Pads that lost their only tie got their own off-pad via (C101.2, C402.2,
 75 %, every piece via-tied), 40/40 thermal vias, Tj 101 °C; a second build gives the same. Silkscreen unchanged.
 Not covered by the review: the fab package, the JLCPCB footprint/rotation checks and stock (pre-order list), the
 hot-plug surge path with the new U30.
+Updated: 2026-11-18 (RoHS/REACH check, no design change; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+222: U30 → LM74502H-Q1; decision 221 [proposed]: PWM rating)
+
+**2026-11-18 (owner – interactive): RoHS and REACH check** of the 54 BOM parts and 7 THT connector parts,
+`docs/reviews/2026-11-18-rohs-reach-pdm-4ch.md` + `.csv`. RoHS: no non-compliant part (18 by exemption 7(a)/7(c)-I).
+REACH: Q30 AGM601LL declares lead above 0.1 % (SGS); U6 likely too (unverified); 22 parts have no maker statement,
+mainly the THT connectors. Nothing blocks the prototype order; the declarations to collect before any sale are in the
+pre-order checklist.
 
 **2026-11-18 (decision 224, owner – interactive): silkscreen done.** `scripts/silk.py` (KiCad python, rewrites the
 board; the same result on every run) draws all silkscreen. Re-run it after any part move or reroute.
@@ -175,6 +183,9 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 - T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
 - Decision 220 (licence): add "CERN-OHL-S v2" and the source location `github.com/plektra/ESP32-PDM` to the PCB
   silkscreen and to the KiCad title-block comments.
+- RoHS/REACH (`docs/reviews/2026-11-18-rohs-reach-pdm-4ch.md`): hand-solder J4/J5/J10/J11 with lead-free solder.
+  Before any sale (not for the prototypes): ST declaration for U6 (R2), maker declarations for the connectors and the
+  small makers (R3–R5), REACH Art. 33 note + SCIP entry for lead in Q30 AGM601LL (R1). Re-run the check after a BOM change.
 
 ## For /system
 
