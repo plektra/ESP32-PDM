@@ -169,9 +169,11 @@ Espressif is better asked directly (sales or technical inquiry form on espressif
 
 - **Samsung, UNI-ROYAL, TI, UMW, JCET, Infineon:** current statements are already on file in the CSV.
 
-### STMicroelectronics (U6, R2)
+### STMicroelectronics (U6, R2) – optional
 
-Ask ST directly (online support on st.com), not through LCSC.
+Optional (owner, 2026-11-20): R2 is closed on ST's 2014 declaration and its 2019 and 2026 letters, with U6 treated
+as holding lead above 0.1 % under 7(a). Send this only to refresh the figures or to get ST's SCIP number. Ask ST
+directly (online support on st.com), not through LCSC.
 
 > Part: L78M05ABDT-TR (DPAK).
 >

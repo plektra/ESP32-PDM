@@ -81,8 +81,10 @@ Materials Declaration Form "HZGR*L765AA6", version A, 2014-10-31, "MD valid for 
 device "313.30" mg, lead 0.935 mg in the soft solder, "2984" ppm of the part, RoHS exemption "7a". Its REACH answer
 is against the list of 16 June 2014 and so out of date; ST's REACH letter of 20 March 2026 (253 substances) lists
 "Lead in metal form RoHS exemption 7a" for "Power Devices". U6 is now counted as a part with lead above 0.1 %.
-The version ST links today (HZGR*ML052B6 ver2) is still unread. *Action before any sale:* ask ST for that current
-version and the SCIP number (request drafted). Details in "Owner-supplied ST documents" below.
+The version ST links today (HZGR*ML052B6 ver2) is still unread. Details in "Owner-supplied ST documents" below.
+**Closed (owner, 2026-11-20):** U6 is treated as holding lead above 0.1 % under 7(a). The current version would
+only refresh the ppm figure and the Art. 33 duty is the same either way, so it is not required; the request to ST
+stays as an optional draft.
 
 **R3 – THT connectors J4, J5, J10, J11 (Cixi Kefa ×3, Ningbo Kangnex ×4) and J3 USB-C (HRO): no maker statement.**
 The Kefa and Kangnex parts have only the JLCPCB "ROHS" text. Their drawings say copper alloy, tin plated, with no
@@ -128,8 +130,7 @@ leaded report covers "K" packages only.
 1. Prototypes (decision 101): nothing to do except hand-solder J4, J5, J10, J11 with lead-free solder (e.g. SAC305 or
    Sn99.3Cu0.7) if the boards are to stay RoHS-compliant.
 2. Before any sale in the EU (also under CE marking, together with the EMC and LVD work):
-   - R2: ask ST for the current U6 declaration and SCIP number (the 2014 version is on record; ST's link to the
-     current one is dead).
+   - R2: nothing required (closed 2026-11-20). Optional: ask ST for the current U6 declaration and SCIP number.
    - Collect declarations for R3–R5.
    - Write the board's RoHS Declaration of Conformity and technical file.
    - Make the REACH Art. 33 statement (lead in Q30 and U6, plus the Kefa connectors and the hongjiacheng diodes if
@@ -262,9 +263,6 @@ extracted with pypdf; the Mouser one is a scan and was read from a rendering); n
 
 ## Still open
 
-1. R2: the current ST declaration for U6 L78M05ABDT-TR (HZGR*ML052B6 ver2) is not published at the moment (404);
-   the 2014 version is on record. Before a sale, try the link again or send the drafted request to ST:
-   https://www.st.com/resource/en/material_declaration/md_gr-wspc-to-wspc-252-wspc-dpak-wspc-cu-wspc-wire_hzgr-wspc-ml052b6_ver2_signed.pdf
-2. The two .zip archives on the LCSC page of C318884 were not opened.
-3. Owner: send the drafted requests through LCSC support (ST: its own support page) when a sale is planned.
-4. Later: the same check for pdm-hc2 once its BOM is settled.
+1. The two .zip archives on the LCSC page of C318884 were not opened.
+2. Owner: send the drafted requests through LCSC support when a sale is planned (the one to ST is optional).
+3. Later: the same check for pdm-hc2 once its BOM is settled.
