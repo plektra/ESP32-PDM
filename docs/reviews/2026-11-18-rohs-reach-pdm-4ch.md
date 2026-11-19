@@ -20,15 +20,17 @@ says so.
 
 ## Verdict
 
-- **RoHS: no non-compliant part found.** Eighteen parts rely on an exemption, which is allowed: 7(c)-I (lead in the
-  glass/ceramic of thick-film resistors and in the ESP32 module) and 7(a) (high-melting lead solder in Q30 and,
-  per the maker's SGS report, D4–D6 H5VL10B; likely also U6). The Kefa connector brass uses 6(c) (R3). The finished
+- **RoHS: no non-compliant part found.** Nineteen parts rely on an exemption, which is allowed: 7(c)-I (lead in the
+  glass/ceramic of thick-film resistors and in the ESP32 module) and 7(a) (high-melting lead solder in Q30, U6
+  and, per the maker's SGS report, D4–D6 H5VL10B). The Kefa connector brass uses 6(c) (R3). The finished
   board is RoHS-compliant if the THT connectors are hand-soldered with **lead-free solder**.
-- **REACH: one part declares an SVHC above 0.1 %.** Q30 AGM601LL contains lead (CAS 7439-92-1), 1.111 % in the
-  package body. Lead above 0.1 % is likely, but not declared, in three more places: U6 L78M05ABDT-TR (R2), the Kefa
-  connectors (R3) and some of the hongjiacheng diodes (R4). So the board carries an Art. 33 information duty and
+- **REACH: two parts hold an SVHC above 0.1 % by the maker's own figures.** Q30 AGM601LL contains lead
+  (CAS 7439-92-1), 1.111 % in the package body. U6 L78M05ABDT-TR contains lead at 0.2984 % of the part per ST's
+  2014 material declaration (R2; the current version of that declaration was not readable). Lead above 0.1 % is
+  likely, but not declared, in two more places: the Kefa connectors (R3) and some of the hongjiacheng diodes (R4).
+  So the board carries an Art. 33 information duty and
   needs a SCIP notification if it is ever sold in the EU. This is paperwork, not a design change.
-- **Evidence is thin for 22 parts.** No maker REACH statement was found for them, and 12 of them also have no RoHS
+- **Evidence is thin for 21 parts.** No maker REACH statement was found for them, and 12 of them also have no RoHS
   statement of their own. The THT connectors are the main gap (the Kefa brass holds 3.5 % lead under exemption 6(c)).
 - **For the two prototype boards (decision 101) none of this blocks the order.** RoHS and REACH apply when a product
   is placed on the EU market. The value of this check is the record, plus the list of declarations to request before
@@ -39,7 +41,7 @@ says so.
 | RoHS evidence | Parts |
 |---|---|
 | Compliant, stated by Mouser or the maker (datasheet / declaration / test report) | 30 |
-| Compliant by exemption (16 UNI-ROYAL resistors 7(c)-I, Q30 7(a), D4–D6 H5VL10B 7(a), U6 exemption not named) | 19 |
+| Compliant by exemption (16 UNI-ROYAL resistors 7(c)-I, Q30 7(a), D4–D6 H5VL10B 7(a), U6 7(a)) | 19 |
 | Only the word "ROHS" in the JLCPCB part description (JLCPCB adds it to nearly every listing) | 12 |
 | Non-compliant | 0 |
 
@@ -47,8 +49,8 @@ says so.
 |---|---|
 | Maker states no SVHC above 0.1 % (Samsung, UNI-ROYAL, Sunlord, TI, UMW, JCET, Chipanalog, Infineon) | 33 |
 | Maker says "REACH compliant" with no SVHC detail (Ymin, HRO, FOJAN, APV, Espressif) | 5 |
-| Maker declares an SVHC above 0.1 % (AGM601LL, lead) | 1 |
-| No statement found | 22 |
+| Maker declares an SVHC above 0.1 % (lead: AGM601LL; L78M05ABDT-TR by ST's 2014 composition figures) | 2 |
+| No statement found | 21 |
 
 ## Findings
 
@@ -74,6 +76,13 @@ solder, "4566" ppm of the part, RoHS exemption "7a". Its REACH answer ("does not
 of 17 December 2014, before lead was added, so it is out of date. DigiKey shows "ROHS3 Compliant" and "REACH
 Unaffected" for U6, which does not show exemptions. U6 stays **likely, not confirmed**. *Action before any sale:*
 ask ST for the current declaration (request drafted).
+*Update 2026-11-20 (owner-supplied documents):* **confirmed by ST's 2014 declaration, which names this part.** ST
+Materials Declaration Form "HZGR*L765AA6", version A, 2014-10-31, "MD valid for CP: L78M05ABDT-TR,L78M05CDT-TR":
+device "313.30" mg, lead 0.935 mg in the soft solder, "2984" ppm of the part, RoHS exemption "7a". Its REACH answer
+is against the list of 16 June 2014 and so out of date; ST's REACH letter of 20 March 2026 (253 substances) lists
+"Lead in metal form RoHS exemption 7a" for "Power Devices". U6 is now counted as a part with lead above 0.1 %.
+The version ST links today (HZGR*ML052B6 ver2) is still unread. *Action before any sale:* ask ST for that current
+version and the SCIP number (request drafted). Details in "Owner-supplied ST documents" below.
 
 **R3 – THT connectors J4, J5, J10, J11 (Cixi Kefa ×3, Ningbo Kangnex ×4) and J3 USB-C (HRO): no maker statement.**
 The Kefa and Kangnex parts have only the JLCPCB "ROHS" text. Their drawings say copper alloy, tin plated, with no
@@ -119,10 +128,11 @@ leaded report covers "K" packages only.
 1. Prototypes (decision 101): nothing to do except hand-solder J4, J5, J10, J11 with lead-free solder (e.g. SAC305 or
    Sn99.3Cu0.7) if the boards are to stay RoHS-compliant.
 2. Before any sale in the EU (also under CE marking, together with the EMC and LVD work):
-   - Settle R2 (ask ST for the U6 declaration; the published link is dead).
+   - R2: ask ST for the current U6 declaration and SCIP number (the 2014 version is on record; ST's link to the
+     current one is dead).
    - Collect declarations for R3–R5.
    - Write the board's RoHS Declaration of Conformity and technical file.
-   - Make the REACH Art. 33 statement (lead in Q30, plus U6, the Kefa connectors and the hongjiacheng diodes if
+   - Make the REACH Art. 33 statement (lead in Q30 and U6, plus the Kefa connectors and the hongjiacheng diodes if
      the makers confirm it) and the SCIP notification.
 3. Repeat this check after any BOM change.
    The Candidate List grows in January and June each year, so a sale-ready record needs declarations against the
@@ -212,10 +222,42 @@ Everything below was read from the screen in Chrome. Full quotes and URLs are in
 5. **Request drafts corrected** (still not sent): Kefa, hongjiacheng and XKB now refer to the documents that
    exist; a request to ST for the U6 declaration is added.
 
+## Owner-supplied ST documents (2026-11-20)
+
+The owner found two ST documents on a distributor's document host and one on Mouser. The two were downloaded and
+their text extracted (pypdf); nothing is copied into the repo.
+
+1. **ST Materials Declaration Form for U6** (IPC 1752, version 2), 4 pages:
+   https://4donline.ihs.com/images/VipMasterIC/IC/SGST/SGST-E-A0002296617/SGST-E-A0002857088-1.pdf?hkey=6D0214268300F1406B835FE51CB13195
+
+   | Field | Value as written |
+   |---|---|
+   | Mfr Item Name / version / site / date | "HZGR*L765AA6" / "A" / "SH1A" / "2014-10-31" |
+   | Scope | "TO-252 DPAK Cu Wire; MD valid for CP: L78M05ABDT-TR,L78M05CDT-TR." |
+   | Device mass | "313.30" mg, "ECOPACK® 2" |
+   | Lead (CAS 7439-92-1), only entry | "Soft solder" (0.979 mg): 0.935 mg, "955056" ppm in the material, "2984" ppm in the product |
+   | RoHS ("ROHS directive 2011/65/EU _ July 2011") | "Product(s) meets EU RoHS requirements by application of the selected exemption(s)" = true; exemption "7a" |
+   | REACH SVHC | "The product does not contain REACH Substances Of Very High Concern above the limits" = true |
+   | Candidate List version | "REACH-16th June 2014" (lead was added in 2018) |
+
+   This names U6, so R2 is confirmed as far as a 2014 document can: lead 0.2984 % of the part, under 7(a). It is
+   version A of another declaration code than the one ST links today (HZGR*ML052B6 ver2, still 404), so the
+   figures of current production are **not verified**.
+2. **ST "REACH Communication to Customers"**, Geneva, March 20th 2026, 2 pages, company-wide, marked "ST
+   Restricted" (so cited by title and date only). It covers the EU Candidate List "through Feb 4th 2026 …
+   containing 253 substances". ST products "do not contain SVHC candidate substances, except for some articles";
+   the exception table has "Power Devices – Lead in metal form RoHS exemption 7a / ELV exemption 8e", and
+   "When relevant, ST products are reported on the SCIP database." It names no part number and does not say
+   whether a DPAK regulator is a "Power Device".
+3. **Mouser "STMicroelectronics_5113_RoHS_Certificate.pdf": not read.** Mouser answered "Access Denied" to a
+   scripted download and timed out for a fetch; no browser tool was connected in this session.
+4. **Counts changed** (REACH table only): maker declares an SVHC 1 → 2 (U6), no statement 22 → 21. U6 was already
+   counted under "by exemption" in the RoHS table; the exemption is now named.
+
 ## Still open
 
-1. R2: the ST declaration for U6 L78M05ABDT-TR is not published at the moment (404). Try the link again later, or
-   send the drafted request to ST:
+1. R2: the current ST declaration for U6 L78M05ABDT-TR (HZGR*ML052B6 ver2) is not published at the moment (404);
+   the 2014 version is on record. Before a sale, try the link again or send the drafted request to ST:
    https://www.st.com/resource/en/material_declaration/md_gr-wspc-to-wspc-252-wspc-dpak-wspc-cu-wspc-wire_hzgr-wspc-ml052b6_ver2_signed.pdf
 2. The two .zip archives on the LCSC page of C318884 were not opened.
 3. Owner: send the drafted requests through LCSC support (ST: its own support page) when a sale is planned.

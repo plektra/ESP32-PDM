@@ -177,6 +177,7 @@ Ask ST directly (online support on st.com), not through LCSC.
 >
 > The material declaration linked from the product page (Quality & Reliability, "Material Declaration", file
 > `md_gr-wspc-to-wspc-252-wspc-dpak-wspc-cu-wspc-wire_hzgr-wspc-ml052b6_ver2_signed.pdf`) returns "page not found",
-> as does its XML version. Please send the current IPC-1752 material declaration for this part, with the RoHS
-> exemption used (7(a)?), the lead content in ppm of the part, and the REACH SVHC answer against the current
-> Candidate List.
+> as does its XML version. The only version we have is HZGR*L765AA6, version A, of 2014-10-31 (lead 2984 ppm of
+> the part, exemption 7a, REACH answer against the list of 16 June 2014). Please send the current IPC-1752
+> material declaration for this part, with the lead content in ppm of the part, the REACH SVHC answer against the
+> current Candidate List, and the SCIP number if the part is notified.
