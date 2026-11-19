@@ -224,8 +224,8 @@ Everything below was read from the screen in Chrome. Full quotes and URLs are in
 
 ## Owner-supplied ST documents (2026-11-20)
 
-The owner found two ST documents on a distributor's document host and one on Mouser. The two were downloaded and
-their text extracted (pypdf); nothing is copied into the repo.
+The owner found two ST documents on a distributor's document host and one on Mouser. All three were read (text
+extracted with pypdf; the Mouser one is a scan and was read from a rendering); nothing is copied into the repo.
 
 1. **ST Materials Declaration Form for U6** (IPC 1752, version 2), 4 pages:
    https://4donline.ihs.com/images/VipMasterIC/IC/SGST/SGST-E-A0002296617/SGST-E-A0002857088-1.pdf?hkey=6D0214268300F1406B835FE51CB13195
@@ -249,8 +249,14 @@ their text extracted (pypdf); nothing is copied into the repo.
    the exception table has "Power Devices – Lead in metal form RoHS exemption 7a / ELV exemption 8e", and
    "When relevant, ST products are reported on the SCIP database." It names no part number and does not say
    whether a DPAK regulator is a "Power Device".
-3. **Mouser "STMicroelectronics_5113_RoHS_Certificate.pdf": not read.** Mouser answered "Access Denied" to a
-   scripted download and timed out for a fetch; no browser tool was connected in this session.
+3. **ST letter "STMicroelectronics semiconductor products RoHS compliance"**, Geneva, July 22nd, 2019, one scanned
+   page signed by two ST vice presidents: https://www.mouser.com/catalog/additional/STMicroelectronics_5113_RoHS_Certificate.pdf
+   (Mouser refuses scripted downloads; the owner downloaded it and it was read from a rendering of the page.)
+   ST "Ecopack semiconductor products" "are compliant with … RoHS Directive (… 2011/65/EU and former 2002/95/EC
+   as amended by 2015/863/EU)" and "do not contain any of the restricted substances except Lead (Pb) that may be
+   used according to the exemptions given under RoHS Annex III (7a, 7cI,15)". Company-wide, no part numbers. U6
+   is an "ECOPACK® 2" part, so this covers the four phthalates of (EU) 2015/863, which the 2014 declaration
+   could not.
 4. **Counts changed** (REACH table only): maker declares an SVHC 1 → 2 (U6), no statement 22 → 21. U6 was already
    counted under "by exemption" in the RoHS table; the exemption is now named.
 
