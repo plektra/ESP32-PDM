@@ -2718,7 +2718,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 114.3 97.79 0)
 			(effects
 				(font
@@ -2727,7 +2727,16 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
+			(at 114.3 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
 			(at 114.3 97.79 0)
 			(effects
 				(font
@@ -4552,7 +4561,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 116.84 97.79 0)
 			(effects
 				(font
@@ -4561,7 +4570,16 @@
 				(hide yes)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
+			(at 116.84 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
 			(at 116.84 97.79 0)
 			(effects
 				(font

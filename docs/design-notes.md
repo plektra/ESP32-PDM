@@ -560,11 +560,11 @@ this section.
 IIS(FAULT) = 6 / 15 / 40 mA (min/typ/max) into RIS. An unconnected output floats up in OFF and also reads as
 open load in OFF (VOUT > VS − VOL(OFF), p. 27, 30).
 
-| IIS(FAULT) | P in RIS 680 Ω (I²R) | 0603 (0.1 W) | 1206 (0.25 W) | RIS 500 Ω = 2 × 1 kΩ 1206 (T-0107): total / per part (of 0.25 W) |
-|---|---|---|---|---|
-| 6 mA | 24 mW | ok | ok | 18 mW / 9 mW – ok |
-| 15 mA | 153 mW | **over** | ok (61 %) | 113 mW / 56 mW – ok (23 %) |
-| 40 mA | 1.09 W | **over** | **over** | 0.80 W / 0.40 W – **over** (160 %) |
+| IIS(FAULT) | P in RIS 680 Ω (I²R) | 0603 (0.1 W) | 1206 (0.25 W) | RIS 500 Ω = 2 × 1 kΩ 1206 (T-0107): total / per part (of 0.25 W) | Decision 235: 2 × CRCW1206-HP (0.75 W at 70 °C) |
+|---|---|---|---|---|---|
+| 6 mA | 24 mW | ok | ok | 18 mW / 9 mW – ok | ok (1 %) |
+| 15 mA | 153 mW | **over** | ok (61 %) | 113 mW / 56 mW – ok (23 %) | ok (8 %) |
+| 40 mA | 1.09 W | **over** | **over** | 0.80 W / 0.40 W – **over** (160 %) | **ok (53 %)** |
 
 Hardware: R103/R203/R303/R403 are now 680 Ω **1206**, 0.25 W, 1 %, C17975 (UNI-ROYAL 1206W4F6800T5E). No *basic* 1206
 680 Ω exists at JLCPCB (all 25 parts are extended), so the cheapest extended one was taken; the 0603 C23228 is no
@@ -572,6 +572,15 @@ longer used on the board. The value is unchanged, so the sense scaling (≈ 0.45
 typical fault current continuously. The 40 mA maximum (1.09 W) is **not** covered by hardware – by ruling that case is
 covered by the firmware rule above (IS is clamped at ≈ 3.3 V by D102, but the current still flows through RIS until DEN
 is dropped). A 2 W part was not fitted (not asked for). If the owner wants the 40 mA case covered in hardware, RIS would need a rating of about 1.5–2 W (a larger, costlier part). **Decision 235 (2026-11-21): covered in hardware before the first order** – 2 × 1 kΩ in parallel must carry 0.8 W (40 mA² × 500 Ω) at board temperature; first try higher-power 1206 parts in the same footprint (ROHM ESR18 C2074262 0.5 W, Vishay CRCW-HP C844867 0.75 W, ratings from the LCSC listing, unverified), else 2512 and a reroute.
+**Done 2026-11-21 (owner chose the Vishay part):** all eight RIS parts are **Vishay CRCW12061K00FKEAHP, C844867**
+(extended), same 1206 footprint, no reroute; facts file `docs/part-facts/C844867.md` (datasheet 20043, 17-Mar-2026).
+P70 = 0.75 W flat to 70 °C ambient, linear to 0 at 155 °C; 1.5 W up to 105 °C terminal temperature; film limit
+155 °C. At 40 mA each part carries 0.40 W = 53 % of P70 at the 65 °C board temperature; the ambient limit at 0.40 W
+is ≈ 110 °C. The rating assumes Rth ≤ 110 K/W; even at 150–200 K/W the film stays at 125–145 °C, under 155 °C. The
+ROHM ESR18 (0.5 W) was not taken: 80 % of its rating at 65 °C. The KiCad 1206 land is longer than Vishay's
+(Z 4.05 vs 3.60 mm, G 1.80 vs 1.50 mm) and holds the terminals fully; accepted. Schematic edit by `tools/ksch.py`:
+netlist identical (167 nets), ERC unchanged. Sense scaling unchanged (500 Ω). The firmware DEN rule stays as a second
+layer: it limits the time RIS runs hot, it is no longer what keeps RIS from failing.
 
 **Update T-0107 (2026-11-03, cost lever L7, auto):** each RIS is now **two 1 kΩ 1206 0.25 W 1 % in parallel = 500 Ω**
 (R103 ‖ R107, R203 ‖ R207, R303 ‖ R307, R403 ‖ R407; UNI-ROYAL 1206W4F1001T5E, C4410, **basic**; facts file
@@ -603,9 +612,12 @@ VS − VOL(OFF) (≥ 4 V), so an unconnected output no longer reads as open load
 unconnected outputs must not be flagged; with it fitted open-load-in-OFF detection no longer works for a really open
 load (the output is held at 0 V), open-load in ON is unaffected.
 
-**Failure mode (RIS and DEN):** a lost or stuck-high DEN with a faulted channel only overheats RIS (one 1206
-resistor, ≈ 1 W at the 40 mA maximum, a few seconds to hot) – it cannot switch an output on or off, so no output
-fails to a hazardous state; a failed-open RIS reads as zero current (a fault would not be reported). With RIS as two parallel 1 kΩ (T-0107), one
+**Failure mode (RIS and DEN):** a lost or stuck-high DEN with a faulted channel only heats RIS – it cannot switch an
+output on or off, so no output fails to a hazardous state. Since decision 235 the pair carries the 40 mA maximum
+(0.40 W per part) continuously within its rating, so a stuck DEN no longer overheats RIS (before: ≈ 1 W in 0.25 W
+parts). If one part of a pair fails open during a fault, the other sees up to the IS compliance voltage
+(VS − 3.5 V ≈ 26.5 V at 30 V): ≤ 26.5 mA, ≤ 0.70 W in one part – still under its 0.75 W at 65 °C, but hot (bring-up
+or a fault report should lead to replacing it); a failed-open RIS reads as zero current (a fault would not be reported). With RIS as two parallel 1 kΩ (T-0107), one
 part failing open doubles the reading (1 kΩ: a false high current or full-scale fault report, the safe direction);
 only both open reads zero; one part failing short (rare for thick-film) reads zero as before. These are not
 safety outputs on their own, but the sense path is used for the bilge-pump jam detection, so a competent person

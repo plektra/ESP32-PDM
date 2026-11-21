@@ -6018,7 +6018,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 0 0 270)
 			(layer "F.Fab")
 			(hide yes)
@@ -6041,11 +6041,23 @@
 				)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
 			(at 0 0 270)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "59180cb9-73ae-4954-8ed0-17551bedba7e")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
+			(at 0 0 270)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "9eb112e0-3570-4ff8-b941-1f05f76cf46f")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12501,7 +12513,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 0 0 270)
 			(layer "F.Fab")
 			(hide yes)
@@ -12524,11 +12536,23 @@
 				)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
 			(at 0 0 270)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "290ab800-c44b-4f66-b68d-9803b2cda4a2")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
+			(at 0 0 270)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "667477c8-315e-4ed7-9fc6-863c5f9f578f")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13612,7 +13636,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 0 0 270)
 			(layer "F.Fab")
 			(hide yes)
@@ -13635,11 +13659,23 @@
 				)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
 			(at 0 0 270)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "d464e7d5-bd75-4cde-834f-cd0da760b4a0")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
+			(at 0 0 270)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "956285ab-2c7d-4ae0-9cdf-5ff2599ea557")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19934,7 +19970,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 0 0 270)
 			(layer "F.Fab")
 			(hide yes)
@@ -19957,11 +19993,23 @@
 				)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
 			(at 0 0 270)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "5d3a203d-8563-475c-8db2-5b2e9cb9beff")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
+			(at 0 0 270)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "b61e6ec7-a430-436d-8c70-4ae6f799b80b")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -26794,7 +26842,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -26817,11 +26865,23 @@
 				)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
 			(at 0 0 90)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "5a025f24-ff99-4371-95e6-865c5913d367")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
+			(at 0 0 90)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "9b757334-b9b1-4a14-8a66-bfb953fcbc66")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -28342,7 +28402,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 0 0 270)
 			(layer "F.Fab")
 			(hide yes)
@@ -28365,11 +28425,23 @@
 				)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
 			(at 0 0 270)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "34553188-4746-45f8-8835-7376ce280039")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
+			(at 0 0 270)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "cf739a81-e22d-4c85-bdac-3bed5ef70d5a")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -28837,7 +28909,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -28860,11 +28932,23 @@
 				)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
 			(at 0 0 90)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "747aa6bf-ab62-48ba-bd8d-78b5711399cb")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
+			(at 0 0 90)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "05b05c49-8312-45f5-b803-e2a6b8185f2b")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -34083,7 +34167,7 @@
 				)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "Resistor, 1206 0.75 W pulse-proof thick film (RIS, decision 235)"
 			(at 0 0 270)
 			(layer "F.Fab")
 			(hide yes)
@@ -34106,11 +34190,23 @@
 				)
 			)
 		)
-		(property "LCSC" "C4410"
+		(property "LCSC" "C844867"
 			(at 0 0 270)
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "d2e53090-bb5f-46a4-8c98-9cd56be1d3c6")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "CRCW12061K00FKEAHP"
+			(at 0 0 270)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "cfc53440-fc4b-4239-b0d0-b14bd306ecf4")
 			(effects
 				(font
 					(size 1.27 1.27)

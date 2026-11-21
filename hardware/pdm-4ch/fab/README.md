@@ -41,15 +41,18 @@ anode). The CPL uses KiCad's rotation without correction; fix them in the previe
 
 | Item | USD |
 |---|---|
-| Parts at need quantity (398 pcs, all at the 1+ price) | 38.93 |
-| Extended-part loading fees: 14 unique × 3 USD | 42.00 |
-| **Parts + fees** | **80.93** |
+| Parts at need quantity (398 pcs, all at the 1+ price) | 39.59 |
+| Extended-part loading fees: 15 unique × 3 USD | 45.00 |
+| **Parts + fees** | **84.59** |
+
+Update 2026-11-21 (decision 238): the 16 RIS parts moved from basic C4410 (0.0085 USD) to extended C844867
+(0.05 USD): +0.66 USD parts, +3 USD for one more extended part.
 | Hand-soldered sockets J4, J5, J10, J11 + plugs for J4, J5, J11 (separate LCSC lines) | ≈ 5.01 |
 
 PCB fabrication, Standard PCBA setup/stencil and shipping come from the JLCPCB quote page and are not included.
 Unit prices change daily; recheck in the cart.
 
-Extended parts (fee each): C170101, C487384, C2687131, C70113, C165948, C96963, C5464765, C7420022, C52155402,
+Extended parts (fee each): C844867, C170101, C487384, C2687131, C70113, C165948, C96963, C5464765, C7420022, C52155402,
 C2913206, C22427220, C528763, C534868, C5219203. Everything else is basic or preferred (no fee).
 
 Stock flags:

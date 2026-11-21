@@ -1,7 +1,9 @@
 # pdm-4ch status
 
-Updated: 2026-11-21 (decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+Updated: 2026-11-21 (decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
+
+**2026-11-21 (`/board pdm-4ch pcb`, decision 238, owner):** decision 235 done. The eight RIS parts R103/R107 … R403/R407 are now **Vishay CRCW12061K00FKEAHP C844867** (1206, 0.75 W at 70 °C; 0.40 W each at the 40 mA fault maximum = 53 % at 65 °C). Same footprint, no layout change: `channel.kicad_sch` by `tools/ksch.py` (netlist identical, 167 nets; ERC unchanged, 5 library notices), PCB footprint fields synced (LCSC, Description, MPN), JLCPCB package rebuilt (DRC gate 0 errors / 0 unconnected / 0 parity; BOM 54 unique parts, one more extended: 15 fees). Facts file `docs/part-facts/C844867.md`, design-notes §6.1 and the failure-mode note updated.
 
 **2026-11-21 (`/system firmware`, decisions 230–236, owner):** firmware rulings: stack confirmed, SensESP v3 after a build trial (230); fault behaviour confirmed, bus outputs off after a reset (231); NMEA 2000 messages confirmed plus bus alerts (232); version 1 = Active + OTA (233); PWM rating 221 confirmed and PWM added to the draft (234). **Decision 235: RIS gets a hardware cover for the 40 mA fault before the first order** (see Next). The "For /system" items are done: layout rules and mechanics are in ARCHITECTURE (236); the firmware items (IO13, spare pulls, IO12, RIS 500 Ω, DEN) are in the draft (`hal.cpp`, `pdm_config.h`).
 
@@ -123,13 +125,8 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
    merged. Schematic changes go through `tools/ksch.py` (agents), checked by ERC and the netlist compare; a KiCad 10
    format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
 2. Silkscreen: done (decision 224). After any part move or reroute run `scripts/silk.py` again and check the DRC.
-3. **Decision 235 first (owner, 2026-11-21): RIS hardware cover before the order.** R103/R107, R203/R207, R303/R307,
-   R403/R407 (2 × 1 kΩ 1206 C4410 per channel) must together carry 0.8 W (40 mA IIS(FAULT) max in 500 Ω) at the board
-   temperature. Try a higher-power 1206 1 kΩ first, no reroute: ROHM ESR18EZPF1001 C2074262 (0.5 W) or Vishay
-   CRCW12061K00FKEAHP C844867 (0.75 W), both extended; read the derating curve, land pattern and pulse rating
-   (part-facts file), check the 1206 footprint against the maker's land, update the schematic with `tools/ksch.py`
-   (ERC, netlist compare), BOM/CPL, `/cost` note (one more extended part). Only if no 1206 fits: 2512 (e.g. C54315 1 W)
-   and a reroute through the build scripts (rule 12). Then design-notes §6.1 and the failure-mode note.
+3. Decision 235 (RIS hardware cover): **done** (decision 238, C844867). Only the footprint check against the JLCPCB
+   footprint of C844867 is left, in the pre-order checklist.
 4. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). **Next step:** rebuild the JLCPCB
    package and work through the pre-order checklist below (footprints, CPL rotation, stock: U30 is now C5219203).
    Earlier notes for this step: Points to check first:
@@ -199,14 +196,16 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
   before FL1 is ever fitted (design-notes §8.5).
 - T-0051 (production / flashing): never burn eFuse `EFUSE_STRAP_JTAG_SEL` – IO3 is held low by the IS2 network
   (design-notes §2).
-- T-0107/T-0120: C30 and C104–C404 use C170101 2.2 µF instead of C13832 1 µF. pdm-4ch no longer carries C13832, so its loading fee is gone; this pays on short runs only. Revisit the choice if runs grow past about 12 boards (owner ruling Q-0063). RIS is now 2 × C4410 per channel.
+- T-0107/T-0120: C30 and C104–C404 use C170101 2.2 µF instead of C13832 1 µF. pdm-4ch no longer carries C13832, so its loading fee is gone; this pays on short runs only. Revisit the choice if runs grow past about 12 boards (owner ruling Q-0063). RIS is now 2 × C844867 per channel (decision 238; was 2 × C4410).
 - T-0121: check the KiCad footprints `Infineon_PG-HSOF-8-1` (Q30, pads 1 G / 2 S / 3 D) and `ESP32-PDM:TI_DDF0008A` (U30, since 2026-11-09; was `TSOT-23-8`; TI DDF land
   1.05 × 0.45 mm pads, 2.6 mm column pitch) against the JLCPCB footprints of C5464765 and C5219203 (U30 is the LM74502H-Q1 since decision 222). Recheck stock
   (C5464765 2016 on 2026-11-07, C5219203 1995 on 2026-11-17).
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
 - Stock 2026-11-17 (`fab/README.md`): U30 LM74500-Q1 C5219210 was out of stock everywhere; **U30 is now LM74502H-Q1
   C5219203** (1995 in stock, decision 222: pin 7 OV → GND, pin 8 SRC → VBAT_FL; pad 5 got its own VBAT_FL via and pad 7 a
-  GND via on the PCB; DRC 0 errors / 0 unconnected / parity 0). SMAJ30CA C19077548 has 172 pcs (20 needed). Parts + 14 extended-part fees for 2 boards ≈ 81 USD.
+  GND via on the PCB; DRC 0 errors / 0 unconnected / parity 0). SMAJ30CA C19077548 has 172 pcs (20 needed). Parts + 14 extended-part fees for 2 boards ≈ 81 USD (2026-11-21, decision 238: 15 fees, ≈ 84.6 USD).
+- Decision 238: check the KiCad `R_1206_3216Metric` land (G 1.80, Z 4.05, X 1.75 mm) against the JLCPCB footprint of
+  C844867 (Vishay land G 1.50, Z 3.60, X 1.80 mm, accepted on the datasheet) and recheck its stock (138848 on 2026-11-21).
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 - T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
 - Decision 220 (licence): add "CERN-OHL-S v2" and the source location `github.com/plektra/ESP32-PDM` to the PCB

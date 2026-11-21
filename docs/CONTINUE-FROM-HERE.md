@@ -1,12 +1,12 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-21 (decisions 215–236).
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-21 (decisions 215–238).
 
 ## Boards
 
 | Board | Schematic | PCB | Status file |
 |---|---|---|---|
-| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices; RIS hardware cover before the order (decision 235) | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 223); silkscreen done (decision 224); validator layout review done, V1 fixed (decision 225); test pads TP1/TP30/TP70–TP72 (decision 226); left: RIS parts (decision 235), then order preparation | `hardware/pdm-4ch/STATUS.md` |
+| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices; RIS hardware cover done (decisions 235, 238) | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 223); silkscreen done (decision 224); validator layout review done, V1 fixed (decision 225); test pads TP1/TP30/TP70–TP72 (decision 226); RIS parts done (decision 238: Vishay CRCW-HP C844867, package rebuilt); left: order preparation (pre-order checklist) | `hardware/pdm-4ch/STATUS.md` |
 | `pdm-hc2` (2 × TPS48110A-Q1 + MOSFETs) | done, ERC clean except library notices | not started | `hardware/pdm-hc2/STATUS.md` |
 
 Firmware: first draft in `firmware/` (decisions 227–229, confirmed by 230–232): pdm-4ch, Active mode, NMEA 2000 switch bank, current sense, soft fuse. Builds and passes its host tests; never run on a board. Rulings of 2026-11-21: SensESP v3 after a build trial (230), bus outputs off after a reset (231), NMEA 2000 bus alerts (232), version 1 = Active + OTA (233), PWM at 100 Hz (234). Open list: `firmware/README.md`.
@@ -26,7 +26,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout. Cable entry decided (decision 237): glands and a clamp comb from the bottom face, M12 5-pin panel connector for NMEA 2000, cable-tie anchors on the DIN mount; pick and check the M12 part and its pinout against J4.
 5. **`/board pdm-4ch pcb`** – routed (decision 219); EMC layout review done and E22/E23 fixed (decision 223);
    silkscreen done (decision 224); validated, V1 fixed (decision 225); test pads (decision 226, JLCPCB package rebuilt with them).
-   Left: RIS hardware cover (decision 235, `/board pdm-4ch`), the pre-order checklist, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
+   RIS hardware cover done (decision 238). Left: the pre-order checklist, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
    the rules are in `docs/ARCHITECTURE.md`, "PCB layout rules".
 6. **`/system firmware`** – done 2026-11-21 (decisions 230–235). Firmware work left, in order: (a) SensESP v3 build trial
    on the S3 next to the NMEA 2000 stack (230); (b) bus alerts 126983/126984 and Signal K notifications (231, 232);
