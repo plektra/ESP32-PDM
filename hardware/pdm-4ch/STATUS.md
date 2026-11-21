@@ -1,9 +1,11 @@
 # pdm-4ch status
 
-Updated: 2026-11-18 (decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
-222: U30 → LM74502H-Q1; decision 221 [proposed]: PWM rating)
+Updated: 2026-11-21 (decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
 
-**2026-11-18 (decisions 227–229 [proposed], firmware draft, no hardware change):** `firmware/` holds a first pdm-4ch firmware (Active mode, NMEA 2000 switch bank, DEN-pulsed current sense, soft fuse, panel LEDs, USB console). It builds for the ESP32-S3 and its logic passes 15 host tests; it has not run on a board. For bring-up it can replace MicroPython once the unverified values in `firmware/README.md` are settled (DEN settling time, IO33 state at reset); its TWAI driver covers the CAN test of bring-up.md §8.
+**2026-11-21 (`/system firmware`, decisions 230–236, owner):** firmware rulings: stack confirmed, SensESP v3 after a build trial (230); fault behaviour confirmed, bus outputs off after a reset (231); NMEA 2000 messages confirmed plus bus alerts (232); version 1 = Active + OTA (233); PWM rating 221 confirmed and PWM added to the draft (234). **Decision 235: RIS gets a hardware cover for the 40 mA fault before the first order** (see Next). The "For /system" items are done: layout rules and mechanics are in ARCHITECTURE (236); the firmware items (IO13, spare pulls, IO12, RIS 500 Ω, DEN) are in the draft (`hal.cpp`, `pdm_config.h`).
+
+**2026-11-18 (decisions 227–229, confirmed by 230–232, firmware draft, no hardware change):** `firmware/` holds a first pdm-4ch firmware (Active mode, NMEA 2000 switch bank, DEN-pulsed current sense, soft fuse, panel LEDs, USB console). It builds for the ESP32-S3 and its logic passes 15 host tests; it has not run on a board. For bring-up it can replace MicroPython once the unverified values in `firmware/README.md` are settled (DEN settling time, IO33 state at reset); its TWAI driver covers the CAN test of bring-up.md §8.
 
 **2026-11-18 (decision 226, owner – interactive): copper-only test pads.** The debug-access check found USB-Serial/JTAG, BOOT/RESET and J6 enough for firmware, but no test points for bring-up scoping (EMC review 2026-11-03 item 9). Added five bare 1.0 mm pads, top side, not in BOM/CPL: TP1 GND (17.6, 59.4) 3 mm from the buck SW node, TP30 VS (56.1, 42.7), TP70 CANH_BUS (83.6, 53.3), TP71 CANL_BUS (85.3, 54.6), TP72 GND_CAN (89.4, 57.3). No new track or via (pads join their pours or sit on the fixed CAN routes). Buck SW and +3V3 are probed on L1's pads. `silk.py` prints the net name beside each pad. Probe table with scope-ground points: `bring-up.md`. Schematic: TP1/TP30 on the root, TP70–TP72 in the shared `can` sheet (pdm-hc2 too); ERC unchanged, netlist only the five nodes added. Build (`LAND_BEST=1`): 0 DRC errors, 4 warnings (known), 0 unconnected, parity 0, pours whole, tracks/vias unchanged, VS-In2 2 pieces 966.9 mm², GND_CAN-F −0.9 mm². **Note:** the build no longer adds the 43 `sliver-*` fill keep-outs that the committed board carried; a build of the untouched HEAD gives the same (0 slivers, identical GND islands), so this is the build's own current output, not the pads. Fab package rebuilt: it was stale (CPL still had the pre-decision-223 C50/D24/D50/R19 positions); BOM unchanged, CPL 199 rows.
 
@@ -18,7 +20,7 @@ stays). Pads that lost their only tie got their own off-pad via (C101.2, C402.2,
 Not covered by the review: the fab package, the JLCPCB footprint/rotation checks and stock (pre-order list), the
 hot-plug surge path with the new U30.
 Updated: 2026-11-18 (RoHS/REACH check, no design change; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
-222: U30 → LM74502H-Q1; decision 221 [proposed]: PWM rating)
+222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
 
 **2026-11-18 (owner – interactive): RoHS and REACH check** of the 54 BOM parts and 7 THT connector parts,
 `docs/reviews/2026-11-18-rohs-reach-pdm-4ch.md` + `.csv`. RoHS: no non-compliant part (19 by exemption 7(a)/7(c)-I).
@@ -105,7 +107,7 @@ file missing in KiCad 10 (PROFETs, KF135T, KF2EDGRC, both WJ15EDGRC, USB-C, TS-1
 LCSC/EasyEDA STEP models in `lib/ESP32-PDM.3dshapes/` (see its README). Placement checked in renders. No copper,
 footprint pad or schematic change; DRC unchanged.
 
-**2026-11-17: PWM rating and showcase.** Decision 221 **[proposed], waiting for the owner:** a PWM-dimmed channel is
+**2026-11-17: PWM rating and showcase.** Decision 221 (confirmed by 234): a PWM-dimmed channel is
 rated 4 A on 12 V and 3.5 A on 24 V at 100 Hz (3 A at 200 Hz), from the datasheet switching energy and slew added to
 the heat budget (design-notes §4 "PWM dimming"); bring-up.md §9.4 measures it. The README carries a preview render
 (`docs/images/pdm-4ch-preview.jpg`, KiCad raytrace). A showcase page with a rotatable 3D model of the board (for the
@@ -121,7 +123,14 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
    merged. Schematic changes go through `tools/ksch.py` (agents), checked by ERC and the netlist compare; a KiCad 10
    format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
 2. Silkscreen: done (decision 224). After any part move or reroute run `scripts/silk.py` again and check the DRC.
-3. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). **Next step:** rebuild the JLCPCB
+3. **Decision 235 first (owner, 2026-11-21): RIS hardware cover before the order.** R103/R107, R203/R207, R303/R307,
+   R403/R407 (2 × 1 kΩ 1206 C4410 per channel) must together carry 0.8 W (40 mA IIS(FAULT) max in 500 Ω) at the board
+   temperature. Try a higher-power 1206 1 kΩ first, no reroute: ROHM ESR18EZPF1001 C2074262 (0.5 W) or Vishay
+   CRCW12061K00FKEAHP C844867 (0.75 W), both extended; read the derating curve, land pattern and pulse rating
+   (part-facts file), check the 1206 footprint against the maker's land, update the schematic with `tools/ksch.py`
+   (ERC, netlist compare), BOM/CPL, `/cost` note (one more extended part). Only if no 1206 fits: 2512 (e.g. C54315 1 W)
+   and a reroute through the build scripts (rule 12). Then design-notes §6.1 and the failure-mode note.
+4. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). **Next step:** rebuild the JLCPCB
    package and work through the pre-order checklist below (footprints, CPL rotation, stock: U30 is now C5219203).
    Earlier notes for this step: Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and
@@ -135,15 +144,15 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
    - Not a finding, noted: the VBAT_FL track at x = 40.25 (U30 pin 5 to the pour) is 0.3 mm from GND fill for
      about 4 mm, beyond rule 4's 0.6 mm pad zone. The BTT6050 slew is now read from the datasheet (0.3/0.8/1.4 V/µs),
      which closes the "slew UNVERIFIED" item for pdm-4ch.
-4. At the first order, check the CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°), and
+5. At the first order, check the CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°), and
    the footprints listed in the pre-order checklist below. The JLCPCB package (Gerber zip, BOM, CPL) is built by
    `python3 tools/jlc_package.py pdm-4ch` into `fab/` behind a DRC gate; see `fab/README.md` for the quote settings.
    The 2026-11-17 package is for quoting only and predates decisions 223–225 (D50, R19, C50, D24 moved; copper and
    silkscreen changed): rebuild it before quoting again.
-5. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384 and
+6. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384 and
    C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2. Remaining part check from
    the BOM audit: PESD2CAN pin 3 = common.
-6. Layout rules: `docs/ARCHITECTURE.md`, "PCB layout rules". Layout work is interactive (decision 216); a new
+7. Layout rules: `docs/ARCHITECTURE.md`, "PCB layout rules". Layout work is interactive (decision 216); a new
    signal routing is `pf_export.py` → `pf_route.py` → `pf_land.py` → `build_routing.sh` in `scripts/`.
 
 History of the schematic fix rounds and of the layout up to 2026-11-16: `STATUS-history.md` beside this file.
@@ -171,6 +180,7 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 
 ## Pre-order checklist (T-0065)
 
+- Decision 150: the cost reviews still price pdm-4ch as 2 layers; the next `/cost` prices 4 layers (owner's quote €43.95 for 5 boards, 100 × 75 mm).
 - Decision 127: no connector samples before the order; buy the connector sets with the board order and re-check their stock, plug sets included. Footprints of J10, J11, J5, J4 checked against the maker drawings and the EasyEDA footprints: pass (2026-11-08, see the log above). Hand-solder J10 with a powerful iron; check the joints.
 - J10 marking (T-0177, layout rule 2 of `docs/reviews/2026-11-07-emc-system-2.md`): silkscreen "BATTERY" and the polarity at J10. The cross-board mis-plug of T-0177 (battery plug into a pdm-hc2 J11) no longer applies: J10 is a fixed screw terminal with no plug (decision 121).
 - Recheck JLCPCB stock of the thin parts: TPS48110A (HC2), L1 SWPA6045S8R2MT (1231 on 2026-11-02), BTT6050 (4-ch),
@@ -209,21 +219,4 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 
 ## For /system
 
-- EMC 2026-11-17: add layout rules 1–4 of 2026-11-17 (design-notes §8.24: filter cap ≤ 5 mm from its resistor, TVS flow-through
-  on differential lines, short dead-end SW copper, re-check after a reroute) to `docs/ARCHITECTURE.md` "PCB layout rules".
-  Decision 223 adds one: every TVS and RF filter-cap GND pad has its own GND via (≤ 2.5 mm), never only fill or grid
-  stitching; on pdm-4ch `scripts/emc_report.py` reports all of these after each build.
-  Decision 225: rule 9 (no via on an SMD pad) gets an exception for thermal tabs ≥ 10 mm² (U6 DPAK tab); the
-  pdm-4ch build gates the rule.
-- Decision 150: cost reviews still price pdm-4ch as 2 layers; the owner's quote is €43.95 for 5 boards (4 layers, 100 × 75 mm). ARCHITECTURE Mechanics/Budgets: note 4 layers.
-- T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave spare inputs on J6 (IO35–IO37, IO42) with a pull enabled while unused.
-- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
-- T-0107 (`/system firmware`): the IS scale constant is now **RIS = 500 Ω** (2 × 1 kΩ). IL = VIS / 500 Ω × kILIS, ≈ 0.33 V/A for the BTT6050 and ≈ 0.128 V/A for the BTT6010 (design-notes §6.1). A sense current of about 5.8 mA reads full scale (2.9 V), below the minimum IIS(FAULT) of 6 mA, so DEN rule 2 still sees every fault.
-- T-0069 (`/system firmware`): firmware requirements for DEN (design-notes §6.1).
-- RIS at the 40 mA maximum fault current: 0.8 W in two 0.25 W parts since T-0107, covered only by firmware; hardware
-  cover needs a resistor of at least the fault power – owner decision if wanted.
-
-- Decision 127 (`/system mechanical`): the rail pitch is a soft goal, not a constraint. ARCHITECTURE Mechanics and decisions 97/123 still say "about 36 mm"; reword it as a target. Decision 123's arms-instead-of-plate choice for the long DIN mount was made for the 36 mm and may be revisited.
-- Decision 138: ARCHITECTURE Mechanics and decision 123's two mount depths (65/75 mm) – both boards are now 100 × 75 mm, one long DIN mount. Sync in `/system`.
-- Decision 128: ARCHITECTURE Mechanics still says "length up to 100 mm, set at layout"; now 100 mm on both boards, H1–H4 4 mm from both edges, rail-side hole spacing 92 mm. Sync in `/system`.
 - Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).

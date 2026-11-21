@@ -1,6 +1,8 @@
 # pdm-hc2 status
 
-Updated: 2026-11-18 (decision 226: test pads TP70–TP72 in the shared `can` sheet)
+Updated: 2026-11-21 (decisions 230–236: firmware rulings, ARCHITECTURE sync; decision 226: test pads TP70–TP72 in the shared `can` sheet)
+
+**2026-11-21 (`/system firmware`, decisions 230–236, no schematic change):** the firmware rulings (stack, fault behaviour, NMEA 2000 messages with bus alerts, Active + OTA, PWM) apply to pdm-hc2 when its firmware is written; IO12/IO13 handling as in the pdm-4ch draft. Board outline (100 × 75 mm, holes 4 mm from the edges, 92 mm rail-side) and layout rules 13–17 are in ARCHITECTURE (236); lay out to them.
 
 **2026-11-18 (decision 226, from the pdm-4ch session):** the shared `can` sheet gained three copper-only test pads, TP70 CANH_BUS, TP71 CANL_BUS, TP72 GND_CAN (`TestPoint:TestPoint_Pad_D1.0mm`, not in BOM/CPL), so this board has them too. ERC unchanged (0 errors, 5 library warnings); netlist: only those three nodes added. **PCB phase:** place them on the bus side behind the CAN TVS, TP72 on the GND_CAN pour, and add VS / GND-by-the-buck pads on the root as pdm-4ch did (TP30, TP1); probe buck SW and +3V3 on the inductor pads.
 
@@ -238,14 +240,12 @@ R71/R72 go between D9 and U5 (D9 at J4).
 
 ## For /system
 
-- Decision 128 (from the pdm-4ch floorplan, 2026-11-08): pdm-hc2 is **100 × 75 mm**, H1–H4 hole centres 4 mm from both edges, rail-side hole spacing 92 mm (the same as pdm-4ch, decision 123), 67 mm across; since decision 138 pdm-4ch is 100 × 75 mm too, so both boards share one outline and one DIN mount. Lay out to these figures.
 - T-0072/T-0055: J10 is keyed (decision 98); the board label carries the reverse-battery warning and the external-breaker requirement (≤ 15–18 A per output).
-- T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the
+- pdm-hc2 firmware (after the pdm-4ch draft; decisions 230–233 apply; no PWM until the gate slew is measured, 234). T-0072/T-0053: **firmware soft fuse** on IMON for each HC2 output (`/system firmware`): alarm and switch-off above the
   15 A rating (e.g. I²t), since the hardware breaker sits at ≈ 15–20 A. Firmware also reads IO4/IO5 (OUT sense,
   full scale ≈ 31.9 V) and reports "OUT high while off" as a float-driven run.
+- Firmware pins (decision 93, T-0160): IO12 high = SW_SUPPLY present, alert only with a healthy VBAT; IO13 status LED as a plain output (no pull-up), low in Sleep; IO8/IO11 have hardware pull-downs; give IO42 a pull while unused (the pdm-4ch draft does this only for its own spare list, `firmware/src/pins.h`).
 - **Next HC2 revision:** full reverse-polarity protection at J10 (deferred by Q-0044, keep on the list). Pre-charge path (TPS48111-Q1) if the prototype shows real loads exceed about 50 µF (decision 94).
-- Decision 93 (`/system firmware`): read IO12 (high = SW_SUPPLY present); alert only while VBAT_SENSE shows a healthy battery.
-- T-0160 (`/system firmware`): IO13 drives the status LED (high = on, ≈ 0.7 mA); keep its internal pull-up off; hold it low in Sleep. Leave IO42 with a pull enabled while unused.
 
 - **Bilge output fusing (T-0064 failure mode, needs README/installation rule):** D103/D203 sit outside the
   back-to-back MOSFETs. If a TVS fails short, a float-switch run feeds the short through the PDM output wire. The

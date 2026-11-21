@@ -1,8 +1,8 @@
 # ESP32-PDM firmware (draft)
 
 First draft, written before any board exists. It compiles and its control logic is tested on the development
-machine; **nothing has run on hardware yet**. The choices in it are proposals (decisions 227–229) until the owner
-rules on them in `/system firmware`. Licence: MIT (`LICENSE-MIT`).
+machine; **nothing has run on hardware yet**. Its stack, fault behaviour and NMEA 2000 messages were confirmed in
+`/system firmware` on 2026-11-21 (decisions 230–232); figures marked `proposed` in the code stay proposals until bring-up. Licence: MIT (`LICENSE-MIT`).
 
 ## What it does now
 
@@ -19,13 +19,22 @@ rules on them in `/system firmware`. Licence: MIT (`LICENSE-MIT`).
 - Battery voltage, board temperature (NTC), panel-supply alert (decision 93).
 - Reports on NMEA 2000: PGN 127501 (switch bank status) and PGN 127751 (voltage and current per channel).
 
+## Next (decisions 230–234)
+
+1. SensESP v3 build trial: this core on the ESP32-S3, next to the NMEA 2000 stack, flash size (230). If it fails, an
+   own small Signal K websocket client, Arduino OTA and a minimal settings page.
+2. Alerts on NMEA 2000 (PGN 126983, response 126984 for acknowledge/silence) and as Signal K notifications (231, 232).
+3. PWM at 100 Hz on the drive pins within decision 234's rating, with IS sampled in the on phase.
+4. OTA, enabled only with a password (233).
+5. Later: per-output settings, including "restore after reset" (231); Eco and Sleep after bring-up (233); pdm-hc2.
+
 ## What it does not do yet
 
 Wi-Fi and Signal K (alerts that can be acknowledged and muted, decision 20), OTA update, Eco and Sleep modes
 (design-notes §6), outputs held through a reset, panel LED dimming, PWM outputs, the heater thermostat, `pdm-hc2`,
 settings per output (name, rating, kILIS, fuse curve) and calibration.
 
-## Fault behaviour (proposed, decision 228)
+## Fault behaviour (decision 231)
 
 | Fault | Detected by | Firmware does | Panel LED | Clears |
 |---|---|---|---|---|

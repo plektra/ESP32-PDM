@@ -66,7 +66,7 @@ Channel drive pins must stay on RTC GPIOs (IO0–IO21) for output hold through d
 
 The live list. The EMC reviews, design-notes §8 and older decision rows give the reasons; where they differ from this
 list, this list holds. On `pdm-4ch` the router (`hardware/pdm-4ch/scripts/pf_route.py`) and the build
-(`build_routing.sh`) enforce rules 2–12; `pdm-hc2` follows the same rules when its layout starts.
+(`build_routing.sh`) enforce rules 2–12 and report rules 13–17 (`scripts/emc_report.py`); `pdm-hc2` follows the same rules when its layout starts.
 
 1. All SMT parts on the top side (decision 122). Connectors on the edges named in decision 128.
 2. Four layers: F.Cu/B.Cu 2 oz carry all load current; In1 is a solid GND plane (GND_CAN its own area) with no
@@ -85,7 +85,7 @@ list, this list holds. On `pdm-4ch` the router (`hardware/pdm-4ch/scripts/pf_rou
    Copper stays 0.5 mm from the board edge.
 8. Tracks and clearance 0.2 mm, vias 0.6/0.3 mm, +3V3 0.3 mm. Exceptions on `pdm-4ch`: VBUS and Net-(D3-A) 0.2 mm
    at J3 (decision 219), a 0.15 mm neck on CANL_XCVR between R71 and R72 (decision 168).
-9. No via on an SMD pad. In2 tracks stay 1.8 mm from GND through-hole pads (thermal relief). Two vias of one net
+9. No via on an SMD pad, except thermal tabs of at least 10 mm² (the U6 DPAK tab; decision 225). In2 tracks stay 1.8 mm from GND through-hole pads (thermal relief). Two vias of one net
    are at least 0.55 mm apart.
 10. GND copper on F.Cu, B.Cu and In2 is fill, not the reference plane: a fragment needs two vias to In1 or is
     removed by a fill keep-out; a GND pad the fill cannot reach gets a stub and a via (decisions 206, 214, 219).
@@ -94,10 +94,20 @@ list, this list holds. On `pdm-4ch` the router (`hardware/pdm-4ch/scripts/pf_rou
 12. The board file is the output of the build: a change goes into the scripts or `pf_routes.json`, never into the
     board alone (decision 163). A build is accepted with 0 DRC errors, schematic parity 0 and the gates of rules
     3, 5 and 10.
+13. A filter's shunt capacitor sits within 5 mm of its series resistor, with a GND via beside its pad; the track
+    onward to the protected part may be long (rule 1 of 2026-11-17, design-notes §8.24).
+14. TVS flow-through, also on differential lines: every protected line passes through its TVS pad, and nothing taps
+    the line between the connector and the clamp (rule 2 of 2026-11-17).
+15. Every TVS and RF filter-capacitor GND pad has its own GND via within 2.5 mm, never only fill or grid stitching
+    (decision 223).
+16. Dead-end copper on the buck SW node (DNP snubber or option footprints) stays short (≤ 3 mm of spur) and ≥ 3 mm
+    from the FB node and its divider (rule 3 of 2026-11-17).
+17. Rules 13–15 are re-checked after every reroute: the router knows nets, not the order of parts along a filtered
+    line. On pdm-4ch `scripts/emc_report.py` reports them after each build (rule 4 of 2026-11-17, decision 223).
 
 ## Mechanics
 
-Same four non-plated M3 holes (H1–H4) for every mounting (decision 97), one in each corner; both boards have the same length and the same hole spacing along the rail-side edge, with no copper and no parts within Ø 8 mm of each hole (decision 123). DIN mount: one solid printed ASA part on the two rail-side holes, or a long version also reaching the far corners along the short edges (65 / 75 mm depth), nylon M3 hardware (decision 123). DIN rail: bare board on a plastic carrier, PCB edge-on to the rail, about 36 mm of rail per unit, in an enclosure the installer provides. Alternative: a 3D-printed vented ASA enclosure, also for flat mounting. Nothing conductive from carrier, screws or enclosure reaches board copper (invariant 6).
+Same four non-plated M3 holes (H1–H4) for every mounting (decision 97), one in each corner, hole centres 4 mm from both edges: 92 mm apart along the rail-side edge, 67 mm across (decisions 128, 138); no copper and no parts within Ø 8 mm of each hole (decision 123). DIN mount: one solid printed ASA part on the two rail-side holes, or a long version also reaching the far corners along the short edges (one 75 mm depth, since both boards are 100 × 75 mm), nylon M3 hardware (decision 123). DIN rail: bare board on a plastic carrier, PCB edge-on to the rail, about 36 mm of rail per unit as a soft target that never limits connectors, layout or mount (decision 127; decision 123's arms-instead-of-plate choice for the long mount may be revisited), in an enclosure the installer provides. Alternative: a 3D-printed vented ASA enclosure, also for flat mounting. Nothing conductive from carrier, screws or enclosure reaches board copper (invariant 6).
 
 Connectors (decision 98): keyed plugs on right-angle sockets, hand-soldered, plugs pull away from the board edge. Exception for the pdm-4ch prototype: J10 is a fixed screw terminal, wire entry at the board edge (decision 121).
 
@@ -112,7 +122,21 @@ Connectors (decision 98): keyed plugs on right-angle sockets, hand-soldered, plu
 
 C577772 (pdm-hc2 J11) sources: any seller, flange header KF2EDGSRM-7.62 only; no substitute socket (decision 120). Connector stock is re-checked for the next revision (decision 121).
 
-Board depth about 65 mm (4-ch) and 75 mm (HC2), length up to 100 mm, set at layout. All SMT parts on the top side; a bottom-side part needs an owner ruling (decision 122).
+Both boards are 100 × 75 mm (decisions 128, 138), one 100 mm edge on the rail side. pdm-4ch has 4 copper layers, 2 oz outer (decision 150; owner's quote €43.95 for 5 boards, +€7.07 per order over 2 layers); pdm-hc2 follows PCB layout rule 2 when its layout starts. All SMT parts on the top side; a bottom-side part needs an owner ruling (decision 122).
+
+## Firmware (decisions 230–235)
+
+Shared by both boards; `firmware/` (draft, pdm-4ch first). PlatformIO, Arduino-ESP32, NMEA2000 library with the own
+TWAI driver; hardware-free control logic tested on the host. Wi-Fi, Signal K, OTA and web settings through SensESP v3
+after a build trial (230). Version 1: Active mode and password-protected OTA; Eco/Sleep after bring-up (233).
+
+- Panel LED on = output on, blinking = latched fault; no automatic retry; a fault clears when the switch opens or the
+  bus commands off; a bus-switched output comes back off after a reset (231). The firmware never overrides a closed
+  panel switch (invariant 1).
+- NMEA 2000: switch bank 127501/127502, 127751 per channel, alerts 126983/126984 (232); the same alerts go to Signal K.
+- DEN (pdm-4ch) is pulsed only while sampling IS and dropped at once on a full-scale reading (decision 36), also
+  with the hardware RIS cover of decision 235.
+- PWM on the drive pins at 100 Hz within the rating of decision 234; pdm-hc2 has no PWM until its gate slew is measured.
 
 ## Budgets [estimate until measured]
 

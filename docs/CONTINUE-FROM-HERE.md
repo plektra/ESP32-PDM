@@ -1,15 +1,15 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-18 (decisions 215–229).
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-21 (decisions 215–236).
 
 ## Boards
 
 | Board | Schematic | PCB | Status file |
 |---|---|---|---|
-| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 223); silkscreen done (decision 224); validator layout review done, V1 fixed (decision 225); test pads TP1/TP30/TP70–TP72 (decision 226); order preparation is left | `hardware/pdm-4ch/STATUS.md` |
+| `pdm-4ch` (4 × PROFET+24V) | done, ERC clean except library notices; RIS hardware cover before the order (decision 235) | 100 × 75 mm, 4 layers (decisions 138, 150); placed and **fully routed** (decision 219: 0 DRC errors, 0 unconnected, parity 0); EMC layout review done, E22/E23 fixed (decision 223); silkscreen done (decision 224); validator layout review done, V1 fixed (decision 225); test pads TP1/TP30/TP70–TP72 (decision 226); left: RIS parts (decision 235), then order preparation | `hardware/pdm-4ch/STATUS.md` |
 | `pdm-hc2` (2 × TPS48110A-Q1 + MOSFETs) | done, ERC clean except library notices | not started | `hardware/pdm-hc2/STATUS.md` |
 
-Firmware: first draft in `firmware/` (decisions 227–229, all **[proposed]**): pdm-4ch, Active mode, NMEA 2000 switch bank, current sense, soft fuse. Builds and passes its host tests; never run on a board. Open list: `firmware/README.md`.
+Firmware: first draft in `firmware/` (decisions 227–229, confirmed by 230–232): pdm-4ch, Active mode, NMEA 2000 switch bank, current sense, soft fuse. Builds and passes its host tests; never run on a board. Rulings of 2026-11-21: SensESP v3 after a build trial (230), bus outputs off after a reset (231), NMEA 2000 bus alerts (232), version 1 = Active + OTA (233), PWM at 100 Hz (234). Open list: `firmware/README.md`.
 
 ## Order of work
 
@@ -26,17 +26,20 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout.
 5. **`/board pdm-4ch pcb`** – routed (decision 219); EMC layout review done and E22/E23 fixed (decision 223);
    silkscreen done (decision 224); validated, V1 fixed (decision 225); test pads (decision 226, JLCPCB package rebuilt with them).
-   Left: the pre-order checklist, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
+   Left: RIS hardware cover (decision 235, `/board pdm-4ch`), the pre-order checklist, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
    the rules are in `docs/ARCHITECTURE.md`, "PCB layout rules".
-6. **`/system firmware`** – firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
+6. **`/system firmware`** – done 2026-11-21 (decisions 230–235). Firmware work left, in order: (a) SensESP v3 build trial
+   on the S3 next to the NMEA 2000 stack (230); (b) bus alerts 126983/126984 and Signal K notifications (231, 232);
+   (c) PWM at 100 Hz with the current-sense timing worked out (234); (d) OTA with a password (233); later Eco/Sleep,
+   per-output settings with "restore after reset", pdm-hc2. Original scope: firmware architecture: NMEA 2000 switch bank (PGN 127501/127502), power modes, soft fuse,
    heater thermostat, variant ID, VBAT and NTC readings. Owner's wish (decision 20): panel LED on = output on,
    blinking = fault; alerts and failures go to Signal K where they can be acknowledged and muted – design the
-   failure modes per output (what blinks, alerts, latches, clears). A draft exists (`firmware/`, decisions 227–229);
+   failure modes per output (what blinks, alerts, latches, clears). A draft exists (`firmware/`, decisions 227–229, confirmed by 230–232; decision 20 settled by 231 except Signal K acknowledge/mute);
    the session rules on its proposals and on Wi-Fi/Signal K, OTA, power modes and pdm-hc2.
 
 ## Waiting on the owner
 
-- **[proposed]** decisions 221 (PWM rating) and 227–229 (firmware draft: stack, fault behaviour, NMEA 2000 messages). Decision 20 (fault/alert handling) stays open until `/system firmware`; decision 228 is the draft's proposal for it.
+- No **[proposed]** decisions. Decision 20: the Signal K acknowledge/mute part is open until SensESP is in (decision 230).
 - Connector checks of decision 98 on the first assembled boards, not before the order (decision 127). Re-check connector stock before ordering.
 - Prototype bring-up and validation: `hardware/pdm-4ch/bring-up.md` (order, pass criteria, record sheet; MicroPython as
   bring-up firmware until `/system firmware`).
@@ -51,7 +54,7 @@ Ideas parked by the owner to keep focus on the two boards. Not decisions; pick u
   de-fogging, with stepless fan speed; also LED dimming of load outputs. Findings so far:
   - pdm-4ch: MCU can PWM the PROFET channels (LEDC on IO6–IO8/IO11) at ≤ 200 Hz (EMC limit); a closed panel switch
     forces the output fully on via the diode-OR; PROFET has no freewheel diode, so motor PWM puts the turn-off energy
-    into the PROFET clamp every cycle. PWM loss checked in the datasheet (decision 221 [proposed]: 3.5 A per dimmed
+    into the PROFET clamp every cycle. PWM loss checked in the datasheet (decision 221, confirmed by 234: 3.5 A per dimmed
     channel on 24 V at 100 Hz, design-notes §4); current-sense timing under PWM still not checked.
   - pdm-hc2: no PWM until the gate slew is limited and measured on the bench (Q-0001, EMC E2).
   - Stepless brushed-motor control needs ≈ 20–25 kHz, which conflicts with the EMC limits on long load cables near

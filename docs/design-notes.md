@@ -168,7 +168,7 @@ Findings that drove the design:
   terminal + VS copper ≤ 2 mΩ and rate the input terminal for 16 A (decisions 103, 104; J10 is 30 A UL / 32 A IEC, §7);
   output terminals ≥ 10 A.
 
-**PWM dimming on pdm-4ch (2026-11-17, decision 221 [proposed]).** PWM adds a switching loss per channel on top of
+**PWM dimming on pdm-4ch (2026-11-17, decision 221, confirmed by 234).** PWM adds a switching loss per channel on top of
 I²·RDS(on): each edge spends the slew-limited ramp half-on. Source: BTT6050-1ERA datasheet Rev 1.00 p. 15–16: slew
 dV/dtON / −dV/dtOFF 0.3 / 0.8 / 1.4 V/µs (min/typ/max, 30–70 %, VS 28 V, RL 12 Ω; P_5.5.11/12), tON / tOFF 20–150 µs
 (P_5.5.14/15), EON 0.6 mJ / EOFF 0.7 mJ typ at VS 36 V, RL 12 Ω (P_5.5.19/20, by design). Model for a resistive load:
@@ -571,7 +571,7 @@ Hardware: R103/R203/R303/R403 are now 680 Ω **1206**, 0.25 W, 1 %, C17975 (UNI-
 longer used on the board. The value is unchanged, so the sense scaling (≈ 0.45 V/A) is unchanged. The 1206 covers the
 typical fault current continuously. The 40 mA maximum (1.09 W) is **not** covered by hardware – by ruling that case is
 covered by the firmware rule above (IS is clamped at ≈ 3.3 V by D102, but the current still flows through RIS until DEN
-is dropped). A 2 W part was not fitted (not asked for). If the owner wants the 40 mA case covered in hardware, RIS would need a rating of about 1.5–2 W (a larger, costlier part): open point.
+is dropped). A 2 W part was not fitted (not asked for). If the owner wants the 40 mA case covered in hardware, RIS would need a rating of about 1.5–2 W (a larger, costlier part). **Decision 235 (2026-11-21): covered in hardware before the first order** – 2 × 1 kΩ in parallel must carry 0.8 W (40 mA² × 500 Ω) at board temperature; first try higher-power 1206 parts in the same footprint (ROHM ESR18 C2074262 0.5 W, Vishay CRCW-HP C844867 0.75 W, ratings from the LCSC listing, unverified), else 2512 and a reroute.
 
 **Update T-0107 (2026-11-03, cost lever L7, auto):** each RIS is now **two 1 kΩ 1206 0.25 W 1 % in parallel = 500 Ω**
 (R103 ‖ R107, R203 ‖ R207, R303 ‖ R307, R403 ‖ R407; UNI-ROYAL 1206W4F1001T5E, C4410, **basic**; facts file
@@ -2597,7 +2597,7 @@ with pin 1 and the drain pin J5.10, J4 "CAN".
 
 - [x] Panel cable: fused switch-supply output, constant-current LED sinks, TVS on every line (§5, decision 17)
 - [x] Battery-voltage measurement (IO10) and NTC near the switches (IO9) (decision 18)
-- [ ] Failure modes and alert handling: LED blink codes, Signal K alerts with acknowledge/mute (decision 20)
+- [x] Failure modes and alert handling: LED and latching settled (decision 231); alerts on NMEA 2000 and Signal K with acknowledge/mute in firmware (decisions 230, 232)
 - [x] Mounting and connectors (§7, decisions 97, 98)
 - [ ] DIN carrier and printed enclosure design, connector sample check (§7)
 - [x] Verify the PG-TDSO-14 footprint against the package drawing and the JLCPCB/EasyEDA footprint (§8.4, T-0066)

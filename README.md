@@ -8,7 +8,7 @@ Infineon PROFET+24V high-side switches, for 12 V and 24 V systems, assembled by 
 
 **Status:** Both boards (`hardware/pdm-4ch`, `hardware/pdm-hc2`) are complete at schematic level and pass ERC
 (apart from library-version notices). The `pdm-4ch` PCB is fully routed (0 DRC errors, 0 unconnected); the image
-above is rendered from it. Not tested in hardware. `pdm-4ch` goes first as a prototype, with `pdm-hc2` layout
+above is rendered from it. Not tested in hardware. A first firmware for `pdm-4ch` (`firmware/`) builds and passes its host tests; it has not run on a board. `pdm-4ch` goes first as a prototype, with `pdm-hc2` layout
 after its bring-up.
 
 ## Boards
