@@ -1266,6 +1266,11 @@ power-up on the prototype.
     The cjiang land is 1.3 × 0.9 mm pads, L 5.5, G1 2.9, H 3.4, G2 1.6 mm. Both cover the electrodes (D 0.70, E 0.85 mm).
   - **The cjiang drawing does not number the pads:** check the pad numbering against the JLCPCB footprint of C20624726
     before FL1 is fitted. With one pair swapped, the choke works in differential mode and corrupts the bus.
+  - **Checked 2026-11-21 (`docs/reviews/2026-11-21-footprints-pdm-4ch.md`, F1): it does not match.** The EasyEDA
+    footprint of C20624726 equals the cjiang land and runs each winding end to end along the long side (1 → 2 and
+    4 → 3 across the 4.2 mm pitch). The ACM4532 placeholder pairs pads 1–2 on one short side, so a fitted FL1 would join
+    CANH_XCVR to CANL_XCVR. Before fitting: renumber the footprint to the EasyEDA order, reroute the four CAN tracks
+    and R71/R72, and confirm the windings on a sample with an ohmmeter.
 - **R71/R72, fitted:** 0 Ω 0402 (C17168, basic, the same part as R43), one across each winding (CANH_BUS–CANH_XCVR,
   CANL_BUS–CANL_XCVR). To fit FL1, remove R71 and R72.
 - **Order on the line:** J4 → D9 (PESD2CAN at the connector) → FL1/R71/R72 → U5. The TVS stays on the cable side of the

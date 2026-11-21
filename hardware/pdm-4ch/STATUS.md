@@ -1,7 +1,17 @@
 # pdm-4ch status
 
-Updated: 2026-11-21 (decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+Updated: 2026-11-21 (footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
+
+**2026-11-21 (`/board pdm-4ch pcb`, footprint check, owner asked for the scripted comparison):** 37 LCSC parts compared
+with their JLCPCB/EasyEDA footprints by `tools/fp_check/` (report `docs/reviews/2026-11-21-footprints-pdm-4ch.md`). No
+design file changed. Every fitted land passes (D30/D31 SMC and the SOD-123FL diodes are smaller than the maker's
+suggestion, accepted; Q30 land checked against the AGM601LL p. 5 drawing; PESD2CAN pin 3 = common confirmed). Found:
+(1) the CPL carries KiCad's raw rotation and origin, so **U3, U5, U11–U14, U30 and the SOT-23 parts need a rotation
+correction and U1, J3, U6, Q30 an origin correction** (table in the report; D7/D8 need none, polarity right at 0°);
+(2) **FL1 (DNP) cannot be fitted as drawn**: EasyEDA/cjiang put each winding end to end along the long side, our
+footprint pairs pads 1–2 on the short side, so a fitted FL1 would join CANH_XCVR to CANL_XCVR. No effect on this order.
+Stock: all fitted parts in stock; SMAJ30CA back to 23897.
 
 **2026-11-21 (`/board pdm-4ch pcb`, decision 238, owner):** decision 235 done. The eight RIS parts R103/R107 … R403/R407 are now **Vishay CRCW12061K00FKEAHP C844867** (1206, 0.75 W at 70 °C; 0.40 W each at the 40 mA fault maximum = 53 % at 65 °C). Same footprint, no layout change: `channel.kicad_sch` by `tools/ksch.py` (netlist identical, 167 nets; ERC unchanged, 5 library notices), PCB footprint fields synced (LCSC, Description, MPN), JLCPCB package rebuilt (DRC gate 0 errors / 0 unconnected / 0 parity; BOM 54 unique parts, one more extended: 15 fees). Facts file `docs/part-facts/C844867.md`, design-notes §6.1 and the failure-mode note updated.
 
@@ -176,6 +186,11 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
   switch voltage (≈ 8 V at the switch, ≈ 8.5 V at the battery).
 
 ## Pre-order checklist (T-0065)
+
+**2026-11-21: the footprint, polarity, CPL-rotation and stock items below were checked by script**
+(`docs/reviews/2026-11-21-footprints-pdm-4ch.md`): all fitted lands pass; T-0118, T-0121, T-0143, T-0160, the
+decision 238 land, `CP_Elec_8x10`/`C_1206`, `D_SOD-882`/`TO-252-2`/`L_0805`, U5 and PESD2CAN pin 3 are closed. Open
+from it: apply the CPL rotation/origin corrections (owner's choice), FL1 footprint before FL1 is ever fitted (T-0067).
 
 - Decision 150: the cost reviews still price pdm-4ch as 2 layers; the next `/cost` prices 4 layers (owner's quote €43.95 for 5 boards, 100 × 75 mm).
 - Decision 127: no connector samples before the order; buy the connector sets with the board order and re-check their stock, plug sets included. Footprints of J10, J11, J5, J4 checked against the maker drawings and the EasyEDA footprints: pass (2026-11-08, see the log above). Hand-solder J10 with a powerful iron; check the joints.
