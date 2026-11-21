@@ -23,7 +23,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
    and propose levers.
 3. **`/validate pdm-4ch deep`** and **`/validate pdm-hc2 deep`** – independent check: pinouts, the two custom
    footprints, circuit math, heat budget.
-4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout.
+4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout. Cable entry decided (decision 237): glands and a clamp comb from the bottom face, M12 5-pin panel connector for NMEA 2000, cable-tie anchors on the DIN mount; pick and check the M12 part and its pinout against J4.
 5. **`/board pdm-4ch pcb`** – routed (decision 219); EMC layout review done and E22/E23 fixed (decision 223);
    silkscreen done (decision 224); validated, V1 fixed (decision 225); test pads (decision 226, JLCPCB package rebuilt with them).
    Left: RIS hardware cover (decision 235, `/board pdm-4ch`), the pre-order checklist, order and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);

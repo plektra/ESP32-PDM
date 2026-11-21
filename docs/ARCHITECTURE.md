@@ -109,6 +109,12 @@ list, this list holds. On `pdm-4ch` the router (`hardware/pdm-4ch/scripts/pf_rou
 
 Same four non-plated M3 holes (H1–H4) for every mounting (decision 97), one in each corner, hole centres 4 mm from both edges: 92 mm apart along the rail-side edge, 67 mm across (decisions 128, 138); no copper and no parts within Ø 8 mm of each hole (decision 123). DIN mount: one solid printed ASA part on the two rail-side holes, or a long version also reaching the far corners along the short edges (one 75 mm depth, since both boards are 100 × 75 mm), nylon M3 hardware (decision 123). DIN rail: bare board on a plastic carrier, PCB edge-on to the rail, about 36 mm of rail per unit as a soft target that never limits connectors, layout or mount (decision 127; decision 123's arms-instead-of-plate choice for the long mount may be revisited), in an enclosure the installer provides. Alternative: a 3D-printed vented ASA enclosure, also for flat mounting. Nothing conductive from carrier, screws or enclosure reaches board copper (invariant 6).
 
+Cable entry (decision 237): no connectors in the enclosure wall except CAN. Power and output cables pass through
+nylon glands, panel and thin wires through a printed clamp comb, all from the bottom face (drip loop), straight
+to the board plugs. NMEA 2000 enters on a panel-mount M12 5-pin connector (the standard drop-cable plug) wired short and direct
+to J4, whose protection stays unchanged (invariant 4); its shield pin stays open (decision 28) and the body is plastic
+or isolated from all copper (invariant 6). The DIN mount carries cable-tie anchors so no plug carries a cable; in the installer's enclosure its glands seal.
+
 Connectors (decision 98): keyed plugs on right-angle sockets, hand-soldered, plugs pull away from the board edge. Exception for the pdm-4ch prototype: J10 is a fixed screw terminal, wire entry at the board edge (decision 121).
 
 | Connector | Socket + plug | Rating UL / IEC | Row length | Reach from the board edge |

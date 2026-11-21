@@ -219,4 +219,4 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 
 ## For /system
 
-- Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`).
+- Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`), with the cable entry of decision 237 (bottom-face glands and clamp comb, M12 5-pin CAN panel connector to J4, cable-tie anchors on the DIN mount). Open there: pick the M12 part (plastic body or isolated metal, shield pin open) and map J4's four poles to its pins from the datasheets.

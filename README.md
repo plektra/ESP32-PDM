@@ -68,6 +68,11 @@ The first version of `pdm-4ch` is built with four BTT6050-1ERA (≈ 4 A per chan
   touch board copper. All connectors are keyed plugs that pull out from the board edge: wire them on the bench and leave room for the plug and cable bend. Exception: on the `pdm-4ch` prototype the battery connector J10 is a fixed screw terminal. Switch off the battery feed before unscrewing it, and on a DIN rail wire it before the neighbouring unit is fitted. Connect it only as marked: a reversed battery up to 30 V is blocked on the board, but check polarity before connecting.
   Alternatively use a vented 3D-printed enclosure, also for flat mounting. Each board gives off about 9 W at full load: in a
   shared enclosure keep the air inside at or below 50 °C for the full rating (estimate until measured), or derate.
+- **Cable entry and strain relief:** no connector plug may carry a cable's weight or pull. Support every cable near the
+  unit (a cable tie on the DIN mount's anchors, or the enclosure's glands and clamp), with a drip loop below the entry.
+  The printed enclosure takes power and output cables through nylon glands and the thin panel wires through a clamp
+  comb, all from the bottom face; the NMEA 2000 drop cable plugs into an M12 5-pin panel connector, whose shield pin is
+  not connected: do not tie the drop's shield to anything at the PDM.
 - **Board input limits:** at most **16 A** continuous through J10 on `pdm-4ch` and **36 A** on `pdm-hc2`, whatever the
   outputs could draw together. Size the battery feed, and its fuse, so that these limits are not exceeded.
 - **`pdm-hc2` timing:** after power is connected, the first switch-on of each output (also from a panel switch)
