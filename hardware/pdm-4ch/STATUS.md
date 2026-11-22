@@ -150,7 +150,8 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
 2. Silkscreen: done (decision 224). After any part move or reroute run `scripts/silk.py` again and check the DRC.
 3. Decision 235 (RIS hardware cover): **done** (decision 238, C844867; land checked 2026-11-21).
 4. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). Footprints, CPL and licence done
-   (2026-11-21/22). **Next step: quote and order** (fixture-fee check, connector sets and their stock, decision 127).
+   (2026-11-21/22). **Next step: quote and order, step by step in `fab/ORDER-CHECKLIST.md`** (2026-11-22; fixture-fee
+   check, placement preview, connector sets; record the result there and copy it here).
    No PCB fix is open before the order; open only on condition: E24 (below) and FL1 (before it is ever fitted).
    Earlier notes for this step: Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and

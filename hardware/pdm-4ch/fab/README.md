@@ -1,7 +1,7 @@
 # pdm-4ch JLCPCB package
 
-**For quoting only, not for ordering yet.** Still open before an order: silkscreen (layout stage 6), `/validate pdm-4ch`
-on the PCB, EMC E22/E23 (`docs/reviews/2026-11-17-emc-pdm-4ch.md`) and the pre-order checklist in `../STATUS.md`.
+**Ready to order (2026-11-22).** Step by step: `ORDER-CHECKLIST.md`. Silkscreen, validation, EMC fixes, footprint
+check and CPL corrections are done (`../STATUS.md`).
 
 Regenerate after any board or schematic change (it runs the DRC gate first):
 
@@ -34,8 +34,9 @@ In the BOM/CPL: 199 placed parts, 54 unique LCSC parts (one BOM line per LCSC pa
 JP1/JP30 (copper bridges) and the THT connectors J4, J5, J10, J11, which the owner buys and hand-solders (decision 85).
 Their sockets and plugs go in the same cart as separate LCSC parts.
 
-In the placement preview, check the rotation of U3, U11–U14 (EasyEDA draws them rotated 90°) and D7/D8 (C2286 pad 1 =
-anode). The CPL uses KiCad's rotation without correction; fix them in the preview.
+The CPL is corrected against JLCPCB's footprints (`CPL_FIX` in `tools/jlc_package.py`, 24 parts, report
+`docs/reviews/2026-11-21-footprints-pdm-4ch.md`); `package-report.md` lists them. In the placement preview they should
+already sit right: check, do not rotate them again. D7/D8 need no correction.
 
 ## Price check (2026-11-21, `docs/reviews/2026-11-21-cost-pdm-4ch.md`, 5 PCBs / 2 assembled)
 
@@ -60,12 +61,11 @@ Extended parts: C844867, C170101, C487384, C2687131, C70113, C165948, C96963, C5
 C2913206, C22427220, C528763, C534868, C5219203. Under Standard PCBA they cost the same 1.53 USD loading fee as basic parts.
 
 Stock flags:
-- U30 LM74500-Q1 C5219210 was out of stock (0) everywhere. **U30 is now LM74502H-Q1 C5219203** (decision 222):
-  1995 in stock on 2026-11-17, 1.49 USD, minimum order 1. Its footprint check (T-0121) is still open.
-- **D1, D16–D19, D50–D54 SMAJ30CA C19077548: 172 in stock** for 20 needed, so it is thin. JLCPCB's minimum purchase is
-  293 pcs (≈ 9 USD at the 100+ price).
-- Under 2000 in stock: L1 C96963 (1173), U3 C22427220 (1524), U11–U14 C534868 (1604), Q30 C5464765 (1650),
-  J10 C475108 (821).
+- U30 is LM74502H-Q1 C5219203 (decision 222; the LM74500-Q1 was out of stock): 1993 in stock on 2026-11-21,
+  footprint checked 2026-11-21.
+- SMAJ30CA C19077548: 23897 in stock on 2026-11-21 (was 172 on 2026-11-17).
+- Under 2000 in stock (2026-11-21): L1 C96963 (1173), U11–U14 C534868 (1604), Q30 C5464765 (1650), U30 C5219203 (1993).
+  Connectors (2026-11-22): all over 6000, J10 C475108 6023.
 - U1 ESP32-S3-MINI-1 is Standard-PCBA-only (already the basis, decision 100).
 
 ## BOM-step dry run (owner, 2026-11-17)
