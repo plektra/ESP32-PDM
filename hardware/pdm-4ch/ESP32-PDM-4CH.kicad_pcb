@@ -7,6 +7,13 @@
 		(legacy_teardrops no)
 	)
 	(paper "A4")
+	(title_block
+		(title "ESP32-PDM pdm-4ch")
+		(date "2026-11")
+		(rev "A")
+		(comment 1 "Hardware licence: CERN-OHL-S v2")
+		(comment 2 "Source: github.com/plektra/ESP32-PDM")
+	)
 	(layers
 		(0 "F.Cu" signal)
 		(4 "In1.Cu" signal)
@@ -49706,7 +49713,7 @@
 	(gr_text "GND"
 		(at 117.55 107.85 0)
 		(layer "F.SilkS")
-		(uuid "80256ab4-d364-45ef-9dac-537205295276")
+		(uuid "6a8692f9-365f-46eb-afa9-c18f1d964ff3")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49717,7 +49724,7 @@
 	(gr_text "VS"
 		(at 156.05 91.15 0)
 		(layer "F.SilkS")
-		(uuid "3c11dcf0-4b96-4cd5-bdd2-c746bd25a5b8")
+		(uuid "ac44fe19-26f5-43f8-8103-5dfae02204b0")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49728,7 +49735,7 @@
 	(gr_text "CANH"
 		(at 184.05 101.75 0)
 		(layer "F.SilkS")
-		(uuid "c6bda8fb-98cc-48c5-b705-6e855d9b62ca")
+		(uuid "8146e251-cc16-481e-949a-7b1f31e17d94")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49739,7 +49746,7 @@
 	(gr_text "CANL"
 		(at 187.25 102.05 0)
 		(layer "F.SilkS")
-		(uuid "8fb71c79-a156-43b1-92c2-8ac62b2f3d9c")
+		(uuid "330543b7-f3ae-4a31-876e-7f007188ffba")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49750,7 +49757,7 @@
 	(gr_text "OUT2"
 		(at 113.35 67.03 90)
 		(layer "F.SilkS")
-		(uuid "309e1035-1b83-4edd-b2aa-c733119c2fab")
+		(uuid "a5fc6aa3-d7c5-40e7-9268-b797d0e83d86")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49761,7 +49768,7 @@
 	(gr_text "OUT4"
 		(at 113.35 77.19 90)
 		(layer "F.SilkS")
-		(uuid "c7938cb5-cc03-4566-8572-6f2d7c9ffbd0")
+		(uuid "d1951e45-fb04-404f-b5e5-0f71086cf4d9")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49772,7 +49779,7 @@
 	(gr_text "OUT1"
 		(at 113.6 61.95 90)
 		(layer "F.SilkS")
-		(uuid "8fba20e6-0a5f-44bf-a978-59f973ba6f60")
+		(uuid "9d489bbd-ef53-4827-8e41-ad6ce95a536c")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49783,7 +49790,7 @@
 	(gr_text "OUT3"
 		(at 113.6 72.11 90)
 		(layer "F.SilkS")
-		(uuid "724b4654-47bb-44f5-b212-453ed91d012b")
+		(uuid "63ea9d77-30fb-49d0-9c7b-3775c86d8115")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49794,7 +49801,7 @@
 	(gr_text "GND_C"
 		(at 190.85 107 90)
 		(layer "F.SilkS")
-		(uuid "9d690cb9-cc15-46ba-9482-c7f4ec77875f")
+		(uuid "0e82ad85-1168-4791-bc00-8e70d0a8a689")
 		(effects
 			(font
 				(size 0.8 0.8)
@@ -49805,7 +49812,7 @@
 	(gr_text "BATTERY"
 		(at 109.95 82.624999 0)
 		(layer "F.SilkS")
-		(uuid "433a2a9a-29de-4edf-9037-1d64ebf5b81d")
+		(uuid "db3981e6-bbf2-407e-a9a0-e101de319287")
 		(effects
 			(font
 				(size 1 1)
@@ -49816,7 +49823,7 @@
 	(gr_text "PANEL"
 		(at 188.005 98.69 0)
 		(layer "F.SilkS")
-		(uuid "707a723a-83fe-4e4d-8720-2eaa4dab6930")
+		(uuid "65370981-1303-464e-a593-cd16e750e2c6")
 		(effects
 			(font
 				(size 1 1)
@@ -49827,7 +49834,7 @@
 	(gr_text "CAN"
 		(at 188.005 100.329999 0)
 		(layer "F.SilkS")
-		(uuid "7195b313-9e7e-40d3-82f5-ce544b073496")
+		(uuid "308506f5-4c0e-4e04-b70c-b296d3372a7b")
 		(effects
 			(font
 				(size 1 1)
@@ -49838,7 +49845,7 @@
 	(gr_text "+"
 		(at 120.795 89.45 0)
 		(layer "F.SilkS")
-		(uuid "d3735d41-0ce6-4145-8657-9d5aaf645069")
+		(uuid "b0cf1496-f293-42e3-b98b-131acf3f9687")
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -49849,7 +49856,7 @@
 	(gr_text "-"
 		(at 120.795 99.86 0)
 		(layer "F.SilkS")
-		(uuid "855e2127-7da5-440a-b823-dd2634d7b929")
+		(uuid "73a53b9d-de3e-44d1-ad01-ebfc4dfe0831")
 		(effects
 			(font
 				(size 1.5 1.5)
@@ -49860,7 +49867,7 @@
 	(gr_text "BAT +"
 		(at 112.07 86.45 0)
 		(layer "B.SilkS")
-		(uuid "fa9640ff-9701-41de-8401-ad3ac1bab4d7")
+		(uuid "6c3b4706-0830-4b62-bd5e-33168912a906")
 		(effects
 			(font
 				(size 1 1)
@@ -49872,7 +49879,7 @@
 	(gr_text "BAT -"
 		(at 112.07 102.61 0)
 		(layer "B.SilkS")
-		(uuid "9bbe1deb-0834-44c2-8765-55de2c34ccf9")
+		(uuid "629b1f8f-eae6-42a0-88ec-86965a473a12")
 		(effects
 			(font
 				(size 1 1)
@@ -49884,7 +49891,7 @@
 	(gr_text "OUT1"
 		(at 112.15 61.95 0)
 		(layer "B.SilkS")
-		(uuid "4cbfdb2e-2397-47b7-b32f-62e9d9f4d6ea")
+		(uuid "0bd750ef-0e06-4524-b0cb-01ab58a9d13d")
 		(effects
 			(font
 				(size 1 1)
@@ -49896,7 +49903,7 @@
 	(gr_text "OUT2"
 		(at 112.15 67.03 0)
 		(layer "B.SilkS")
-		(uuid "d444595b-3b54-43b7-aeb6-c815899c8392")
+		(uuid "7fe667c6-77f1-4825-bb5d-e7463a3ed109")
 		(effects
 			(font
 				(size 1 1)
@@ -49908,7 +49915,7 @@
 	(gr_text "OUT3"
 		(at 112.15 72.11 0)
 		(layer "B.SilkS")
-		(uuid "6e1506b0-5f72-45f1-a9fa-f9f8cc2b823b")
+		(uuid "90792941-1546-4a26-8919-d2050b0909dd")
 		(effects
 			(font
 				(size 1 1)
@@ -49920,7 +49927,7 @@
 	(gr_text "OUT4"
 		(at 112.15 77.19 0)
 		(layer "B.SilkS")
-		(uuid "c16217aa-c902-47e6-a1ef-0fd13b5925f6")
+		(uuid "c686ed13-3b11-4fe3-aa64-5477d039ad7d")
 		(effects
 			(font
 				(size 1 1)
@@ -49932,7 +49939,19 @@
 	(gr_text "rev A 2026-11  CERN-OHL-S v2"
 		(at 141.2 118.95 0)
 		(layer "B.SilkS")
-		(uuid "d821f233-8351-4250-8016-449d1fcdec09")
+		(uuid "c7ca0494-200d-4185-9339-35a9b6050fa9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+			(justify mirror)
+		)
+	)
+	(gr_text "github.com/plektra/ESP32-PDM"
+		(at 141.7 121.95 0)
+		(layer "B.SilkS")
+		(uuid "31ac64b8-1a5f-4261-bd51-d0bc888f1c62")
 		(effects
 			(font
 				(size 1 1)
@@ -49944,7 +49963,7 @@
 	(gr_text "ESP32-PDM pdm-4ch"
 		(at 145.7 115.95 0)
 		(layer "B.SilkS")
-		(uuid "9d65f6ed-ee51-497a-8ec1-bd42a5d5a015")
+		(uuid "0ee9884f-a3f6-44e6-ba35-b874be220612")
 		(effects
 			(font
 				(size 1 1)
@@ -49956,7 +49975,7 @@
 	(gr_text "GND"
 		(at 158.2 105.05 0)
 		(layer "B.SilkS")
-		(uuid "b2921aa5-3107-4fbe-bb0d-0e7d5eea5a59")
+		(uuid "2a4c7591-70cb-4151-ba0e-b8b6d34a6be6")
 		(effects
 			(font
 				(size 1 1)
@@ -49968,7 +49987,7 @@
 	(gr_text "TXD0"
 		(at 158.55 107.59 0)
 		(layer "B.SilkS")
-		(uuid "41405320-9f86-452b-b31a-085cde29317b")
+		(uuid "6a050d18-4e2f-4090-adee-fd277056d2d5")
 		(effects
 			(font
 				(size 1 1)
@@ -49980,7 +49999,7 @@
 	(gr_text "RXD0"
 		(at 158.55 110.13 0)
 		(layer "B.SilkS")
-		(uuid "2d53b880-3e4d-4131-9f06-8e2fb9d3eeac")
+		(uuid "3e6362aa-31c7-41ba-ac7e-42b5c069af15")
 		(effects
 			(font
 				(size 1 1)
@@ -49992,7 +50011,7 @@
 	(gr_text "IO35"
 		(at 158.55 112.67 0)
 		(layer "B.SilkS")
-		(uuid "67b24836-ee2f-47dd-ad95-2e94a8e84c34")
+		(uuid "dfa128fe-9a67-4b4b-b9b6-38d09b37dfd3")
 		(effects
 			(font
 				(size 1 1)
@@ -50004,7 +50023,7 @@
 	(gr_text "IO36"
 		(at 158.55 115.21 0)
 		(layer "B.SilkS")
-		(uuid "94cab9bc-19b9-47a4-be8d-85bd7b362224")
+		(uuid "18ab519d-9262-4eb8-a6c9-770565dba6a9")
 		(effects
 			(font
 				(size 1 1)
@@ -50016,7 +50035,7 @@
 	(gr_text "IO37"
 		(at 158.55 117.75 0)
 		(layer "B.SilkS")
-		(uuid "86b12466-8e42-4f85-8b28-184a57509300")
+		(uuid "e07f85a1-1389-4b49-8542-8442a450b5aa")
 		(effects
 			(font
 				(size 1 1)
@@ -50028,7 +50047,7 @@
 	(gr_text "IO42"
 		(at 158.55 120.29 0)
 		(layer "B.SilkS")
-		(uuid "c5fb1205-22ec-4d84-9de2-ec6b967244f9")
+		(uuid "54cc7cf1-1803-4df0-a955-01969088af3a")
 		(effects
 			(font
 				(size 1 1)
@@ -50040,7 +50059,7 @@
 	(gr_text "+3V3"
 		(at 158.55 122.83 0)
 		(layer "B.SilkS")
-		(uuid "45066979-b7a0-4a63-884a-e57cc9a75a9e")
+		(uuid "c87b148c-b64b-4043-bcf1-4bcc2ec91c38")
 		(effects
 			(font
 				(size 1 1)
@@ -50052,7 +50071,7 @@
 	(gr_text "SW SUPPLY"
 		(at 186.599999 80.81 0)
 		(layer "B.SilkS")
-		(uuid "d8a9b250-eb27-4744-8124-6b39a200fa92")
+		(uuid "f4bdedc2-d45d-4459-8bda-d7862a6a50d8")
 		(effects
 			(font
 				(size 1 1)
@@ -50064,7 +50083,7 @@
 	(gr_text "NET-C GND"
 		(at 186.599999 113.85 0)
 		(layer "B.SilkS")
-		(uuid "51afc6f1-12ed-4579-9129-bc268bba6f03")
+		(uuid "b5f2eee1-1b71-48fd-92c8-2e7598c77700")
 		(effects
 			(font
 				(size 1 1)
@@ -50076,7 +50095,7 @@
 	(gr_text "CAN-L"
 		(at 188 102.42 0)
 		(layer "B.SilkS")
-		(uuid "1a5ce2a1-ac38-4b8d-a8a6-d274923ceb50")
+		(uuid "e5f980a0-a258-4d71-9be2-bb83fd05a424")
 		(effects
 			(font
 				(size 1 1)
@@ -50088,7 +50107,7 @@
 	(gr_text "CAN-H"
 		(at 188 106.23 0)
 		(layer "B.SilkS")
-		(uuid "ba2876e8-2af6-42bf-b01b-dc56d1f70f08")
+		(uuid "21749092-be98-409e-b3ef-bfd52634623a")
 		(effects
 			(font
 				(size 1 1)
@@ -50100,7 +50119,7 @@
 	(gr_text "NET-S"
 		(at 188 110.04 0)
 		(layer "B.SilkS")
-		(uuid "4f4e69b7-bd5d-429b-a968-bc1178232e40")
+		(uuid "4b7445e0-af54-49ff-9391-7f3b91a0dd8f")
 		(effects
 			(font
 				(size 1 1)
@@ -50112,7 +50131,7 @@
 	(gr_text "LED4"
 		(at 188.349999 65.57 0)
 		(layer "B.SilkS")
-		(uuid "33fe9172-f2f4-4087-a937-89867484a0e7")
+		(uuid "11731dd1-e936-49ff-bdab-dbdc969e97f6")
 		(effects
 			(font
 				(size 1 1)
@@ -50124,7 +50143,7 @@
 	(gr_text "LED3"
 		(at 188.349999 69.38 0)
 		(layer "B.SilkS")
-		(uuid "74c7f2a2-e984-43eb-8371-a8db657f7848")
+		(uuid "11a69e13-149a-40fc-a8dc-1ed159e73bdb")
 		(effects
 			(font
 				(size 1 1)
@@ -50136,7 +50155,7 @@
 	(gr_text "LED2"
 		(at 188.349999 73.19 0)
 		(layer "B.SilkS")
-		(uuid "62a31e18-d58b-4dea-9be8-8ee05371ca56")
+		(uuid "7cdb3605-6b59-41ed-a5f4-c7adf7424ae6")
 		(effects
 			(font
 				(size 1 1)
@@ -50148,7 +50167,7 @@
 	(gr_text "LED1"
 		(at 188.349999 77 0)
 		(layer "B.SilkS")
-		(uuid "837d6970-e5f4-441b-a1f2-c3ca7b1c421a")
+		(uuid "3b5625ca-18b2-4737-9375-b3a7bf3d009f")
 		(effects
 			(font
 				(size 1 1)
@@ -50160,7 +50179,7 @@
 	(gr_text "GND"
 		(at 188.7 61.76 0)
 		(layer "B.SilkS")
-		(uuid "978fdc29-8919-4b55-ad75-3f4f9b4bbdf0")
+		(uuid "01ad25f4-b40d-48af-bd4f-31b065c05c16")
 		(effects
 			(font
 				(size 1 1)
@@ -50172,7 +50191,7 @@
 	(gr_text "SW4"
 		(at 188.7 84.62 0)
 		(layer "B.SilkS")
-		(uuid "8000b1a3-7174-41be-bd3f-f300464d2735")
+		(uuid "1d4b37cc-4946-433b-bf87-acc1ed1f7094")
 		(effects
 			(font
 				(size 1 1)
@@ -50184,7 +50203,7 @@
 	(gr_text "SW3"
 		(at 188.7 88.43 0)
 		(layer "B.SilkS")
-		(uuid "a477be79-bf6a-4827-b324-5ba7f1f0c931")
+		(uuid "64e0d545-53db-4cdd-aba4-e96a6906c820")
 		(effects
 			(font
 				(size 1 1)
@@ -50196,7 +50215,7 @@
 	(gr_text "SW2"
 		(at 188.7 92.24 0)
 		(layer "B.SilkS")
-		(uuid "3dc9806e-c4dc-41e8-aa3e-788dc05e252a")
+		(uuid "1aff470e-689b-43e5-a837-fe054715e939")
 		(effects
 			(font
 				(size 1 1)
@@ -50208,7 +50227,7 @@
 	(gr_text "SW1"
 		(at 188.7 96.05 0)
 		(layer "B.SilkS")
-		(uuid "05baad89-255c-430c-b0ca-eb419c053e5d")
+		(uuid "d324b8aa-edc7-4f0c-ab90-c87bb052aec6")
 		(effects
 			(font
 				(size 1 1)

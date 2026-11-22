@@ -95,6 +95,23 @@ def set_prop(sym, name, value, hide=True):
     sym.insert(index_after_props(sym), ['property', S(name), S(value), ['at', at[1], at[2], '0'], eff])
 
 
+def set_title_block(t, title, date='', rev='', company='', comments=()):
+    """Replace or add the sheet's title block (placed after `paper`, as KiCad writes it)."""
+    old = first(t, 'title_block')
+    tb = ['title_block', ['title', S(title)]]
+    if date:
+        tb.append(['date', S(date)])
+    if rev:
+        tb.append(['rev', S(rev)])
+    if company:
+        tb.append(['company', S(company)])
+    tb += [['comment', str(i), S(c)] for i, c in enumerate(comments, 1) if c]
+    if old is not None:
+        t[t.index(old)] = tb
+    else:
+        t.insert(t.index(first(t, 'paper')) + 1, tb)
+
+
 def index_after_props(sym):
     idx = [i for i, c in enumerate(sym) if isinstance(c, list) and c and c[0] == 'property']
     return idx[-1] + 1

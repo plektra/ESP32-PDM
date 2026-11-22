@@ -4,6 +4,13 @@
 	(generator_version "8.0")
 	(uuid "f4b6537b-82f9-4059-bfb2-60ee5cd1292f")
 	(paper "A4")
+	(title_block
+		(title "ESP32-PDM pdm-4ch: CAN")
+		(date "2026-11")
+		(rev "A")
+		(comment 1 "Hardware licence: CERN-OHL-S v2")
+		(comment 2 "Source: github.com/plektra/ESP32-PDM")
+	)
 	(lib_symbols
 		(symbol "Connector_Generic:Conn_01x04"
 			(pin_names hide

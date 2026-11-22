@@ -3,6 +3,13 @@
 Updated: 2026-11-21 (footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
 
+**2026-11-22 (`/board pdm-4ch pcb`, decision 220 licence, owner: "add it"):** title blocks on all five schematic
+sheets (`tools/ksch.py` `set_title_block`, by `scripts/title_block.py`) and on the PCB (pcbnew): "ESP32-PDM pdm-4ch",
+rev A, 2026-11, comments "Hardware licence: CERN-OHL-S v2" and "Source: github.com/plektra/ESP32-PDM". The source
+location was missing on the board: `scripts/silk.py` now prints it as a third bottom line under the licence (1.0 mm).
+Checks: ERC unchanged (5 library notices), netlist nets identical (167); PCB diff = title block + the new text (silk
+texts redrawn), DRC 0 errors / 0 unconnected / 0 parity; package rebuilt, only the Gerber zip changed.
+
 **2026-11-22 (`/board pdm-4ch pcb`, owner: "apply corrections"):** the CPL corrections of the footprint check are in
 `tools/jlc_package.py` (`CPL_FIX`, per LCSC part, applied only on the footprint it was measured on; the report flags
 any other). Package rebuilt: DRC gate 0 errors / 0 unconnected / 0 parity, 24 CPL rows changed, BOM and copper
@@ -141,10 +148,10 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
    merged. Schematic changes go through `tools/ksch.py` (agents), checked by ERC and the netlist compare; a KiCad 10
    format upgrade, if wanted, is a scripted package of its own with a netlist-identical check.
 2. Silkscreen: done (decision 224). After any part move or reroute run `scripts/silk.py` again and check the DRC.
-3. Decision 235 (RIS hardware cover): **done** (decision 238, C844867). Only the footprint check against the JLCPCB
-   footprint of C844867 is left, in the pre-order checklist.
-4. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). **Next step:** rebuild the JLCPCB
-   package and work through the pre-order checklist below (footprints, CPL rotation, stock: U30 is now C5219203).
+3. Decision 235 (RIS hardware cover): **done** (decision 238, C844867; land checked 2026-11-21).
+4. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). Footprints, CPL and licence done
+   (2026-11-21/22). **Next step: quote and order** (fixture-fee check, connector sets and their stock, decision 127).
+   No PCB fix is open before the order; open only on condition: E24 (below) and FL1 (before it is ever fitted).
    Earlier notes for this step: Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and
    Net-(D3-A) necks at J3 (decision 219), the fill keep-outs that removed GND slivers on F.Cu/B.Cu/In2.
@@ -163,9 +170,8 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
    `python3 tools/jlc_package.py pdm-4ch` into `fab/` behind a DRC gate; see `fab/README.md` for the quote settings.
    The 2026-11-17 package is for quoting only and predates decisions 223–225 (D50, R19, C50, D24 moved; copper and
    silkscreen changed): rebuild it before quoting again.
-6. Before ordering: check the `CP_Elec_8x10` and `C_1206` footprints against the JLCPCB footprints of C487384 and
-   C170101; before fitting D103–D403 read the demagnetisation note in design-notes §8.2. Remaining part check from
-   the BOM audit: PESD2CAN pin 3 = common.
+6. Before fitting D103–D403 read the demagnetisation note in design-notes §8.2. (`CP_Elec_8x10`, `C_1206` and
+   PESD2CAN pin 3: checked 2026-11-21.)
 7. Layout rules: `docs/ARCHITECTURE.md`, "PCB layout rules". Layout work is interactive (decision 216); a new
    signal routing is `pf_export.py` → `pf_route.py` → `pf_land.py` → `build_routing.sh` in `scripts/`.
 
@@ -232,8 +238,8 @@ footprint before FL1 is ever fitted (T-0067).
   C844867 (Vishay land G 1.50, Z 3.60, X 1.80 mm, accepted on the datasheet) and recheck its stock (138848 on 2026-11-21).
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
 - T-0160: check the CPL rotation of D7/D8 (C2286; JLCPCB footprint pad 1 = anode, KiCad pad 1 = cathode, cathode on the same side) and the KiCad `LED_0603_1608Metric` pads against `LED-SMD_L1.6-W0.8-R-RD`.
-- Decision 220 (licence): add "CERN-OHL-S v2" and the source location `github.com/plektra/ESP32-PDM` to the PCB
-  silkscreen and to the KiCad title-block comments.
+- Decision 220 (licence): **done 2026-11-22**: "CERN-OHL-S v2" and `github.com/plektra/ESP32-PDM` on the bottom
+  silkscreen and in the title blocks of the five sheets and the PCB.
 - RoHS/REACH (`docs/reviews/2026-11-18-rohs-reach-pdm-4ch.md`): hand-solder J4/J5/J10/J11 with lead-free solder.
   Before any sale (not for the prototypes): maker declarations
   for the connectors and the small makers (R3–R5), REACH Art. 33 note + SCIP entry for lead in Q30 AGM601LL (R1) and U6 (R2) and,

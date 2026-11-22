@@ -4,6 +4,13 @@
 	(generator_version "8.0")
 	(uuid "0880d338-e165-4013-9bc2-c20287e872ca")
 	(paper "A4")
+	(title_block
+		(title "ESP32-PDM pdm-4ch: Power and USB")
+		(date "2026-11")
+		(rev "A")
+		(comment 1 "Hardware licence: CERN-OHL-S v2")
+		(comment 2 "Source: github.com/plektra/ESP32-PDM")
+	)
 	(lib_symbols
 		(symbol "Device:C"
 			(pin_numbers hide)

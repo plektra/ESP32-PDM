@@ -10,7 +10,8 @@ placed again.
   body (its F.Fab outline), a footprint's silk lines (+0.05 mm), another text or within 0.6 mm of the board edge. 1.0 mm text,
   0.8 mm if nothing fits; a label that fits nowhere stops the script.
 3 Top labels: OUT1-OUT4 on the J11 pins, BATTERY / + / - at J10, PANEL at J5, CAN at J4.
-4 Bottom (no parts there): pin legends of J5, J4, J11, J10 and the J6 service pads, board name and licence.
+4 Bottom (no parts there): pin legends of J5, J4, J11, J10 and the J6 service pads, board name, licence and
+  source location.
 5 Test pads TP1/TP30/TP70-TP72 (decision 226): the net name beside each pad, placed last."""
 import math, os, sys
 import pcbnew
@@ -32,6 +33,7 @@ PAD_GAP = 0.15         # JLCPCB silk-to-pad minimum
 SILK_GAP = 0.05        # to other silk lines (KiCad: must not touch)
 BODY_SHRINK = 0.3
 REV = 'rev A 2026-11'
+SOURCE = 'github.com/plektra/ESP32-PDM'
 
 # bottom pin legends: connector -> {pad number: text}; the text sits beside the pad on the board side
 LEGEND = {
@@ -248,6 +250,7 @@ def main():
             label(text, 'B', x, y, angles=(0,), maxd=2.0)
     label('ESP32-PDM pdm-4ch', 'B', 50.0, 66.0, angles=(0,), maxd=12.0)
     label(REV + '  CERN-OHL-S v2', 'B', 50.0, 69.0, angles=(0,), maxd=12.0)
+    label(SOURCE, 'B', 50.0, 72.0, angles=(0,), maxd=12.0)      # source location (CERN-OHL-S 4.3, decision 220)
 
     # ---- 1/2 references, smallest parts first (large parts search a wider radius)
     order = sorted(KEEP, key=lambda r: fps[r].GetCourtyard(pcbnew.F_CrtYd).Area() if fps[r].GetCourtyard(pcbnew.F_CrtYd).OutlineCount() else 0)
