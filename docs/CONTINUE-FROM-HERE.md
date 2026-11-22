@@ -15,7 +15,7 @@ Firmware: first draft in `firmware/` (decisions 227–229, confirmed by 230–23
 
 Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run on 2026-11-07 (`docs/reviews/2026-11-07-cost-system-2.md`). Step 4 is in progress: mounting and connectors are decided (decisions 97, 98, 121).
 
-**First order (decisions 99–103):** `pdm-4ch` only, as the cheapest MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 204 $ with connector sets (about 220 $ if the 16.42 $ fixture fee applies), 16 A only; all SMT parts on one side (decision 122). `pdm-hc2` follows after bring-up. Applied by the orchestrator on 2026-11-08 (decisions 124, 125): C3 → C170101 on `power-usb` (T-0190) and HC2 R105/R205 → C17927 (T-0191).
+**First order (decisions 99–103):** `pdm-4ch` only, as the cheapest MVP: 5 bare PCBs, 2 assembled, 2 oz, Standard PCBA, about 210 $ with connector sets (about 227 $ if the 16.42 $ fixture fee applies; cost review 2026-11-21), 16 A only; all SMT parts on one side (decision 122). `pdm-hc2` follows after bring-up. Applied by the orchestrator on 2026-11-08 (decisions 124, 125): C3 → C170101 on `power-usb` (T-0190) and HC2 R105/R205 → C17927 (T-0191).
 
 1. **`/emc system`** – EMC review of both schematics before layout: long switch and load leads, VHF immunity,
    surge/ESD paths, PWM edges, layout rules for the PCB phase.

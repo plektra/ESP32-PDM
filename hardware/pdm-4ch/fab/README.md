@@ -37,23 +37,27 @@ Their sockets and plugs go in the same cart as separate LCSC parts.
 In the placement preview, check the rotation of U3, U11–U14 (EasyEDA draws them rotated 90°) and D7/D8 (C2286 pad 1 =
 anode). The CPL uses KiCad's rotation without correction; fix them in the preview.
 
-## Price and stock check (2026-11-17, live LCSC/JLCPCB lookup, 2 assembled boards)
+## Price check (2026-11-21, `docs/reviews/2026-11-21-cost-pdm-4ch.md`, 5 PCBs / 2 assembled)
+
+Basis: Standard PCBA, top side only. Every unique LCSC line costs 1.53 USD feeder loading, basic and extended alike
+(the Economic 3 USD extended-part fee does not apply).
 
 | Item | USD |
 |---|---|
-| Parts at need quantity (398 pcs, all at the 1+ price) | 39.59 |
-| Extended-part loading fees: 15 unique × 3 USD | 45.00 |
-| **Parts + fees** | **84.59** |
+| Parts at need quantity (398 pcs, live tier prices) | 37.76 |
+| Feeder loading: 54 lines × 1.53 | 82.62 |
+| Setup 25.56 + stencil 8.21 + confirm placement 0.45 | 34.22 |
+| SMT joints (≈ 560 per board × 0.0016) | 1.79 |
+| PCB, 4 layers, 2 oz, 100 × 75 mm, 5 pcs (owner's quote 43.95 EUR) | 49.07 |
+| **JLCPCB order** | **205.46** |
+| Hand-soldered sockets J4, J5, J10, J11 + plugs for J4, J5, J11 (separate LCSC lines) | 5.00 |
+| **First order with connector sets** | **210.46** |
+| Fixture fee, if the quote shows it | +16.42 |
 
-Update 2026-11-21 (decision 238): the 16 RIS parts moved from basic C4410 (0.0085 USD) to extended C844867
-(0.05 USD): +0.66 USD parts, +3 USD for one more extended part.
-| Hand-soldered sockets J4, J5, J10, J11 + plugs for J4, J5, J11 (separate LCSC lines) | ≈ 5.01 |
+Shipping, VAT, duty and minimum-purchase rounding are not included. Unit prices change daily; recheck in the cart.
 
-PCB fabrication, Standard PCBA setup/stencil and shipping come from the JLCPCB quote page and are not included.
-Unit prices change daily; recheck in the cart.
-
-Extended parts (fee each): C844867, C170101, C487384, C2687131, C70113, C165948, C96963, C5464765, C7420022, C52155402,
-C2913206, C22427220, C528763, C534868, C5219203. Everything else is basic or preferred (no fee).
+Extended parts: C844867, C170101, C487384, C2687131, C70113, C165948, C96963, C5464765, C7420022, C52155402,
+C2913206, C22427220, C528763, C534868, C5219203. Under Standard PCBA they cost the same 1.53 USD loading fee as basic parts.
 
 Stock flags:
 - U30 LM74500-Q1 C5219210 was out of stock (0) everywhere. **U30 is now LM74502H-Q1 C5219203** (decision 222):

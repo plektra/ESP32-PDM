@@ -218,7 +218,7 @@ from it: apply the CPL rotation/origin corrections (owner's choice), FL1 footpri
 - T-0143: check KiCad `D_SMC` (D31; pads 2.5 × 3.3 mm, gap 4.3 mm) against the JLCPCB footprint of C42371557 (`SMC_L7.2-W5.8-LS8.1-BI`, pads 3 × 3.8 mm, gap 4.6 mm; hongjiacheng suggested land: pads 3.03 × 3.82 mm, gap at most 3.84 mm) and recheck its stock (10271 on 2026-11-04).
 - Stock 2026-11-17 (`fab/README.md`): U30 LM74500-Q1 C5219210 was out of stock everywhere; **U30 is now LM74502H-Q1
   C5219203** (1995 in stock, decision 222: pin 7 OV → GND, pin 8 SRC → VBAT_FL; pad 5 got its own VBAT_FL via and pad 7 a
-  GND via on the PCB; DRC 0 errors / 0 unconnected / parity 0). SMAJ30CA C19077548 has 172 pcs (20 needed). Parts + 14 extended-part fees for 2 boards ≈ 81 USD (2026-11-21, decision 238: 15 fees, ≈ 84.6 USD).
+  GND via on the PCB; DRC 0 errors / 0 unconnected / parity 0). SMAJ30CA C19077548 has 172 pcs (20 needed). First order (5 PCBs, 2 assembled, Standard PCBA, 4 layers): 205.46 USD at JLCPCB, 210.46 USD with connector sets, 226.88 USD with the fixture fee (cost review 2026-11-21).
 - Decision 238: check the KiCad `R_1206_3216Metric` land (G 1.80, Z 4.05, X 1.75 mm) against the JLCPCB footprint of
   C844867 (Vishay land G 1.50, Z 3.60, X 1.80 mm, accepted on the datasheet) and recheck its stock (138848 on 2026-11-21).
 - T-0021: BOM lines without `LCSC` are now only H1–H4 and the DNP positions.
