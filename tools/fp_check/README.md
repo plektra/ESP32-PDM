@@ -16,3 +16,6 @@ python3 -I tools/fp_check/cpl_fix.py hardware/pdm-4ch/fab/ESP32-PDM-4CH-cpl-jlc.
 (D7/D8: EasyEDA pad 1 = anode, KiCad pad 1 = cathode, so the number fit's 180° is wrong and 0° is right).
 Rotation convention: JLCPCB rotation = KiCad rotation + the correction (both counter-clockwise; SOT-23 +180°,
 SOIC +270°, as in the usual JLCPCB rotation tables). The `FIX` table in `cpl_fix.py` holds the pdm-4ch results.
+
+After a rebuild, cross-check the CPL: `$KPY tools/fp_check/verify_cpl.py <board>.kicad_pcb fab/<stem>-cpl-jlc.csv $T/easy.json`
+(places the EasyEDA pads by the CPL and reports the distance to the board pads per part).

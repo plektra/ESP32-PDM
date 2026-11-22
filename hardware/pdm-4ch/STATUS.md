@@ -3,6 +3,12 @@
 Updated: 2026-11-21 (footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
 
+**2026-11-22 (`/board pdm-4ch pcb`, owner: "apply corrections"):** the CPL corrections of the footprint check are in
+`tools/jlc_package.py` (`CPL_FIX`, per LCSC part, applied only on the footprint it was measured on; the report flags
+any other). Package rebuilt: DRC gate 0 errors / 0 unconnected / 0 parity, 24 CPL rows changed, BOM and copper
+unchanged. Cross-check: JLCPCB's EasyEDA pads placed by the new CPL land within 0.4 mm of our pads on all 142 checked
+parts (the switch's 3.7 mm is pad numbering only; Q30 leads 0.00 mm). D7/D8 stay at KiCad's rotation.
+
 **2026-11-21 (`/board pdm-4ch pcb`, footprint check, owner asked for the scripted comparison):** 37 LCSC parts compared
 with their JLCPCB/EasyEDA footprints by `tools/fp_check/` (report `docs/reviews/2026-11-21-footprints-pdm-4ch.md`). No
 design file changed. Every fitted land passes (D30/D31 SMC and the SOD-123FL diodes are smaller than the maker's
@@ -151,8 +157,9 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
    - Not a finding, noted: the VBAT_FL track at x = 40.25 (U30 pin 5 to the pour) is 0.3 mm from GND fill for
      about 4 mm, beyond rule 4's 0.6 mm pad zone. The BTT6050 slew is now read from the datasheet (0.3/0.8/1.4 V/µs),
      which closes the "slew UNVERIFIED" item for pdm-4ch.
-5. At the first order, check the CPL rotation of U11–U14 and U3 (EasyEDA draws both packages rotated 90°), and
-   the footprints listed in the pre-order checklist below. The JLCPCB package (Gerber zip, BOM, CPL) is built by
+5. CPL rotation and origin are now corrected by `CPL_FIX` in `tools/jlc_package.py` (2026-11-22, 24 parts: U3, U5,
+   U11–U14, U30, Q3–Q6, Q30, D9, D12–D15, D102–D402, U1, J3, U6); the package report lists what JLCPCB's placement
+   preview should show. A part swap or a new footprint needs a `tools/fp_check` run and a `CPL_FIX` entry. The JLCPCB package (Gerber zip, BOM, CPL) is built by
    `python3 tools/jlc_package.py pdm-4ch` into `fab/` behind a DRC gate; see `fab/README.md` for the quote settings.
    The 2026-11-17 package is for quoting only and predates decisions 223–225 (D50, R19, C50, D24 moved; copper and
    silkscreen changed): rebuild it before quoting again.
@@ -189,8 +196,10 @@ file (2026-11-17). It includes every test below. Open owner choice in it: cuttin
 
 **2026-11-21: the footprint, polarity, CPL-rotation and stock items below were checked by script**
 (`docs/reviews/2026-11-21-footprints-pdm-4ch.md`): all fitted lands pass; T-0118, T-0121, T-0143, T-0160, the
-decision 238 land, `CP_Elec_8x10`/`C_1206`, `D_SOD-882`/`TO-252-2`/`L_0805`, U5 and PESD2CAN pin 3 are closed. Open
-from it: apply the CPL rotation/origin corrections (owner's choice), FL1 footprint before FL1 is ever fitted (T-0067).
+decision 238 land, `CP_Elec_8x10`/`C_1206`, `D_SOD-882`/`TO-252-2`/`L_0805`, U5 and PESD2CAN pin 3 are closed. CPL
+corrections applied 2026-11-22 (`CPL_FIX` in `tools/jlc_package.py`, package rebuilt, DRC gate pass; EasyEDA pads
+placed by the new CPL land within 0.4 mm of our pads on all 142 checked parts, Q30 leads 0.00 mm). Open from it: FL1
+footprint before FL1 is ever fitted (T-0067).
 
 - Decision 150: the cost reviews still price pdm-4ch as 2 layers; the next `/cost` prices 4 layers (owner's quote €43.95 for 5 boards, 100 × 75 mm).
 - Decision 127: no connector samples before the order; buy the connector sets with the board order and re-check their stock, plug sets included. Footprints of J10, J11, J5, J4 checked against the maker drawings and the EasyEDA footprints: pass (2026-11-08, see the log above). Hand-solder J10 with a powerful iron; check the joints.

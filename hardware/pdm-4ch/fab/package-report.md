@@ -47,13 +47,35 @@ CPL `ESP32-PDM-4CH-cpl-jlc.csv`: 199 rows, sides: all top
 
 ## Check in the JLCPCB placement preview
 
-- U3: EasyEDA draws the package rotated 90 deg
-- U11: EasyEDA draws the package rotated 90 deg
-- U12: EasyEDA draws the package rotated 90 deg
-- U13: EasyEDA draws the package rotated 90 deg
-- U14: EasyEDA draws the package rotated 90 deg
-- D7: C2286: JLCPCB pad 1 = anode, KiCad pad 1 = cathode (T-0160)
-- D8: C2286: JLCPCB pad 1 = anode, KiCad pad 1 = cathode (T-0160)
+- D7: C2286: EasyEDA pad 1 = anode, KiCad pad 1 = cathode; no fix needed, anode on Net-(D7-A) at 0 deg
+- D8: C2286: EasyEDA pad 1 = anode, KiCad pad 1 = cathode; no fix needed, anode on Net-(D8-A) at 0 deg
+
+## CPL corrected against the JLCPCB footprints (CPL_FIX; the preview should show these)
+
+- D9: rotation 0 -> 180 deg
+- D12: rotation 90 -> 270 deg
+- D13: rotation 0 -> 180 deg
+- D14: rotation 0 -> 180 deg
+- D15: rotation 90 -> 270 deg
+- D102: rotation 0 -> 180 deg
+- D202: rotation 0 -> 180 deg
+- D302: rotation 0 -> 180 deg
+- D402: rotation 0 -> 180 deg
+- J3: rotation 180 -> 180 deg, origin +0.00 / -1.57 mm
+- Q3: rotation 90 -> 270 deg
+- Q4: rotation 90 -> 270 deg
+- Q5: rotation 90 -> 270 deg
+- Q6: rotation 0 -> 180 deg
+- Q30: rotation 0 -> 270 deg, origin -1.60 / +1.80 mm
+- U1: rotation 0 -> 0 deg, origin +0.00 / -2.55 mm
+- U3: rotation 90 -> 0 deg
+- U5: rotation 0 -> 270 deg
+- U6: rotation 0 -> 0 deg, origin -1.56 / +0.00 mm
+- U11: rotation 180 -> 90 deg
+- U12: rotation 180 -> 90 deg
+- U13: rotation 180 -> 90 deg
+- U14: rotation 180 -> 90 deg
+- U30: rotation 180 -> 0 deg
 
 ## Unique LCSC parts
 

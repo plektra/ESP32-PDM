@@ -11,11 +11,15 @@ writes the package anyway and says so in the report).
 
 BOM/CPL rules: a part is machine-placed only if it has an LCSC number, is not DNP and is not on the board's
 hand-solder list (decision 85: the THT connectors). Everything left out is listed in the report with the reason.
-CPL rotations are KiCad's; the parts in ROTATION_CHECK must be checked in JLCPCB's placement preview.
+CPL rotation and position: KiCad's, corrected per LCSC part by CPL_FIX where JLCPCB's EasyEDA footprint is drawn
+rotated or has its origin elsewhere (found by tools/fp_check/, docs/reviews/2026-11-21-footprints-pdm-4ch.md). A fix
+applies only when the KiCad footprint is the one it was measured on; otherwise the report flags the part. Confirm the
+corrected parts and those in rotation_check in JLCPCB's placement preview.
 """
 import csv
 import io
 import json
+import math
 import re
 import subprocess
 import sys
@@ -33,15 +37,26 @@ BOARDS = {
         stem='hardware/pdm-4ch/ESP32-PDM-4CH',
         hand_solder={'J4', 'J5', 'J10', 'J11'},           # decision 85
         rotation_check={                                  # STATUS.md open items
-            'U3': 'EasyEDA draws the package rotated 90 deg',
-            'U11': 'EasyEDA draws the package rotated 90 deg',
-            'U12': 'EasyEDA draws the package rotated 90 deg',
-            'U13': 'EasyEDA draws the package rotated 90 deg',
-            'U14': 'EasyEDA draws the package rotated 90 deg',
-            'D7': 'C2286: JLCPCB pad 1 = anode, KiCad pad 1 = cathode (T-0160)',
-            'D8': 'C2286: JLCPCB pad 1 = anode, KiCad pad 1 = cathode (T-0160)',
+            'D7': 'C2286: EasyEDA pad 1 = anode, KiCad pad 1 = cathode; no fix needed, anode on Net-(D7-A) at 0 deg',
+            'D8': 'C2286: EasyEDA pad 1 = anode, KiCad pad 1 = cathode; no fix needed, anode on Net-(D8-A) at 0 deg',
         }),
     'pdm-hc2': dict(stem='hardware/pdm-hc2/ESP32-PDM-HC2', hand_solder={'J4', 'J5', 'J10', 'J11'}, rotation_check={}),
+}
+# LCSC: (KiCad footprint it was measured on, rotation to add in deg, tx, ty). (tx, ty) = where the EasyEDA footprint
+# origin sits in the KiCad footprint frame (mm, y down); it turns with the part. JLCPCB rotation = KiCad + correction.
+CPL_FIX = {
+    'C5219203': ('TI_DDF0008A', 180, 0, 0),                          # LM74502H-Q1
+    'C528763': ('SOIC-8_7.5x5.85mm_P1.27mm', 270, 0, 0),             # CA-IS3050G
+    'C22427220': ('SOT-23-6', 270, 0, 0),                            # LMR51610
+    'C534868': ('Infineon_PG-TDSO-14_ThermalVias', 270, 0, 0),       # BTT6050-1ERA
+    'C2145': ('SOT-23-3', 180, 0, 0),                                # MMBT5551
+    'C22466350': ('SOT-23', 180, 0, 0),                              # BAT54C
+    'C7420333': ('SOT-23', 180, 0, 0),                               # BAT54S
+    'C2687131': ('SOT-23', 180, 0, 0),                               # PESD2CAN
+    'C5464765': ('Infineon_PG-HSOF-8-1', 270, -1.60, -1.80),         # AGM601LL, aligned on the lead pads
+    'C58069': ('TO-252-2', 0, -1.56, 0),                             # L78M05
+    'C2913206': ('ESP32-S2-MINI-1', 0, 0, 2.55),                     # ESP32-S3-MINI-1 module
+    'C165948': ('USB_C_Receptacle_HRO_TYPE-C-31-M-12', 0, 0, -1.57),
 }
 GERBER_LAYERS = 'F.Cu,In1.Cu,In2.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts'
 
@@ -160,13 +175,27 @@ def main():
         for key, g in sorted(groups.items(), key=lambda kv: natural(kv[1]['refs'][0])):
             w.writerow([g['val'], ','.join(sorted(g['refs'], key=natural)), g['fp'], key if isinstance(key, str) else ''])
     cpl = out / f'{name}-cpl-jlc.csv'
+    fixed, fix_wrong = [], []
     with cpl.open('w', newline='') as f:
         w = csv.writer(f)
         w.writerow(['Designator', 'Mid X', 'Mid Y', 'Layer', 'Rotation'])
         for ref in placed:
             p = pos[ref]
-            w.writerow([ref, f"{float(p['PosX']):.4f}mm", f"{float(p['PosY']):.4f}mm",
-                        'Top' if p['Side'] == 'top' else 'Bottom', f"{float(p['Rot']):.1f}"])
+            x0, y0, rot = float(p['PosX']), float(p['PosY']), float(p['Rot'])
+            x, y = x0, y0
+            fix = CPL_FIX.get(sym[ref]['LCSC'].strip())
+            fp = sym[ref]['Footprint'].split(':')[-1]
+            if fix and fix[0] != fp:
+                fix_wrong.append(f'{ref}: CPL_FIX measured on {fix[0]}, board has {fp}; not applied, re-run tools/fp_check')
+            elif fix:
+                _, d, tx, ty = fix
+                a = math.radians(rot)                     # pos.csv: y up, rotation counter-clockwise
+                x += tx * math.cos(a) + ty * math.sin(a)
+                y += tx * math.sin(a) - ty * math.cos(a)
+                fixed.append(f'{ref}: rotation {rot:.0f} -> {(rot + d) % 360:.0f} deg'
+                             + (f', origin {x - x0:+.2f} / {y - y0:+.2f} mm' if tx or ty else ''))
+                rot = (rot + d) % 360
+            w.writerow([ref, f"{x:.4f}mm", f"{y:.4f}mm", 'Top' if p['Side'] == 'top' else 'Bottom', f"{rot:.1f}"])
 
     lcscs = sorted(k for k in groups if isinstance(k, str))
     report += ['', f'BOM `{bom.name}`: {len(groups)} lines, {len(placed)} placed parts, {len(lcscs)} unique LCSC parts.',
@@ -176,6 +205,9 @@ def main():
     report += [f'| {r} | {v} | {l} | {why} |' for r, v, l, why in left_out]
     report += ['', '## Check in the JLCPCB placement preview', '']
     report += [f'- {r}: {why}' for r, why in cfg['rotation_check'].items() if r in placed]
+    report += [f'- **{m}**' for m in fix_wrong]
+    report += ['', '## CPL corrected against the JLCPCB footprints (CPL_FIX; the preview should show these)', '']
+    report += [f'- {m}' for m in fixed]
     report += ['', '## Unique LCSC parts', '', ' '.join(lcscs), '']
     (out / 'package-report.md').write_text('\n'.join(report))
     print('\n'.join(report[:6]))

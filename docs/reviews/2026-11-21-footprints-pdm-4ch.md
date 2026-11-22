@@ -123,8 +123,8 @@ time remains the final check, with this table as the expected result.
 
 ## Not done here
 
-- Applying the corrections: `tools/jlc_package.py` still writes KiCad's raw rotation and origin (owner's choice, see
-  STATUS "Next").
+- Applying the corrections: done 2026-11-22 (owner), `CPL_FIX` in `tools/jlc_package.py`. Cross-check: EasyEDA pads
+  placed by the rebuilt CPL land within 0.4 mm of our pads on all 142 checked parts.
 - KiCad title-block comments for decision 220 (the silkscreen already has the licence).
 - Connectors J4, J5, J10, J11: checked 2026-11-08, hand-soldered, not in the CPL.
 
