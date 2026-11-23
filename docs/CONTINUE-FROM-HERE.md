@@ -1,6 +1,6 @@
 # Continue from here
 
-Project-level handoff: which board is where and what to do next. Updated: 2026-11-21 (decisions 215–238).
+Project-level handoff: which board is where and what to do next. Updated: 2026-11-23 (decisions 215–239).
 
 ## Boards
 
@@ -26,7 +26,7 @@ Steps 1–3 are done, including the fix rounds; `/cost system deep` was re-run o
 4. **`/system mechanical`** – mounting decided (decisions 97, 123: corner M3 holes, one printed ASA DIN mount). The connector sample check moves to bring-up (decision 127), so the PCB can start; the DIN mount and enclosure follow as OpenSCAD files after layout. Cable entry decided (decision 237): glands and a clamp comb from the bottom face, M12 5-pin panel connector for NMEA 2000, cable-tie anchors on the DIN mount; pick and check the M12 part and its pinout against J4.
 5. **`/board pdm-4ch pcb`** – routed (decision 219); EMC layout review done and E22/E23 fixed (decision 223);
    silkscreen done (decision 224); validated, V1 fixed (decision 225); test pads (decision 226, JLCPCB package rebuilt with them).
-   RIS hardware cover done (decision 238). Pre-order checklist done 2026-11-22. Left: order (`fab/ORDER-CHECKLIST.md`) and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
+   RIS hardware cover done (decision 238). Pre-order checklist done 2026-11-22; validator V1 of 2026-11-23 (C10 to U5) fixed, rerouted, package rebuilt (decision 239). Left: order (`fab/ORDER-CHECKLIST.md`) and bring-up; then **`/board pdm-hc2 pcb`** (decision 102). Layout is interactive (decision 216);
    the rules are in `docs/ARCHITECTURE.md`, "PCB layout rules".
 6. **`/system firmware`** – done 2026-11-21 (decisions 230–235). Firmware work left, in order: (a) SensESP v3 build trial
    on the S3 next to the NMEA 2000 stack (230); (b) bus alerts 126983/126984 and Signal K notifications (231, 232);

@@ -1,10 +1,20 @@
 # pdm-4ch status
 
-Updated: 2026-11-23 (`/validate pdm-4ch` deep: **V1 MAJOR open, fix before the order**, `docs/reviews/2026-11-23-validate-pdm-4ch.md`; footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+Updated: 2026-11-23 (decision 239: validator V1 fixed, C10 moved to U5, board rerouted, package rebuilt; `docs/reviews/2026-11-23-validate-pdm-4ch.md`; footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
 
+**2026-11-23 (`/board pdm-4ch pcb`, decision 239, owner: "go with A"): validator V1 fixed, no PCB fix open before the
+order.** C10 moved to U5: (66.3, 52.65), 270°, +3V3 pad 1.5 mm from U5.1 (was 33.6 mm), own GND via 0.7 mm from its
+GND pad and off the pad, U5.4 GND via 1.2 mm; outside the CAN barrier bands. Only C10 moved. One reroute of all signal
+nets (`pf_route.py --iters 300 --seed 1 --ties-extra C301.2,U1.63`, best of six seeds that all closed); build twice,
+same result: 0 DRC errors, 4 warnings (known), 0 unconnected, parity 0, pours whole; VS-In2 **one** island 1011.5 mm²
+(was 2 pieces, 966.9), 40/40 thermal vias, Tj 101 °C (40 °C, 4 × 4 A). EMC report: only the two known notes (SW_SUPPLY
+stub, E24 FB–SW). Silkscreen, assembly drawing and JLCPCB package rebuilt: BOM unchanged, CPL changed only in C10.
+U1 keeps C8 (22 µF) and the module's own decoupling; no second 0.1 µF at U1 pin 3 (option not taken). All signal
+copper is new since the 2026-11-17 EMC and 2026-11-23 validator reviews; neither has been re-run on it.
+
 **2026-11-23 (`/validate pdm-4ch` deep, full board at b238c0a; owner: "add"): 0 CRITICAL, 1 MAJOR, 0 MINOR**
-(`docs/reviews/2026-11-23-validate-pdm-4ch.md`). No design file changed. **V1 (MAJOR, open): U5 CA-IS3050G has no
+(`docs/reviews/2026-11-23-validate-pdm-4ch.md`). No design file changed. **V1 (MAJOR, fixed by decision 239): U5 CA-IS3050G has no
 bypass capacitor at VCC1.** C10 (0.1 µF C307331, the isolator's logic-side cap on the shared `can` sheet) sits under
 U1, 33.6 mm from U5 pin 1; the nearest +3V3 capacitor to U5.1 is C8 at 31.9 mm. The datasheet (CA-IS305x v1.10 p. 5
 Table 6-1, p. 18; `docs/part-facts/C528763.md`) asks for 0.1 µF as close to the device as possible. Risk: CAN bit
@@ -163,8 +173,7 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
 4. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). Footprints, CPL and licence done
    (2026-11-21/22). **Next step: quote and order, step by step in `fab/ORDER-CHECKLIST.md`** (2026-11-22; fixture-fee
    check, placement preview, connector sets; record the result there and copy it here).
-   **Open before the order: validator V1 of 2026-11-23 (move C10 to U5 pins 1/4, entry at the top) in
-   `/board pdm-4ch pcb`; the fab package must be rebuilt after it.** Open only on condition: E24 (below) and FL1
+   No PCB fix is open before the order (validator V1 of 2026-11-23 fixed, decision 239). Open only on condition: E24 (below) and FL1
    (before it is ever fitted).
    Earlier notes for this step: Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and

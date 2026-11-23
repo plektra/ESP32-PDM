@@ -1707,10 +1707,10 @@ All SMT parts are on top. Nothing is parked.
   - The EN parts C6/C9/R15 and the IO0 parts C7/R16 sit next to the right-hand pin column.
   - The LED-line capacitors C50, C52 and C53 sit with R25/R28. C51/R22 sit in the gap of the even TVS column at pin 7.
 - **Below U1** (x 63.5–77, y 20–33):
-  - The 3V3 decoupling C8/C10, the VBAT_SENSE divider R60/R61/C60, the NTC parts R62/C61, R29/R42 (MOD_ID), and
+  - The 3V3 decoupling C8 (C10 is at U5 since decision 239), the VBAT_SENSE divider R60/R61/C60, the NTC parts R62/C61, R29/R42 (MOD_ID), and
     R58 (SW_SENSE_IO).
   - The four LED sinks: Q3–Q6 with their base, pull-down and emitter resistors, and R19.
-  - U1's left pins face channel 2 with no room in between. C8/C10 therefore reach pin 3 over about 12 mm: route it as
+  - U1's left pins face channel 2 with no room in between. C8 therefore reaches pin 3 over about 12 mm: route it as
     a short wide 3V3 trace, with the GND return on the bottom plane.
 - **USB:** J3 at the front edge in the power-end corner (15.2/4.2, rot 180, receptacle outward).
   - Around it: D4–D6 (ESD) and R11/R12 (CC) at the pins, R13/C18/R14 at the shield, and F2/FB1/C4/C5.
