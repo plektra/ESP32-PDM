@@ -1,7 +1,18 @@
 # pdm-4ch status
 
-Updated: 2026-11-21 (footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+Updated: 2026-11-23 (`/validate pdm-4ch` deep: **V1 MAJOR open, fix before the order**, `docs/reviews/2026-11-23-validate-pdm-4ch.md`; footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
+
+**2026-11-23 (`/validate pdm-4ch` deep, full board at b238c0a; owner: "add"): 0 CRITICAL, 1 MAJOR, 0 MINOR**
+(`docs/reviews/2026-11-23-validate-pdm-4ch.md`). No design file changed. **V1 (MAJOR, open): U5 CA-IS3050G has no
+bypass capacitor at VCC1.** C10 (0.1 µF C307331, the isolator's logic-side cap on the shared `can` sheet) sits under
+U1, 33.6 mm from U5 pin 1; the nearest +3V3 capacitor to U5.1 is C8 at 31.9 mm. The datasheet (CA-IS305x v1.10 p. 5
+Table 6-1, p. 18; `docs/part-facts/C528763.md`) asks for 0.1 µF as close to the device as possible. Risk: CAN bit
+errors and radiated emission (requirement verified, size of the effect not measured). Fix (layout only, two-way, no
+schematic or BOM change): move C10 to U5 pins 1/4 with a GND via beside U5.4, outside the rule 6 barrier, then rerun
+the build, `silk.py`, `emc_report.py` and the fab package. Optional, owner's choice: one more C307331 at U1 pin 3
+(same BOM line, no new fee). Not checked by this run: the `CPL_FIX` rotations/origins (taken from the 2026-11-21
+report) and the Gerber zip contents. Everything else checked is listed in the report.
 
 **2026-11-22 (`/board pdm-4ch pcb`, decision 220 licence, owner: "add it"):** title blocks on all five schematic
 sheets (`tools/ksch.py` `set_title_block`, by `scripts/title_block.py`) and on the PCB (pcbnew): "ESP32-PDM pdm-4ch",
@@ -152,7 +163,9 @@ Signal K community) lives outside the repo as a claude.ai artifact; it is rebuil
 4. `/validate pdm-4ch` on the PCB: done 2026-11-18, V1 fixed (decision 225). Footprints, CPL and licence done
    (2026-11-21/22). **Next step: quote and order, step by step in `fab/ORDER-CHECKLIST.md`** (2026-11-22; fixture-fee
    check, placement preview, connector sets; record the result there and copy it here).
-   No PCB fix is open before the order; open only on condition: E24 (below) and FL1 (before it is ever fitted).
+   **Open before the order: validator V1 of 2026-11-23 (move C10 to U5 pins 1/4, entry at the top) in
+   `/board pdm-4ch pcb`; the fab package must be rebuilt after it.** Open only on condition: E24 (below) and FL1
+   (before it is ever fitted).
    Earlier notes for this step: Points to check first:
    decision 217 (CAN barrier keep-out at the rule minimum), decision 218 (VS-In2 gate), the 0.2 mm VBUS and
    Net-(D3-A) necks at J3 (decision 219), the fill keep-outs that removed GND slivers on F.Cu/B.Cu/In2.
@@ -248,5 +261,8 @@ footprint before FL1 is ever fitted (T-0067).
   Requests are drafted in `docs/reviews/2026-11-18-rohs-reach-requests-pdm-4ch.md` for the owner to send through LCSC (the one to ST is optional, R2 is closed).
 
 ## For /system
+
+- Validator V1 of 2026-11-23: C10 on the shared `can` sheet is U5's VCC1 bypass. Place it at U5 pins 1/4 on pdm-hc2
+  too when its layout starts; consider a layout rule for it in `docs/ARCHITECTURE.md`.
 
 - Mounting decided (decision 123). After layout: the printed DIN mount and enclosure as OpenSCAD files (`/system mechanical`), with the cable entry of decision 237 (bottom-face glands and clamp comb, M12 5-pin CAN panel connector to J4, cable-tie anchors on the DIN mount). Open there: the M12 part (plastic body or isolated metal, shield pin open) and J4's four poles mapped to its pins. Candidate (2026-11-21): the owner's own Chinese M12 panel connectors, 5-pin A-coded, male pins (the usual NMEA 2000 device side); still to check: continuity of every pin, pin 1 included, to the metal body (owner measuring; pin 1 left unwired if tied to the body, decision 28), mounting thread and front/back mount (sets the wall hole), lead type and colours (map by continuity, not colour).
