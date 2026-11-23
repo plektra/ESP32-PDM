@@ -25,7 +25,7 @@ Regenerate after any board or schematic change (it runs the DRC gate first):
 | Outer copper | 2 oz (the load current runs on F.Cu/B.Cu) |
 | Inner copper | JLCPCB default for 4 layers with 2 oz outer |
 | Surface finish | HASL lead-free (as set in the board file) |
-| Smallest via | 0.3 mm drill (507 vias) |
+| Smallest via | 0.3 mm drill (380 holes; another 183 of 0.4 mm) |
 | Quantity | 5 PCBs, of which 2 assembled (decision 101) |
 | Assembly | **Standard PCBA**, top side only (decisions 99, 100, 122); Economic is not offered with 2 oz |
 | Fixture fee | check whether the 16.42 USD Standard PCBA fixture fee applies (CONTINUE-FROM-HERE) |

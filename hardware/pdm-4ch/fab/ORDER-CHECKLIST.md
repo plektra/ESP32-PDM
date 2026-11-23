@@ -20,7 +20,7 @@ Write the result of each step in the record at the end, then copy it into `../ST
 - [ ] Thickness **1.6 mm**.
 - [ ] Outer copper **2 oz**; inner copper: JLCPCB's default for 4 layers with 2 oz outer.
 - [ ] Surface finish **HASL lead-free**.
-- [ ] Via covering: leave the default (tented). Smallest drill 0.3 mm, 507 vias – standard capability.
+- [ ] Via covering: leave the default (tented). Smallest drill 0.3 mm (380 holes) – standard capability.
 - [ ] Everything else (colour, order number, etc.): leave the default.
 - [ ] Gerber viewer: silkscreen top shows OUT1–OUT4, BATTERY + / −, PANEL, CAN; bottom shows the pin legends and
       "ESP32-PDM pdm-4ch", "rev A 2026-11  CERN-OHL-S v2", "github.com/plektra/ESP32-PDM".
