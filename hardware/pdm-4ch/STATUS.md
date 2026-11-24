@@ -1,7 +1,19 @@
 # pdm-4ch status
 
-Updated: 2026-11-23 (decision 239: validator V1 fixed, C10 moved to U5, board rerouted, package rebuilt; `docs/reviews/2026-11-23-validate-pdm-4ch.md`; footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
+Updated: 2026-11-24 (`/validate` and `/emc` on the new layout: no findings; decision 239: validator V1 fixed, C10 moved to U5, board rerouted, package rebuilt; `docs/reviews/2026-11-23-validate-pdm-4ch.md`; footprint check against JLCPCB: `docs/reviews/2026-11-21-footprints-pdm-4ch.md`; decision 238: RIS → Vishay CRCW-HP C844867, decision 235 done; decisions 230–236: firmware rulings, RIS hardware cover, ARCHITECTURE sync; decision 226: test pads; decision 225: validator V1 fixed, no via on SMD pads; decision 224: silkscreen done; decision 223: EMC E22/E23 fixed, E25 report in the build; decision
 222: U30 → LM74502H-Q1; decision 221: PWM rating, confirmed by 234)
+
+**2026-11-24 (`/validate pdm-4ch`, `/emc pdm-4ch` on the decision 239 layout, owner: "record"): both 0 CRITICAL,
+0 MAJOR, 0 MINOR**, no new layout rule (`docs/reviews/2026-11-24-validate-pdm-4ch.md`, `2026-11-24-emc-pdm-4ch.md`). No
+design file changed. Both were targeted re-checks (not `deep`); part facts, circuit math and the firmware pin map come
+from the 2026-11-23 report, the Gerber zip was not reviewed, coupling figures are estimates. V1 fixed, E22/E23 stay
+fixed, E24 unchanged (T-0161 scan).
+- **Open, small:** the EMC report calls the `emc_report.py` SW_SUPPLY flag a tool artefact (R49 tapped after C54); the
+  decision 223 entry below says R49 is tapped at J5.5, ahead of D54. Not traced; R49 is 10 k, so the branch carries
+  microamps in a surge either way.
+- **Noted:** SWIN1 is the one long cable-side switch track (53.6 mm, was 81.1 mm before the reroute); no finding.
+- The validator's remark that PROFET IN/DEN/IS copper is partly unchanged is not to be relied on: the reroute
+  covered all signal nets.
 
 **2026-11-23 (`/board pdm-4ch pcb`, decision 239, owner: "go with A"): validator V1 fixed, no PCB fix open before the
 order.** C10 moved to U5: (66.3, 52.65), 270°, +3V3 pad 1.5 mm from U5.1 (was 33.6 mm), own GND via 0.7 mm from its
@@ -11,7 +23,7 @@ same result: 0 DRC errors, 4 warnings (known), 0 unconnected, parity 0, pours wh
 (was 2 pieces, 966.9), 40/40 thermal vias, Tj 101 °C (40 °C, 4 × 4 A). EMC report: only the two known notes (SW_SUPPLY
 stub, E24 FB–SW). Silkscreen, assembly drawing and JLCPCB package rebuilt: BOM unchanged, CPL changed only in C10.
 U1 keeps C8 (22 µF) and the module's own decoupling; no second 0.1 µF at U1 pin 3 (option not taken). All signal
-copper is new since the 2026-11-17 EMC and 2026-11-23 validator reviews; neither has been re-run on it.
+copper is new since the 2026-11-17 EMC and 2026-11-23 validator reviews; both were re-run on it on 2026-11-24 (above).
 
 **2026-11-23 (`/validate pdm-4ch` deep, full board at b238c0a; owner: "add"): 0 CRITICAL, 1 MAJOR, 0 MINOR**
 (`docs/reviews/2026-11-23-validate-pdm-4ch.md`). No design file changed. **V1 (MAJOR, fixed by decision 239): U5 CA-IS3050G has no
